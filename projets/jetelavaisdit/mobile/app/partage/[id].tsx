@@ -42,7 +42,7 @@ export default function Partage() {
     }
     vibrerSucces();
     const url = lienCarte(lien as string);
-    const message = `Regarde. Je l'avais dit. ${url}`;
+    const message = `Regarde. Je te l'avais dit. ${url}`;
     try {
       await Share.share({ message, url });
     } catch {
@@ -88,7 +88,7 @@ export default function Partage() {
             <Text style={styles.date}>Scellée le {formaterDate(phrase.scellee_le, true)}</Text>
           </View>
           <Text style={styles.slogan}>
-            regarde.{'\n'}je l'avais <Text style={{ color: couleurs.vert }}>dit.</Text>
+            regarde.{'\n'}je te l'avais <Text style={{ color: couleurs.vert }}>dit.</Text>
           </Text>
         </View>
 

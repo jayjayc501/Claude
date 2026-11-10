@@ -1,6 +1,6 @@
-# Je l'avais dit
+# Je te l'avais dit
 
-App mobile (iPhone et Android) pour sceller une phrase datée et l'envoyer plus tard à quelqu'un avec une carte d'authenticité : « Regarde, je l'avais dit. »
+App mobile (iPhone et Android) pour sceller une phrase datée et l'envoyer plus tard à quelqu'un avec une carte d'authenticité : « Regarde, je te l'avais dit. »
 
 **État :** prototype en ligne en version web : https://jayjayc501.github.io/Claude/app/ (mise à jour automatique à chaque modification sur `main`).
 
@@ -22,14 +22,14 @@ App mobile (iPhone et Android) pour sceller une phrase datée et l'envoyer plus 
 - Écran **« c'est scellé »** avec animation et vibration.
 - Écran **« reviens demain »** avec compte à rebours quand la prédiction du jour est utilisée.
 - **Mes phrases** : statistiques, filtres, bulle-compteur des jours, rose pour les phrases révélées, écran vide au premier lancement.
-- **Partage** : « Je l'avais dit ! » crée un lien public et ouvre le menu de partage du téléphone (WhatsApp, Messages, Instagram, copier…).
+- **Partage** : « Je te l'avais dit ! » crée un lien public et ouvre le menu de partage du téléphone (WhatsApp, Messages, Instagram, copier…).
 - **Page web de la carte** : affiche la phrase, l'auteur, le nombre de jours, la date et l'empreinte.
 
 Pas encore fait : connexion Apple (à la publication sur l'App Store), image au format story, notifications de rappel, modération par IA, aperçu enrichi du lien dans WhatsApp.
 
 ## Lancer le prototype
 
-La version web est mise en ligne automatiquement par GitHub (`.github/workflows/jelavaisdit.yml`) à chaque modification sur `main` :
+La version web est mise en ligne automatiquement par GitHub (`.github/workflows/jetelavaisdit.yml`) à chaque modification sur `main` :
 
 - l'app : https://jayjayc501.github.io/Claude/app/
 - la page de la carte : https://jayjayc501.github.io/Claude/carte/
@@ -46,14 +46,14 @@ La version web est mise en ligne automatiquement par GitHub (`.github/workflows/
 La connexion se fait **uniquement avec Google** (Apple sera ajouté à la publication sur l'App Store, car il demande un compte Apple Developer payant).
 
 1. Sur [console.cloud.google.com](https://console.cloud.google.com), créer un projet.
-2. **APIs & Services › OAuth consent screen** : type *External*, nom « Je l'avais dit », e-mail de contact.
+2. **APIs & Services › OAuth consent screen** : type *External*, nom « Je te l'avais dit », e-mail de contact.
 3. **Credentials › Create credentials › OAuth client ID** : type *Web application*. Dans *Authorized redirect URIs*, ajouter `https://joqzrjjgrntbyutytpnr.supabase.co/auth/v1/callback`.
 4. Copier le *Client ID* et le *Client secret* dans Supabase : **Authentication › Sign In / Providers › Google**, activer et enregistrer. Le *Client secret* ne doit jamais être mis dans le dépôt.
 
 ### 3. L'app mobile
 
 ```bash
-cd projets/jelavaisdit/mobile
+cd projets/jetelavaisdit/mobile
 cp .env.example .env        # valeurs publiques déjà remplies
 npm install
 npx expo install --fix      # aligne les versions des paquets sur le SDK Expo

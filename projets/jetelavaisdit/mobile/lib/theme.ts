@@ -1,4 +1,4 @@
-// Couleurs et typos de l'identité « Je l'avais dit ».
+// Couleurs et typos de l'identité « Je te l'avais dit ».
 // Règle : vert = agir, rose = phrase révélée, gris = phrase en attente.
 export const couleurs = {
   fond: '#0D0C12',

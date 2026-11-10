@@ -38,7 +38,7 @@ export default function Connexion() {
           <Logo taille={48} />
         </View>
         <Text style={styles.titre} accessibilityRole="header">
-          je l'avais <Text style={{ color: couleurs.vert }}>dit.</Text>
+          je te l'avais <Text style={{ color: couleurs.vert }}>dit.</Text>
         </Text>
         <Text style={styles.sousTitre}>Scelle tes prédictions aujourd'hui.{'\n'}Prouve que t'avais raison demain.</Text>
 

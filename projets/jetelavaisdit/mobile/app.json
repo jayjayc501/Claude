@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Je l'avais dit",
-    "slug": "jelavaisdit",
-    "scheme": "jelavaisdit",
+    "name": "Je te l'avais dit",
+    "slug": "jetelavaisdit",
+    "scheme": "jetelavaisdit",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,10 +10,10 @@
     "backgroundColor": "#0D0C12",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "app.jelavaisdit"
+      "bundleIdentifier": "app.jetelavaisdit"
     },
     "android": {
-      "package": "app.jelavaisdit",
+      "package": "app.jetelavaisdit",
       "edgeToEdgeEnabled": true
     },
     "plugins": [

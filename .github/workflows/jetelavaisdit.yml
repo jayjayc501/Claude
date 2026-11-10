@@ -1,13 +1,13 @@
-# « Je l'avais dit » : construit la version web de l'app et la met en ligne sur GitHub Pages.
+# « Je te l'avais dit » : construit la version web de l'app et la met en ligne sur GitHub Pages.
 #   https://jayjayc501.github.io/Claude/app/    → l'app
 #   https://jayjayc501.github.io/Claude/carte/  → la page de la carte reçue
 # Sur une branche : construction et vérifications seulement. Sur main : mise en ligne.
-name: jelavaisdit
+name: jetelavaisdit
 
 on:
   push:
-    branches: [main, 'jelavaisdit/**']
-    paths: ['projets/jelavaisdit/**', '.github/workflows/jelavaisdit.yml']
+    branches: [main, 'jetelavaisdit/**']
+    paths: ['projets/jetelavaisdit/**', '.github/workflows/jetelavaisdit.yml']
   workflow_dispatch:
 
 permissions:
@@ -16,7 +16,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: jelavaisdit-${{ github.ref }}
+  group: jetelavaisdit-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: projets/jelavaisdit/mobile
+        working-directory: projets/jetelavaisdit/mobile
     steps:
       - uses: actions/checkout@v4
 
@@ -48,7 +48,7 @@ jobs:
         run: npx expo export --platform web --output-dir dist
 
       - name: Assemblage du site
-        working-directory: projets/jelavaisdit
+        working-directory: projets/jetelavaisdit
         run: |
           mkdir -p _site
           cp -r mobile/dist _site/app
@@ -60,7 +60,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: projets/jelavaisdit/_site
+          path: projets/jetelavaisdit/_site
 
   mettre-en-ligne:
     if: github.ref == 'refs/heads/main'

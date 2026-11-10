@@ -1,10 +1,10 @@
-# « Je l'avais dit » — Document de cadrage
+# « Je te l'avais dit » — Document de cadrage
 
 *Version 2 — 10 novembre 2026*
 
 ## 1. Le concept en une phrase
 
-Une app mobile (iPhone et Android) où l'on **scelle une phrase datée**, une prédiction ou une intuition, pour pouvoir **plus tard l'envoyer à quelqu'un** avec une jolie carte qui prouve : *« Regarde, je l'avais dit. »*
+Une app mobile (iPhone et Android) où l'on **scelle une phrase datée**, une prédiction ou une intuition, pour pouvoir **plus tard l'envoyer à quelqu'un** avec une jolie carte qui prouve : *« Regarde, je te l'avais dit. »*
 
 ## 2. Positionnement
 
@@ -22,9 +22,9 @@ Une app mobile (iPhone et Android) où l'on **scelle une phrase datée**, une pr
 5. La phrase est enregistrée avec la date et l'heure du scellement. **Elle n'est plus modifiable ni supprimable.** À confirmer : l'utilisateur peut-il au moins la masquer ?
 6. La phrase reste **privée** jusqu'à ce que l'utilisateur décide de l'envoyer.
 
-### 3.2 Envoyer « Je l'avais dit ! »
+### 3.2 Envoyer « Je te l'avais dit ! »
 1. Plus tard, quand la prédiction se réalise, l'utilisateur ouvre sa liste de phrases scellées.
-2. Il choisit une phrase et appuie sur **« Je l'avais dit ! »**.
+2. Il choisit une phrase et appuie sur **« Je te l'avais dit ! »**.
 3. Il partage un **lien** par WhatsApp, SMS, réseaux sociaux, mail, etc.
 
 ### 3.3 Recevoir la carte (destinataire)
@@ -94,7 +94,7 @@ Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » l
 - [ ] **Modèle économique :** gratuit avec publicité ? cartes premium ? (peut attendre)
 - [x] **Logo :** la « bulle scellée », une bulle de parole fermée par un cadenas, avec un « ! ». Élément signature : la **bulle-compteur** (le logo avec le nombre de jours dedans, en vert, légèrement penché), utilisée sur la carte, la story et le partage. *Décidé le 10/11/2026.*
 - [x] **Règles de couleur :** vert = agir (sceller, envoyer, compteur, logo) ; rose = phrase révélée uniquement ; gris = phrase en attente. *Décidé le 10/11/2026.*
-- [ ] **Nom définitif** (« Je l'avais dit » pour l'instant).
+- [x] **Nom :** « Je te l'avais dit » (identifiant technique : `jetelavaisdit`). *Décidé le 10/11/2026.*
 
 ## 9. Prochaines étapes
 

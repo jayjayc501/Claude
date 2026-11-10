@@ -43,8 +43,28 @@ son texte, puis chaque frontière est calée sur le silence le plus proche dans
 la voix off. Si un plan tombe mal, ajouter `"debut": 12.4` (en secondes) à
 **tous** les segments du `plan.json` pour imposer les temps.
 
+## Montage « timeline » (monter2.py) — méthode recommandée
+
+`monter2.py` suit une timeline précise décrite dans `shorts/<sujet>/montage.json` :
+plans avec début/fin exacts (calés sur les silences de la voix), mouvement de
+caméra par plan (`push`, `punch`, `pull`, `fixe`), vitesse, noms dorés en
+surimpression (image or sur fond noir rendue transparente), sous-titres
+dynamiques 1 à 3 mots (mots `*clés*` en or), musique + bruitages des clips avec
+ducking sous la voix, étalonnage léger et loudness YouTube (−14 LUFS).
+
+    python3 monter2.py shorts/odin-oeil/montage.json
+    python3 monter2.py shorts/odin-oeil/montage.json --factice   # test sans médias
+
+Chaîne de production qui a donné le meilleur résultat (voir `shorts/odin-oeil/storyboard.md`) :
+1. Script validé → voix ElevenLabs (v3, stabilité 50 %, langue forcée FR).
+2. Personnages de référence sur fond neutre (GPT-Image 2.5 via Kling).
+3. Une image clé par plan (GPT-Image 2.5, image-to-image avec les références).
+4. Animation Kling 4.0 en 1080p, durée = durée du plan (15 crédits/s).
+5. Musique ElevenLabs Music (instrumental), noms dorés générés en image.
+6. Le navigateur regroupe les médias dans un ZIP → glissé dans la conversation → `monter2.py`.
+
 ## Shorts
 
 | Sujet | Dossier | État |
 |---|---|---|
-| Pourquoi Odin n'a qu'un œil ? | `shorts/odin-oeil` | script prêt, médias à générer |
+| Odin va-t-il se faire dévorer par ce loup ? (l'œil d'Odin) | `shorts/odin-oeil` | terminé (47 s) |

@@ -2,48 +2,212 @@
   "titre": "Odin va-t-il se faire dévorer par ce loup ?",
   "voix": "medias/voix.mp3",
   "musique": "medias/musique.mp3",
-  "volume_musique": 0.35,
+  "volume_musique": 0.3,
   "depart_musique": 0,
   "plans": [
-    {"fichier": "medias/clips/P01.mp4", "debut": 0.00,  "fin": 3.05,  "mouvement": "push"},
-    {"fichier": "medias/clips/P02.mp4", "debut": 3.05,  "fin": 5.95,  "mouvement": "punch"},
-    {"fichier": "medias/clips/P03.mp4", "debut": 5.95,  "fin": 8.95,  "mouvement": "push"},
-    {"fichier": "medias/clips/P04.mp4", "debut": 8.95,  "fin": 13.00, "mouvement": "push"},
-    {"fichier": "medias/clips/P05.mp4", "debut": 13.00, "fin": 15.20, "mouvement": "fixe"},
-    {"fichier": "medias/clips/P06.mp4", "debut": 15.20, "fin": 17.70, "mouvement": "push"},
-    {"fichier": "medias/clips/P07.mp4", "debut": 17.70, "fin": 20.30, "mouvement": "push"},
-    {"fichier": "medias/clips/P08.mp4", "debut": 20.30, "fin": 23.30, "mouvement": "fixe"},
-    {"fichier": "medias/clips/P09.mp4", "debut": 23.30, "fin": 25.20, "mouvement": "punch"},
-    {"fichier": "medias/clips/P10.mp4", "debut": 25.20, "fin": 30.20, "mouvement": "push"},
-    {"fichier": "medias/clips/P11.mp4", "debut": 30.20, "fin": 31.60, "mouvement": "punch"},
-    {"fichier": "medias/clips/P12.mp4", "debut": 31.60, "fin": 33.00, "mouvement": "fixe"},
-    {"fichier": "medias/clips/P13.mp4", "debut": 33.00, "fin": 34.55, "mouvement": "push"},
-    {"fichier": "medias/clips/P14.mp4", "debut": 34.55, "fin": 38.80, "mouvement": "push", "vitesse": 0.7},
-    {"fichier": "medias/clips/P15.mp4", "debut": 38.80, "fin": 40.85, "mouvement": "punch"},
-    {"fichier": "medias/clips/P16.mp4", "debut": 40.85, "fin": 43.10, "mouvement": "punch"},
-    {"fichier": "medias/clips/P17.mp4", "debut": 43.10, "fin": 44.50, "mouvement": "punch"},
-    {"fichier": "medias/clips/P18.mp4", "debut": 44.50, "fin": 47.39, "mouvement": "pull"}
+    {
+      "fichier": "medias/clips/P01.mp4",
+      "debut": 0.0,
+      "fin": 3.05,
+      "mouvement": "push"
+    },
+    {
+      "fichier": "medias/clips/P02.mp4",
+      "debut": 3.05,
+      "fin": 5.95,
+      "mouvement": "punch"
+    },
+    {
+      "fichier": "medias/clips/P03.mp4",
+      "debut": 5.95,
+      "fin": 8.95,
+      "mouvement": "push"
+    },
+    {
+      "fichier": "medias/clips/P04.mp4",
+      "debut": 8.95,
+      "fin": 13.0,
+      "mouvement": "push"
+    },
+    {
+      "fichier": "medias/clips/P05.mp4",
+      "debut": 13.0,
+      "fin": 15.2,
+      "mouvement": "fixe"
+    },
+    {
+      "fichier": "medias/clips/P06.mp4",
+      "debut": 15.2,
+      "fin": 17.7,
+      "mouvement": "push"
+    },
+    {
+      "fichier": "medias/clips/P07.mp4",
+      "debut": 17.7,
+      "fin": 20.3,
+      "mouvement": "push"
+    },
+    {
+      "fichier": "medias/clips/P08.mp4",
+      "debut": 20.3,
+      "fin": 23.3,
+      "mouvement": "fixe"
+    },
+    {
+      "fichier": "medias/clips/P09.mp4",
+      "debut": 23.3,
+      "fin": 25.2,
+      "mouvement": "punch"
+    },
+    {
+      "fichier": "medias/clips/P10.mp4",
+      "debut": 25.2,
+      "fin": 30.2,
+      "mouvement": "push"
+    },
+    {
+      "fichier": "medias/clips/P11.mp4",
+      "debut": 30.2,
+      "fin": 31.6,
+      "mouvement": "punch"
+    },
+    {
+      "fichier": "medias/clips/P12.mp4",
+      "debut": 31.6,
+      "fin": 33.0,
+      "mouvement": "fixe"
+    },
+    {
+      "fichier": "medias/clips/P13.mp4",
+      "debut": 33.0,
+      "fin": 34.55,
+      "mouvement": "push"
+    },
+    {
+      "fichier": "medias/clips/P14.mp4",
+      "debut": 34.55,
+      "fin": 38.8,
+      "mouvement": "push",
+      "vitesse": 0.7
+    },
+    {
+      "fichier": "medias/clips/P15.mp4",
+      "debut": 38.8,
+      "fin": 40.85,
+      "mouvement": "punch"
+    },
+    {
+      "fichier": "medias/clips/P16.mp4",
+      "debut": 40.85,
+      "fin": 43.1,
+      "mouvement": "punch"
+    },
+    {
+      "fichier": "medias/clips/P17.mp4",
+      "debut": 43.1,
+      "fin": 44.5,
+      "mouvement": "punch"
+    },
+    {
+      "fichier": "medias/clips/P18.mp4",
+      "debut": 44.5,
+      "fin": 47.39,
+      "mouvement": "pull"
+    }
   ],
   "noms": [
-    {"image": "medias/noms/odin.png",   "debut": 6.10,  "fin": 8.80},
-    {"image": "medias/noms/mimir.png",  "debut": 23.40, "fin": 25.15},
-    {"image": "medias/noms/fenrir.png", "debut": 41.00, "fin": 43.05}
+    {
+      "image": "medias/noms/odin-crop.png",
+      "debut": 6.1,
+      "fin": 8.8
+    },
+    {
+      "image": "medias/noms/mimir-crop.png",
+      "debut": 23.4,
+      "fin": 25.15
+    },
+    {
+      "image": "medias/noms/fenrir-crop.png",
+      "debut": 41.0,
+      "fin": 43.05
+    }
   ],
   "sous_titres": [
-    {"debut": 0.00,  "fin": 2.26,  "texte": "*Odin* va-t-il se faire dévorer par ce *loup* ?"},
-    {"debut": 3.16,  "fin": 5.70,  "texte": "Il a payé de son *sang* pour avoir la réponse."},
-    {"debut": 6.08,  "fin": 8.45,  "texte": "Odin, c'est le *Père-de-Tout*."},
-    {"debut": 9.04,  "fin": 11.11, "texte": "Mais il y a une chose qu'il ne contrôle pas :"},
-    {"debut": 11.87, "fin": 12.67, "texte": "*l'avenir*."},
-    {"debut": 13.08, "fin": 17.22, "texte": "Alors il descend sous les racines d'*Yggdrasil*, l'arbre de vie."},
-    {"debut": 17.78, "fin": 22.68, "texte": "Il arrive au puits de *Mímir* : boire son eau donne la réponse à toutes les questions."},
-    {"debut": 23.39, "fin": 24.85, "texte": "Mais tout savoir a un *prix*."},
-    {"debut": 25.29, "fin": 29.80, "texte": "Mímir, le gardien du puits, exige un *œil* pour une gorgée."},
-    {"debut": 30.30, "fin": 34.27, "texte": "Odin *s'arrache* l'œil et le jette au fond du puits, avant de boire."},
-    {"debut": 34.61, "fin": 35.10, "texte": "Et là,"},
-    {"debut": 35.28, "fin": 36.25, "texte": "il comprend *tout* :"},
-    {"debut": 36.52, "fin": 38.77, "texte": "le passé, le destin des hommes…"},
-    {"debut": 38.86, "fin": 40.11, "texte": "le *Ragnarök*."},
-    {"debut": 40.89, "fin": 47.39, "texte": "Ce jour-là, *Fenrir* sera libéré et *dévorera* *Odin*, avant que le *feu* ne marque la fin du monde."}
-  ]
+    {
+      "debut": 0.0,
+      "fin": 2.26,
+      "texte": "*Odin* va-t-il se faire dévorer par ce *loup* ?"
+    },
+    {
+      "debut": 3.16,
+      "fin": 5.7,
+      "texte": "Il a payé de son *sang* pour avoir la réponse."
+    },
+    {
+      "debut": 6.08,
+      "fin": 8.45,
+      "texte": "Odin, c'est le *Père-de-Tout*."
+    },
+    {
+      "debut": 9.04,
+      "fin": 11.11,
+      "texte": "Mais il y a une chose qu'il ne contrôle pas :"
+    },
+    {
+      "debut": 11.87,
+      "fin": 12.67,
+      "texte": "*l'avenir*."
+    },
+    {
+      "debut": 13.08,
+      "fin": 17.22,
+      "texte": "Alors il descend sous les racines d'*Yggdrasil*, l'arbre de vie."
+    },
+    {
+      "debut": 17.78,
+      "fin": 22.68,
+      "texte": "Il arrive au puits de *Mímir* : boire son eau donne la réponse à toutes les questions."
+    },
+    {
+      "debut": 23.39,
+      "fin": 24.85,
+      "texte": "Mais tout savoir a un *prix*."
+    },
+    {
+      "debut": 25.29,
+      "fin": 29.8,
+      "texte": "Mímir, le gardien du puits, exige un *œil* pour une gorgée."
+    },
+    {
+      "debut": 30.3,
+      "fin": 34.27,
+      "texte": "Odin *s'arrache* l'œil et le jette au fond du puits, avant de boire."
+    },
+    {
+      "debut": 34.61,
+      "fin": 35.1,
+      "texte": "Et là,"
+    },
+    {
+      "debut": 35.28,
+      "fin": 36.25,
+      "texte": "il comprend *tout* :"
+    },
+    {
+      "debut": 36.52,
+      "fin": 38.77,
+      "texte": "le passé, le destin des hommes…"
+    },
+    {
+      "debut": 38.86,
+      "fin": 40.11,
+      "texte": "le *Ragnarök*."
+    },
+    {
+      "debut": 40.89,
+      "fin": 47.39,
+      "texte": "Ce jour-là, *Fenrir* sera libéré et *dévorera* *Odin*, avant que le *feu* ne marque la fin du monde."
+    }
+  ],
+  "son_plans": 0.35
 }

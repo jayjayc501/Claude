@@ -101,7 +101,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Carton,{police},92,&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,1,0,0,0,100,100,1,0,1,7,4,2,90,90,600,1
+Style: Carton,{police},106,&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,1,0,0,0,100,100,1,0,1,8,4,2,60,60,600,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -202,18 +202,18 @@ def monter(chemin_cfg, sortie, factice, police):
 
         # étalonnage léger : contraste doux, vignettage, grain
         f.append("[vbase]eq=contrast=1.06:saturation=1.05,vignette=angle=PI/5,"
-                 "noise=alls=5:allf=t[vgrade]")
+                 "noise=alls=3:allf=t[vgrade]")
 
         # --- noms dorés (fusion screen)
         courant = "vgrade"
         for j, nm in enumerate(noms):
             idx = n + j
-            largeur = nm.get("largeur", 520)
-            x, y = nm.get("x", L - largeur - 50), nm.get("y", 230)
+            hauteur = nm.get("hauteur", 190)
+            x, y = nm.get("x", f"W-w-45"), nm.get("y", 210)
             dn = nm["fin"] - nm["debut"]
             # Alpha = luminosité amplifiée : le noir devient transparent, l'or et sa lueur restent.
             f.append(
-                f"[{idx}:v]scale={largeur}:-2,format=rgb24,split[nc{j}][na{j}];"
+                f"[{idx}:v]scale=-2:{hauteur},format=rgb24,split[nc{j}][na{j}];"
                 f"[na{j}]format=gray,lut=c0='clip(val*2.6,0,255)'[nl{j}];"
                 f"[nc{j}][nl{j}]alphamerge,format=rgba,"
                 f"fade=t=in:st=0:d=0.35:alpha=1,fade=t=out:st={dn - 0.35:.3f}:d=0.35:alpha=1,"
@@ -222,23 +222,46 @@ def monter(chemin_cfg, sortie, factice, police):
             courant = f"ov{j}"
         f.append(f"[{courant}]format=yuv420p,ass='{ass}'[vout]")
 
-        # --- audio : voix + musique avec ducking
+        # --- bruitages : son d'origine de chaque clip, calé sur la timeline
+        vol_sfx = cfg.get("son_plans", 0)
+        if vol_sfx:
+            for k, p in enumerate(plans):
+                d = p["fin"] - p["debut"]
+                vit = p.get("vitesse", 1.0)
+                fichier = dossier / p["fichier"]
+                if a_de_l_audio(fichier):
+                    tempo = f",atempo={vit}" if vit != 1.0 else ""
+                    f.append(f"[{k}:a]aformat=sample_rates=48000:channel_layouts=stereo,"
+                             f"atrim=start={p.get('depart', 0.0)}:duration={d * vit},asetpts=PTS-STARTPTS{tempo},"
+                             f"apad,atrim=0:{d},afade=t=in:d=0.04,afade=t=out:st={max(d - 0.06, 0)}:d=0.06[s{k}]")
+                else:
+                    f.append(f"anullsrc=r=48000:cl=stereo,atrim=0:{d}[s{k}]")
+            f.append("".join(f"[s{k}]" for k in range(n)) + f"concat=n={n}:v=0:a=1,volume={vol_sfx}[sfx]")
+
+        # --- audio : voix + musique (+ bruitages) avec ducking
         vol_mus = cfg.get("volume_musique", 0.35)
+        f.append(f"[{i_voix}:a]aformat=sample_rates=48000:channel_layouts=stereo,apad,atrim=0:{total},asplit=2[v1][vsc]")
+        fonds = []
         if musique:
-            f.append(f"[{i_voix}:a]aformat=sample_rates=48000:channel_layouts=stereo,apad,atrim=0:{total},asplit=2[v1][vsc]")
             f.append(f"[{i_mus}:a]aformat=sample_rates=48000:channel_layouts=stereo,"
                      f"atrim=start={cfg.get('depart_musique', 0)}:duration={total},asetpts=PTS-STARTPTS,"
                      f"volume={vol_mus}[m0]")
-            f.append("[m0][vsc]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=350[mduck]")
-            f.append("[v1][mduck]amix=inputs=2:duration=first:normalize=0,"
+            fonds.append("[m0]")
+        if vol_sfx:
+            fonds.append("[sfx]")
+        if fonds:
+            f.append("".join(fonds) + f"amix=inputs={len(fonds)}:duration=first:normalize=0[fond]")
+            f.append("[fond][vsc]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=350[fduck]")
+            f.append("[v1][fduck]amix=inputs=2:duration=first:normalize=0,"
                      "loudnorm=I=-14:TP=-1.0:LRA=9[aout]")
         else:
-            f.append(f"[{i_voix}:a]apad,atrim=0:{total},loudnorm=I=-14:TP=-1.0:LRA=9[aout]")
+            f.append("[v1]loudnorm=I=-14:TP=-1.0:LRA=9[aout]")
+            f.append("[vsc]anullsink")
 
         graphe = ";".join(f)
         cmd += ["-filter_complex", graphe, "-map", "[vout]", "-map", "[aout]",
                 "-t", f"{total:.3f}", "-r", str(IPS),
-                "-c:v", "libx264", "-preset", "veryfast", "-crf", "17", "-pix_fmt", "yuv420p",
+                "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-tune", "film", "-pix_fmt", "yuv420p",
                 "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-movflags", "+faststart", str(sortie)]
         lancer(cmd)
     print(f"✔ {sortie} ({total:.2f} s, {n} plans)")

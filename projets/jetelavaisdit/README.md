@@ -50,7 +50,14 @@ La connexion se fait **uniquement avec Google** (Apple sera ajouté à la public
 3. **Credentials › Create credentials › OAuth client ID** : type *Web application*. Dans *Authorized redirect URIs*, ajouter `https://joqzrjjgrntbyutytpnr.supabase.co/auth/v1/callback`.
 4. Copier le *Client ID* et le *Client secret* dans Supabase : **Authentication › Sign In / Providers › Google**, activer et enregistrer. Le *Client secret* ne doit jamais être mis dans le dépôt.
 
-### 3. L'app mobile
+### 3. L'APK Android (vraie app, sans ordinateur)
+
+1. Créer un compte gratuit sur [expo.dev](https://expo.dev), puis **Account settings › Access tokens › Create token**.
+2. Dans GitHub : **Settings › Secrets and variables › Actions › New repository secret**, nom `EXPO_TOKEN`, valeur = le jeton.
+3. Dans Supabase : **Authentication › URL Configuration › Redirect URLs**, ajouter `jetelavaisdit://**` (retour de la connexion Google dans l'app).
+4. Dans GitHub : **Actions › jetelavaisdit-apk › Run workflow**. Au bout de 10 à 30 minutes, le résumé de l'exécution donne le lien de l'APK à ouvrir sur le téléphone.
+
+### 4. L'app mobile en développement (avec un ordinateur)
 
 ```bash
 cd projets/jetelavaisdit/mobile

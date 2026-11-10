@@ -100,4 +100,4 @@ Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » l
 
 1. Trancher les points encore ouverts du §8.
 2. ~~Maquettes~~ : version finale le 10/11/2026, 11 écrans + planche logo (copie dans `maquettes/`).
-3. Prototype : première version écrite le 10/11/2026 (base de données, app mobile, page web de la carte). À tester sur téléphone.
+3. Prototype : en ligne le 10/11/2026 en version web (https://jayjayc501.github.io/Claude/app/). À tester sur téléphone.

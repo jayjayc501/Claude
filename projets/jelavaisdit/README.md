@@ -2,7 +2,7 @@
 
 App mobile (iPhone et Android) pour sceller une phrase datée et l'envoyer plus tard à quelqu'un avec une carte d'authenticité : « Regarde, je l'avais dit. »
 
-**État :** cadrage et maquettes terminés, premier prototype écrit (pas encore testé sur téléphone).
+**État :** prototype en ligne en version web : https://jayjayc501.github.io/Claude/app/ (mise à jour automatique à chaque modification sur `main`).
 
 ## Contenu
 

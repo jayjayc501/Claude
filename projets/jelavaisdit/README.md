@@ -16,7 +16,7 @@ App mobile (iPhone et Android) pour sceller une phrase datée et l'envoyer plus 
 
 ## Ce que fait le prototype
 
-- Connexion sans mot de passe, par **code reçu par e-mail** (Apple / Google viendront avant la publication).
+- Connexion **avec Google**, sans mot de passe.
 - **Sceller une phrase**, une par jour maximum (heure de Paris). La date est fixée par le serveur et une empreinte SHA-256 est enregistrée. Une phrase scellée ne peut plus être modifiée ni supprimée.
 - **Modération de base** : refus des insultes courantes, des numéros de téléphone et des e-mails.
 - Écran **« c'est scellé »** avec animation et vibration.
@@ -25,36 +25,36 @@ App mobile (iPhone et Android) pour sceller une phrase datée et l'envoyer plus 
 - **Partage** : « Je l'avais dit ! » crée un lien public et ouvre le menu de partage du téléphone (WhatsApp, Messages, Instagram, copier…).
 - **Page web de la carte** : affiche la phrase, l'auteur, le nombre de jours, la date et l'empreinte.
 
-Pas encore fait : connexion Apple / Google, image au format story, notifications de rappel, modération par IA, aperçu enrichi du lien dans WhatsApp.
+Pas encore fait : connexion Apple (à la publication sur l'App Store), image au format story, notifications de rappel, modération par IA, aperçu enrichi du lien dans WhatsApp.
 
 ## Lancer le prototype
+
+La version web est mise en ligne automatiquement par GitHub (`.github/workflows/jelavaisdit.yml`) à chaque modification sur `main` :
+
+- l'app : https://jayjayc501.github.io/Claude/app/
+- la page de la carte : https://jayjayc501.github.io/Claude/carte/
 
 ### 1. La base de données (Supabase, gratuit)
 
 1. Créer un projet sur [supabase.com](https://supabase.com).
 2. Ouvrir **SQL Editor**, coller le contenu de `supabase/migrations/20261110120000_init.sql` et l'exécuter.
-3. **Authentication › URL Configuration** : mettre `https://jayjayc501.github.io/Claude/app/` en **Site URL** et dans **Redirect URLs**. Le lien reçu par e-mail ramène alors sur l'app, déjà connecté.
-4. **Authentication › Sign In / Providers** : activer **Allow anonymous sign-ins** pour le lien « Juste essayer, sans compte » (compte invité, aucun e-mail envoyé).
-5. **Connexion Google** (gratuite) :
-   1. Sur [console.cloud.google.com](https://console.cloud.google.com), créer un projet.
-   2. **APIs & Services › OAuth consent screen** : type *External*, nom « Je l'avais dit », e-mail de contact.
-   3. **Credentials › Create credentials › OAuth client ID** : type *Web application*. Dans *Authorized redirect URIs*, ajouter `https://joqzrjjgrntbyutytpnr.supabase.co/auth/v1/callback`.
-   4. Copier le *Client ID* et le *Client secret* dans Supabase : **Authentication › Sign In / Providers › Google**, puis activer et enregistrer.
-6. **Connexion Apple** : nécessite le compte Apple Developer (payant). À configurer au moment de publier sur l'App Store ; d'ici là, le bouton affiche « arrive bientôt ».
-   (Pour recevoir plutôt un code à 6 chiffres, il faut configurer un serveur d'e-mail à soi, « custom SMTP », puis ajouter `{{ .Token }}` dans les modèles « Confirm signup » et « Magic Link ».)
-4. Noter, dans **Project Settings › API**, l'URL du projet et la clé `anon` (publique).
+3. **Authentication › URL Configuration** : mettre `https://jayjayc501.github.io/Claude/app/` en **Site URL** et dans **Redirect URLs**.
+4. Reporter l'URL du projet et la clé publique (`anon` / `publishable`) dans `mobile/.env.example` et `web/carte/config.js` (déjà fait pour ce projet).
 
-### 2. La page web de la carte
+### 2. La connexion avec Google (gratuite)
 
-1. Remplir `web/carte/config.js` avec l'URL et la clé `anon`.
-2. Mettre le dossier `web/carte/` en ligne (Netlify, Vercel, GitHub Pages…).
-3. Noter l'adresse obtenue, par exemple `https://monsite.netlify.app/`.
+La connexion se fait **uniquement avec Google** (Apple sera ajouté à la publication sur l'App Store, car il demande un compte Apple Developer payant).
+
+1. Sur [console.cloud.google.com](https://console.cloud.google.com), créer un projet.
+2. **APIs & Services › OAuth consent screen** : type *External*, nom « Je l'avais dit », e-mail de contact.
+3. **Credentials › Create credentials › OAuth client ID** : type *Web application*. Dans *Authorized redirect URIs*, ajouter `https://joqzrjjgrntbyutytpnr.supabase.co/auth/v1/callback`.
+4. Copier le *Client ID* et le *Client secret* dans Supabase : **Authentication › Sign In / Providers › Google**, activer et enregistrer. Le *Client secret* ne doit jamais être mis dans le dépôt.
 
 ### 3. L'app mobile
 
 ```bash
 cd projets/jelavaisdit/mobile
-cp .env.example .env        # puis remplir les 3 valeurs
+cp .env.example .env        # valeurs publiques déjà remplies
 npm install
 npx expo install --fix      # aligne les versions des paquets sur le SDK Expo
 npx expo start

@@ -99,5 +99,5 @@ Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » l
 ## 9. Prochaines étapes
 
 1. Trancher les points encore ouverts du §8.
-2. ~~Maquettes~~ : 11 écrans faits (connexion, écrire, déjà scellé aujourd'hui, scellé, refus de modération, liste vide, mes phrases, partage, story, carte reçue, notifications) + planche logo. À valider.
+2. ~~Maquettes~~ : version finale le 10/11/2026, 11 écrans + planche logo (copie dans `maquettes/`).
 3. Prototype.

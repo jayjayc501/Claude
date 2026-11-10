@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Premier lancement</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#C8FF3D}a:hover{color:#FFFFFF}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #0D0C12; color: #FFFFFF; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <div style="flex-grow: 1; display: flex; flex-direction: column; padding: 56px 24px 20px">
+    <h1 style="margin: 0; font-family: 'Unbounded', sans-serif; font-size: 32px; line-height: 1; font-weight: 800; letter-spacing: -1px">mes phrases</h1>
+
+    <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 18px">
+      <svg width="132" height="132" viewBox="0 0 100 100" aria-hidden="true" style="transform: rotate(-6deg)"><path d="M36 40V30a14 14 0 0 1 28 0v10" stroke="#4A475A" stroke-width="6" fill="none" stroke-linecap="round"></path><path d="M28 38h44a12 12 0 0 1 12 12v18a12 12 0 0 1-12 12H46l-14 11v-11h-4a12 12 0 0 1-12-12V50a12 12 0 0 1 12-12z" fill="none" stroke="#4A475A" stroke-width="4" stroke-dasharray="6 5" stroke-linejoin="round"></path><rect x="46" y="46" width="8" height="18" rx="4" fill="#C8FF3D"></rect><circle cx="50" cy="71.5" r="4.5" fill="#C8FF3D"></circle></svg>
+      <p style="margin: 0; font-family: 'Unbounded', sans-serif; font-size: 22px; line-height: 1.15; font-weight: 800">Rien de scellé<br>pour l'instant.</p>
+      <p style="margin: 0; max-width: 290px; font-size: 16px; line-height: 1.45; color: #A9A6B8">Écris ta première prédiction. Dans quelques mois, tu te remercieras.</p>
+    </div>
+
+    <a href="Ecrire.dc.html" style="display: flex; align-items: center; justify-content: center; height: 60px; border-radius: 999px; background: #C8FF3D; color: #0D0C12; font-family: 'Unbounded', sans-serif; font-size: 16px; font-weight: 800; text-decoration: none">Ma première prédiction</a>
+  </div>
+
+  <nav aria-label="Navigation principale" style="display: flex; gap: 8px; margin: 0 24px 24px; padding: 6px; background: #1A1922; border: 1px solid #2C2A38; border-radius: 999px; flex-shrink: 0">
+    <a href="Ecrire.dc.html" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 999px; text-decoration: none; color: #A9A6B8; font-size: 14px; font-weight: 700">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" stroke="#A9A6B8" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="M13 7l4 4"></path></svg>
+      Écrire
+    </a>
+    <a href="Vide.dc.html" aria-current="page" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 999px; background: #FFFFFF; text-decoration: none; color: #0D0C12; font-size: 14px; font-weight: 700">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" stroke="#0D0C12" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg>
+      Mes phrases
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

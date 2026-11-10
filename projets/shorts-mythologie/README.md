@@ -48,9 +48,27 @@ la voix off. Si un plan tombe mal, ajouter `"debut": 12.4` (en secondes) à
 `monter2.py` suit une timeline précise décrite dans `shorts/<sujet>/montage.json` :
 plans avec début/fin exacts (calés sur les silences de la voix), mouvement de
 caméra par plan (`push`, `punch`, `pull`, `fixe`), vitesse, noms dorés en
-surimpression (image or sur fond noir rendue transparente), sous-titres
-dynamiques 1 à 3 mots (mots `*clés*` en or), musique + bruitages des clips avec
-ducking sous la voix, étalonnage léger et loudness YouTube (−14 LUFS).
+surimpression (image or sur fond noir rendue transparente), titre d'accroche
+et quelques mots-clés dorés, musique + bruitages des clips avec ducking sous la
+voix, étalonnage léger et loudness YouTube (−14 LUFS). Le texte complet part
+dans un `.srt` à importer dans YouTube Studio.
+
+Réglages qualité (`montage.json`) :
+- `"resolution": [2160, 3840]` : rendu 4K vertical. YouTube réserve son meilleur
+  codec (VP9/AV1, plus de débit) aux vidéos ≥ 1440p : l'image reste nette même
+  pour les spectateurs en 1080p. Chaque clip n'est redimensionné qu'une fois
+  (lanczos, zoom compris).
+- `"ips": 24` : cadence native des clips Kling (24 → 30 i/s faisait saccader).
+- `"nettete": 0.35` (filtre CAS), `"grain": 0` (le grain se compresse mal sur YouTube).
+- `"crf": 18`, `"preset": "medium"`.
+
+Mots-clés : chacun doit avoir un sens tout seul (« Payé de son sang », pas
+« Sang »). Les caler sur la voix : début de l'expression → un peu après sa fin.
+
+Carte de fin (`"fin"`) : décor vidéo, `"fondu"` (fondu enchaîné depuis le
+dernier plan, en s), `"vitesse"`, et `"logo_anime": true` → le logo est découpé
+ligne par ligne puis icône par icône et entre avec fondu, montée et flou qui se
+dissipe, halo doré et reflet de lumière (`logo_anime.py`).
 
     python3 monter2.py shorts/odin-oeil/montage.json
     python3 monter2.py shorts/odin-oeil/montage.json --factice   # test sans médias
@@ -67,4 +85,4 @@ Chaîne de production qui a donné le meilleur résultat (voir `shorts/odin-oeil
 
 | Sujet | Dossier | État |
 |---|---|---|
-| Odin va-t-il se faire dévorer par ce loup ? (l'œil d'Odin) | `shorts/odin-oeil` | terminé, v2 (49,9 s) — à publier |
+| Odin va-t-il se faire dévorer par ce loup ? (l'œil d'Odin) | `shorts/odin-oeil` | terminé, v3 4K (51,7 s) — à publier |

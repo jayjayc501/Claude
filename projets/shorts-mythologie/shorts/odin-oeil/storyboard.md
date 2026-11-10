@@ -70,3 +70,17 @@ Leçons :
 
 Pistes d'amélioration notées : viser 30-40 s de voix au prochain Short ; refaire P16 avec une image
 sans chaîne visible ; caler les mots clés au mot près (transcription horodatée).
+
+## Version 3 (10/11/2026) — qualité, texte, carte de fin
+
+- **P16** refait (`P16b.mp4`, image clé sans chaîne qui casse) : Fenrir hurle sous l'orage, animé par Kling.
+- **Mots-clés** : 5 expressions qui ont un sens seules (« Sang » tout seul ne voulait rien dire) :
+  *Payé de son sang* · *L'avenir* · *Un œil pour une gorgée* · *Ragnarök* · *Fenrir dévorera Odin*
+  (la dernière répond au titre d'accroche). Calées sur la voix grâce aux fricatives (s, f) repérées
+  dans le spectre : « payé de son sang » 3,44-4,48 s, « Fenrir » 41,92 s, « dévorera Odin » 43,38-44,6 s.
+  La coupe P16b → P17 tombe sur « dévorera ».
+- **Qualité** : rendu 4K vertical 24 i/s (cadence native Kling), un seul redimensionnement lanczos par
+  plan, netteté CAS, plus de grain, CRF 18.
+- **Carte de fin** : fondu enchaîné de 0,9 s depuis l'arbre en feu, décor animé (corbeau + oiseau doré,
+  horizon en feu), logo animé ligne par ligne puis icône par icône, halo doré et reflet.
+- Durée : 51,7 s.

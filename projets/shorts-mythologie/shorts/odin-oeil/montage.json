@@ -100,20 +100,21 @@
     {
       "fichier": "medias/clips/P16b.mp4",
       "debut": 41.85,
-      "fin": 44.1,
+      "fin": 44.35,
       "mouvement": "punch"
     },
     {
       "fichier": "medias/clips/P17.mp4",
-      "debut": 44.1,
-      "fin": 45.5,
+      "debut": 44.35,
+      "fin": 45.8,
       "mouvement": "punch"
     },
     {
       "fichier": "medias/clips/P18.mp4",
-      "debut": 45.5,
-      "fin": 48.39,
-      "mouvement": "pull"
+      "debut": 45.8,
+      "fin": 49.3,
+      "mouvement": "pull",
+      "vitesse": 0.85
     }
   ],
   "noms": [
@@ -130,7 +131,7 @@
     {
       "image": "medias/noms/fenrir-crop.png",
       "debut": 42.0,
-      "fin": 44.05
+      "fin": 44.25
     }
   ],
   "sous_titres": [
@@ -221,36 +222,50 @@
   },
   "mots_cles": [
     {
-      "texte": "Sang",
-      "debut": 4.05,
-      "fin": 5.4
+      "texte": "Payé de\\Nson sang",
+      "debut": 3.42,
+      "fin": 5.25
     },
     {
       "texte": "L'avenir",
-      "debut": 11.85,
-      "fin": 12.95
+      "debut": 11.86,
+      "fin": 13.0
     },
     {
-      "texte": "Un œil",
-      "debut": 28.0,
-      "fin": 29.3
+      "texte": "Un œil pour\\Nune gorgée",
+      "debut": 27.95,
+      "fin": 30.05,
+      "taille": 120
     },
     {
       "texte": "Ragnarök",
-      "debut": 39.05,
-      "fin": 40.4
+      "debut": 39.0,
+      "fin": 40.3
     },
     {
-      "texte": "Dévorera",
-      "debut": 43.05,
-      "fin": 44.55
+      "texte": "Fenrir\\Ndévorera Odin",
+      "debut": 43.38,
+      "fin": 44.78,
+      "taille": 116
     }
   ],
   "fin": {
     "fichier": "medias/fin-fond.mp4",
-    "duree": 2.5,
+    "duree": 3.3,
     "logo": "medias/fin-texte.png",
     "logo_largeur": 800,
-    "logo_y": 500
-  }
+    "logo_y": 500,
+    "vitesse": 0.92,
+    "fondu": 0.9,
+    "logo_anime": true
+  },
+  "resolution": [
+    2160,
+    3840
+  ],
+  "ips": 24,
+  "crf": 18,
+  "preset": "medium",
+  "grain": 0,
+  "nettete": 0.35
 }

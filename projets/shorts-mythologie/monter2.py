@@ -12,8 +12,12 @@ Suit une timeline précise décrite dans un fichier montage.json :
   transparente) ;
 - son : voix + musique + bruitages des clips enchaînés en fondu, le fond
   s'efface doucement sous la voix, loudness YouTube (−14 LUFS) ;
-- étalonnage léger (vignettage + grain) ;
-- carte de fin de chaîne facultative (« fin »).
+- étalonnage léger (vignettage, grain facultatif, netteté adaptative) ;
+- rendu à la résolution voulue (« resolution », 2160x3840 conseillé : YouTube
+  réserve alors son meilleur codec, VP9/AV1, même aux spectateurs en 1080p)
+  et à la cadence native des clips (« ips », 24 pour Kling) ;
+- carte de fin de chaîne facultative (« fin ») : fondu enchaîné depuis le
+  dernier plan, logo animé ligne par ligne (logo_anime.py).
 
 Usage :
     python3 monter2.py shorts/odin-oeil/montage.json [-o sortie.mp4] [--factice]
@@ -27,6 +31,11 @@ import sys
 import tempfile
 from pathlib import Path
 
+import logo_anime
+
+# Repère de travail : toutes les positions (texte, noms, logo) sont données
+# pour du 1080x1920 et mises à l'échelle de la résolution de sortie.
+BL, BH = 1080, 1920
 L, H, IPS = 1080, 1920, 30
 OR_ASS = "&H3AB2E8&"     # or #E8B23A au format ASS (BBGGRR)
 BLANC_ASS = "&HFFFFFF&"
@@ -89,8 +98,8 @@ def ecrire_ass(cfg, chemin, decalage):
     police = cfg.get("police_texte", "Inter Display Black")
     entete = f"""[Script Info]
 ScriptType: v4.00+
-PlayResX: {L}
-PlayResY: {H}
+PlayResX: {BL}
+PlayResY: {BH}
 WrapStyle: 0
 
 [V4+ Styles]
@@ -111,7 +120,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     # Mots clés (temps de la voix, décalés)
     for mc in cfg.get("mots_cles", []):
         d, f = mc["debut"] + decalage, mc["fin"] + decalage
-        pop = "{\\fad(60,160)\\fscx60\\fscy60\\t(0,110,\\fscx100\\fscy108)\\t(110,200,\\fscx92\\fscy100)}"
+        taille = f"\\fs{mc['taille']}" if mc.get("taille") else ""
+        pop = "{" + taille + "\\fad(60,160)\\fscx60\\fscy60\\t(0,110,\\fscx100\\fscy108)\\t(110,200,\\fscx92\\fscy100)}"
         lignes.append(f"Dialogue: 0,{t_ass(d)},{t_ass(f)},Mot,,0,0,0,,{pop}{mc['texte'].upper()}")
     # Sous-titres complets incrustés (désactivés par défaut)
     if cfg.get("sous_titres_incrustes", False):
@@ -182,140 +192,187 @@ def factices(cfg, dossier):
 
 # ---------------------------------------------------------------- montage
 
+def _zoom(mvt, d):
+    if mvt == "punch":
+        return f"if(lt(t,0.35),1+0.12*t/0.35,1.12+0.03*(t-0.35)/{d})"
+    if mvt == "pull":
+        return f"1.10-0.08*t/{d}"
+    if mvt == "fixe":
+        return "1"
+    return f"1+0.07*t/{d}"
+
+
+def _cadrer(nf, d, vit, depart, z, miroir=False, extra=""):
+    """Chaîne vidéo d'un plan : extrait → format 9:16 sans rééchantillonnage →
+    nf images exactement → un seul redimensionnement lanczos (zoom compris)."""
+    return (f"trim=start={depart}:duration={d * vit + 0.3},setpts=(PTS-STARTPTS)/{vit},fps={IPS},"
+            f"crop='min(iw,ih*{L}/{H})':'min(ih,iw*{H}/{L})'{',hflip' if miroir else ''},setsar=1,"
+            f"tpad=stop_mode=clone:stop_duration={d + 1},trim=end_frame={nf},setpts=PTS-STARTPTS,"
+            f"scale=w='ceil({L}*({z})/2)*2':h=-2:eval=frame:flags=lanczos+accurate_rnd,"
+            f"crop={L}:{H},setsar=1{extra},format=yuv420p")
+
+
 def monter(chemin_cfg, sortie, factice):
+    """Montage en deux temps pour tenir en mémoire même en 4K :
+    1) chaque plan (et la carte de fin) est rendu seul en fichier intermédiaire
+       quasi sans perte, au nombre d'images exact (pas de dérive de synchro) ;
+    2) les plans sont mis bout à bout, puis noms, texte et son sont posés."""
+    global L, H, IPS
     cfg = json.loads(chemin_cfg.read_text(encoding="utf-8"))
     dossier = chemin_cfg.parent
+    L, H = cfg.get("resolution", [BL, BH])
+    IPS = cfg.get("ips", 30)
+    k = L / BL
     if factice:
         factices(cfg, dossier)
 
     voix = dossier / cfg["voix"]
     dec = cfg.get("decalage_voix", 0.0)
     plans = cfg["plans"]
-    fin_timeline = plans[-1]["fin"]
     fin_carte = cfg.get("fin")
     d_fin = fin_carte["duree"] if fin_carte else 0.0
-    total = fin_timeline + d_fin
+    fondu = fin_carte.get("fondu", 0.0) if fin_carte else 0.0
+
+    def im(t):
+        return int(round(t * IPS))
+
+    n_total = im(plans[-1]["fin"]) + (im(d_fin) - im(fondu) if fin_carte else 0)
+    total = n_total / IPS
     sortie = sortie or dossier / "sortie" / f"{dossier.name}.mp4"
     sortie.parent.mkdir(parents=True, exist_ok=True)
 
+    grain, nettete = cfg.get("grain", 0), cfg.get("nettete", 0)
+    etalonnage = (",eq=contrast=1.06:saturation=1.05,vignette=angle=PI/5"
+                  + (f",noise=alls={grain}:allf=t" if grain else "")
+                  + (f",cas=strength={nettete}" if nettete else ""))
+    inter = ["-r", str(IPS), "-c:v", "libx264", "-preset", "veryfast", "-crf", "8",
+             "-pix_fmt", "yuv420p", "-an"]
+
     with tempfile.TemporaryDirectory() as tmp:
-        ass = Path(tmp) / "st.ass"
+        tmp = Path(tmp)
+        ass = tmp / "st.ass"
         ecrire_ass(cfg, ass, dec)
         sortie.with_suffix(".ass").write_text(ass.read_text(encoding="utf-8"), encoding="utf-8")
         if cfg.get("sous_titres"):
             ecrire_srt(cfg["sous_titres"], sortie.with_suffix(".srt"), dec)
 
-        cmd = ["ffmpeg", "-y", "-hide_banner"]
-        f = []
-        n = len(plans)
-        for p in plans:
+        # --- 1) plans, un fichier chacun
+        segments, n_images = [], []
+        for j, p in enumerate(plans):
             src = dossier / p["fichier"]
-            if est_image(src):
-                cmd += ["-loop", "1", "-t", str(p["fin"] - p["debut"] + 1), "-i", str(src)]
-            else:
-                cmd += ["-i", str(src)]
-        noms = cfg.get("noms", [])
-        for nm in noms:
-            cmd += ["-loop", "1", "-t", str(nm["fin"] - nm["debut"] + 0.1), "-i", str(dossier / nm["image"])]
-        i_fin = n + len(noms)
+            nf = im(p["fin"]) - im(p["debut"])
+            d = nf / IPS
+            entree = (["-loop", "1", "-t", str(d + 1)] if est_image(src) else []) + ["-i", str(src)]
+            vf = _cadrer(nf, d, p.get("vitesse", 1.0), p.get("depart", 0.0),
+                         _zoom(p.get("mouvement", "push"), d), p.get("miroir", False), etalonnage)
+            seg = tmp / f"plan_{j:02d}.mkv"
+            lancer(["ffmpeg", "-y", "-hide_banner", *entree, "-vf", vf, *inter, str(seg)])
+            segments.append(seg)
+            n_images.append(nf)
+            print(f"  plan {j + 1}/{len(plans)} ✓", flush=True)
+
+        # --- carte de fin : décor + logo (animé ou fixe), puis fondu enchaîné avec le dernier plan
         if fin_carte:
+            nfin = im(d_fin)
+            dfin = nfin / IPS
             src = dossier / fin_carte["fichier"]
-            if est_image(src):
-                cmd += ["-loop", "1", "-t", str(d_fin + 0.5), "-i", str(src)]
+            cmd = ["ffmpeg", "-y", "-hide_banner"]
+            cmd += (["-loop", "1", "-t", str(dfin + 1)] if est_image(src) else []) + ["-i", str(src)]
+            entree_fondu = "" if fondu else ",fade=t=in:st=0:d=0.25"
+            fc = [f"[0:v]{_cadrer(nfin, dfin, fin_carte.get('vitesse', 1.0), 0.0, f'1+0.04*t/{dfin}')}"
+                  f"{entree_fondu}[f0]"]
+            if fin_carte.get("logo"):
+                lw = int(round(fin_carte.get("logo_largeur", 760) * k))
+                if fin_carte.get("logo_anime"):
+                    motif, marge = logo_anime.generer(dossier / fin_carte["logo"], tmp / "logo", lw, IPS, dfin,
+                                                      depart=fin_carte.get("logo_depart", 0.35))
+                    cmd += ["-framerate", str(IPS), "-i", str(motif)]
+                    fc.append("[1:v]format=rgba,setpts=PTS-STARTPTS[logo]")
+                else:
+                    marge = 0
+                    cmd += ["-loop", "1", "-t", str(dfin + 1), "-i", str(dossier / fin_carte["logo"])]
+                    fc.append(f"[1:v]scale={lw}:-2:flags=lanczos,format=rgba,"
+                              f"fade=t=in:st=0.15:d=0.35:alpha=1[logo]")
+                ly = int(fin_carte.get("logo_y", 520) * k) - marge
+                fc.append(f"[f0][logo]overlay=x=(W-w)/2:y={ly}:format=auto:eof_action=repeat,"
+                          f"trim=end_frame={nfin},format=yuv420p[v]")
             else:
-                cmd += ["-i", str(src)]
-        i_logo = i_fin + (1 if fin_carte else 0)
-        if fin_carte and fin_carte.get("logo"):
-            cmd += ["-loop", "1", "-t", str(d_fin + 0.5), "-i", str(dossier / fin_carte["logo"])]
-        i_voix = i_logo + (1 if fin_carte and fin_carte.get("logo") else 0)
-        cmd += ["-i", str(voix)]
-        musique = cfg.get("musique")
-        i_mus = i_voix + 1
-        if musique:
-            cmd += ["-i", str(dossier / musique)]
-
-        # --- vidéo
-        for k, p in enumerate(plans):
-            d = p["fin"] - p["debut"]
-            depart = p.get("depart", 0.0)
-            vit = p.get("vitesse", 1.0)
-            mvt = p.get("mouvement", "push")
-            if mvt == "punch":
-                z = f"if(lt(t,0.35),1+0.12*t/0.35,1.12+0.03*(t-0.35)/{d})"
-            elif mvt == "pull":
-                z = f"1.10-0.08*t/{d}"
-            elif mvt == "fixe":
-                z = "1"
+                fc.append("[f0]null[v]")
+            seg_fin = tmp / "fin.mkv"
+            lancer(cmd + ["-filter_complex", ";".join(fc), "-map", "[v]", *inter, str(seg_fin)])
+            if fondu:
+                nfd = im(fondu)
+                decalage = (n_images[-1] - nfd) / IPS
+                seg = tmp / "fin_fondu.mkv"
+                lancer(["ffmpeg", "-y", "-hide_banner", "-i", str(segments[-1]), "-i", str(seg_fin),
+                        "-filter_complex",
+                        f"[0:v]settb=AVTB,fps={IPS}[a];[1:v]settb=AVTB,fps={IPS}[b];"
+                        f"[a][b]xfade=transition=fade:duration={nfd / IPS:.4f}:offset={decalage:.4f},"
+                        f"format=yuv420p[v]", "-map", "[v]", *inter, str(seg)])
+                segments[-1] = seg
             else:
-                z = f"1+0.07*t/{d}"
-            miroir = ",hflip" if p.get("miroir") else ""
-            f.append(
-                f"[{k}:v]trim=start={depart}:duration={d * vit + 0.2},setpts=(PTS-STARTPTS)/{vit},"
-                f"fps={IPS},scale={L}:{H}:force_original_aspect_ratio=increase,crop={L}:{H}{miroir},"
-                f"tpad=stop_mode=clone:stop_duration={d},trim=duration={d},setpts=PTS-STARTPTS,"
-                f"scale=w='ceil({L}*({z})/2)*2':h=-2:eval=frame,crop={L}:{H},setsar=1,format=yuv420p[p{k}]"
-            )
-        f.append("".join(f"[p{k}]" for k in range(n)) + f"concat=n={n}:v=1:a=0[vbase]")
-        f.append("[vbase]eq=contrast=1.06:saturation=1.05,vignette=angle=PI/5,"
-                 "noise=alls=3:allf=t[vgrade]")
+                segments.append(seg_fin)
+            print("  carte de fin ✓", flush=True)
 
-        courant = "vgrade"
+        liste = tmp / "liste.txt"
+        liste.write_text("".join(f"file '{s}'\n" for s in segments), encoding="utf-8")
+
+        # --- 2) assemblage : plans bout à bout + noms + texte + son
+        cmd = ["ffmpeg", "-y", "-hide_banner", "-f", "concat", "-safe", "0", "-i", str(liste)]
+        f = [f"[0:v]settb=AVTB,setpts=N/{IPS}/TB[vbase]"]
+        noms = cfg.get("noms", [])
+        courant = "vbase"
         for j, nm in enumerate(noms):
-            idx = n + j
-            hauteur = nm.get("hauteur", 190)
-            x, y = nm.get("x", "W-w-45"), nm.get("y", 210)
+            cmd += ["-loop", "1", "-t", str(nm["fin"] - nm["debut"] + 0.1), "-i", str(dossier / nm["image"])]
+            idx = 1 + j
+            hauteur = int(round(nm.get("hauteur", 190) * k / 2)) * 2
+            x, y = nm.get("x", f"W-w-{int(45 * k)}"), int(nm.get("y", 210) * k)
             dn = nm["fin"] - nm["debut"]
             f.append(
-                f"[{idx}:v]scale=-2:{hauteur},format=rgb24,split[nc{j}][na{j}];"
+                f"[{idx}:v]scale=-2:{hauteur}:flags=lanczos,format=rgb24,split[nc{j}][na{j}];"
                 f"[na{j}]format=gray,lut=c0='clip(val*2.6,0,255)'[nl{j}];"
                 f"[nc{j}][nl{j}]alphamerge,format=rgba,"
                 f"fade=t=in:st=0:d=0.35:alpha=1,fade=t=out:st={dn - 0.35:.3f}:d=0.35:alpha=1,"
                 f"setpts=PTS-STARTPTS+{nm['debut']}/TB[nom{j}]")
             f.append(f"[{courant}][nom{j}]overlay=x={x}:y={y}:eof_action=pass:format=auto[ov{j}]")
             courant = f"ov{j}"
-        f.append(f"[{courant}]format=yuv420p,ass='{ass}'[vtexte]")
+        f.append(f"[{courant}]format=yuv420p,ass='{ass}'[vout]")
 
-        if fin_carte:
-            # Carte de fin : décor (image ou vidéo) + logo de la chaîne net par-dessus
-            f.append(f"[{i_fin}:v]trim=duration={d_fin},setpts=PTS-STARTPTS,fps={IPS},"
-                     f"scale={L}:{H}:force_original_aspect_ratio=increase,crop={L}:{H},setsar=1,"
-                     f"scale=w='ceil({L}*(1+0.04*t/{d_fin})/2)*2':h=-2:eval=frame,crop={L}:{H},"
-                     f"format=yuv420p,fade=t=in:st=0:d=0.25[vfin0]")
-            if fin_carte.get("logo"):
-                lw = fin_carte.get("logo_largeur", 760)
-                ly = fin_carte.get("logo_y", 520)
-                f.append(f"[{i_logo}:v]scale={lw}:-2,format=rgba,"
-                         f"fade=t=in:st=0.15:d=0.35:alpha=1[logo]")
-                f.append(f"[vfin0][logo]overlay=x=(W-w)/2:y={ly}:format=auto,format=yuv420p[vfin]")
-            else:
-                f.append("[vfin0]null[vfin]")
-            f.append("[vtexte][vfin]concat=n=2:v=1:a=0[vout]")
-        else:
-            f.append("[vtexte]null[vout]")
+        i_voix = 1 + len(noms)
+        cmd += ["-i", str(voix)]
+        musique = cfg.get("musique")
+        i_mus = i_voix + 1
+        if musique:
+            cmd += ["-i", str(dossier / musique)]
+        prochain = i_mus + (1 if musique else 0)
 
-        # --- bruitages : son d'origine des clips, posés sur la timeline avec fondus croisés
+        # bruitages : son d'origine des clips (vidéo ignorée à la lecture), posés avec fondus croisés
         vol_sfx = cfg.get("son_plans", 0)
         xf = 0.25
         if vol_sfx:
             pistes = []
-            for k, p in enumerate(plans):
+            for j, p in enumerate(plans):
                 src = dossier / p["fichier"]
                 if est_image(src) or not a_de_l_audio(src):
                     continue
+                cmd += ["-vn", "-i", str(src)]
+                idx, prochain = prochain, prochain + 1
                 d = p["fin"] - p["debut"]
                 vit = p.get("vitesse", 1.0)
                 tempo = f",atempo={vit}" if vit != 1.0 else ""
                 debut = max(p["debut"] - xf / 2, 0)
                 longueur = d + xf
-                f.append(f"[{k}:a]aformat=sample_rates=48000:channel_layouts=stereo,"
+                f.append(f"[{idx}:a]aformat=sample_rates=48000:channel_layouts=stereo,"
                          f"atrim=start={p.get('depart', 0.0)},asetpts=PTS-STARTPTS{tempo},"
                          f"apad,atrim=0:{longueur},afade=t=in:d={xf},afade=t=out:st={longueur - xf}:d={xf},"
-                         f"adelay={int(debut * 1000)}:all=1[s{k}]")
-                pistes.append(f"[s{k}]")
-            f.append("".join(pistes) + f"amix=inputs={len(pistes)}:duration=longest:normalize=0,"
-                     f"atrim=0:{total},volume={vol_sfx}[sfx]")
+                         f"adelay={int(debut * 1000)}:all=1[s{j}]")
+                pistes.append(f"[s{j}]")
+            if pistes:
+                f.append("".join(pistes) + f"amix=inputs={len(pistes)}:duration=longest:normalize=0,"
+                         f"apad,atrim=0:{total},volume={vol_sfx}[sfx]")
+            else:
+                vol_sfx = 0
 
-        # --- voix (décalée), musique, mixage
         vol_mus = cfg.get("volume_musique", 0.3)
         f.append(f"[{i_voix}:a]aformat=sample_rates=48000:channel_layouts=stereo,"
                  f"adelay={int(dec * 1000)}:all=1,apad,atrim=0:{total},asplit=2[v1][vsc]")
@@ -338,11 +395,13 @@ def monter(chemin_cfg, sortie, factice):
             f.append("[vsc]anullsink")
 
         cmd += ["-filter_complex", ";".join(f), "-map", "[vout]", "-map", "[aout]",
-                "-t", f"{total:.3f}", "-r", str(IPS),
-                "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-tune", "film", "-pix_fmt", "yuv420p",
+                "-frames:v", str(n_total), "-t", f"{total:.3f}", "-r", str(IPS),
+                "-c:v", "libx264", "-preset", cfg.get("preset", "medium"), "-crf", str(cfg.get("crf", 19)),
+                "-tune", "film", "-pix_fmt", "yuv420p", "-profile:v", "high",
                 "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-movflags", "+faststart", str(sortie)]
+        print("  assemblage…", flush=True)
         lancer(cmd)
-    print(f"✔ {sortie} ({total:.2f} s, {n} plans)")
+    print(f"✔ {sortie} ({total:.2f} s, {len(plans)} plans, {L}x{H} {IPS} i/s)")
 
 
 def main():

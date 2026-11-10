@@ -8,128 +8,129 @@
     {
       "fichier": "medias/clips/P01.mp4",
       "debut": 0.0,
-      "fin": 3.05,
+      "fin": 4.05,
       "mouvement": "push"
     },
     {
       "fichier": "medias/clips/P02.mp4",
-      "debut": 3.05,
-      "fin": 5.95,
+      "debut": 4.05,
+      "fin": 6.95,
       "mouvement": "punch"
     },
     {
       "fichier": "medias/clips/P03.mp4",
-      "debut": 5.95,
-      "fin": 8.95,
+      "debut": 6.95,
+      "fin": 9.95,
       "mouvement": "push"
     },
     {
       "fichier": "medias/clips/P04.mp4",
-      "debut": 8.95,
-      "fin": 13.0,
+      "debut": 9.95,
+      "fin": 14.0,
       "mouvement": "push"
     },
     {
       "fichier": "medias/clips/P05.mp4",
-      "debut": 13.0,
-      "fin": 15.2,
+      "debut": 14.0,
+      "fin": 16.2,
       "mouvement": "fixe"
     },
     {
       "fichier": "medias/clips/P06.mp4",
-      "debut": 15.2,
-      "fin": 17.7,
+      "debut": 16.2,
+      "fin": 18.7,
       "mouvement": "push"
     },
     {
       "fichier": "medias/clips/P07.mp4",
-      "debut": 17.7,
-      "fin": 20.3,
+      "debut": 18.7,
+      "fin": 21.3,
       "mouvement": "push"
     },
     {
       "fichier": "medias/clips/P08.mp4",
-      "debut": 20.3,
-      "fin": 23.3,
+      "debut": 21.3,
+      "fin": 24.3,
       "mouvement": "fixe"
     },
     {
       "fichier": "medias/clips/P09.mp4",
-      "debut": 23.3,
-      "fin": 25.2,
+      "debut": 24.3,
+      "fin": 26.2,
       "mouvement": "punch"
     },
     {
       "fichier": "medias/clips/P10.mp4",
-      "debut": 25.2,
-      "fin": 30.2,
+      "debut": 26.2,
+      "fin": 31.2,
       "mouvement": "push"
     },
     {
       "fichier": "medias/clips/P11.mp4",
-      "debut": 30.2,
-      "fin": 31.6,
-      "mouvement": "punch"
+      "debut": 31.2,
+      "fin": 32.6,
+      "mouvement": "punch",
+      "miroir": true
     },
     {
       "fichier": "medias/clips/P12.mp4",
-      "debut": 31.6,
-      "fin": 33.0,
+      "debut": 32.6,
+      "fin": 34.0,
       "mouvement": "fixe"
     },
     {
       "fichier": "medias/clips/P13.mp4",
-      "debut": 33.0,
-      "fin": 34.55,
+      "debut": 34.0,
+      "fin": 35.55,
       "mouvement": "push"
     },
     {
       "fichier": "medias/clips/P14.mp4",
-      "debut": 34.55,
-      "fin": 38.8,
+      "debut": 35.55,
+      "fin": 39.8,
       "mouvement": "push",
       "vitesse": 0.7
     },
     {
-      "fichier": "medias/clips/P15.mp4",
-      "debut": 38.8,
-      "fin": 40.85,
+      "fichier": "medias/clips/P15b.mp4",
+      "debut": 39.8,
+      "fin": 41.85,
       "mouvement": "punch"
     },
     {
       "fichier": "medias/clips/P16.mp4",
-      "debut": 40.85,
-      "fin": 43.1,
+      "debut": 41.85,
+      "fin": 44.1,
       "mouvement": "punch"
     },
     {
       "fichier": "medias/clips/P17.mp4",
-      "debut": 43.1,
-      "fin": 44.5,
+      "debut": 44.1,
+      "fin": 45.5,
       "mouvement": "punch"
     },
     {
       "fichier": "medias/clips/P18.mp4",
-      "debut": 44.5,
-      "fin": 47.39,
+      "debut": 45.5,
+      "fin": 48.39,
       "mouvement": "pull"
     }
   ],
   "noms": [
     {
       "image": "medias/noms/odin-crop.png",
-      "debut": 6.1,
-      "fin": 8.8
+      "debut": 7.1,
+      "fin": 9.8
     },
     {
       "image": "medias/noms/mimir-crop.png",
-      "debut": 23.4,
-      "fin": 25.15
+      "debut": 24.4,
+      "fin": 26.15
     },
     {
       "image": "medias/noms/fenrir-crop.png",
-      "debut": 41.0,
-      "fin": 43.05
+      "debut": 42.0,
+      "fin": 44.05
     }
   ],
   "sous_titres": [
@@ -209,5 +210,59 @@
       "texte": "Ce jour-là, *Fenrir* sera libéré et *dévorera* *Odin*, avant que le *feu* ne marque la fin du monde."
     }
   ],
-  "son_plans": 0.35
+  "son_plans": 0.12,
+  "decalage_voix": 1.0,
+  "police_texte": "Inter Display Black",
+  "sous_titres_incrustes": false,
+  "titre_accroche": {
+    "texte": "Odin va-t-il\\Nse faire dévorer ?",
+    "debut": 0.0,
+    "fin": 3.3
+  },
+  "mots_cles": [
+    {
+      "texte": "Payé de son sang",
+      "debut": 3.4,
+      "fin": 5.7
+    },
+    {
+      "texte": "L'avenir",
+      "debut": 11.87,
+      "fin": 12.95
+    },
+    {
+      "texte": "Yggdrasil",
+      "debut": 15.25,
+      "fin": 16.4
+    },
+    {
+      "texte": "Un œil",
+      "debut": 27.95,
+      "fin": 29.75
+    },
+    {
+      "texte": "Il comprend tout",
+      "debut": 35.28,
+      "fin": 36.4
+    },
+    {
+      "texte": "Ragnarök",
+      "debut": 39.0,
+      "fin": 40.4
+    },
+    {
+      "texte": "Dévorera Odin",
+      "debut": 43.2,
+      "fin": 44.6
+    },
+    {
+      "texte": "La fin du monde",
+      "debut": 46.1,
+      "fin": 47.39
+    }
+  ],
+  "fin": {
+    "fichier": "medias/fin.png",
+    "duree": 1.5
+  }
 }

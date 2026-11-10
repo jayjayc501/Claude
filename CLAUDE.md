@@ -30,3 +30,4 @@ Ajouter ici une ligne par projet :
 `- projets/<nom> — description courte — état (en cours / terminé)`
 
 - projets/shorts-mythologie — Shorts YouTube pour la chaîne « La Pause Mytho…logique » (Kling + ElevenLabs + montage ffmpeg) — en cours
+- projets/jelavaisdit — App mobile « Je l'avais dit » : sceller une phrase datée et l'envoyer plus tard avec une carte d'authenticité — en cours (cadrage)

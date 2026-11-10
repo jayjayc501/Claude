@@ -1,6 +1,6 @@
 # « Je l'avais dit » — Document de cadrage
 
-*Version 1 — 10 novembre 2026*
+*Version 2 — 10 novembre 2026*
 
 ## 1. Le concept en une phrase
 
@@ -86,15 +86,16 @@ Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » l
 
 ## 8. Points encore ouverts
 
-- [ ] **Public visé en priorité :** amis, famille, collègues ? Quelle tranche d'âge ?
+- [x] **Public visé en priorité :** plutôt les jeunes (15-25 ans environ). *Décidé le 10/11/2026.*
+- [x] **Style visuel :** fun et coloré (violet, jaune, crème, contours épais, sceau façon autocollant). *Décidé le 10/11/2026.* Maquettes : https://claude.ai/artifact/GBrtiSGWzndyC5aD4Husvq
 - [ ] **Rétention :** comment faire revenir l'utilisateur pendant l'attente ? Piste : un rappel *« Il y a 6 mois, tu as scellé ceci… Ça s'est réalisé ? »*
 - [ ] **Masquage :** peut-on cacher une phrase de sa liste, sans la supprimer ?
-- [ ] **Connexion :** e-mail, Google, Apple, numéro de téléphone ?
+- [x] **Connexion :** Apple et Google uniquement, sans mot de passe. *Décidé le 10/11/2026.*
 - [ ] **Modèle économique :** gratuit avec publicité ? cartes premium ? (peut attendre)
 - [ ] **Nom définitif et identité visuelle.**
 
 ## 9. Prochaines étapes
 
-1. Trancher les points ouverts du §8.
-2. Maquettes des écrans principaux : écrire et sceller, mes phrases, envoyer, la carte reçue sur le web.
+1. Trancher les points encore ouverts du §8.
+2. ~~Maquettes des écrans principaux~~ : première version faite (connexion, écrire, scellé, refus de modération, mes phrases, carte reçue). À valider.
 3. Prototype.

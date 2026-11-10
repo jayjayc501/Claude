@@ -21,9 +21,13 @@ Base vidéo : `https://v15-kling.klingai.com/bs2/upload-ylab-stunt-sgp/<id>-outp
 | P14 | medias/clips/P14.mp4 | a11bdaa5-9fbf-46c4-b53c-9735a72668c0-YYXcMOM7tQF_sWqvXWd0uQ |
 | P15 | medias/clips/P15.mp4 (remplacé) | 4850bf3d-c4df-400b-a772-7dd03b9e0e44-EeycTaEvqUk2Taf3UbzKsQ |
 | P15b | medias/clips/P15b.mp4 (utilisé) | 594fc78b-6b66-4985-8705-289d609e0682-BoIs2hsQHLmKsnYYNwdZpw |
-| P16 | medias/clips/P16.mp4 | refusé 2× par Kling (copyright) → fabriqué au montage depuis `clips/P16.png` |
+| P16b | medias/clips/P16b.mp4 | a6f5e6cc-6a20-4583-9d5e-7f55a9b325d0-1gputz8a6jm1B_5vJYz6kA (image clé 2db6132f-84e1-4907-bf10-6c96175b2e83 : loup qui hurle sur un rocher, reste de chaîne) |
 | P17 | medias/clips/P17.mp4 | bc7f5263-dd52-4a5a-9f62-a93676fd4dc5-Na10HSgsKvRNAkhU3nNF3Q |
 | P18 | medias/clips/P18.mp4 | af767075-9d6c-404f-9d7b-2198d38aae65-OdWSIcT1yDcjDyE407FIjg |
+
+| Fin | medias/fin-fond.mp4 | 224fb75e-b6d4-4583-a914-e30076843230-ciz-kVp695zjbA71yx39nA (image clé 796d1cb3-0909-4d7b-9df5-d5350fd005e3 : corbeau sur pierre runique + oiseau doré, horizon en feu) |
+
+Logo de fin : `medias/fin-texte.png`, texte du logo de la chaîne détouré depuis la carte de fin du Short Baldr, posé par monter2.py (`fin.logo`).
 
 ## Noms dorés (images, base `https://s15-kling.klingai.com/kimg/<id>.origin?x-kcdn-pid=112372`)
 

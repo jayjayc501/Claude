@@ -98,7 +98,7 @@
       "mouvement": "punch"
     },
     {
-      "fichier": "medias/clips/P16.mp4",
+      "fichier": "medias/clips/P16b.mp4",
       "debut": 41.85,
       "fin": 44.1,
       "mouvement": "punch"
@@ -221,48 +221,36 @@
   },
   "mots_cles": [
     {
-      "texte": "Payé de son sang",
-      "debut": 3.4,
-      "fin": 5.7
+      "texte": "Sang",
+      "debut": 4.05,
+      "fin": 5.4
     },
     {
       "texte": "L'avenir",
-      "debut": 11.87,
+      "debut": 11.85,
       "fin": 12.95
     },
     {
-      "texte": "Yggdrasil",
-      "debut": 15.25,
-      "fin": 16.4
-    },
-    {
       "texte": "Un œil",
-      "debut": 27.95,
-      "fin": 29.75
-    },
-    {
-      "texte": "Il comprend tout",
-      "debut": 35.28,
-      "fin": 36.4
+      "debut": 28.0,
+      "fin": 29.3
     },
     {
       "texte": "Ragnarök",
-      "debut": 39.0,
+      "debut": 39.05,
       "fin": 40.4
     },
     {
-      "texte": "Dévorera Odin",
-      "debut": 43.2,
-      "fin": 44.6
-    },
-    {
-      "texte": "La fin du monde",
-      "debut": 46.1,
-      "fin": 47.39
+      "texte": "Dévorera",
+      "debut": 43.05,
+      "fin": 44.55
     }
   ],
   "fin": {
-    "fichier": "medias/fin.png",
-    "duree": 1.5
+    "fichier": "medias/fin-fond.mp4",
+    "duree": 2.5,
+    "logo": "medias/fin-texte.png",
+    "logo_largeur": 800,
+    "logo_y": 500
   }
 }

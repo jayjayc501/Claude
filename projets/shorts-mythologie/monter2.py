@@ -224,7 +224,10 @@ def monter(chemin_cfg, sortie, factice):
                 cmd += ["-loop", "1", "-t", str(d_fin + 0.5), "-i", str(src)]
             else:
                 cmd += ["-i", str(src)]
-        i_voix = i_fin + (1 if fin_carte else 0)
+        i_logo = i_fin + (1 if fin_carte else 0)
+        if fin_carte and fin_carte.get("logo"):
+            cmd += ["-loop", "1", "-t", str(d_fin + 0.5), "-i", str(dossier / fin_carte["logo"])]
+        i_voix = i_logo + (1 if fin_carte and fin_carte.get("logo") else 0)
         cmd += ["-i", str(voix)]
         musique = cfg.get("musique")
         i_mus = i_voix + 1
@@ -273,10 +276,19 @@ def monter(chemin_cfg, sortie, factice):
         f.append(f"[{courant}]format=yuv420p,ass='{ass}'[vtexte]")
 
         if fin_carte:
-            # Carte de fin : apparition rapide en fondu depuis le noir
+            # Carte de fin : décor (image ou vidéo) + logo de la chaîne net par-dessus
             f.append(f"[{i_fin}:v]trim=duration={d_fin},setpts=PTS-STARTPTS,fps={IPS},"
                      f"scale={L}:{H}:force_original_aspect_ratio=increase,crop={L}:{H},setsar=1,"
-                     f"format=yuv420p,fade=t=in:st=0:d=0.25[vfin]")
+                     f"scale=w='ceil({L}*(1+0.04*t/{d_fin})/2)*2':h=-2:eval=frame,crop={L}:{H},"
+                     f"format=yuv420p,fade=t=in:st=0:d=0.25[vfin0]")
+            if fin_carte.get("logo"):
+                lw = fin_carte.get("logo_largeur", 760)
+                ly = fin_carte.get("logo_y", 520)
+                f.append(f"[{i_logo}:v]scale={lw}:-2,format=rgba,"
+                         f"fade=t=in:st=0.15:d=0.35:alpha=1[logo]")
+                f.append(f"[vfin0][logo]overlay=x=(W-w)/2:y={ly}:format=auto,format=yuv420p[vfin]")
+            else:
+                f.append("[vfin0]null[vfin]")
             f.append("[vtexte][vfin]concat=n=2:v=1:a=0[vout]")
         else:
             f.append("[vtexte]null[vout]")

@@ -34,6 +34,13 @@ Pas encore fait : connexion Apple / Google, image au format story, notifications
 1. Créer un projet sur [supabase.com](https://supabase.com).
 2. Ouvrir **SQL Editor**, coller le contenu de `supabase/migrations/20261110120000_init.sql` et l'exécuter.
 3. **Authentication › URL Configuration** : mettre `https://jayjayc501.github.io/Claude/app/` en **Site URL** et dans **Redirect URLs**. Le lien reçu par e-mail ramène alors sur l'app, déjà connecté.
+4. **Authentication › Sign In / Providers** : activer **Allow anonymous sign-ins** pour le lien « Juste essayer, sans compte » (compte invité, aucun e-mail envoyé).
+5. **Connexion Google** (gratuite) :
+   1. Sur [console.cloud.google.com](https://console.cloud.google.com), créer un projet.
+   2. **APIs & Services › OAuth consent screen** : type *External*, nom « Je l'avais dit », e-mail de contact.
+   3. **Credentials › Create credentials › OAuth client ID** : type *Web application*. Dans *Authorized redirect URIs*, ajouter `https://joqzrjjgrntbyutytpnr.supabase.co/auth/v1/callback`.
+   4. Copier le *Client ID* et le *Client secret* dans Supabase : **Authentication › Sign In / Providers › Google**, puis activer et enregistrer.
+6. **Connexion Apple** : nécessite le compte Apple Developer (payant). À configurer au moment de publier sur l'App Store ; d'ici là, le bouton affiche « arrive bientôt ».
    (Pour recevoir plutôt un code à 6 chiffres, il faut configurer un serveur d'e-mail à soi, « custom SMTP », puis ajouter `{{ .Token }}` dans les modèles « Confirm signup » et « Magic Link ».)
 4. Noter, dans **Project Settings › API**, l'URL du projet et la clé `anon` (publique).
 

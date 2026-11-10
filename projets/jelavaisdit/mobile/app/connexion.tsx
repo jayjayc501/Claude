@@ -32,7 +32,7 @@ export default function Connexion() {
     });
     setChargement(false);
     if (error) {
-      setErreur("Impossible d'envoyer le code. Vérifie l'adresse et réessaie.");
+      setErreur(messageEnvoi(error.message, error.status));
       return;
     }
     setEtape('code');
@@ -112,6 +112,21 @@ export default function Connexion() {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+}
+
+/** Explique pourquoi l'e-mail n'a pas pu partir. */
+function messageEnvoi(message: string, statut?: number): string {
+  const m = message.toLowerCase();
+  if (statut === 429 || m.includes('rate limit')) {
+    return "Trop d'e-mails envoyés pour l'instant. Réessaie dans une heure environ.";
+  }
+  if (m.includes('seconds') || m.includes('security purposes')) {
+    return 'Attends une minute avant de redemander un lien.';
+  }
+  if (m.includes('invalid') && m.includes('email')) {
+    return "Cette adresse e-mail n'est pas valide.";
+  }
+  return `Impossible d'envoyer l'e-mail (${message}).`;
 }
 
 const styles = StyleSheet.create({

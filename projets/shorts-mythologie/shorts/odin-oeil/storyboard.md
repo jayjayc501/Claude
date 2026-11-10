@@ -54,3 +54,19 @@ Leçons :
 | P16 | 40,9–43,5 | Ce jour-là, Fenrir sera libéré | Fenrir brise sa chaîne — nom « Fenrir » |
 | P17 | 43,5–45,5 | et dévorera Odin, | Fenrir bondit, gueule ouverte, sur Odin |
 | P18 | 45,5–47,4 | …la fin du monde. | Le monde englouti par le feu → boucle sur P01 |
+
+## Version finale (v2, 10/11/2026) — corrections après relecture
+
+- **Intro d'1 s** avant la voix (`decalage_voix: 1.0`) : gueule de Fenrir + titre « ODIN VA-T-IL SE FAIRE DÉVORER ? ».
+- **Texte** : plus de sous-titres complets incrustés (« ça attire l'œil et l'enlève de l'image ») →
+  8 mots clés dorés + fichier `sortie/odin-oeil.srt` à importer dans YouTube Studio (CC).
+- **Œil** : Odin est borgne de l'œil **droit** (P02, P13, P14) ; P11 retourné en miroir pour qu'il arrache le bon œil.
+- **P15** remplacé (`P15b.mp4`) : serpent du monde + pont arc-en-ciel qui s'effondre, sans personnage
+  (l'ancien montrait un « Thor super-héros qui vole »).
+- **P16** : Kling a refusé deux fois l'animation (filtre copyright) → image animée au montage (zoom + tremblement).
+- **Son** : bruitages des clips très bas (`son_plans: 0.12`) en fondu croisé, ducking doux (plus de « saccades »).
+- **Carte de fin** 1,5 s (`medias/fin.png`).
+- Durée finale : 49,9 s. Loudness −14,4 LUFS, crête −1,1 dB.
+
+Pistes d'amélioration notées : viser 30-40 s de voix au prochain Short ; refaire P16 avec une image
+sans chaîne visible ; caler les mots clés au mot près (transcription horodatée).

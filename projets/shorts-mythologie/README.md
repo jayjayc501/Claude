@@ -67,4 +67,4 @@ Chaîne de production qui a donné le meilleur résultat (voir `shorts/odin-oeil
 
 | Sujet | Dossier | État |
 |---|---|---|
-| Odin va-t-il se faire dévorer par ce loup ? (l'œil d'Odin) | `shorts/odin-oeil` | terminé (47 s) |
+| Odin va-t-il se faire dévorer par ce loup ? (l'œil d'Odin) | `shorts/odin-oeil` | terminé, v2 (49,9 s) — à publier |

@@ -34,6 +34,7 @@ Pas encore fait : connexion Apple / Google, image au format story, notifications
 1. Créer un projet sur [supabase.com](https://supabase.com).
 2. Ouvrir **SQL Editor**, coller le contenu de `supabase/migrations/20261110120000_init.sql` et l'exécuter.
 3. **Authentication › URL Configuration** : mettre `https://jayjayc501.github.io/Claude/app/` en **Site URL** et dans **Redirect URLs**. Le lien reçu par e-mail ramène alors sur l'app, déjà connecté.
+4. **Authentication › Sign In / Providers** : activer **Allow anonymous sign-ins** pour le bouton « Essayer sans e-mail » (compte invité, aucun e-mail envoyé, pratique pour tester).
    (Pour recevoir plutôt un code à 6 chiffres, il faut configurer un serveur d'e-mail à soi, « custom SMTP », puis ajouter `{{ .Token }}` dans les modèles « Confirm signup » et « Magic Link ».)
 4. Noter, dans **Project Settings › API**, l'URL du projet et la clé `anon` (publique).
 

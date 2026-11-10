@@ -15,6 +15,7 @@ export default function Connexion() {
   const [code, setCode] = useState('');
   const [etape, setEtape] = useState<'email' | 'code'>('email');
   const [chargement, setChargement] = useState(false);
+  const [chargementInvite, setChargementInvite] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
   const emailValide = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
@@ -36,6 +37,21 @@ export default function Connexion() {
       return;
     }
     setEtape('code');
+  }
+
+  /** Compte invité : aucun e-mail envoyé. Le compte reste lié à ce navigateur / ce téléphone. */
+  async function essayerSansEmail() {
+    setChargementInvite(true);
+    setErreur(null);
+    const { error } = await supabase.auth.signInAnonymously();
+    setChargementInvite(false);
+    if (error) {
+      setErreur(
+        error.message.toLowerCase().includes('disabled')
+          ? "La connexion sans e-mail n'est pas encore activée dans Supabase."
+          : `Connexion impossible (${error.message}).`,
+      );
+    }
   }
 
   async function verifierCode() {
@@ -79,6 +95,13 @@ export default function Connexion() {
               style={styles.champ}
             />
             <Bouton titre="Recevoir mon lien" onPress={envoyerCode} desactive={!emailValide} chargement={chargement} />
+            <Text style={styles.ou}>ou</Text>
+            <Bouton
+              titre="Essayer sans e-mail"
+              variante="contour"
+              onPress={essayerSansEmail}
+              chargement={chargementInvite}
+            />
           </View>
         ) : (
           <View style={styles.formulaire}>
@@ -139,6 +162,7 @@ const styles = StyleSheet.create({
   titre: { fontFamily: polices.titre, fontSize: 44, lineHeight: 46, color: couleurs.texte, letterSpacing: -1.5 },
   sousTitre: { marginTop: 16, fontFamily: polices.normal, fontSize: 17, lineHeight: 25, color: couleurs.texteDoux },
   formulaire: { gap: 12 },
+  ou: { textAlign: 'center', fontFamily: polices.moyen, fontSize: 14, color: couleurs.texteDoux },
   encart: {
     backgroundColor: couleurs.surface, borderColor: couleurs.bordure, borderWidth: 1,
     borderRadius: 24, padding: 18, gap: 6, marginBottom: 8,

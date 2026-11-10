@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Regarde. Je l'avais dit.</title>
+<title>Regarde. Je te l'avais dit.</title>
 <meta name="description" content="Une prédiction scellée, vérifiée, et elle s'est réalisée.">
-<meta property="og:title" content="Regarde. Je l'avais dit.">
+<meta property="og:title" content="Regarde. Je te l'avais dit.">
 <meta property="og:description" content="Une prédiction scellée, vérifiée, et elle s'est réalisée.">
 <meta name="theme-color" content="#0D0C12">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,9 +65,9 @@
 </head>
 <body>
 <main>
-  <a class="marque titre" href="./" aria-label="Je l'avais dit, accueil">
+  <a class="marque titre" href="./" aria-label="Je te l'avais dit, accueil">
     <svg width="30" height="30" viewBox="0 0 100 100" aria-hidden="true"><path d="M36 40V30a14 14 0 0 1 28 0v10" stroke="#C8FF3D" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M28 38h44a12 12 0 0 1 12 12v18a12 12 0 0 1-12 12H46l-14 11v-11h-4a12 12 0 0 1-12-12V50a12 12 0 0 1 12-12z" fill="#C8FF3D"/><rect x="46" y="46" width="8" height="18" rx="4" fill="#0D0C12"/><circle cx="50" cy="71.5" r="4.5" fill="#0D0C12"/></svg>
-    je l'avais dit.
+    je te l'avais dit.
   </a>
 
   <section id="chargement" class="etat" aria-live="polite"><p>Ouverture de la carte…</p></section>
@@ -94,7 +94,7 @@
         <span class="puce" id="mois"></span>
       </div>
     </article>
-    <p class="slogan titre">regarde.<br>je l'avais <em>dit.</em></p>
+    <p class="slogan titre">regarde.<br>je te l'avais <em>dit.</em></p>
     <p class="empreinte">Empreinte de scellement : <span id="empreinte"></span></p>
   </section>
 
@@ -169,7 +169,7 @@
       var empreinte = document.getElementById('empreinte');
       empreinte.textContent = c.empreinte.slice(0, 16) + '…';
       empreinte.title = c.empreinte;
-      document.title = '« ' + c.texte + ' » · Je l\'avais dit';
+      document.title = '« ' + c.texte + ' » · Je te l\'avais dit';
       if (config.emailSignalement) {
         var s = document.getElementById('signaler');
         s.href = 'mailto:' + config.emailSignalement + '?subject=' + encodeURIComponent('Signalement carte ' + code);

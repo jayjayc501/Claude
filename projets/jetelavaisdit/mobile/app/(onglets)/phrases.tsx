@@ -68,7 +68,7 @@ export default function MesPhrases() {
                   </View>
                   <View style={styles.stat}>
                     <Text style={[styles.statNombre, { color: couleurs.vert }]}>{envoyees}</Text>
-                    <Text style={styles.statLabel}>« je l'avais dit »</Text>
+                    <Text style={styles.statLabel}>« je te l'avais dit »</Text>
                   </View>
                 </View>
                 <View style={styles.filtres} accessibilityRole="tablist">
@@ -147,7 +147,7 @@ function CartePhrase({ phrase, onPartager }: { phrase: Phrase; onPartager: () =>
         ) : null}
       </View>
       <Text style={styles.phrase}>« {phrase.texte} »</Text>
-      <Bouton titre="Je l'avais dit !" onPress={onPartager} petit variante={jours >= 1 ? 'vert' : 'contour'} />
+      <Bouton titre="Je te l'avais dit !" onPress={onPartager} petit variante={jours >= 1 ? 'vert' : 'contour'} />
     </View>
   );
 }

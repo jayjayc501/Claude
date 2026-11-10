@@ -1,7 +1,7 @@
 import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const cleAnon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -17,9 +17,13 @@ export const supabase = createClient(url, cleAnon, {
     storage: AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    // Version web : la connexion arrive par le lien de l'e-mail, qui ramène sur l'app avec la session dans l'adresse.
+    detectSessionInUrl: Platform.OS === 'web',
   },
 });
+
+/** Adresse où le lien de connexion ramène (version web de l'app). */
+export const URL_APP = process.env.EXPO_PUBLIC_URL_APP ?? '';
 
 // Rafraîchit la session seulement quand l'app est au premier plan.
 AppState.addEventListener('change', (etat) => {

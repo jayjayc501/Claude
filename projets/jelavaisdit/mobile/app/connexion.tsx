@@ -3,11 +3,11 @@ import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bouton } from '../components/Bouton';
 import { Logo } from '../components/Logo';
-import { supabase } from '../lib/supabase';
+import { supabase, URL_APP } from '../lib/supabase';
 import { couleurs, polices } from '../lib/theme';
 
 /**
- * Connexion sans mot de passe : on reçoit un code par e-mail.
+ * Connexion sans mot de passe : on reçoit un lien (ou un code) par e-mail.
  * (La connexion Apple / Google sera ajoutée avant la publication sur les stores.)
  */
 export default function Connexion() {
@@ -24,7 +24,11 @@ export default function Connexion() {
     setErreur(null);
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim().toLowerCase(),
-      options: { shouldCreateUser: true },
+      options: {
+        shouldCreateUser: true,
+        // Le lien de l'e-mail ramène sur la version web de l'app, déjà connecté.
+        emailRedirectTo: Platform.OS === 'web' && URL_APP ? URL_APP : undefined,
+      },
     });
     setChargement(false);
     if (error) {
@@ -74,11 +78,18 @@ export default function Connexion() {
               keyboardType="email-address"
               style={styles.champ}
             />
-            <Bouton titre="Recevoir mon code" onPress={envoyerCode} desactive={!emailValide} chargement={chargement} />
+            <Bouton titre="Recevoir mon lien" onPress={envoyerCode} desactive={!emailValide} chargement={chargement} />
           </View>
         ) : (
           <View style={styles.formulaire}>
-            <Text style={styles.etiquette} nativeID="etiquette-code">CODE REÇU PAR E-MAIL</Text>
+            <View style={styles.encart}>
+              <Text style={styles.encartTitre}>Regarde tes e-mails.</Text>
+              <Text style={styles.encartTexte}>
+                On t'a envoyé un lien à {email.trim()}. Ouvre-le sur ce téléphone : il te connecte directement.
+                Pense à vérifier les spams.
+              </Text>
+            </View>
+            <Text style={styles.etiquette} nativeID="etiquette-code">OU TAPE LE CODE, SI TU EN AS REÇU UN</Text>
             <TextInput
               accessibilityLabelledBy="etiquette-code"
               value={code}
@@ -113,6 +124,12 @@ const styles = StyleSheet.create({
   titre: { fontFamily: polices.titre, fontSize: 44, lineHeight: 46, color: couleurs.texte, letterSpacing: -1.5 },
   sousTitre: { marginTop: 16, fontFamily: polices.normal, fontSize: 17, lineHeight: 25, color: couleurs.texteDoux },
   formulaire: { gap: 12 },
+  encart: {
+    backgroundColor: couleurs.surface, borderColor: couleurs.bordure, borderWidth: 1,
+    borderRadius: 24, padding: 18, gap: 6, marginBottom: 8,
+  },
+  encartTitre: { fontFamily: polices.titre, fontSize: 18, color: couleurs.vert },
+  encartTexte: { fontFamily: polices.normal, fontSize: 15, lineHeight: 21, color: couleurs.texte },
   etiquette: { fontFamily: polices.gras, fontSize: 12, letterSpacing: 1, color: couleurs.texteDoux },
   champ: {
     height: 58, borderRadius: 20, paddingHorizontal: 20, backgroundColor: couleurs.surface,

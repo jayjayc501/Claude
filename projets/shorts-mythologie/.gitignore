@@ -1,0 +1,4 @@
+# Médias générés (lourds) : gardés hors du dépôt
+shorts/*/medias/
+shorts/*/sortie/
+__pycache__/

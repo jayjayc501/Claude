@@ -26,5 +26,7 @@ mets-le à jour quand quelque chose d'important change.
 
 ## Projets en cours
 
-_Aucun pour l'instant._ Ajouter ici une ligne par projet :
+Ajouter ici une ligne par projet :
 `- projets/<nom> — description courte — état (en cours / terminé)`
+
+- projets/shorts-mythologie — Shorts YouTube pour la chaîne « La Pause Mytho…logique » (Kling + ElevenLabs + montage ffmpeg) — en cours

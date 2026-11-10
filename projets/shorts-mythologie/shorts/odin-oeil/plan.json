@@ -1,0 +1,119 @@
+{
+  "titre": "Pourquoi Odin n'a qu'un œil ?",
+  "voix": "medias/voix.mp3",
+  "musique": null,
+  "volume_musique": 0.12,
+  "segments": [
+    {
+      "texte": "Odin, le plus puissant des dieux nordiques… n'a qu'*un* *seul* *œil*.",
+      "clips": [
+        {
+          "fichier": "medias/01.mp4",
+          "prompt": "Extreme close-up of the face of Odin, very old powerful Norse god, long silver-white beard, dark blue hooded cloak with gold runic embroidery, wide-brimmed hat; his left eye is hidden in deep shadow, his right eye glows faintly gold, slow push-in"
+        }
+      ]
+    },
+    {
+      "texte": "Et cet œil, il l'a *sacrifié* lui-même.",
+      "clips": [
+        {
+          "fichier": "medias/02.mp4",
+          "prompt": "Odin standing alone on a cliff at night, cloak and beard blowing in the wind, holding a tall wooden spear, storm clouds lit by golden lightning, camera slowly orbits around him"
+        }
+      ]
+    },
+    {
+      "texte": "Sous une racine d'*Yggdrasil*, l'arbre qui porte les neuf mondes, coule une source : le puits de *Mímir*.",
+      "clips": [
+        {
+          "fichier": "medias/03.mp4",
+          "prompt": "Gigantic cosmic ash tree Yggdrasil whose branches hold nine glowing worlds in a starry midnight-blue sky, golden light running through its bark, slow upward tilt"
+        },
+        {
+          "fichier": "medias/04.mp4",
+          "prompt": "A sacred well hidden beneath a colossal tree root in a misty cavern, the water glows with liquid gold light, ancient runes carved in the stones around it, slow dolly forward"
+        }
+      ]
+    },
+    {
+      "texte": "Qui boit son eau reçoit toute la *sagesse* de l'univers.",
+      "clips": [
+        {
+          "fichier": "medias/05.mp4",
+          "prompt": "Macro shot of glowing golden water rippling in a stone well, swirling constellations and runes reflected in the surface, magical particles rising"
+        }
+      ]
+    },
+    {
+      "texte": "Mais son gardien ne donne rien gratuitement. Son prix : *un* *œil*.",
+      "clips": [
+        {
+          "fichier": "medias/06.mp4",
+          "prompt": "Mímir, an ancient wise giant with pale grey skin, a long beard like tree roots and glowing gold eyes, half-merged with the stone wall of a cavern beside a glowing well, he slowly opens his eyes and looks at the camera"
+        }
+      ]
+    },
+    {
+      "texte": "Odin n'hésite pas. Il arrache son œil… et le jette au fond du puits.",
+      "clips": [
+        {
+          "fichier": "medias/07.mp4",
+          "prompt": "Odin kneeling at the edge of a glowing golden well, he raises his hand to his face in determination, dramatic shadow hides the gesture, intense golden light from below on his face, no gore"
+        },
+        {
+          "fichier": "medias/08.mp4",
+          "prompt": "A small glowing golden orb falls in slow motion into dark water of a sacred well, creating rings of golden light that spread across the surface"
+        }
+      ]
+    },
+    {
+      "texte": "Puis il boit. Et soudain, il voit *tout* : le passé, les secrets des mondes…",
+      "clips": [
+        {
+          "fichier": "medias/09.mp4",
+          "prompt": "Odin, now one-eyed with a dark leather eyepatch, drinks golden water from a horn, a burst of golden light and runes explodes around him, visions of galaxies swirl, camera pulls back fast"
+        }
+      ]
+    },
+    {
+      "texte": "… et même le *Ragnarök*, la fin qui l'attend.",
+      "clips": [
+        {
+          "fichier": "medias/10.mp4",
+          "prompt": "Apocalyptic vision of Ragnarök, a giant wolf silhouette howling against a burning sky, a world serpent rising from a stormy sea, gods' halls in flames, dark blue and gold palette, slow pan"
+        }
+      ]
+    },
+    {
+      "texte": "Depuis, deux corbeaux, *Huginn* la Pensée et *Muninn* la Mémoire, parcourent le monde pour lui.",
+      "clips": [
+        {
+          "fichier": "medias/11.mp4",
+          "prompt": "Two large black ravens with blue-black iridescent feathers fly over misty Nordic mountains and fjords at golden dusk, tracking shot following them"
+        },
+        {
+          "fichier": "medias/12.mp4",
+          "prompt": "Two black ravens land on the shoulders of one-eyed Odin seated on a high stone throne, one raven leans to whisper in his ear, golden candlelight, slow push-in"
+        }
+      ]
+    },
+    {
+      "texte": "Un œil en moins… pour voir plus *loin* que tous les autres.",
+      "clips": [
+        {
+          "fichier": "medias/13.mp4",
+          "prompt": "Silhouette of one-eyed Odin with his spear and two ravens standing on a mountain peak, facing an immense golden sunrise above a sea of clouds, epic wide shot, slow zoom out"
+        }
+      ]
+    },
+    {
+      "texte": "Et ce n'était que son *premier* sacrifice… Abonne-toi pour la suite.",
+      "clips": [
+        {
+          "fichier": "medias/14.mp4",
+          "prompt": "Close-up of a large black raven perched on a gnarled branch of a giant ash tree at night, golden runes glowing in the bark behind it, the raven turns its head toward the camera"
+        }
+      ]
+    }
+  ]
+}

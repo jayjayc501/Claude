@@ -92,10 +92,12 @@ Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » l
 - [ ] **Masquage :** peut-on cacher une phrase de sa liste, sans la supprimer ?
 - [x] **Connexion :** Apple et Google uniquement, sans mot de passe. *Décidé le 10/11/2026.*
 - [ ] **Modèle économique :** gratuit avec publicité ? cartes premium ? (peut attendre)
-- [ ] **Nom définitif et identité visuelle.**
+- [x] **Logo :** la « bulle scellée », une bulle de parole fermée par un cadenas, avec un « ! ». Élément signature : la **bulle-compteur** (le logo avec le nombre de jours dedans, en vert, légèrement penché), utilisée sur la carte, la story et le partage. *Décidé le 10/11/2026.*
+- [x] **Règles de couleur :** vert = agir (sceller, envoyer, compteur, logo) ; rose = phrase révélée uniquement ; gris = phrase en attente. *Décidé le 10/11/2026.*
+- [ ] **Nom définitif** (« Je l'avais dit » pour l'instant).
 
 ## 9. Prochaines étapes
 
 1. Trancher les points encore ouverts du §8.
-2. ~~Maquettes des écrans principaux~~ : première version faite (connexion, écrire, scellé, refus de modération, mes phrases, carte reçue). À valider.
+2. ~~Maquettes~~ : 11 écrans faits (connexion, écrire, déjà scellé aujourd'hui, scellé, refus de modération, liste vide, mes phrases, partage, story, carte reçue, notifications) + planche logo. À valider.
 3. Prototype.

@@ -10,6 +10,14 @@ contradiction, le dossier fait foi, puis le concepteur.
 Mettre ce fichier à jour dès qu'une décision est validée ou qu'une étape est
 terminée (sections « Décisions validées », « Questions ouvertes », « État »).
 
+## Où se trouve quoi (pour toutes les discussions)
+
+- **Projet claude.ai « App Foot Merge Tactic »** : ce fichier (`contexte-foot-merge-tactic.md`) et le dossier de conception complet (`dossier-conception.md`). Toutes les discussions du projet y ont accès.
+- **Dépôt GitHub jayjayc501/Claude**, dossier `projets/foot-merge-tactic/` : ce même fichier (`CLAUDE.md`), le dossier de conception (`docs/dossier-conception.md`), puis plus tard le code et le journal des tests. **Le dépôt est la version de référence.**
+- Pour écrire du code ou sauvegarder des fichiers : ajouter le dépôt à la session et suivre son `CLAUDE.md` (à la racine et dans ce dossier).
+- Quand une discussion valide une décision ou change le plan, mettre à jour ce fichier **aux deux endroits** (dépôt et projet claude.ai). Sinon, les autres discussions ne seront pas au courant.
+- Pour une simple discussion de conception (sans code), répondre en s'appuyant sur ce fichier et sur le dossier, en indiquant toujours si un point est validé, proposé ou ouvert.
+
 ## Règle d'or : trois statuts à ne jamais mélanger
 
 - **[VALIDÉ]** : décidé par le concepteur. À respecter.

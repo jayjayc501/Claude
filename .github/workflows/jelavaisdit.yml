@@ -1,0 +1,74 @@
+# « Je l'avais dit » : construit la version web de l'app et la met en ligne sur GitHub Pages.
+#   https://jayjayc501.github.io/Claude/app/    → l'app
+#   https://jayjayc501.github.io/Claude/carte/  → la page de la carte reçue
+# Sur une branche : construction et vérifications seulement. Sur main : mise en ligne.
+name: jelavaisdit
+
+on:
+  push:
+    branches: [main, 'jelavaisdit/**']
+    paths: ['projets/jelavaisdit/**', '.github/workflows/jelavaisdit.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: jelavaisdit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projets/jelavaisdit/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Configuration (valeurs publiques)
+        run: cp .env.example .env
+
+      - name: Installation des paquets
+        run: |
+          npm install --no-audit --no-fund
+          npx expo install --fix
+
+      - name: Vérification des types
+        run: npx tsc --noEmit
+        continue-on-error: true
+
+      - name: Construction de la version web
+        run: npx expo export --platform web --output-dir dist
+
+      - name: Assemblage du site
+        working-directory: projets/jelavaisdit
+        run: |
+          mkdir -p _site
+          cp -r mobile/dist _site/app
+          cp -r web/carte _site/carte
+          # Les liens profonds de l'app (ex. /app/phrases) retombent sur l'app.
+          cp _site/app/index.html _site/404.html
+          printf '<!doctype html><meta http-equiv="refresh" content="0; url=app/"><a href="app/">Je l%savais dit</a>\n' "'" > _site/index.html
+          ls -R _site | head -40
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: projets/jelavaisdit/_site
+
+  mettre-en-ligne:
+    if: github.ref == 'refs/heads/main'
+    needs: construire
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}app/
+    steps:
+      - id: deploiement
+        uses: actions/deploy-pages@v4

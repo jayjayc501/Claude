@@ -1,4 +1,4 @@
-import * as Haptics from 'expo-haptics';
+
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -9,6 +9,7 @@ import { Bouton } from '../../components/Bouton';
 import { IconeCadenas, IconeInterdit } from '../../components/Icones';
 import { aujourdhuiParis, avantMinuitParis, dateRelative } from '../../lib/dates';
 import { lireErreur } from '../../lib/erreurs';
+import { vibrerAppui, vibrerErreur, vibrerSucces } from '../../lib/vibration';
 import { supabase, type Phrase } from '../../lib/supabase';
 import { couleurs, polices } from '../../lib/theme';
 
@@ -55,14 +56,14 @@ export default function Ecrire() {
   async function sceller() {
     setErreur(null);
     setEnvoi(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    vibrerAppui();
     const { data, error } = await supabase.rpc('sceller_phrase', { p_texte: texte });
     setEnvoi(false);
 
     if (error) {
       const e = lireErreur(error.message);
       if (e.moderation) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        vibrerErreur();
         setRefus(e.message);
       } else if (e.dejaScelle) {
         charger();
@@ -72,7 +73,7 @@ export default function Ecrire() {
       return;
     }
 
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    vibrerSucces();
     const phrase = data as Phrase;
     setTexte('');
     setPhraseDuJour(phrase);

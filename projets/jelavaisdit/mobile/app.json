@@ -5,6 +5,7 @@
     "scheme": "jelavaisdit",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0D0C12",
     "ios": {
@@ -24,8 +25,14 @@
         }
       ]
     ],
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
     "experiments": {
-      "typedRoutes": false
+      "typedRoutes": false,
+      "baseUrl": "/Claude/app"
     }
   }
 }

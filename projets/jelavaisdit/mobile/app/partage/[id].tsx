@@ -1,4 +1,4 @@
-import * as Haptics from 'expo-haptics';
+
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Share, StyleSheet, Text, View } from 'react-native';
@@ -9,6 +9,7 @@ import { IconeRetour } from '../../components/Icones';
 import { formaterDate, joursDepuis } from '../../lib/dates';
 import { lienCarte, supabase, type Phrase } from '../../lib/supabase';
 import { couleurs, polices } from '../../lib/theme';
+import { vibrerSucces } from '../../lib/vibration';
 
 /** Aperçu de la preuve puis partage du lien de la carte. */
 export default function Partage() {
@@ -17,6 +18,7 @@ export default function Partage() {
   const [phrase, setPhrase] = useState<Phrase | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
     supabase
@@ -38,9 +40,22 @@ export default function Partage() {
       setErreur("Impossible de créer le lien. Réessaie dans un instant.");
       return;
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    vibrerSucces();
     const url = lienCarte(lien as string);
-    await Share.share({ message: `Regarde. Je l'avais dit. ${url}`, url });
+    const message = `Regarde. Je l'avais dit. ${url}`;
+    try {
+      await Share.share({ message, url });
+    } catch {
+      // Navigateur sans menu de partage : on copie le lien.
+      const presse = (globalThis as { navigator?: { clipboard?: { writeText: (t: string) => Promise<void> } } })
+        .navigator?.clipboard;
+      if (presse) {
+        await presse.writeText(message);
+        setInfo('Lien copié. Colle-le dans WhatsApp ou tes messages.');
+      } else {
+        setInfo(url);
+      }
+    }
   }
 
   if (!phrase) {
@@ -79,6 +94,7 @@ export default function Partage() {
 
         <View style={{ flex: 1 }} />
         {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
+        {info ? <Text style={styles.info} selectable>{info}</Text> : null}
         <Bouton titre="Partager" onPress={partager} chargement={envoi} />
         <Text style={styles.note}>Ton pote voit la carte sans installer l'app.</Text>
       </View>
@@ -107,5 +123,6 @@ const styles = StyleSheet.create({
   date: { fontFamily: polices.gras, fontSize: 12, color: couleurs.fond },
   slogan: { fontFamily: polices.titre, fontSize: 20, lineHeight: 22, color: couleurs.texte },
   erreur: { marginBottom: 12, fontFamily: polices.moyen, fontSize: 14, color: couleurs.rose, textAlign: 'center' },
+  info: { marginBottom: 12, fontFamily: polices.moyen, fontSize: 14, color: couleurs.vert, textAlign: 'center' },
   note: { marginTop: 12, fontFamily: polices.normal, fontSize: 13, color: couleurs.texteDoux, textAlign: 'center' },
 });

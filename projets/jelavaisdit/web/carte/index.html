@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Regarde. Je l'avais dit.</title>
+<meta name="description" content="Une prédiction scellée, vérifiée, et elle s'est réalisée.">
+<meta property="og:title" content="Regarde. Je l'avais dit.">
+<meta property="og:description" content="Une prédiction scellée, vérifiée, et elle s'est réalisée.">
+<meta name="theme-color" content="#0D0C12">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@800&family=Inter:wght@400;600;700;800&display=swap">
+<style>
+  :root {
+    --fond: #0D0C12; --surface: #1A1922; --bordure: #2C2A38;
+    --texte: #FFFFFF; --doux: #A9A6B8; --vert: #C8FF3D; --rose: #FF4FA3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--fond); color: var(--texte);
+    font-family: Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 440px; margin: 0 auto; padding: 24px 24px 32px; display: flex; flex-direction: column; min-height: 100vh; }
+  .titre { font-family: Unbounded, sans-serif; font-weight: 800; }
+  a { color: var(--vert); }
+  .marque { display: flex; align-items: center; gap: 10px; font-size: 17px; letter-spacing: -0.5px; text-decoration: none; color: var(--texte); }
+  .intro { margin: 22px 0 0; font-size: 17px; font-weight: 600; color: var(--doux); }
+  .intro b { color: var(--texte); font-weight: 600; }
+  .compteur { margin-top: 10px; display: flex; align-items: flex-end; gap: 10px; }
+  .compteur svg { margin-left: -4px; transform: rotate(-6deg); }
+  .compteur span { font-size: 22px; padding-bottom: 24px; }
+  .carte {
+    margin-top: 12px; background: var(--rose); color: var(--fond); border-radius: 30px; padding: 22px;
+    transform: rotate(-1.5deg); display: flex; flex-direction: column; gap: 14px;
+  }
+  .verifie {
+    align-self: flex-start; display: flex; align-items: center; gap: 6px; background: var(--fond); color: var(--vert);
+    border-radius: 999px; padding: 5px 11px 5px 6px; font-size: 13px; font-weight: 800;
+  }
+  .phrase { margin: 0; font-size: 25px; line-height: 1.2; font-weight: 800; letter-spacing: -0.3px; overflow-wrap: anywhere; }
+  .puces { display: flex; flex-wrap: wrap; gap: 8px; }
+  .puce { background: rgba(13,12,18,0.12); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700; }
+  .slogan { margin: 26px 0 0; font-size: 30px; line-height: 1.02; letter-spacing: -1px; }
+  .slogan em { font-style: normal; color: var(--vert); }
+  .empreinte { margin: 12px 0 0; font-size: 12px; color: var(--doux); overflow-wrap: anywhere; }
+  .espace { flex: 1; min-height: 28px; }
+  .cta { background: var(--surface); border: 1px solid var(--bordure); border-radius: 28px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .cta p { margin: 0; font-size: 17px; line-height: 1.2; }
+  .boutons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .bouton {
+    display: flex; align-items: center; justify-content: center; height: 50px; border-radius: 999px;
+    font-size: 14px; font-weight: 700; text-decoration: none; text-align: center;
+  }
+  .bouton.blanc { background: var(--texte); color: var(--fond); }
+  .bouton.vert { background: var(--vert); color: var(--fond); }
+  .bouton[aria-disabled="true"] { background: var(--surface); color: var(--doux); border: 1px solid var(--bordure); }
+  .pied { margin-top: 12px; display: flex; justify-content: space-between; font-size: 13px; color: var(--doux); }
+  .pied a { color: var(--doux); }
+  .etat { margin: auto 0; text-align: center; display: flex; flex-direction: column; gap: 14px; align-items: center; }
+  .etat p { margin: 0; color: var(--doux); font-size: 16px; line-height: 1.45; max-width: 300px; }
+  [hidden] { display: none !important; }
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<main>
+  <a class="marque titre" href="./" aria-label="Je l'avais dit, accueil">
+    <svg width="30" height="30" viewBox="0 0 100 100" aria-hidden="true"><path d="M36 40V30a14 14 0 0 1 28 0v10" stroke="#C8FF3D" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M28 38h44a12 12 0 0 1 12 12v18a12 12 0 0 1-12 12H46l-14 11v-11h-4a12 12 0 0 1-12-12V50a12 12 0 0 1 12-12z" fill="#C8FF3D"/><rect x="46" y="46" width="8" height="18" rx="4" fill="#0D0C12"/><circle cx="50" cy="71.5" r="4.5" fill="#0D0C12"/></svg>
+    je l'avais dit.
+  </a>
+
+  <section id="chargement" class="etat" aria-live="polite"><p>Ouverture de la carte…</p></section>
+
+  <section id="introuvable" class="etat" hidden>
+    <p class="titre" style="color: var(--texte); font-size: 22px">Carte introuvable.</p>
+    <p>Le lien est peut-être incomplet. Demande à ton pote de te le renvoyer.</p>
+  </section>
+
+  <section id="carte" hidden>
+    <p class="intro"><b id="pseudo"></b> l'avait scellé il y a…</p>
+    <div class="compteur titre">
+      <svg width="168" height="126" viewBox="0 0 200 150" role="img" id="bulle"><path d="M72 44V30a28 28 0 0 1 56 0v14" stroke="#C8FF3D" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M36 40h128a26 26 0 0 1 26 26v36a26 26 0 0 1-26 26H78l-30 22v-22H36a26 26 0 0 1-26-26V66a26 26 0 0 1 26-26z" fill="#C8FF3D"/><text id="jours" x="100" y="104" text-anchor="middle" font-family="Unbounded, sans-serif" font-size="52" font-weight="800" letter-spacing="-2" fill="#0D0C12"></text></svg>
+      <span id="joursMot">jours.</span>
+    </div>
+    <article class="carte">
+      <span class="verifie">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#C8FF3D"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#0D0C12" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Vérifié · non modifiée
+      </span>
+      <p class="phrase" id="phrase"></p>
+      <div class="puces">
+        <span class="puce" id="date"></span>
+        <span class="puce" id="mois"></span>
+      </div>
+    </article>
+    <p class="slogan titre">regarde.<br>je l'avais <em>dit.</em></p>
+    <p class="empreinte">Empreinte de scellement : <span id="empreinte"></span></p>
+  </section>
+
+  <div class="espace"></div>
+
+  <section class="cta">
+    <p class="titre">À ton tour de sceller tes prédictions.</p>
+    <div class="boutons">
+      <a class="bouton blanc" id="appstore" href="#">App Store</a>
+      <a class="bouton vert" id="googleplay" href="#">Google Play</a>
+    </div>
+  </section>
+  <p class="pied"><span>Une prédiction par jour, pas une de plus.</span><a id="signaler" href="#" hidden>Signaler</a></p>
+</main>
+
+<script>
+(function () {
+  var config = window.CONFIG_CARTE || {};
+  var MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+  function montrer(id) {
+    ['chargement', 'introuvable', 'carte'].forEach(function (s) {
+      document.getElementById(s).hidden = s !== id;
+    });
+  }
+
+  function parties(date, options) {
+    var p = new Intl.DateTimeFormat('en-GB', Object.assign({ timeZone: 'Europe/Paris' }, options)).formatToParts(date);
+    return function (type) { var x = p.find(function (e) { return e.type === type; }); return x ? x.value : ''; };
+  }
+
+  function formaterDate(iso) {
+    var v = parties(new Date(iso), { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    return Number(v('day')) + ' ' + MOIS[Number(v('month')) - 1] + ' ' + v('year') + ' · ' + v('hour') + 'h' + v('minute');
+  }
+
+  function lienStore(id, url, libelle) {
+    var a = document.getElementById(id);
+    if (url) { a.href = url; } else { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); a.textContent = libelle + ' · bientôt'; }
+  }
+
+  lienStore('appstore', config.lienAppStore, 'App Store');
+  lienStore('googleplay', config.lienGooglePlay, 'Google Play');
+
+  var code = new URLSearchParams(location.search).get('c');
+  if (!code || !config.supabaseUrl) { montrer('introuvable'); return; }
+
+  fetch(config.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/carte_publique', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: config.supabaseCleAnon,
+    },
+    body: JSON.stringify({ p_lien: code }),
+  })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (lignes) {
+      var c = lignes && lignes[0];
+      if (!c) { montrer('introuvable'); return; }
+      var jours = Math.max(0, c.jours || 0);
+      document.getElementById('pseudo').textContent = '@' + c.pseudo;
+      document.getElementById('jours').textContent = String(jours);
+      document.getElementById('jours').setAttribute('font-size', String(jours).length > 3 ? '42' : '52');
+      document.getElementById('bulle').setAttribute('aria-label', jours + (jours > 1 ? ' jours' : ' jour'));
+      document.getElementById('joursMot').textContent = jours > 1 ? 'jours.' : 'jour.';
+      document.getElementById('phrase').textContent = '« ' + c.texte + ' »';
+      document.getElementById('date').textContent = formaterDate(c.scellee_le);
+      var moisNom = MOIS[Number(parties(new Date(c.scellee_le), { month: 'numeric' })('month')) - 1];
+      document.getElementById('mois').textContent = c.scellees_mois > 1
+        ? '1 prédiction sur ' + c.scellees_mois + ' en ' + moisNom
+        : 'sa seule prédiction en ' + moisNom;
+      var empreinte = document.getElementById('empreinte');
+      empreinte.textContent = c.empreinte.slice(0, 16) + '…';
+      empreinte.title = c.empreinte;
+      document.title = '« ' + c.texte + ' » · Je l\'avais dit';
+      if (config.emailSignalement) {
+        var s = document.getElementById('signaler');
+        s.href = 'mailto:' + config.emailSignalement + '?subject=' + encodeURIComponent('Signalement carte ' + code);
+        s.hidden = false;
+      }
+      montrer('carte');
+    })
+    .catch(function () {
+      montrer('introuvable');
+      document.querySelector('#introuvable p:last-child').textContent = "Impossible d'ouvrir la carte pour l'instant. Réessaie dans un moment.";
+    });
+})();
+</script>
+</body>
+</html>

@@ -45,7 +45,7 @@
         "nom": "Ferrand",
         "postes": [
           "DG",
-          "MG"
+          "AG"
         ]
       },
       {
@@ -53,7 +53,7 @@
         "nom": "Tissier",
         "postes": [
           "DD",
-          "MD"
+          "AD"
         ]
       },
       {
@@ -92,24 +92,21 @@
         "id": "sarrazin",
         "nom": "Sarrazin",
         "postes": [
-          "MG",
-          "MAG"
+          "AG"
         ]
       },
       {
         "id": "valmy",
         "nom": "Valmy",
         "postes": [
-          "AG",
-          "MAG"
+          "AG"
         ]
       },
       {
         "id": "cassagne",
         "nom": "Cassagne",
         "postes": [
-          "AD",
-          "MAD"
+          "AD"
         ]
       },
       {

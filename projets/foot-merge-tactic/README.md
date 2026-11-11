@@ -18,7 +18,7 @@ footballeurs.
 ## Prototype 1
 
 Deux écrans :
-- **Placement** (une page) : le plateau sur le demi-terrain, et le banc. Le plateau est toujours visible, en couleurs (jaune le gardien, bleu la défense, violet le milieu, rouge l'attaque ; couloirs des côtés plus clairs), en **hexagones** ou en **carrés** au choix (boutons en haut à droite ; la composition suit, chaque joueur garde son poste). On fait glisser les ronds : sur une case libre (le joueur y va), sur un autre joueur (échange, ou entrée d'un remplaçant), sur le banc (sortie). Un simple toucher affiche le joueur.
+- **Placement** (une page) : le plateau sur le demi-terrain, et le banc. Le plateau est toujours visible, en couleurs (jaune le gardien, bleu la défense, violet le milieu, rouge l'attaque et les ailiers ; couloirs des côtés plus clairs), en **hexagones** ou en **carrés** au choix (boutons en haut à droite ; la composition suit, chaque joueur garde son poste). On fait glisser les ronds : sur une case libre (le joueur y va), sur un autre joueur (échange, ou entrée d'un remplaçant), sur le banc (sortie). Un simple toucher affiche le joueur.
 - **Match** : le terrain entier. Les 22 joueurs partent de leurs positions de coup d'envoi, puis montent ou redescendent selon une possession simulée. Pas encore de passes ni de tirs.
 
 ### Lancer

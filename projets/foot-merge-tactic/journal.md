@@ -124,3 +124,9 @@ Historique des étapes, des choix techniques et des résultats de tests.
 **Tests** : 60 verts. Les tests de données tournent sur les deux plateaux (nombre de cases, aucun chevauchement, rôles du milieu, case visée, compositions valables), ceux de réalisme aussi. Nouveaux : cases à cheval en hexagones, passage d'un plateau à l'autre. Test « défense adverse non repoussée » précisé : un retard quand le ballon repart en arrière est permis (4 s au plus d'affilée), une ligne repoussée par nos attaquants non (moins de 5 % du temps).
 
 **Vérification au format téléphone** (390 × 844, clair et sombre) : la page de placement tient sur l'écran avec les deux formes ; glisser-déposer sur une case hexagonale et carrée, case visée surlignée à sa forme, joueur hors poste signalé, lâcher hors plateau sans effet, choix du plateau gardé après rechargement. Match en hexagones regardé à ×4 dans les trois modes.
+
+## 11/11/2026 — Hexagones validés, cases d'ailier
+
+- Le concepteur choisit les **hexagones** (les carrés restent en variante dans le prototype).
+- **AG et AD sont des cases d'ailier** à trois hauteurs (bas, milieu, haut) : les rôles « milieu gauche / droit » et « milieu avancé » disparaissent du plateau et des données ; postes naturels de l'effectif mis à jour (Sarrazin, Valmy : AG ; Cassagne : AD ; Ferrand DG et AG ; Tissier DD et AD). Couloirs d'ailiers en rouge clair.
+- 60 tests verts. Vérifié au format téléphone.

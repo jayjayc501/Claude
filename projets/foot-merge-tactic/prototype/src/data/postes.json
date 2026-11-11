@@ -11,11 +11,7 @@
     "MDC": "Milieu défensif",
     "MC": "Milieu central",
     "MOC": "Milieu offensif",
-    "MG": "Milieu gauche",
-    "MAG": "Milieu avancé gauche",
     "AG": "Ailier gauche",
-    "MD": "Milieu droit",
-    "MAD": "Milieu avancé droit",
     "AD": "Ailier droit",
     "AC": "Attaquant"
   },
@@ -97,8 +93,8 @@
         ["DG", "DC", "DC", "DC", "DD"],
         ["DG", "DC", "DC", "DD"],
         ["DG", "MC:MDC", "MC:MDC", "MC:MDC", "DD"],
-        ["AG:MG", "MC:MC", "MC:MC", "AD:MD"],
-        ["AG:MAG", "MC:MOC", "MC:MOC", "MC:MOC", "AD:MAD"],
+        ["AG", "MC:MC", "MC:MC", "AD"],
+        ["AG", "MC:MOC", "MC:MOC", "MC:MOC", "AD"],
         ["AG", "AC", "AC", "AD"],
         ["", "AC", "AC", "AC", ""]
       ]
@@ -123,8 +119,8 @@
         ["DG", "DC", "DC", "DC", "DD"],
         ["DG", "DC", "DC", "DC", "DD"],
         ["DG", "MC:MDC", "MC:MDC", "MC:MDC", "DD"],
-        ["AG:MG", "MC:MC", "MC:MC", "MC:MC", "AD:MD"],
-        ["AG:MAG", "MC:MOC", "MC:MOC", "MC:MOC", "AD:MAD"],
+        ["AG", "MC:MC", "MC:MC", "MC:MC", "AD"],
+        ["AG", "MC:MOC", "MC:MOC", "MC:MOC", "AD"],
         ["AG", "AC", "AC", "AC", "AD"],
         ["", "AC", "AC", "AC", ""]
       ]

@@ -1248,3 +1248,21 @@ Encore ouvertes, en plus de celles du §17 et des sections ci-dessus :
     couloirs de la référence football) et des rangées décalées (une case
     à cheval sur deux), chaque case appartenant à un poste selon sa rangée
     et son couloir.
+
+## 20.12. Plateau en hexagones et ailiers (11/11/2026)
+
+-   [VALIDÉ] Plateau de placement en **hexagones de couleur**, toujours
+    visible, sans chevauchement (choisi après comparaison avec une
+    variante en carrés, gardée dans le prototype). Rangées de 5 et 4 cases
+    en alternance, les rangées de 4 décalées d'une demi-case.
+-   [VALIDÉ] **Les cases AG et AD sont des cases d'ailier**, à trois
+    hauteurs (bas, milieu, haut). Il n'y a plus de « milieu de côté » ni de
+    « milieu avancé » à part. Remplace la lecture « milieu de côté, milieu
+    avancé, attaquant de côté » du §20.9.
+-   [PROPOSITION, à valider] Nombre de cases en hexagones : G 2, DC 5
+    (3 + 2), DG 3, DD 3, milieu 8 (MDC 3, MC 2, MOC 3), ailiers 3 + 3,
+    attaque 5 (2 + 3). Le découpage validé (DC 6, milieu 9, attaque 6)
+    n'est exact qu'en carrés.
+-   [VALIDÉ] Priorité au moteur. L'interface actuelle n'est qu'une base
+    (les positions) ; elle est loin de la vision finale du concepteur, qui
+    la décrira plus tard.

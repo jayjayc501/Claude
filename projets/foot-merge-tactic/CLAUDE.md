@@ -70,8 +70,9 @@ un plateau.
 - **Chaque rectangle est découpé en sous-zones** (positions possibles) : G 2 (normal ou un peu avancé) ; DC 6 sur 2 lignes ; DD et DG 2 ou 3 (le concepteur hésite) ; **milieu central 9 sur 3 lignes** (MDC, MC, MOC) ; AD et AG 3 ; **attaquant 6 sur 2 lignes**.
 - **Défenseurs centraux, milieu, attaque : 3 cases par ligne, et la case de l'axe est à cheval sur celle de gauche et celle de droite** (colonnes qui se chevauchent). Appliqué dans le prototype le 11/11, puis remplacé le même jour par la proposition de plateau unique (hexagones ou carrés, voir « Propositions »), à la demande du concepteur ; en hexagones, le « à cheval » vient des rangées décalées.
 - **Inspiration visuelle** (capture envoyée par le concepteur) : le plateau de Merge Tactics, un quadrillage d'hexagones clair, toujours visible, « grossier mais intuitif et visuel », avec un compteur d'unités placées et les compteurs de traits sur le côté.
-- **Plateau en hexagones de couleur** demandé par le concepteur (11/11), **avec une variante en carrés pour choisir** : les deux sont dans le prototype ; **choix en attente**.
-- Les 3 cases de AG et AD sont trois postes, du plus bas au plus haut : milieu de côté (MG / MD), milieu avancé, attaquant de côté. Il n'y a donc pas de poste MD / MG à part.
+- **Plateau en hexagones de couleur** (11/11, choisi après comparaison avec une variante en carrés, gardée dans le prototype) : toujours visible, sans chevauchement, rangées de 5 et 4 cases en alternance, les rangées de 4 décalées d'une demi-case. Nombre de cases par poste en hexagones : voir « Propositions » (à valider).
+- **Les cases AG et AD sont des cases d'ailier**, à trois hauteurs (bas, milieu, haut) (11/11). Plus de « milieu de côté » ni de « milieu avancé » à part.
+- **Priorité au moteur** (11/11) : l'interface actuelle n'est qu'une base (les positions), loin de la vision finale du concepteur, qu'il décrira plus tard.
 - **Placement sur un demi-terrain** (idée du concepteur) : l'entraîneur place ses joueurs comme avant le coup d'envoi, dans son propre camp. Les **règles de projection** du moteur transforment ensuite chaque position en position de match, en attaque et en défense. La correspondance exacte (une petite table de règles) se règle ensemble en regardant le prototype.
 - L'entraîneur place chaque joueur dans une sous-zone ; le rectangle reste la zone de liberté dans laquelle le moteur fait bouger le joueur.
 - **Plusieurs joueurs peuvent occuper le même poste**, dans la limite d'un maximum par poste (exemple donné : 3 DC, 1 AG).
@@ -124,7 +125,7 @@ Affichage du match :
 - Choisir des temps forts qui montrent la conséquence des choix tactiques (but encaissé en transition après un bloc trop haut, par exemple).
 
 Placement :
-- Le rôle de la case garde le sens des postes naturels (un MDC placé sur une case MOC joue hors poste). Les 3 cases des côtés vont du milieu de côté à l'attaquant de côté.
+- Le rôle de la case garde le sens des postes naturels (un MDC placé sur une case MOC joue hors poste).
 - Latéraux (DD, DG) : 3 cases en profondeur en attendant la décision (2 ou 3).
 - Un seul joueur par case.
 - Les données décrivent les postes (maximum de joueurs, ligne défensive) et chaque plateau rangée par rangée ; les rectangles des postes sont déduits des cases.
@@ -134,9 +135,9 @@ Placement :
   - **aucune cible ne dépend de la position du moment d'un autre joueur** (sinon boucle : la ligne adverse s'enfonçait dans sa surface) ;
   - bascule après 0,5 s, puis course à 7 m/s au plus ; un joueur placé haut revient donc en retard (contrepartie naturelle) ;
   - **évitement anticipé** : 3 m au minimum entre coéquipiers, 2,5 m entre adversaires.
-- **Plateau de placement** (11/11, demande du concepteur, choix entre les deux formes en attente) : un quadrillage unique sur le demi-terrain, sans chevauchement, toujours visible, en couleurs (jaune gardien, bleu défense, violet milieu, rouge attaque ; couloirs des côtés plus clairs ; rôle écrit dans la case).
-  - **Hexagones** : rangées de 5 et 4 cases en alternance, les rangées de 4 décalées d'une demi-case (à cheval sur deux cases voisines). G 2, DC 5, DG 3, DD 3, milieu 8 (MDC 3, MC 2, MOC 3), côtés 3 + 3, attaque 5. Plus proche de Merge Tactics, mais ne garde pas exactement le découpage validé.
-  - **Carrés** : 5 cases par rangée, exactement le découpage validé (DC 6, milieu 9, attaque 6).
+- **Plateau de placement** (hexagones validés le 11/11 ; carrés gardés en variante) : couleurs jaune gardien, bleu défense, violet milieu, rouge attaque ; couloirs des côtés plus clairs ; rôle écrit dans la case.
+  - **Hexagones (par défaut)** : G 2, DC 5 (3 + 2), DG 3, DD 3, milieu 8 (MDC 3, MC 2, MOC 3), ailiers 3 + 3, attaque 5 (2 + 3). **Nombre de cases à valider** : le découpage validé (DC 6, milieu 9, attaque 6) n'est exact qu'en carrés.
+  - **Carrés** : 5 cases par rangée, exactement le découpage validé.
   - Gardien : deux petites cases (normal, avancé) sous le plateau. Coins hauts sans case. En changeant de forme, chaque joueur garde son poste, sur la case la plus proche.
 - Maximums provisoires (non validés) : DG 1, DD 1, milieu 4, AD 1, attaquant 3 (validés en exemple : 3 DC, 1 AG ; le gardien : 1).
 - **Écran de placement sur une page** (11/11) : plateau + banc en ronds dessous. Tout au glisser-déposer : sur une case libre, sur un joueur (échange, ou entrée d'un remplaçant), sur le banc (sortie). Plateau toujours visible ; choix hexagones / carrés en haut à droite. Plus de liste ni de boutons de poste.
@@ -166,7 +167,7 @@ Tranchées le 11/11/2026 (voir le §20 du dossier) : ce que représentent les 10
 
 Toujours ouvertes :
 - **Équilibrage des fusions : reporté après le moteur.** Pistes déjà présentées, non validées : coût naturel (deux joueurs pour un) ; un poste naturel de chaque joueur d'origine ; niveau de la plus faible des deux cartes ; hybride qui ne progresse qu'avec un second hybride identique ; un seul style choisi à la fusion. Restent : postes naturels et style d'un hybride ; « hybride A/B + copie de A » est-il autorisé ?
-- **Placement** : **forme du plateau (hexagones ou carrés)** ; DD et DG à 2 ou 3 cases (3 dans le prototype) ; maximum de joueurs par poste ; découpage exact du plateau ; chiffres des règles de projection (à régler ensemble sur le prototype).
+- **Placement** : nombre de cases en hexagones (DC 5, milieu 8, attaque 5) ; DD et DG à 2 ou 3 cases (3 dans le prototype) ; maximum de joueurs par poste ; découpage exact du plateau ; chiffres des règles de projection (à régler ensemble sur le prototype).
 - Consignes d'équipe (plus défensive, plus offensive, en contre…) : plus tard.
 - Égalités : classement des groupes, matchs nuls en demi-finale et en finale.
 - Temps de football simulé par mi-temps, nombre de temps forts montrés, durées exactes de la préparation et de la mi-temps.
@@ -280,3 +281,4 @@ possession), à la place du ballon simulé.
 - 11/11/2026 (suite) : commits directs pour le prototype (accord du concepteur). Nouveau découpage appliqué (DC 6, milieu 9, attaque 6 ; case de l'axe à cheval sur la gauche et la droite ; grandes zones qui ne se chevauchent presque plus). Écrans de placement et de match sur une page (banc en ronds, glisser-déposer pour entrer et sortir). 33 tests verts. Le concepteur a montré le plateau d'hexagones de Merge Tactics comme modèle de découpage clair : piste d'un quadrillage unique en hexagones proposée, à valider.
 - 11/11/2026 (suite) : retour du concepteur, « gros problème de placement durant le match » (défense adverse dans sa surface, équipe étirée). Cause : nos attaquants se calaient sur la position réelle du dernier défenseur, ce qui le faisait reculer (boucle), et la défense ne suivait pas le ballon en attaque. Attaque refaite par lignes liées au ballon ; 4 tests de réalisme sur de longues possessions. Méthode changée : chaque règle testée dans les deux phases et sur la durée, match regardé dans les trois modes avant chaque publication.
 - 11/11/2026 (suite) : plateau en hexagones de couleur et variante en carrés, au choix dans le prototype (demande du concepteur). Faux ballon qui progresse comme une possession. 60 tests verts, sur les deux plateaux. **En attente : le choix du concepteur entre hexagones et carrés.**
+- 11/11/2026 (suite) : **hexagones validés** ; cases AG et AD = ailiers (3 hauteurs). Le concepteur met l'interface de côté (base suffisante) : priorité au moteur. **Prochaine étape : son avis sur les déplacements en match (liste de contrôle donnée dans la discussion), puis mission 2 (vrai ballon).**

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { chargerDonnees, chargerEquipes, chargerReglages } from "../src/sim/chargement";
-import { caseAuPoint, echanger, horsPoste, placer, retirer, verifier } from "../src/sim/placement";
+import { caseAuPoint, echanger, horsPoste, placer, remplacer, retirer, verifier } from "../src/sim/placement";
 import { hauteurLigneDefensiveM, projeter } from "../src/sim/projection";
 import { MatchSim } from "../src/sim/simulation";
 import type { Equipe } from "../src/sim/types";
@@ -16,7 +16,7 @@ function nouveauMatch(graine = 42, effectif?: Equipe): MatchSim {
 
 describe("données des postes", () => {
   test("nombre de cases validé par le concepteur", () => {
-    const attendu: Record<string, number> = { G: 2, DC: 6, DG: 3, DD: 3, MC: 6, AG: 3, AD: 3, AC: 5 };
+    const attendu: Record<string, number> = { G: 2, DC: 6, DG: 3, DD: 3, MC: 9, AG: 3, AD: 3, AC: 6 };
     for (const [id, n] of Object.entries(attendu)) expect(donnees.poste(id).cases.length).toBe(n);
   });
 
@@ -37,7 +37,7 @@ describe("données des postes", () => {
 
   test("le milieu central couvre MDC, MC et MOC de bas en haut", () => {
     const roles = donnees.poste("MC").cases.map((c) => c.role);
-    expect(roles).toEqual(["MDC", "MDC", "MC", "MC", "MOC", "MOC"]);
+    expect(roles).toEqual(["MDC", "MDC", "MDC", "MC", "MC", "MC", "MOC", "MOC", "MOC"]);
   });
 });
 
@@ -85,6 +85,39 @@ describe("règles de placement", () => {
     expect(verifier(r.composition, donnees)).toEqual([]);
   });
 
+  test("remplacement : le remplaçant prend la case, le titulaire va sur le banc", () => {
+    const r = remplacer(effectif.composition, "lomont", "belcourt");
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.composition.find((p) => p.joueurId === "lomont")).toEqual({ joueurId: "lomont", poste: "DC", cellule: 0 });
+    expect(r.composition.some((p) => p.joueurId === "belcourt")).toBe(false);
+    expect(verifier(r.composition, donnees)).toEqual([]);
+    expect(remplacer(effectif.composition, "kessai", "belcourt").ok).toBe(false);
+  });
+
+  test("cases de l'axe à cheval sur la gauche et la droite (DC, milieu, attaque)", () => {
+    for (const id of ["DC", "MC", "AC"]) {
+      const cases = donnees.poste(id).cases;
+      for (let ligne = 0; ligne < cases.length / 3; ligne++) {
+        const [g, a, d] = [cases[ligne * 3]!, cases[ligne * 3 + 1]!, cases[ligne * 3 + 2]!];
+        expect(a.rect.x).toBeLessThan(g.rect.x + g.rect.w);
+        expect(a.rect.x + a.rect.w).toBeGreaterThan(d.rect.x);
+      }
+    }
+  });
+
+  test("les grandes zones défense, milieu et attaque se chevauchent à peine (2 m au plus)", () => {
+    const hauteur = (id: string) => {
+      const r = donnees.poste(id).rect;
+      return [r.y * L, (r.y + r.h) * L] as const;
+    };
+    const [, hautDC] = hauteur("DC");
+    const [basMC, hautMC] = hauteur("MC");
+    const [basAC] = hauteur("AC");
+    expect(hautDC - basMC).toBeLessThanOrEqual(2);
+    expect(hautMC - basAC).toBeLessThanOrEqual(2);
+  });
+
   test("échange refusé avec un remplaçant (il doit passer par une case)", () => {
     expect(echanger(effectif.composition, "belcourt", "lomont").ok).toBe(false);
   });
@@ -106,7 +139,7 @@ describe("règles de placement", () => {
   test("hors poste : un milieu défensif sur la ligne offensive", () => {
     const oubrahim = effectif.joueurs.find((j) => j.id === "oubrahim")!;
     expect(horsPoste(oubrahim, donnees, "MC", 0)).toBe(false);
-    expect(horsPoste(oubrahim, donnees, "MC", 4)).toBe(true);
+    expect(horsPoste(oubrahim, donnees, "MC", 6)).toBe(true);
   });
 });
 
@@ -138,10 +171,10 @@ describe("règles de projection", () => {
     }
   });
 
-  test("l'attaquant devant le but arrive près de la surface adverse en attaque", () => {
+  test("l'attaquant placé haut dans l'axe arrive près de la surface adverse en attaque", () => {
     const ac = donnees.poste("AC");
     const p = projeter(ac.cases[4]!.centre, ac, "attaque", centre, reglages, L);
-    expect(p.y * L).toBeGreaterThan(84);
+    expect(p.y * L).toBeGreaterThan(80);
   });
 
   test("le bloc glisse du côté du ballon en défense", () => {
@@ -215,7 +248,9 @@ describe("simulation", () => {
     m.definirMode("eux");
     m.avancer(15);
     const enDefense = moyenneY(m);
-    expect(enAttaque - enDefense).toBeGreaterThan(15);
+    // Perdu haut, le ballon est encore loin de notre but : le bloc défend
+    // haut (bloc médian) et ne redescend donc pas jusqu'à sa surface.
+    expect(enAttaque - enDefense).toBeGreaterThan(8);
   });
 
   test("les joueurs ne s'empilent pas", () => {

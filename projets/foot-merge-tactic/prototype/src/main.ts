@@ -6,7 +6,7 @@ import { html } from "./ui/dom";
 import { EcranMatch } from "./ui/ecranMatch";
 import { EcranPlacement, type EtatPlacement } from "./ui/ecranPlacement";
 
-const CLE_STOCKAGE = "foot-merge-tactic.composition.v1";
+const CLE_STOCKAGE = "foot-merge-tactic.composition.v2"; // v2 : nouveau découpage des cases
 
 function lireComposition(defaut: Placement[]): Placement[] {
   try {
@@ -34,8 +34,7 @@ function demarrer(): void {
   const etat: EtatPlacement = {
     composition: lireComposition(effectif.composition),
     joueurChoisi: null,
-    posteAffiche: "DC",
-    message: "Choisissez un joueur, puis une case de son poste.",
+    message: "",
     messageErreur: false,
   };
   // Une composition enregistrée qui ne correspond plus aux données est ignorée.
@@ -57,13 +56,7 @@ function demarrer(): void {
   const contenu = html("main", {}, app);
 
   const match = new EcranMatch(donnees, reglages, equipes);
-  const placement = new EcranPlacement(
-    donnees,
-    effectif,
-    etat,
-    (c) => ecrireComposition(c),
-    () => montrer("match"),
-  );
+  const placement = new EcranPlacement(donnees, effectif, etat, (c) => ecrireComposition(c));
 
   function montrer(ecran: "placement" | "match"): void {
     ongletPlacement.classList.toggle("onglet-actif", ecran === "placement");

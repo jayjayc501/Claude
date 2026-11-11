@@ -1229,3 +1229,22 @@ Encore ouvertes, en plus de celles du §17 et des sections ci-dessus :
 -   À faire ensuite : interface sur un seul écran (banc sous forme de
     ronds, sans longue liste), cases affichées seulement pendant le
     glissement, nouveau découpage.
+
+## 20.11. Découpage précisé et écrans sur une page (11/11/2026)
+
+-   [VALIDÉ] Défenseurs centraux, milieu et attaque : 3 cases par ligne ;
+    la case de l'axe est à cheval sur celle de gauche et celle de droite.
+-   [VALIDÉ] Les grandes zones (défense, milieu, attaque) ne se
+    chevauchent pas, ou à peine. Remplace « rectangles plus grands et plus
+    chevauchants » (§20.8).
+-   [VALIDÉ] Commits directs pour le prototype tant qu'on est sur des
+    réglages grossiers.
+-   [PROPOSITION, codée] Écran de placement sur une page (demi-terrain et
+    banc, tout au glisser-déposer, cases visibles pendant le glissement) ;
+    écran de match sur une page.
+-   Inspiration montrée par le concepteur : le plateau d'hexagones de
+    Merge Tactics, clair et toujours visible. [PROPOSITION] Un quadrillage
+    unique en hexagones sur le demi-terrain, cinq colonnes (les cinq
+    couloirs de la référence football) et des rangées décalées (une case
+    à cheval sur deux), chaque case appartenant à un poste selon sa rangée
+    et son couloir.

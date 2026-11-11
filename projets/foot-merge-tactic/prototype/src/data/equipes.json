@@ -3,65 +3,326 @@
     "nom": "Votre équipe",
     "nationalite": "France",
     "joueurs": [
-      { "id": "aubrac", "nom": "Aubrac", "postes": ["G"] },
-      { "id": "varenne", "nom": "Varenne", "postes": ["G"] },
-      { "id": "belcourt", "nom": "Belcourt", "postes": ["DC"] },
-      { "id": "kessai", "nom": "Kessaï", "postes": ["DC"] },
-      { "id": "lomont", "nom": "Lomont", "postes": ["DC", "MDC"] },
-      { "id": "ferrand", "nom": "Ferrand", "postes": ["DG", "MG"] },
-      { "id": "tissier", "nom": "Tissier", "postes": ["DD", "MD"] },
-      { "id": "oubrahim", "nom": "Oubrahim", "postes": ["MDC", "MC"] },
-      { "id": "pellerin", "nom": "Pellerin", "postes": ["MC", "MDC"] },
-      { "id": "rambert", "nom": "Rambert", "postes": ["MC", "MOC"] },
-      { "id": "delisle", "nom": "Delisle", "postes": ["MOC", "MC"] },
-      { "id": "sarrazin", "nom": "Sarrazin", "postes": ["MG", "MAG"] },
-      { "id": "valmy", "nom": "Valmy", "postes": ["AG", "MAG"] },
-      { "id": "cassagne", "nom": "Cassagne", "postes": ["AD", "MAD"] },
-      { "id": "brenac", "nom": "Brenac", "postes": ["AC"] },
-      { "id": "ruffin", "nom": "Ruffin", "postes": ["AC", "AG"] }
+      {
+        "id": "aubrac",
+        "nom": "Aubrac",
+        "postes": [
+          "G"
+        ]
+      },
+      {
+        "id": "varenne",
+        "nom": "Varenne",
+        "postes": [
+          "G"
+        ]
+      },
+      {
+        "id": "belcourt",
+        "nom": "Belcourt",
+        "postes": [
+          "DC"
+        ]
+      },
+      {
+        "id": "kessai",
+        "nom": "Kessaï",
+        "postes": [
+          "DC"
+        ]
+      },
+      {
+        "id": "lomont",
+        "nom": "Lomont",
+        "postes": [
+          "DC",
+          "MDC"
+        ]
+      },
+      {
+        "id": "ferrand",
+        "nom": "Ferrand",
+        "postes": [
+          "DG",
+          "MG"
+        ]
+      },
+      {
+        "id": "tissier",
+        "nom": "Tissier",
+        "postes": [
+          "DD",
+          "MD"
+        ]
+      },
+      {
+        "id": "oubrahim",
+        "nom": "Oubrahim",
+        "postes": [
+          "MDC",
+          "MC"
+        ]
+      },
+      {
+        "id": "pellerin",
+        "nom": "Pellerin",
+        "postes": [
+          "MC",
+          "MDC"
+        ]
+      },
+      {
+        "id": "rambert",
+        "nom": "Rambert",
+        "postes": [
+          "MC",
+          "MOC"
+        ]
+      },
+      {
+        "id": "delisle",
+        "nom": "Delisle",
+        "postes": [
+          "MOC",
+          "MC"
+        ]
+      },
+      {
+        "id": "sarrazin",
+        "nom": "Sarrazin",
+        "postes": [
+          "MG",
+          "MAG"
+        ]
+      },
+      {
+        "id": "valmy",
+        "nom": "Valmy",
+        "postes": [
+          "AG",
+          "MAG"
+        ]
+      },
+      {
+        "id": "cassagne",
+        "nom": "Cassagne",
+        "postes": [
+          "AD",
+          "MAD"
+        ]
+      },
+      {
+        "id": "brenac",
+        "nom": "Brenac",
+        "postes": [
+          "AC"
+        ]
+      },
+      {
+        "id": "ruffin",
+        "nom": "Ruffin",
+        "postes": [
+          "AC",
+          "AG"
+        ]
+      }
     ],
     "composition": [
-      { "joueurId": "aubrac", "poste": "G", "cellule": 0 },
-      { "joueurId": "ferrand", "poste": "DG", "cellule": 1 },
-      { "joueurId": "belcourt", "poste": "DC", "cellule": 0 },
-      { "joueurId": "kessai", "poste": "DC", "cellule": 2 },
-      { "joueurId": "tissier", "poste": "DD", "cellule": 1 },
-      { "joueurId": "oubrahim", "poste": "MC", "cellule": 0 },
-      { "joueurId": "pellerin", "poste": "MC", "cellule": 1 },
-      { "joueurId": "delisle", "poste": "MC", "cellule": 4 },
-      { "joueurId": "valmy", "poste": "AG", "cellule": 2 },
-      { "joueurId": "cassagne", "poste": "AD", "cellule": 2 },
-      { "joueurId": "brenac", "poste": "AC", "cellule": 4 }
+      {
+        "joueurId": "aubrac",
+        "poste": "G",
+        "cellule": 0
+      },
+      {
+        "joueurId": "ferrand",
+        "poste": "DG",
+        "cellule": 1
+      },
+      {
+        "joueurId": "belcourt",
+        "poste": "DC",
+        "cellule": 0
+      },
+      {
+        "joueurId": "kessai",
+        "poste": "DC",
+        "cellule": 2
+      },
+      {
+        "joueurId": "tissier",
+        "poste": "DD",
+        "cellule": 1
+      },
+      {
+        "joueurId": "oubrahim",
+        "poste": "MC",
+        "cellule": 0
+      },
+      {
+        "joueurId": "pellerin",
+        "poste": "MC",
+        "cellule": 2
+      },
+      {
+        "joueurId": "delisle",
+        "poste": "MC",
+        "cellule": 7
+      },
+      {
+        "joueurId": "valmy",
+        "poste": "AG",
+        "cellule": 2
+      },
+      {
+        "joueurId": "cassagne",
+        "poste": "AD",
+        "cellule": 2
+      },
+      {
+        "joueurId": "brenac",
+        "poste": "AC",
+        "cellule": 4
+      }
     ]
   },
   "adversaire": {
     "nom": "Adversaire (IA)",
     "nationalite": "Espagne",
     "joueurs": [
-      { "id": "arnedo", "nom": "Arnedo", "postes": ["G"] },
-      { "id": "basterra", "nom": "Basterra", "postes": ["DG"] },
-      { "id": "celorrio", "nom": "Celorrio", "postes": ["DC"] },
-      { "id": "ezquerra", "nom": "Ezquerra", "postes": ["DC"] },
-      { "id": "fuenmayor", "nom": "Fuenmayor", "postes": ["DD"] },
-      { "id": "larrabe", "nom": "Larrabe", "postes": ["MDC"] },
-      { "id": "mendaro", "nom": "Mendaro", "postes": ["MC"] },
-      { "id": "ortubia", "nom": "Ortubia", "postes": ["MOC"] },
-      { "id": "pradilla", "nom": "Pradilla", "postes": ["AG"] },
-      { "id": "quintanar", "nom": "Quintanar", "postes": ["AD"] },
-      { "id": "rivadeo", "nom": "Rivadeo", "postes": ["AC"] }
+      {
+        "id": "arnedo",
+        "nom": "Arnedo",
+        "postes": [
+          "G"
+        ]
+      },
+      {
+        "id": "basterra",
+        "nom": "Basterra",
+        "postes": [
+          "DG"
+        ]
+      },
+      {
+        "id": "celorrio",
+        "nom": "Celorrio",
+        "postes": [
+          "DC"
+        ]
+      },
+      {
+        "id": "ezquerra",
+        "nom": "Ezquerra",
+        "postes": [
+          "DC"
+        ]
+      },
+      {
+        "id": "fuenmayor",
+        "nom": "Fuenmayor",
+        "postes": [
+          "DD"
+        ]
+      },
+      {
+        "id": "larrabe",
+        "nom": "Larrabe",
+        "postes": [
+          "MDC"
+        ]
+      },
+      {
+        "id": "mendaro",
+        "nom": "Mendaro",
+        "postes": [
+          "MC"
+        ]
+      },
+      {
+        "id": "ortubia",
+        "nom": "Ortubia",
+        "postes": [
+          "MOC"
+        ]
+      },
+      {
+        "id": "pradilla",
+        "nom": "Pradilla",
+        "postes": [
+          "AG"
+        ]
+      },
+      {
+        "id": "quintanar",
+        "nom": "Quintanar",
+        "postes": [
+          "AD"
+        ]
+      },
+      {
+        "id": "rivadeo",
+        "nom": "Rivadeo",
+        "postes": [
+          "AC"
+        ]
+      }
     ],
     "composition": [
-      { "joueurId": "arnedo", "poste": "G", "cellule": 0 },
-      { "joueurId": "basterra", "poste": "DG", "cellule": 0 },
-      { "joueurId": "celorrio", "poste": "DC", "cellule": 0 },
-      { "joueurId": "ezquerra", "poste": "DC", "cellule": 2 },
-      { "joueurId": "fuenmayor", "poste": "DD", "cellule": 0 },
-      { "joueurId": "larrabe", "poste": "MC", "cellule": 0 },
-      { "joueurId": "mendaro", "poste": "MC", "cellule": 3 },
-      { "joueurId": "ortubia", "poste": "MC", "cellule": 4 },
-      { "joueurId": "pradilla", "poste": "AG", "cellule": 2 },
-      { "joueurId": "quintanar", "poste": "AD", "cellule": 2 },
-      { "joueurId": "rivadeo", "poste": "AC", "cellule": 4 }
+      {
+        "joueurId": "arnedo",
+        "poste": "G",
+        "cellule": 0
+      },
+      {
+        "joueurId": "basterra",
+        "poste": "DG",
+        "cellule": 0
+      },
+      {
+        "joueurId": "celorrio",
+        "poste": "DC",
+        "cellule": 0
+      },
+      {
+        "joueurId": "ezquerra",
+        "poste": "DC",
+        "cellule": 2
+      },
+      {
+        "joueurId": "fuenmayor",
+        "poste": "DD",
+        "cellule": 0
+      },
+      {
+        "joueurId": "larrabe",
+        "poste": "MC",
+        "cellule": 1
+      },
+      {
+        "joueurId": "mendaro",
+        "poste": "MC",
+        "cellule": 5
+      },
+      {
+        "joueurId": "ortubia",
+        "poste": "MC",
+        "cellule": 6
+      },
+      {
+        "joueurId": "pradilla",
+        "poste": "AG",
+        "cellule": 2
+      },
+      {
+        "joueurId": "quintanar",
+        "poste": "AD",
+        "cellule": 2
+      },
+      {
+        "joueurId": "rivadeo",
+        "poste": "AC",
+        "cellule": 4
+      }
     ]
   }
 }

@@ -29,6 +29,7 @@ export class EcranMatch {
   private statut!: HTMLElement;
   private boutonDepart!: HTMLButtonElement;
   private boutonPause!: HTMLButtonElement;
+  private boutonZones!: HTMLButtonElement;
   private boutonsMode: Record<ModePossession, HTMLButtonElement> = {} as Record<ModePossession, HTMLButtonElement>;
 
   constructor(
@@ -85,6 +86,18 @@ export class EcranMatch {
       this.enPause = !this.enPause;
       this.majCommandes();
     });
+    const vitesses = [0.5, 1, 2, 3, 4];
+    const boutonVitesse = html("button", { type: "button", class: "bouton bouton-court", "aria-label": "Vitesse" }, c1, `×${this.vitesse}`);
+    boutonVitesse.addEventListener("click", () => {
+      this.vitesse = vitesses[(vitesses.indexOf(this.vitesse) + 1) % vitesses.length]!;
+      boutonVitesse.textContent = `×${this.vitesse}`;
+    });
+    this.boutonZones = html("button", { type: "button", class: "bouton bouton-court" }, c1, "Zones");
+    this.boutonZones.addEventListener("click", () => {
+      this.zonesVisibles = !this.zonesVisibles;
+      this.majCommandes();
+      this.dessiner();
+    });
 
     const s = svg("svg", {
       viewBox: `0 0 ${68 * ECHELLE + 2 * MARGE} ${105 * ECHELLE + 2 * MARGE}`,
@@ -101,15 +114,8 @@ export class EcranMatch {
     );
     this.ballon = svg("circle", { r: 3.2, class: "ballon" }, s);
 
-    const legende = html("div", { class: "legende" }, r);
-    html("span", { class: "rond rond-nous" }, legende);
-    html("span", {}, legende, `${nous.nom} (${nous.nationalite})`);
-    html("span", { class: "rond rond-eux" }, legende);
-    html("span", {}, legende, `${eux.nom} (${eux.nationalite})`);
-
-    html("div", { class: "etiquette" }, r, "Qui a le ballon");
-    const c2 = html("div", { class: "segments", role: "group", "aria-label": "Possession" }, r);
-    const libelles: Record<ModePossession, string> = { auto: "Alterné", nous: "Vous", eux: "Adversaire" };
+    const c2 = html("div", { class: "segments", role: "group", "aria-label": "Qui a le ballon" }, r);
+    const libelles: Record<ModePossession, string> = { auto: "Ballon alterné", nous: "À vous", eux: "À l'adversaire" };
     for (const m of ["auto", "nous", "eux"] as const) {
       const b = html("button", { type: "button", class: "segment" }, c2, libelles[m]);
       b.addEventListener("click", () => {
@@ -120,29 +126,16 @@ export class EcranMatch {
       this.boutonsMode[m] = b;
     }
 
-    const c3 = html("label", { class: "curseur" }, r);
-    html("span", { class: "etiquette" }, c3, "Vitesse");
-    const range = html("input", { type: "range", min: 0.5, max: 4, step: 0.5, value: this.vitesse }, c3);
-    const sortie = html("span", { class: "valeur" }, c3, `×${this.vitesse}`);
-    range.addEventListener("input", () => {
-      this.vitesse = Number(range.value);
-      sortie.textContent = `×${this.vitesse}`;
-    });
-
-    const c4 = html("label", { class: "case-a-cocher" }, r);
-    const cb = html("input", { type: "checkbox" }, c4);
-    cb.checked = this.zonesVisibles;
-    html("span", {}, c4, "Montrer les zones de votre équipe");
-    cb.addEventListener("change", () => {
-      this.zonesVisibles = cb.checked;
-      this.dessiner();
-    });
-
+    const legende = html("div", { class: "legende" }, r);
+    html("span", { class: "rond rond-nous" }, legende);
+    html("span", {}, legende, `${nous.nom} (${nous.nationalite})`);
+    html("span", { class: "rond rond-eux" }, legende);
+    html("span", {}, legende, `${eux.nom} (${eux.nationalite})`);
     html(
       "p",
       { class: "note" },
       r,
-      "Prototype 1 : pas encore de passes ni de tirs. Le petit rond blanc est un ballon simulé qui sert seulement à faire bouger les blocs.",
+      "Pas encore de passes ni de tirs : le petit rond blanc est un ballon simulé qui sert seulement à faire bouger les blocs.",
     );
 
     this.majCommandes();
@@ -152,7 +145,9 @@ export class EcranMatch {
   private majCommandes(): void {
     this.boutonDepart.textContent = this.sim.demarre ? "Recommencer" : "Coup d'envoi";
     this.boutonPause.textContent = this.enPause ? "Reprendre" : "Pause";
-    this.boutonPause.hidden = !this.sim.demarre;
+    this.boutonPause.disabled = !this.sim.demarre;
+    this.boutonZones.classList.toggle("bouton-actif", this.zonesVisibles);
+    this.boutonZones.setAttribute("aria-pressed", String(this.zonesVisibles));
     for (const [m, b] of Object.entries(this.boutonsMode)) {
       b.classList.toggle("segment-actif", m === this.mode);
       b.setAttribute("aria-pressed", String(m === this.mode));

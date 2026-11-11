@@ -18,7 +18,7 @@ footballeurs.
 ## Prototype 1
 
 Deux écrans :
-- **Placement** : le demi-terrain, les rectangles de chaque poste et leurs cases. On choisit un joueur (sur le terrain ou dans l'effectif), puis une case de son poste. On peut aussi garder le doigt appuyé sur un joueur et le faire glisser : lâché sur une case libre, il y va ; lâché sur un autre joueur, ils échangent leurs places.
+- **Placement** (une page) : le demi-terrain et le banc. On fait glisser les ronds : sur une case libre (le joueur y va), sur un autre joueur (échange, ou entrée d'un remplaçant), sur le banc (sortie). Les cases s'affichent pendant le glissement. Un simple toucher affiche le joueur.
 - **Match** : le terrain entier. Les 22 joueurs partent de leurs positions de coup d'envoi, puis montent ou redescendent selon une possession simulée. Pas encore de passes ni de tirs.
 
 ### Lancer

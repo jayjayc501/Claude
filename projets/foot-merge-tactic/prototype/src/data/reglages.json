@@ -11,8 +11,8 @@
         "attaque": 23
       },
       "largeurLigneM": {
-        "defense": 55,
-        "milieu": 58,
+        "defense": 52,
+        "milieu": 54,
         "attaque": 40
       },
       "ecartMinDansLigneM": 6,

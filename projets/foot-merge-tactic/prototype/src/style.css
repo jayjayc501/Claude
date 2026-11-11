@@ -50,13 +50,14 @@ body {
   font: inherit; color: inherit; background: var(--carte);
   border: 1px solid var(--bord); border-radius: 10px; cursor: pointer;
 }
-.onglet { flex: 1; min-height: 44px; font-weight: 500; }
+.onglet { flex: 1; min-height: 42px; font-weight: 500; }
 .onglet-actif { border-color: var(--accent); color: var(--accent); background: var(--accent-fond); }
 .ligne-statut { display: flex; justify-content: space-between; font-size: 14px; color: var(--texte-2); }
-.message { font-size: 14px; color: var(--texte-2); min-height: 21px; margin: 2px 0 6px; }
+.message { font-size: 14px; color: var(--texte-2); min-height: 42px; margin: 2px 0 4px; line-height: 1.45; }
 .message.erreur { color: var(--erreur); }
 svg.planche, svg.terrain { width: 100%; display: block; touch-action: manipulation; user-select: none; }
-svg.terrain { height: min(64vh, calc((min(100vw, 520px) - 24px) * 1.52)); }
+svg.terrain { height: min(calc(100dvh - 300px), calc((min(100vw, 520px) - 24px) * 1.52)); min-height: 300px; }
+svg.planche { height: min(calc(100dvh - 190px), calc((min(100vw, 520px) - 24px) * 1.43)); min-height: 320px; }
 .pelouse { fill: var(--pelouse); }
 .lignes { fill: none; stroke: var(--lignes); stroke-width: 1.4; }
 .lignes .point { fill: var(--lignes); stroke: none; }
@@ -123,3 +124,13 @@ h2 { font-size: 15px; font-weight: 600; margin: 14px 0 6px; }
 .case-a-cocher input { width: 20px; height: 20px; }
 .note { font-size: 13px; color: var(--texte-2); }
 button[hidden] { display: none; }
+.banc-fond { fill: var(--carte); stroke: var(--bord); stroke-width: 1; }
+.banc-titre { font-size: 12px; fill: var(--texte-2); }
+.jeton-banc .jeton-rond { fill: var(--carte); stroke: var(--nous); stroke-width: 2; }
+.jeton-banc .jeton-texte { fill: var(--nous-fonce); }
+.case-fond { fill: var(--carte); fill-opacity: 0.35; stroke: var(--zone); stroke-opacity: 0.55; stroke-width: 1; pointer-events: none; }
+.case-fond-prise { fill: var(--zone); fill-opacity: 0.12; }
+.bouton-court { flex: 0 0 auto; padding: 0 12px; min-width: 56px; }
+.bouton-actif { border-color: var(--accent); color: var(--accent); background: var(--accent-fond); }
+.bouton:disabled { opacity: 0.45; }
+@media (prefers-color-scheme: dark) { .jeton-banc .jeton-texte { fill: var(--zone); } }

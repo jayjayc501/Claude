@@ -159,7 +159,7 @@ export class MatchSim {
       const porteur = candidats[this.rng.entier(candidats.length)];
       if (porteur) {
         const sens = this.possession === 0 ? 1 : -1;
-        const avance = this.rng.entre(2, 8) * sens;
+        const avance = this.rng.entre(-5, 8) * sens; // parfois une passe en retrait
         const cote = this.rng.entre(-4, 4);
         this.cibleBallon = {
           x: Math.min(this.donnees.largeurM - 2, Math.max(2, porteur.pos.x + cote)),

@@ -29,6 +29,12 @@ export interface GrilleDef {
   roles: string[];
   colonnes?: string[];
   lignes?: string[];
+  /** Bornes de chaque colonne (0 à 1 dans le rectangle). Des bornes qui se
+   *  recouvrent donnent des cases qui se chevauchent (la case de l'axe à
+   *  cheval sur la gauche et la droite). Par défaut : colonnes égales. */
+  colonnesBornes?: [number, number][];
+  /** Idem pour les lignes, de la plus basse à la plus haute. */
+  lignesBornes?: [number, number][];
   /** Montée en attaque propre à chaque ligne de la grille (sinon celle du poste). */
   monteeParLigneM?: number[];
 }

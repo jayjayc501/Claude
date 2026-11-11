@@ -41,13 +41,15 @@ function calculerPoste(def: PosteDef): Poste {
       for (let col = 0; col < g.cols; col++) {
         const index = row * g.cols + col;
         const morceaux = [g.colonnes?.[col], g.lignes?.[row]].filter(Boolean);
+        const [c0, c1] = g.colonnesBornes?.[col] ?? [col / g.cols, (col + 1) / g.cols];
+        const [l0, l1] = g.lignesBornes?.[row] ?? [row / g.rows, (row + 1) / g.rows];
         cases.push({
           poste: def.id,
           index,
           role: g.roles[row] ?? def.id,
           label: morceaux.join(", ") || `case ${index + 1}`,
-          centre: { x: r.x + ((col + 0.5) / g.cols) * r.w, y: r.y + ((row + 0.5) / g.rows) * r.h },
-          rect: { x: r.x + (col / g.cols) * r.w, y: r.y + (row / g.rows) * r.h, w: r.w / g.cols, h: r.h / g.rows },
+          centre: { x: r.x + ((c0 + c1) / 2) * r.w, y: r.y + ((l0 + l1) / 2) * r.h },
+          rect: { x: r.x + c0 * r.w, y: r.y + l0 * r.h, w: (c1 - c0) * r.w, h: (l1 - l0) * r.h },
           monteeAttaqueM: g.monteeParLigneM?.[row] ?? def.monteeAttaqueM,
         });
       }

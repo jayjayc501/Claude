@@ -59,6 +59,19 @@ export function echanger(composition: Placement[], joueurA: string, joueurB: str
   };
 }
 
+/** Un remplaçant prend la case d'un joueur du terrain, qui retourne sur le banc. */
+export function remplacer(composition: Placement[], entrant: string, sortant: string): Resultat {
+  if (composition.some((p) => p.joueurId === entrant)) {
+    return { ok: false, erreur: "Ce joueur est déjà sur le terrain." };
+  }
+  const place = composition.find((p) => p.joueurId === sortant);
+  if (!place) return { ok: false, erreur: "Le joueur remplacé doit être sur le terrain." };
+  return {
+    ok: true,
+    composition: composition.map((p) => (p.joueurId === sortant ? { ...place, joueurId: entrant } : p)),
+  };
+}
+
 /** Case visée par un point du demi-terrain : parmi les cases qui contiennent le
  *  point (les rectangles se chevauchent), celle dont le centre est le plus proche. */
 export function caseAuPoint(donnees: Donnees, point: PointNorm): Cellule | undefined {

@@ -70,3 +70,18 @@ Historique des étapes, des choix techniques et des résultats de tests.
 **Mesure** (6 matchs, défense organisée) : ligne de défense 30 m, ligne du milieu 28-29 m, équipe 30-32 m de large. C'était contraire à la référence football (environ 40 m, la largeur de la surface). Le test de réalisme ne vérifiait qu'une largeur maximale ; il vérifie maintenant aussi le minimum.
 
 **Correction** : étalement des lignes 55 m (défense), 58 m (milieu), 40 m (attaque), qui donne des lignes d'environ 40 m ; coulissement ramené de 60 % à 45 %. Résultat mesuré : lignes de 40-41 m, équipe de 42 m. 30 tests verts. Capture au format téléphone : ballon sur le côté gauche, bloc décalé à gauche sur 40 m, latéral opposé dans le demi-espace.
+
+## 11/11/2026 — Nouveau découpage et écrans sur une page
+
+**Décisions du concepteur** : DC 6 cases sur 2 lignes, milieu 9 sur 3 lignes, attaque 6 sur 2 lignes ; sur chaque ligne, 3 cases, et la case de l'axe est à cheval sur la gauche et la droite ; les grandes zones (défense, milieu, attaque) ne doivent presque plus se chevaucher. Commits directs autorisés pour le prototype.
+
+**Ce qui a été fait**
+- Données : bornes de colonnes qui se recouvrent (`colonnesBornes` : gauche 0-40 %, axe 28-72 %, droite 60-100 % du rectangle) ; rectangles redessinés (défense 7-25 m, milieu 24-42 m, attaque 41-52,5 m ; côtés séparés des zones centrales) ; compositions par défaut mises à jour ; étalement des lignes ajusté (52 et 54 m) pour garder des lignes d'environ 40 m.
+- Règle `remplacer()` : un remplaçant prend la case d'un titulaire.
+- Écran de placement sur une page : demi-terrain et banc en ronds ; tout au glisser-déposer (case libre, échange, entrée d'un remplaçant, sortie vers le banc) ; cases visibles seulement pendant le glissement.
+- Écran de match sur une page : commandes au-dessus du terrain (coup d'envoi, pause, vitesse, zones), possession dessous.
+- Faux ballon : passes en retrait possibles (il dérivait vers la ligne de but adverse).
+
+**Tests** : 33 verts (nouveaux : remplacement, cases de l'axe à cheval, grandes zones séparées de 2 m au plus). Seuil du test « le bloc monte puis redescend » ramené à 8 m : perdu haut, le ballon reste loin de notre but et le bloc défend haut, ce qui est correct.
+
+**Vérification au format téléphone** : 390 × 844, la page de placement tient exactement sur l'écran ; 375 × 667, il reste 12 pixels de trop ; sur l'écran de match, les boutons de possession sont visibles sans défiler dans les deux cas. Parcours au glisser-déposer : entrée d'un remplaçant, sortie vers le banc, retour sur une case libre, refus d'un 12e joueur avec un message clair, échange, simple toucher.

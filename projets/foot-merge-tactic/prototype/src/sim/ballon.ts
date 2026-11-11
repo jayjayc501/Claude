@@ -139,9 +139,15 @@ export class BallonReel {
     const pression = Math.min(...adverses.map((o) => dist(o.pos, p.pos)));
     this.decisionA = s.temps + this.rng.entre(r.decisionS.min, r.decisionS.max);
 
-    // Tir : près du but et pas trop excentré.
-    if (p.poste.id !== "G" && dBut < r.tirDistanceM && Math.abs(p.pos.x - W / 2) < dBut * 0.8) {
-      if (this.rng.suivant() < 0.06 + 0.3 * (1 - dBut / r.tirDistanceM)) {
+    // Tir : dans la surface, on tire toujours (jamais de passe en retrait) ;
+    // plus loin mais à portée et pas trop excentré, on tire parfois.
+    if (p.poste.id !== "G") {
+      const dansSurface = Math.abs(sens === 1 ? L - p.pos.y : p.pos.y) <= r.surface.profondeurM && Math.abs(p.pos.x - W / 2) <= r.surface.demiLargeurM;
+      if (dansSurface) {
+        this.tirer(but);
+        return;
+      }
+      if (dBut < r.tirDistanceM && Math.abs(p.pos.x - W / 2) < dBut * 0.8 && this.rng.suivant() < 0.06 + 0.3 * (1 - dBut / r.tirDistanceM)) {
         this.tirer(but);
         return;
       }
@@ -208,7 +214,7 @@ export class BallonReel {
   private tirer(but: PointM): void {
     const r = this.sim.reglages.ballon;
     const p = this.porteur!;
-    const cible = { x: but.x + this.rng.entre(-5.2, 5.2), y: but.y };
+    const cible = { x: but.x + this.rng.entre(-6.5, 6.5), y: but.y };
     const dx = cible.x - this.sim.ballon.x;
     const dy = cible.y - this.sim.ballon.y;
     const n = Math.hypot(dx, dy) || 1;
@@ -259,7 +265,7 @@ export class BallonReel {
       if (this.reserve && s.temps < this.reserve.jusqua && j.camp !== this.reserve.camp) continue;
       if (j === this.dernier && s.temps - this.dernierTemps < r.recontactS) continue;
       const gardienAdverse = j.poste.id === "G" && this.tirEnCours && this.dernier !== null && j.camp !== this.dernier.camp;
-      const rayon = j === this.receveur ? r.rayonReceveurM : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM;
+      const rayon = j === this.receveur ? r.rayonReceveurM : gardienAdverse ? r.rayonGardienM + 1.4 : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM;
       const d = dist(j.pos, s.ballon);
       if (d > rayon) continue;
       if (vBalle > r.vitesseControleMaxMS && j !== this.receveur && j.poste.id !== "G") continue;

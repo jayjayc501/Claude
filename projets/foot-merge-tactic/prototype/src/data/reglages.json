@@ -101,6 +101,7 @@
     "imprecision": { "baseDeg": 1.5, "parMetreDeg": 0.12 },
     "vitesseTirMS": 26,
     "tirDistanceM": 22,
+    "surface": { "profondeurM": 16.5, "demiLargeurM": 20.15 },
     "arretProba": 0.75,
     "dribbleAvanceM": 8,
     "dribbleFacteur": 0.9,

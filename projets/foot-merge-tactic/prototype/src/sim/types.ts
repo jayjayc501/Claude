@@ -197,6 +197,8 @@ export interface Reglages {
     imprecision: { baseDeg: number; parMetreDeg: number };
     vitesseTirMS: number;
     tirDistanceM: number;
+    /** Surface de réparation : on y tire toujours. */
+    surface: { profondeurM: number; demiLargeurM: number };
     arretProba: number;
     dribbleAvanceM: number;
     dribbleFacteur: number;

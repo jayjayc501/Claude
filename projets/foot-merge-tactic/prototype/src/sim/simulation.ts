@@ -8,6 +8,7 @@
 
 import type { Donnees } from "./donnees";
 import { hauteurLigneDefensiveM, lignesAttaqueM, projeter, type LignesTenues } from "./projection";
+import { BallonReel } from "./ballon";
 import { Aleatoire } from "./rng";
 import type { Cellule, Equipe, Joueur, Phase, Placement, PointM, PointNorm, Poste, Reglages } from "./types";
 
@@ -46,6 +47,10 @@ export class MatchSim {
   phases: [Phase, Phase] = ["defense", "defense"];
   mode: ModePossession = "auto";
   ballon: PointM;
+  /** Buts marqués par camp (ballon réel seulement). */
+  score: [number, number] = [0, 0];
+  /** Ballon réel ; null : ballon simulé (anciens tests de projection). */
+  readonly balle: BallonReel | null;
   readonly joueurs: JoueurSim[];
   /** Hauteur de la ligne défensive que tient chaque équipe quand elle défend
    *  (mètres depuis son but ; null quand elle attaque). Elle suit le ballon à
@@ -69,8 +74,10 @@ export class MatchSim {
     readonly reglages: Reglages,
     readonly equipes: [Equipe, Equipe],
     readonly graine: number,
+    ballonReel = false,
   ) {
     this.rng = new Aleatoire(graine);
+    this.balle = ballonReel ? new BallonReel(this, graine) : null;
     this.ballon = this.centre();
     this.cibleBallon = this.centre();
     this.joueurs = [];
@@ -127,6 +134,14 @@ export class MatchSim {
     this.declencherReactions();
     this.programmerChangement();
     this.prochaineCible = this.temps;
+    this.balle?.remettre(this.centre(), 0);
+  }
+
+  /** Une équipe prend la possession (ballon réel) : chacun réagit à son tour. */
+  prendrePossession(camp: Camp): void {
+    if (camp === this.possession) return;
+    this.possession = camp;
+    this.declencherReactions();
   }
 
   definirMode(mode: ModePossession): void {
@@ -144,7 +159,8 @@ export class MatchSim {
     const dt = this.reglages.pasDeTempsS;
     this.temps += dt;
     this.gererPossession();
-    this.deplacerBallon(dt);
+    if (this.balle) this.balle.pas(dt);
+    else this.deplacerBallon(dt);
     this.tenirLignes(dt);
     this.historique.push({ ballon: { ...this.ballon }, lignesDef: [...this.lignesDef] });
     if (this.historique.length > Math.ceil(1 / dt)) this.historique.shift();
@@ -159,7 +175,8 @@ export class MatchSim {
 
   private gererPossession(): void {
     let voulu: Camp = this.possession;
-    if (this.mode === "nous") voulu = 0;
+    if (this.balle) voulu = this.possession;
+    else if (this.mode === "nous") voulu = 0;
     else if (this.mode === "eux") voulu = 1;
     else if (this.temps >= this.prochainChangement) voulu = this.possession === 0 ? 1 : 0;
 
@@ -305,6 +322,7 @@ export class MatchSim {
       j.cible = this.versAbsolu(j.camp, p);
     }
     for (const camp of [0, 1] as const) this.espacerLignes(camp);
+    this.balle?.surcharger();
   }
 
   /** En défense, deux joueurs d'une même ligne ne se marchent pas dessus :
@@ -348,7 +366,8 @@ export class MatchSim {
     const nouvelles: PointM[] = [];
     this.joueurs.forEach((j, i) => {
       // Course de transition (sprint) juste après la réaction, sinon course normale.
-      const vMax = (this.temps < j.sprintJusqua ? this.reglages.transition.sprint.vitesseMS : m.vitesseMaxMS) * j.facteur;
+      const conduit = this.balle?.porteur === j ? this.reglages.ballon.dribbleFacteur : 1;
+      const vMax = (this.temps < j.sprintJusqua ? this.reglages.transition.sprint.vitesseMS : m.vitesseMaxMS) * j.facteur * conduit;
       // 1. Course : vers la cible, en freinant à l'approche, accélération limitée.
       const dx = j.cible.x - j.pos.x;
       const dy = j.cible.y - j.pos.y;

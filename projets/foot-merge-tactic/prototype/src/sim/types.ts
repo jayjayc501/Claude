@@ -174,6 +174,35 @@ export interface Reglages {
      *  joueur (entre minS et maxS) plus parMetreS par mètre qui le sépare du ballon. */
     perception: { minS: number; maxS: number; parMetreS: number };
   };
+  /** Ballon réel (mission 2). */
+  ballon: {
+    rayonControleM: number;
+    rayonReceveurM: number;
+    rayonGardienM: number;
+    /** Vitesse du ballon au-delà de laquelle un joueur ne le contrôle pas. */
+    vitesseControleMaxMS: number;
+    recontactS: number;
+    frottementParS: number;
+    passeMinM: number;
+    passeMaxM: number;
+    voieLibreM: number;
+    seuilPasse: number;
+    pressionM: number;
+    pressingM: number;
+    decisionS: { min: number; max: number };
+    premiereDecisionS: { min: number; max: number };
+    vitessePasseMinMS: number;
+    vitessePasseMaxMS: number;
+    vitessePasseParMetre: number;
+    imprecision: { baseDeg: number; parMetreDeg: number };
+    vitesseTirMS: number;
+    tirDistanceM: number;
+    arretProba: number;
+    dribbleAvanceM: number;
+    dribbleFacteur: number;
+    tacle: { rayonM: number; parSeconde: number };
+    reserveRepriseS: number;
+  };
   possessionSimulee: {
     dureeMinS: number;
     dureeMaxS: number;

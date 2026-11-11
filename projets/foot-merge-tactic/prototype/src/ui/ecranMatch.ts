@@ -56,8 +56,7 @@ export class EcranMatch {
   }
 
   private nouveauMatch(): void {
-    this.sim = new MatchSim(this.donnees, this.reglages, this.equipes(), this.graine);
-    this.sim.definirMode(this.mode);
+    this.sim = new MatchSim(this.donnees, this.reglages, this.equipes(), this.graine, true);
     this.reserve = 0;
     this.construire();
   }
@@ -114,18 +113,6 @@ export class EcranMatch {
     );
     this.ballon = svg("circle", { r: 3.2, class: "ballon" }, s);
 
-    const c2 = html("div", { class: "segments", role: "group", "aria-label": "Qui a le ballon" }, r);
-    const libelles: Record<ModePossession, string> = { auto: "Ballon alterné", nous: "À vous", eux: "À l'adversaire" };
-    for (const m of ["auto", "nous", "eux"] as const) {
-      const b = html("button", { type: "button", class: "segment" }, c2, libelles[m]);
-      b.addEventListener("click", () => {
-        this.mode = m;
-        this.sim.definirMode(m);
-        this.majCommandes();
-      });
-      this.boutonsMode[m] = b;
-    }
-
     const legende = html("div", { class: "legende" }, r);
     html("span", { class: "rond rond-nous" }, legende);
     html("span", {}, legende, `${nous.nom} (${nous.nationalite})`);
@@ -135,7 +122,7 @@ export class EcranMatch {
       "p",
       { class: "note" },
       r,
-      "Pas encore de passes ni de tirs : le petit rond blanc est un ballon simulé qui sert seulement à faire bouger les blocs.",
+      "Le ballon est réel : les joueurs le conduisent, le passent, le tirent, l'adversaire l'intercepte ou le tacle. Pas encore de fautes, de hors-jeu ni de corners ; décisions volontairement simples.",
     );
 
     this.majCommandes();
@@ -206,7 +193,7 @@ export class EcranMatch {
     let texte: string;
     if (!sim.demarre) texte = "Positions au coup d'envoi. Touchez « Coup d'envoi » pour lancer.";
     else {
-      const qui = sim.possession === 0 ? "Vous avez le ballon" : "L'adversaire a le ballon";
+      const qui = `${sim.score[0]} – ${sim.score[1]} · ${sim.possession === 0 ? "Vous avez le ballon" : "L'adversaire a le ballon"}`;
       const etat = sim.enTransition
         ? "transition…"
         : sim.phases[0] === "attaque"

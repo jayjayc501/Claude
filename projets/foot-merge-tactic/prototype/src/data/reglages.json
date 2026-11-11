@@ -80,6 +80,33 @@
       "parMetreS": 0.004
     }
   },
+  "ballon": {
+    "rayonControleM": 1.1,
+    "rayonReceveurM": 1.6,
+    "rayonGardienM": 2.2,
+    "vitesseControleMaxMS": 20,
+    "recontactS": 0.5,
+    "frottementParS": 0.35,
+    "passeMinM": 6,
+    "passeMaxM": 38,
+    "voieLibreM": 2,
+    "seuilPasse": 8,
+    "pressionM": 4,
+    "pressingM": 16,
+    "decisionS": { "min": 0.6, "max": 1.2 },
+    "premiereDecisionS": { "min": 0.4, "max": 0.9 },
+    "vitessePasseMinMS": 10,
+    "vitessePasseMaxMS": 24,
+    "vitessePasseParMetre": 0.55,
+    "imprecision": { "baseDeg": 1.5, "parMetreDeg": 0.12 },
+    "vitesseTirMS": 26,
+    "tirDistanceM": 18,
+    "arretProba": 0.75,
+    "dribbleAvanceM": 8,
+    "dribbleFacteur": 0.9,
+    "tacle": { "rayonM": 2.8, "parSeconde": 0.5 },
+    "reserveRepriseS": 3
+  },
   "possessionSimulee": {
     "dureeMinS": 4,
     "dureeMaxS": 8,

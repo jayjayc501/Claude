@@ -161,3 +161,20 @@ Historique des étapes, des choix techniques et des résultats de tests.
 
 **Limites** : le faux ballon change de camp n'importe où, parfois loin de l'équipe qui récupère ; une partie des écarts mesurés vient de là. Le contre-pressing et la contre-attaque viendront avec le vrai ballon (mission 2).
 
+
+## 12/11/2026 (suite) — Mission 2, étape 1 : ballon réel
+
+Demande du concepteur : « passons à un ballon touché par les joueurs ». Étapes 1 à 3 de la feuille de route (ballon physique, actions, interception). Décisions fines, contre-pressing et collectif : plus tard.
+
+**Fait** (`src/sim/ballon.ts`, réglages dans `reglages.json` → `ballon`) :
+- Le ballon a une position et une vitesse, aux pieds d'un porteur ou libre (frottement 0,35/s). La possession est celle du dernier joueur qui l'a touché ; la possession simulée n'est plus utilisée à l'écran (gardée pour les anciens tests de projection : `new MatchSim(..., true)` active le ballon réel).
+- Le porteur conduit (ballon 0,7 m devant, direction lissée), puis toutes les 0,6 à 1,2 s : tir s'il est près du but (18 m) et pas excentré, sinon passe au partenaire le mieux noté (progression, espace, distance, voie libre à 2 m des adversaires), sinon continue ; sous pression (4 m) : passe ou dégagement.
+- Passe : vitesse 10 à 24 m/s selon la distance, visée devant le receveur, imprécision (1,5° + 0,12°/m). Tir : 26 m/s, cadre ± 5,2 m, arrêt du gardien 75 %.
+- Interception : le premier joueur dans le rayon de contrôle (1,1 m, 1,6 m pour le receveur, 2,2 m gardien) prend le ballon ; tacle sur le porteur dans 2,8 m (0,5/s). Les deux plus proches du porteur le pressent ; le receveur et les plus proches du ballon libre vont le chercher.
+- Remises en jeu simplifiées : touche et sortie de but (pas de corner), remise au centre après but, 3 s de priorité à l'équipe qui remet. Score affiché à l'écran.
+
+**Mesures** (4 graines, 3 min chacune) : 9 à 11 passes par minute et par équipe, 62 à 93 % réussies ; 4 à 9 changements de camp par minute ; 0 à 3 tirs par équipe pour 3 min ; 0 à 1 but ; ballon libre 4 à 7 s au plus (coup d'envoi exclu).
+
+**Tests** : 77 verts. `tests/ballon.test.ts` : ballon sur le terrain, pas de saut, collé à son porteur ; même graine, même match ; but et sortie de but ; passes (4 à 16 par minute, 55 à 97 % réussies) ; changements de camp (2 à 12 par minute) ; tirs (moyenne sous 0,5 par équipe et par minute) ; ballon jamais libre plus de 9 s ; la prise de possession fait basculer l'équipe.
+
+**Limites / à régler** : trop de changements de camp et de tirs par rapport au vrai football (comptés pour l'instant « en montage ») ; le gardien adverse peut se tenir jusqu'à 22 m de son but en attaque (projection d'origine, à revoir) ; pas de hors-jeu, de fautes, de corners ; aucune qualité individuelle (tous les joueurs passent et tirent pareil) ; décisions simples, sans appels ni démarquages.

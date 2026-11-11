@@ -11,12 +11,12 @@
         "attaque": 23
       },
       "largeurLigneM": {
-        "defense": 40,
-        "milieu": 40,
-        "attaque": 28
+        "defense": 55,
+        "milieu": 58,
+        "attaque": 40
       },
       "ecartMinDansLigneM": 6,
-      "suiviLateral": 0.6,
+      "suiviLateral": 0.45,
       "influencePlacement": 0.2,
       "gardien": {
         "distanceDerriereLigneM": 22,

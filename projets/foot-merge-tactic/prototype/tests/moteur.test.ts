@@ -284,10 +284,21 @@ describe("réalisme (référence football)", () => {
     }
   });
 
-  test("largeur de la ligne de défense : 45 m au plus", () => {
+  test("largeur en défense : lignes de 35 à 45 m (largeur de la surface), équipe de 38 à 50 m", () => {
+    // Le minimum compte autant que le maximum : une équipe resserrée dans
+    // l'axe laisse les côtés vides (retour du concepteur, 11/11).
+    const largeur = (xs: number[]) => Math.max(...xs) - Math.min(...xs);
     for (const graine of [1, 2, 3, 4, 5]) {
-      const xs = notreLigne(defenseOrganisee(graine), "defense").map((j) => j.pos.x);
-      expect(Math.max(...xs) - Math.min(...xs)).toBeLessThanOrEqual(45);
+      const m = defenseOrganisee(graine);
+      const def = largeur(notreLigne(m, "defense").map((j) => j.pos.x));
+      const mil = largeur(notreLigne(m, "milieu").map((j) => j.pos.x));
+      const equipe = largeur(m.joueurs.filter((j) => j.camp === 0 && j.poste.id !== "G").map((j) => j.pos.x));
+      expect(def).toBeGreaterThanOrEqual(35);
+      expect(def).toBeLessThanOrEqual(45);
+      expect(mil).toBeGreaterThanOrEqual(35);
+      expect(mil).toBeLessThanOrEqual(45);
+      expect(equipe).toBeGreaterThanOrEqual(38);
+      expect(equipe).toBeLessThanOrEqual(50);
     }
   });
 

@@ -141,7 +141,7 @@ export class BallonReel {
 
     // Tir : près du but et pas trop excentré.
     if (p.poste.id !== "G" && dBut < r.tirDistanceM && Math.abs(p.pos.x - W / 2) < dBut * 0.8) {
-      if (this.rng.suivant() < 0.05 + 0.25 * (1 - dBut / r.tirDistanceM)) {
+      if (this.rng.suivant() < 0.03 + 0.17 * (1 - dBut / r.tirDistanceM)) {
         this.tirer(but);
         return;
       }

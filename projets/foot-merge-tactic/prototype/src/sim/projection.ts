@@ -54,7 +54,7 @@ function projeterDefense(
   const ligneDef = tenues.ligneDefM ?? hauteurLigneDefensiveM(ballon, reglages, longueurM);
   // Décalage dû au placement : la position dans le rectangle, fortement réduite.
   const centreRectY = poste.rect.y + poste.rect.h / 2;
-  const decalageM = (base.y - centreRectY) * longueurM * d.influencePlacement;
+  const decalageM = (base.y - centreRectY) * longueurM * d.influencePlacement[poste.ligneDefense];
   const ballonXM = ballon.x * LARGEUR_M;
 
   if (poste.ligneDefense === "gardien") {

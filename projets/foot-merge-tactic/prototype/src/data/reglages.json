@@ -23,7 +23,7 @@
         "max": 44
       },
       "suiviLateral": 0.45,
-      "influencePlacement": 0.2,
+      "influencePlacement": { "gardien": 0.2, "defense": 0.45, "milieu": 0.7, "attaque": 0.7 },
       "gardien": {
         "distanceDerriereLigneM": 22,
         "minM": 3,
@@ -100,7 +100,7 @@
     "vitessePasseParMetre": 0.55,
     "imprecision": { "baseDeg": 1.5, "parMetreDeg": 0.12 },
     "vitesseTirMS": 26,
-    "tirDistanceM": 18,
+    "tirDistanceM": 16,
     "arretProba": 0.75,
     "dribbleAvanceM": 8,
     "dribbleFacteur": 0.9,

@@ -132,7 +132,7 @@ export interface Reglages {
        *  placement (référence football §3 et §9.1, règle 5). */
       largeurLigneBornesM: { min: number; max: number };
       suiviLateral: number;
-      influencePlacement: number;
+      influencePlacement: Record<"gardien" | "defense" | "milieu" | "attaque", number>;
       gardien: { distanceDerriereLigneM: number; minM: number; maxM: number; suiviLateral: number };
     };
     attaque: {

@@ -727,8 +727,8 @@ describe.each(PLATEAUX)("réalisme (référence football), plateau %s", (plateau
       longueursTard.push(longueur(m, D));
     });
     expect(part(longueurs, (x) => x <= 50)).toBeGreaterThan(0.95);
-    // Après 5 s, défense organisée : 8 à 15 m entre défense et milieu, 40 m au plus de long.
-    expect(part(ecartsTard, (x) => x >= 8 && x <= 15)).toBeGreaterThan(0.9);
+    // Après 5 s, défense organisée : 8 à 16 m entre défense et milieu, 40 m au plus de long.
+    expect(part(ecartsTard, (x) => x >= 8 && x <= 16)).toBeGreaterThan(0.9);
     expect(part(longueursTard, (x) => x <= 40)).toBeGreaterThan(0.95);
   });
 

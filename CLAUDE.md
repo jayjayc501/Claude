@@ -23,12 +23,15 @@ mets-le à jour quand quelque chose d'important change.
 - Tester le code avant de le committer quand c'est possible.
 - Messages de commit courts et clairs, en français.
 - Ne jamais committer de mots de passe, clés d'API ou autres secrets.
+- Travail créatif (vidéos, images, voix) : être exigeant, faire soi-même plusieurs
+  essais et montrer un résultat abouti plutôt que demander son avis à chaque étape.
+  Faire valider seulement les étapes clés (script, voix, rendu final).
 
 ## Projets en cours
 
 Ajouter ici une ligne par projet :
 `- projets/<nom> — description courte — état (en cours / terminé)`
 
-- projets/shorts-mythologie — Shorts YouTube pour la chaîne « La Pause Mytho…logique » (Kling + ElevenLabs + montage ffmpeg) — en cours
+- projets/shorts-mythologie — Shorts YouTube pour la chaîne « La Pause Mytho…logique » (Kling + ElevenLabs + montage ffmpeg) — en cours (Short Odin terminé en 4K ; utiliser monter2.py, lire projets/shorts-mythologie/METHODE.md avant tout nouveau Short)
 - projets/jetelavaisdit — App mobile « Je te l'avais dit » : sceller une phrase datée et l'envoyer plus tard avec une carte d'authenticité — en cours (prototype en ligne en version web : https://jayjayc501.github.io/Claude/app/ ; à tester)
 - projets/foot-merge-tactic — Jeu de football mobile : cartes, fusions de joueurs et matchs tactiques simulés ; priorité au moteur de match (contexte dans son `CLAUDE.md`) — en cours (conception, pas encore de code)

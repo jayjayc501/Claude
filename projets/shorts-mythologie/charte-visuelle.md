@@ -24,13 +24,19 @@ Référence de qualité : les **vidéos longues** de la chaîne (pas les anciens
 ## Texte à l'écran
 - **Noms des personnages** : lettres gothiques (Fraktur) or métallique, en haut à droite,
   à leur première apparition (images générées sur fond noir, rendues transparentes).
-- **Titre d'accroche** pendant la première seconde, puis **8 mots clés au maximum**,
-  en or, police Inter Display Black. Pas de sous-titres complets incrustés : le texte
-  complet va dans le fichier `.srt` importé dans YouTube (CC).
+- **Titre d'accroche** (la question) pendant les 3 premières secondes, puis **5 expressions
+  au maximum**, en or, police Inter Display Black, chacune compréhensible seule
+  (« Payé de son sang », jamais « Sang » tout seul), calée sur la voix.
+  Pas de sous-titres complets incrustés : le texte complet va dans le fichier `.srt`
+  importé dans YouTube (CC).
+- Images des noms prêtes : `commun/noms/` (Odin, Mímir, Fenrir).
 
 ## Carte de fin
-« La pause Mytho..logique + NORDIQUE » avec corbeau bleu et oiseau doré, 1,5 s.
-Version actuelle récupérée en 720×1280 : remplacer par le fichier original si disponible.
+`commun/fin-chaine/` : décor animé (corbeau sur pierre runique, oiseau doré, horizon en feu)
+et texte du logo « La pause Mytho… logique + NORDIQUE ». Fondu enchaîné de 0,9 s depuis le
+dernier plan, puis le logo s'écrit ligne par ligne (logo_anime.py) ; 3,3 s en tout.
+Le texte du logo vient d'une capture en 720×1280 : le remplacer par le fichier original
+du logo s'il est disponible.
 
 ## Prompts (anglais)
 Les prompts commencent par « Photorealistic cinematic film still, vertical 9:16 » et se

@@ -90,6 +90,11 @@ Chaîne de production qui a donné le meilleur résultat (voir `shorts/odin-oeil
 
 ## Matériel commun à tous les Shorts
 
+Avant un nouveau Short, lire **`METHODE.md`** (façon de travailler, script, voix, Kling, montage, contrôle, publication).
+
+- `commun/noms/` : noms dorés transparents d'Odin, Mímir et Fenrir (pour `"noms"` dans montage.json).
+- `commun/musiques/` : « Ritual of the Last Dawn » (ElevenLabs Music, instrumental).
+
 `commun/fin-chaine/` : la carte de fin de la chaîne, à réutiliser telle quelle.
 - `fin-fond.mp4` : décor animé (corbeau sur pierre runique, oiseau doré, horizon en feu), 3 s, 1080x1920.
 - `fin-texte.png` : texte du logo détouré (La pause Mytho… logique, NORDIQUE, icônes).

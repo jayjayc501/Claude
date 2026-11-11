@@ -33,8 +33,8 @@ Une proposition ne devient une règle qu'après validation explicite du concepte
 Jeu de football mobile. Le joueur est **entraîneur** : il ne contrôle pas les
 footballeurs. Avant un tournoi, il compose un deck de 4 ou 5 nationalités.
 Pendant le tournoi, il recrute des joueurs fictifs (cartes) au mercato, les
-fusionne, les place dans les sous-zones de leur poste, puis regarde un
-moteur simuler le match en vue du dessus, comme le
+fusionne, les place sur un demi-terrain (positions de coup d'envoi), puis
+regarde un moteur simuler le match en vue du dessus, comme le
 moteur 2D de Football Manager. L'idée de fusion s'inspire du mode Merge
 Tactics de Clash Royale.
 
@@ -67,6 +67,8 @@ un plateau.
 - **Pour l'instant, une seule organisation** : chaque poste a **un seul rectangle de référence fixe** (position, largeur, profondeur). Les deux organisations offensive et défensive (§6 du dossier) sont en pause : trop compliquées et trop longues à régler.
 - Le rectangle n'est ni une case exclusive ni une barrière physique. Les rectangles ne bougent pas. Ils doivent être **plus grands et plus chevauchants** que dans la maquette du 11/11.
 - **Chaque rectangle est découpé en sous-zones** (positions possibles) : G 2 (normal ou un peu avancé) ; DC 6 ; DD et DG 2 ou 3 (le concepteur hésite) ; milieu central 6, qui couvrent MDC, MC et MOC, un peu à gauche ou un peu à droite ; AD et AG 3 ; attaquant 5, dont 1 devant le but.
+- Les 3 cases de AG et AD sont trois postes, du plus bas au plus haut : milieu de côté (MG / MD), milieu avancé, attaquant de côté. Il n'y a donc pas de poste MD / MG à part.
+- **Placement sur un demi-terrain** (idée du concepteur) : l'entraîneur place ses joueurs comme avant le coup d'envoi, dans son propre camp. Les **règles de projection** du moteur transforment ensuite chaque position en position de match, en attaque et en défense. La correspondance exacte (une petite table de règles) se règle ensemble en regardant le prototype.
 - L'entraîneur place chaque joueur dans une sous-zone ; le rectangle reste la zone de liberté dans laquelle le moteur fait bouger le joueur.
 - **Plusieurs joueurs peuvent occuper le même poste**, dans la limite d'un maximum par poste (exemple donné : 3 DC, 1 AG).
 - Les rectangles peuvent **se chevaucher** et plusieurs joueurs peuvent occuper une zone commune. Le moteur doit quand même empêcher les joueurs de s'empiler.
@@ -78,6 +80,9 @@ un plateau.
 ### Priorités immédiates (concepteur, 11/11)
 - Un moteur jouable ; pouvoir choisir les joueurs qui jouent et les placer ; un jeu équilibré ; un rendu intéressant.
 - Les fusions viennent après le moteur.
+
+### Technique
+- **Prototype en version web** (TypeScript, page autonome ouverte d'un lien sur le téléphone). Godot n'est installable ni dans l'environnement de Claude ni sur le PC de travail du concepteur. Le choix de l'outil final (rester en web et en faire une application, ou passer à Godot) se fera quand le moteur convaincra.
 
 ### Tournoi et adversaires
 - **2 groupes de 4** (8 équipes), complétés par des équipes IA si besoin, puis demi-finales (1A contre 2B, 1B contre 2A) et finale. Pas d'aller-retour. 15 matchs ; chaque équipe en joue 3 à 5. À revoir plus tard si c'est trop long.
@@ -102,8 +107,7 @@ un plateau.
 ## Propositions à tester (non validées)
 
 Technique et moteur :
-- Technologie : **Godot 4 en 2D**, vue du dessus. À confirmer avant tout développement important.
-- Modules séparés : MatchSimulation, Pitch, Player, PositionZone, TeamTactics, TransitionManager, PlayerAI, BallController, ActionResolver, MatchEvents, MatchStats, TestHarness. Jamais un seul gros fichier.
+- Modules séparés (dossier `prototype/src/sim/` : données, placement, projection, simulation ; plus tard ballon, actions, statistiques). Jamais un seul gros fichier.
 - Simulation séparée du rendu et des animations. Simulation possible sans affichage (des milliers de matchs). Graine aléatoire contrôlable.
 - Terrain, rectangles, sous-zones, attributs et paramètres dans des fichiers de données, pas codés en dur.
 - Répartition 40 % qualité / 40 % tactique / 20 % hasard : **ancienne piste, pas une règle**. Ne pas la coder.
@@ -122,7 +126,11 @@ Placement :
 - Latéraux (DD, DG) : 3 cases en profondeur en attendant la décision (2 ou 3).
 - Un seul joueur par sous-zone.
 - Pour chaque poste, les données décrivent : rectangle, découpage (colonnes et lignes, ou liste de cases), maximum de joueurs.
-- Sans deuxième organisation, **le moteur gère seul le mouvement du bloc** : avec le ballon, les joueurs montent vers le haut de leur rectangle ; à la perte, ils redescendent progressivement, avec le délai de transition. Une équipe placée haut reste exposée, sans travail en plus pour l'entraîneur.
+- **Règles de projection** (première version, codée dans le prototype 1, chiffres dans `reglages.json` et `postes.json`) :
+  - en défense : la position du demi-terrain, resserrée de 10 % en largeur, qui glisse du côté du ballon et avance ou recule avec lui (10 m au plus) ;
+  - en attaque : chaque poste monte de sa distance (G 5 m, DC 20 m, latéraux et milieux 30 m, côtés 35 m, attaquant 40 m), l'équipe s'écarte de 20 % et suit un peu le ballon ;
+  - bascule après un délai de 0,5 s, puis déplacement progressif (7 m/s au plus).
+- Maximums provisoires (non validés) : DG 1, DD 1, milieu 4, AD 1, attaquant 3 (validés en exemple : 3 DC, 1 AG ; le gardien : 1).
 - Sur téléphone (maquette du 11/11) : terrain vertical, téléphone tenu droit ; on choisit un joueur puis on touche une case (une case de DC fait environ 65 × 45 pixels, un joueur environ 12 pixels) ; n'afficher que les cases du joueur choisi.
 
 Boucle de tournoi (transposition de Merge Tactics) :
@@ -145,11 +153,11 @@ Adversaires :
 
 ## Questions ouvertes (ne pas inventer de réponse)
 
-Tranchées le 11/11/2026 (voir le §20 du dossier) : ce que représentent les 10 s ; contre qui on joue ; d'où viennent les joueurs et les copies ; déplacer les rectangles ou non ; plusieurs joueurs au même poste ; nombre de groupes (2 groupes de 4) ; une seule organisation pour l'instant.
+Tranchées le 11/11/2026 (voir le §20 du dossier) : ce que représentent les 10 s ; contre qui on joue ; d'où viennent les joueurs et les copies ; déplacer les rectangles ou non ; plusieurs joueurs au même poste ; nombre de groupes (2 groupes de 4) ; une seule organisation pour l'instant ; MD / MG (ce sont les cases basses des côtés) ; placement sur un demi-terrain ; outil du prototype (web).
 
 Toujours ouvertes :
 - **Équilibrage des fusions : reporté après le moteur.** Pistes déjà présentées, non validées : coût naturel (deux joueurs pour un) ; un poste naturel de chaque joueur d'origine ; niveau de la plus faible des deux cartes ; hybride qui ne progresse qu'avec un second hybride identique ; un seul style choisi à la fusion. Restent : postes naturels et style d'un hybride ; « hybride A/B + copie de A » est-il autorisé ?
-- **Placement** : DD et DG à 2 ou 3 cases ; MD et MG, postes à part ou couverts par les cases basses des ailiers ? ; maximum de joueurs par poste ; positions et tailles exactes des rectangles.
+- **Placement** : DD et DG à 2 ou 3 cases (3 dans le prototype) ; maximum de joueurs par poste ; positions et tailles exactes des rectangles ; chiffres des règles de projection (à régler ensemble sur le prototype).
 - Consignes d'équipe (plus défensive, plus offensive, en contre…) : plus tard.
 - Égalités : classement des groupes, matchs nuls en demi-finale et en finale.
 - Temps de football simulé par mi-temps, nombre de temps forts montrés, durées exactes de la préparation et de la mi-temps.
@@ -177,11 +185,12 @@ Toujours ouvertes :
 
 ## Notes techniques (propositions)
 
-- Simulation en pas de temps fixe, avec son propre générateur aléatoire à graine (`RandomNumberGenerator`), **sans** le moteur physique de Godot, qui n'est pas déterministe. Code de simulation en classes simples (pas des nœuds de scène) pour pouvoir tourner sans affichage.
-- Coordonnées des rectangles **normalisées** (0 à 1 sur la longueur et la largeur, dans le sens de l'attaque) dans un fichier de données (JSON ou ressource `.tres`). L'équipe adverse utilise la symétrie. Changer la taille du terrain ne change pas les zones. Les sous-zones se déduisent du découpage (colonnes × lignes) de chaque rectangle.
-- Un match ne dépend que des deux équipes (joueurs, placements, consignes) et de la graine : utile pour les tests, et plus tard pour que le serveur simule les matchs en direct.
-- Tests : Godot en mode `--headless` avec un cadre de tests (GUT ou GdUnit4). Vérifier dès la première session que Godot peut être installé dans l'environnement de Claude. Sinon, faire tourner les tests et l'export dans GitHub Actions, comme le dépôt le fait déjà pour jetelavaisdit.
-- Validation visuelle sur téléphone : export web de Godot publié sur GitHub Pages (l'export sans threads de Godot 4.3 et suivants ne demande pas d'en-têtes serveur spéciaux). Donner le lien au concepteur à chaque étape.
+- Prototype dans `prototype/` : TypeScript, sans dépendance. `bun test` lance les tests, `bun run construire` fabrique `dist/index.html` (page autonome, code et données inclus). Voir le `README.md` du projet.
+- Simulation en pas de temps fixe (1/30 s), avec son propre générateur aléatoire à graine (`src/sim/rng.ts`). Le code de `src/sim/` ne dépend pas de l'affichage : il tourne dans les tests sans navigateur.
+- Coordonnées **normalisées** dans le repère de chaque équipe (x de 0 à 1 sur la largeur, y de 0, sa ligne de but, à 1, la ligne adverse). L'équipe adverse utilise la symétrie. Les cases se déduisent d'une grille (colonnes × lignes) ou d'une liste de cases (attaquant).
+- Un match ne dépend que des deux équipes (joueurs, placements) et de la graine : utile pour les tests, et plus tard pour que le serveur simule les matchs en direct.
+- Validation visuelle : Claude vérifie la page dans un navigateur au format téléphone (captures, thèmes clair et sombre), puis la publie comme page claude.ai. Lien du prototype 1 : https://claude.ai/artifact/B86yGS9jR47LwubdEiL5EN (privé au concepteur jusqu'à ce qu'il le partage). Republier la même page à chaque version.
+- GitHub Pages sert l'app jetelavaisdit : ne pas y publier le prototype sans regrouper les deux sites.
 
 ## Façon de travailler sur ce projet
 
@@ -216,9 +225,14 @@ Laboratoire de tests, construit en même temps que le moteur :
 - Tests d'équilibrage : beaucoup de matchs, avec résultats, buts, tirs, tirs cadrés, occasions, passes, pertes de balle, interceptions, récupérations, possession, temps par tiers, temps de transition, efficacité du pressing, actions incohérentes.
 - Aucun objectif de pourcentage de victoire avant les premiers résultats. Les plages cibles sont définies ensuite et validées par le concepteur.
 
-## Première mission (à lancer sur demande du concepteur)
+## Première mission — réalisée le 11/11/2026, en attente de validation
 
-Prototype Godot 4, en 2D vue du dessus, terrain vertical pour un téléphone
+Réalisée en version web (et non en Godot), avec le placement sur le
+demi-terrain. Détails et résultats des tests dans `journal.md`. Lien :
+https://claude.ai/artifact/B86yGS9jR47LwubdEiL5EN
+
+Énoncé d'origine (l'outil a changé, le reste tient) : prototype en 2D vue
+du dessus, terrain vertical pour un téléphone
 tenu droit : un terrain et deux équipes de 11 marqueurs. Chaque joueur a un
 poste. Chaque poste a un seul rectangle fixe, grand et chevauchant, visible
 et modifiable dans les données. Chaque rectangle est découpé en sous-zones
@@ -238,14 +252,14 @@ téléportation ; rectangles, sous-zones et maximums configurables ; prototype
 facile à lancer et à ouvrir sur téléphone ; explication de l'architecture et
 instructions de relance fournies.
 
-Note technique : GitHub Pages sert déjà l'app jetelavaisdit (workflow
-`jetelavaisdit.yml`). Un second déploiement remplacerait tout le site : il
-faudra publier les deux ensemble ou trouver un autre hébergement.
-
 **Ne pas passer à la mission 2 sans validation visuelle et technique du concepteur.**
+Mission 2 envisagée (feuille de route, phase 3) : le ballon et les actions de
+base (passes, contrôle, interception, duel, tir, gardien, changement de
+possession), à la place du ballon simulé.
 
 ## État
 
 - 11/11/2026 : dossier de conception importé et fichier de contexte créé. Aucun code.
 - 11/11/2026 (séance de questions-réponses) : affichage du match, durée des phases, deck de nationalités, mercato inspiré de Merge Tactics, traits, niveaux de cartes, sous-zones, adversaires et groupes de 4 tranchés (détails au §20 du dossier). Aucun code.
-- 11/11/2026 (suite) : 2 groupes de 4 ; une seule organisation pour l'instant ; nombre de sous-zones par poste ; fusions reportées après le moteur (§20.8). Maquette HTML montrée dans la discussion (terrain vertical, placement par cases), non conservée. Prochaine étape : la première mission, sur demande du concepteur.
+- 11/11/2026 (suite) : 2 groupes de 4 ; une seule organisation pour l'instant ; nombre de sous-zones par poste ; fusions reportées après le moteur (§20.8). Maquette HTML montrée dans la discussion (terrain vertical, placement par cases), non conservée.
+- 11/11/2026 (suite) : placement sur un demi-terrain et règles de projection ; côtés à 3 postes (milieu, milieu avancé, attaquant) ; prototype en version web. **Prototype 1 réalisé** (`prototype/`, 20 tests verts, vérifié au format téléphone) et publié. Prochaine étape : retours du concepteur sur le prototype 1 (lisibilité, placement au doigt, chiffres de projection), puis mission 2.

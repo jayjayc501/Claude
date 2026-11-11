@@ -1,0 +1,33 @@
+{
+  "projection": {
+    "defense": {
+      "compression": 0.9,
+      "glissementLateral": 0.25,
+      "suiviProfondeur": 0.25,
+      "decalageMaxM": 10
+    },
+    "attaque": {
+      "ecartement": 1.2,
+      "glissementLateral": 0.15,
+      "suiviProfondeur": 0.15,
+      "decalageMaxM": 5
+    },
+    "limites": { "xMin": 0.03, "xMax": 0.97, "yMin": 0.01, "yMax": 0.92 }
+  },
+  "transition": { "delaiS": 0.5 },
+  "mouvement": {
+    "vitesseMaxMS": 7,
+    "accelerationMS2": 5,
+    "distanceFreinageM": 4,
+    "distanceMinM": 3,
+    "forceSeparation": 3
+  },
+  "possessionSimulee": {
+    "dureeMinS": 4,
+    "dureeMaxS": 8,
+    "ballonVitesseMS": 9,
+    "ciblePeriodeMinS": 1.2,
+    "ciblePeriodeMaxS": 2.5
+  },
+  "pasDeTempsS": 0.03333333333333333
+}

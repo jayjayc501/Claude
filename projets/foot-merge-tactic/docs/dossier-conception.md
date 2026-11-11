@@ -1179,6 +1179,33 @@ Encore ouvertes, en plus de celles du §17 et des sections ci-dessus :
     mouvement automatique. Le placement garde ses conséquences (une
     équipe placée haut reste exposée à la perte du ballon) sans travail
     en plus pour l'entraîneur.
--   [OUVERT] MD et MG : postes à part, ou couverts par les cases basses
-    des ailiers ? Maximum de joueurs par poste (en dehors des exemples
-    3 DC et 1 AG). Positions et tailles exactes des rectangles.
+-   [OUVERT] Maximum de joueurs par poste (en dehors des exemples 3 DC et
+    1 AG). Positions et tailles exactes des rectangles.
+
+## 20.9. Demi-terrain, outil du prototype et prototype 1
+
+-   [VALIDÉ] Les 3 cases de AG et AD sont trois postes, du plus bas au
+    plus haut : milieu de côté, milieu avancé, attaquant de côté. Il n'y a
+    pas de poste MD / MG à part.
+-   [VALIDÉ] **Placement sur un demi-terrain**, comme avant le coup
+    d'envoi (idée du concepteur). Le moteur transforme ensuite chaque
+    position en position de match, en attaque et en défense, par des
+    règles de projection. La correspondance exacte se règle ensemble sur
+    le prototype.
+-   [VALIDÉ] **Prototype en version web** (TypeScript, page ouverte d'un
+    lien sur le téléphone) plutôt qu'en Godot : Godot n'est installable
+    ni dans l'environnement de Claude ni sur le PC de travail du
+    concepteur. Le choix de l'outil final se fera quand le moteur
+    convaincra.
+-   [PROPOSITION] Règles de projection, première version : en défense, la
+    position du demi-terrain resserrée de 10 % en largeur, qui glisse du
+    côté du ballon et avance ou recule avec lui (10 m au plus) ; en
+    attaque, montée par poste (G 5 m, DC 20 m, latéraux et milieux 30 m,
+    côtés 35 m, attaquant 40 m), écartement de 20 %, léger suivi du
+    ballon ; bascule après 0,5 s, déplacement progressif à 7 m/s au plus.
+-   **Prototype 1 réalisé le 11/11/2026** (dossier `prototype/` du dépôt,
+    détails dans `journal.md`) : écran de placement sur le demi-terrain
+    (choix des joueurs, cases, maximums, hors poste) et écran de match
+    (22 joueurs, possession simulée, blocs qui montent et redescendent
+    sans téléportation). Pas encore de passes ni de tirs. En attente de
+    validation du concepteur.

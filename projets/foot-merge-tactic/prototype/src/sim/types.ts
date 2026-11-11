@@ -194,7 +194,7 @@ export interface Reglages {
     vitessePasseMinMS: number;
     vitessePasseMaxMS: number;
     vitessePasseParMetre: number;
-    imprecision: { baseDeg: number; parMetreDeg: number };
+    imprecision: { baseDeg: number; parMetreDeg: number; sousPressionFacteur: number };
     vitesseTirMS: number;
     tirDistanceM: number;
     /** Surface de réparation : on y tire toujours. */
@@ -204,6 +204,8 @@ export interface Reglages {
     dribbleFacteur: number;
     tacle: { rayonM: number; parSeconde: number };
     reserveRepriseS: number;
+    /** Juste après une perte : les plus proches (dans rayonM) pressent pendant dureeS. */
+    contrePressing: { dureeS: number; rayonM: number; joueurs: number };
   };
   possessionSimulee: {
     dureeMinS: number;

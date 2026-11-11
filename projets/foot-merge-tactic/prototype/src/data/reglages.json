@@ -45,7 +45,7 @@
       "gardien": {
         "distanceDerriereLigneM": 20,
         "minM": 4,
-        "maxM": 22
+        "maxM": 16
       }
     },
     "limites": {
@@ -92,13 +92,13 @@
     "voieLibreM": 2,
     "seuilPasse": 8,
     "pressionM": 4,
-    "pressingM": 16,
+    "pressingM": 10,
     "decisionS": { "min": 0.6, "max": 1.2 },
     "premiereDecisionS": { "min": 0.4, "max": 0.9 },
     "vitessePasseMinMS": 10,
     "vitessePasseMaxMS": 24,
     "vitessePasseParMetre": 0.55,
-    "imprecision": { "baseDeg": 1.5, "parMetreDeg": 0.12 },
+    "imprecision": { "baseDeg": 1.5, "parMetreDeg": 0.12, "sousPressionFacteur": 3 },
     "vitesseTirMS": 26,
     "tirDistanceM": 22,
     "surface": { "profondeurM": 16.5, "demiLargeurM": 20.15 },
@@ -106,7 +106,8 @@
     "dribbleAvanceM": 8,
     "dribbleFacteur": 0.9,
     "tacle": { "rayonM": 2.8, "parSeconde": 0.5 },
-    "reserveRepriseS": 3
+    "reserveRepriseS": 3,
+    "contrePressing": { "dureeS": 4, "rayonM": 20, "joueurs": 3 }
   },
   "possessionSimulee": {
     "dureeMinS": 4,

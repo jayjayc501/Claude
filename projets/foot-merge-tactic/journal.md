@@ -178,3 +178,14 @@ Demande du concepteur : « passons à un ballon touché par les joueurs ». Éta
 **Tests** : 77 verts. `tests/ballon.test.ts` : ballon sur le terrain, pas de saut, collé à son porteur ; même graine, même match ; but et sortie de but ; passes (4 à 16 par minute, 55 à 97 % réussies) ; changements de camp (2 à 12 par minute) ; tirs (moyenne sous 0,5 par équipe et par minute) ; ballon jamais libre plus de 9 s ; la prise de possession fait basculer l'équipe.
 
 **Limites / à régler** : trop de changements de camp et de tirs par rapport au vrai football (comptés pour l'instant « en montage ») ; le gardien adverse peut se tenir jusqu'à 22 m de son but en attaque (projection d'origine, à revoir) ; pas de hors-jeu, de fautes, de corners ; aucune qualité individuelle (tous les joueurs passent et tirent pareil) ; décisions simples, sans appels ni démarquages.
+
+## 12/11/2026 (suite) — Tir dans la surface, contre-pressing
+
+- Profondeur du placement mieux gardée en défense (influence 0,45 défense, 0,7 milieu et attaque ; 0,2 partout avant). Retour du concepteur : « zones en défense trop étroites sur la hauteur ».
+- Tir : dans la surface, le porteur tire toujours (retour du concepteur : « on ne fait pas de passe en retrait ») ; hors surface, tir possible jusqu'à 22 m. Gardien : rayon d'arrêt 3,6 m, tirs moins précis.
+- Gardien en attaque : 16 m de son but au plus (22 avant).
+- Pressing normal : le plus proche presse dans 10 m, le suivant couvre 6 m derrière, côté but (avant : les deux plus proches dans 16 m, tout le temps).
+- Contre-pressing (référence §4) : pendant 4 s après une perte en jeu, les 3 plus proches dans 20 m sprintent : un presse, un ferme la passe vers l'avant, un ferme l'intérieur.
+- Passe jouée sous pression (adversaire à moins de 4 m) : imprécision × 3.
+- Mesures (6 graines × 3 min) : récupérations dans les 5 s après une perte 42 % sans contre-pressing, 46 % avec ; 8 à 9 changements de camp par minute (encore trop : surtout des passes interceptées).
+- Tests : 79 verts (tir dans la surface ; contre-pressing puis un seul presseur).

@@ -45,6 +45,8 @@ export class BallonReel {
   dernier: JoueurSim | null = null;
   /** Remise en jeu : seule cette équipe peut prendre le ballon jusqu'à cet instant. */
   reserve: { camp: Camp; jusqua: number } | null = null;
+  /** Dernière perte de balle en jeu (pas sur une remise en jeu) : contre-pressing. */
+  perte: { camp: Camp; a: number } | null = null;
   readonly stats: StatsBallon = {
     passes: [0, 0],
     passesReussies: [0, 0],
@@ -75,6 +77,7 @@ export class BallonReel {
     this.receveur = null;
     this.tirEnCours = false;
     this.dernier = null;
+    this.perte = null;
     this.reserve = { camp, jusqua: s.temps + s.reglages.ballon.reserveRepriseS };
     s.prendrePossession(camp);
   }
@@ -178,9 +181,9 @@ export class BallonReel {
     }
     const presse = pression < r.pressionM;
     if (meilleur && (p.poste.id === "G" || presse || score > r.seuilPasse)) {
-      this.passer(meilleur);
+      this.passer(meilleur, presse);
     } else if (presse && fuite) {
-      this.passer(fuite); // dégagement
+      this.passer(fuite, presse); // dégagement
     }
     // sinon il continue de conduire jusqu'à la prochaine décision
   }
@@ -193,7 +196,7 @@ export class BallonReel {
     this.arret = "?";
   }
 
-  private passer(q: JoueurSim): void {
+  private passer(q: JoueurSim, presse = false): void {
     const r = this.sim.reglages.ballon;
     const p = this.porteur!;
     const d = dist(p.pos, q.pos);
@@ -203,7 +206,8 @@ export class BallonReel {
     const dx = cible.x - this.sim.ballon.x;
     const dy = cible.y - this.sim.ballon.y;
     const n = Math.hypot(dx, dy) || 1;
-    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * Math.PI) / 180) * this.rng.entre(-1, 1);
+    const gene = presse ? r.imprecision.sousPressionFacteur : 1; // passe jouée sous pression : moins précise
+    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * gene * Math.PI) / 180) * this.rng.entre(-1, 1);
     const c = Math.cos(erreur);
     const si = Math.sin(erreur);
     this.stats.passes[p.camp]++;
@@ -288,6 +292,8 @@ export class BallonReel {
   /** Le joueur prend le ballon aux pieds ; son équipe a la possession. */
   private donner(j: JoueurSim): void {
     const r = this.sim.reglages.ballon;
+    const avant = this.sim.possession;
+    if (j.camp !== avant) this.perte = { camp: avant, a: this.sim.temps };
     this.porteur = j;
     this.receveur = null;
     this.tirEnCours = false;
@@ -330,13 +336,37 @@ export class BallonReel {
           x: p.pos.x + (W / 2 - p.pos.x) * 0.2,
           y: Math.min(L - 3, Math.max(3, p.pos.y + sens * r.dribbleAvanceM)),
         };
-      // Pressing : les deux défenseurs les plus proches du porteur vont au ballon.
+      const cp = r.contrePressing;
+      const contre = this.perte !== null && this.perte.camp !== p.camp && s.temps - this.perte.a < cp.dureeS;
+      if (contre) {
+        // Contre-pressing (référence §4) : juste après la perte, les plus proches
+        // attaquent le porteur en sprint : un presse, un ferme la passe vers
+        // l'avant, un ferme l'intérieur. Sinon l'équipe se replie normalement.
+        const fin = this.perte!.a + cp.dureeS;
+        const vers = W / 2 - p.pos.x > 0 ? 1 : -1;
+        const places = [
+          { ...s.ballon },
+          { x: s.ballon.x, y: s.ballon.y + sens * 5 },
+          { x: s.ballon.x + vers * 5, y: s.ballon.y + sens * 2 },
+        ];
+        s.joueurs
+          .filter((j) => j.camp !== p.camp && j.poste.id !== "G" && dist(j.pos, p.pos) < cp.rayonM)
+          .sort((a, b) => dist(a.pos, p.pos) - dist(b.pos, p.pos))
+          .slice(0, cp.joueurs)
+          .forEach((j, i) => {
+            j.cible = places[i] ?? places[0]!;
+            j.sprintJusqua = Math.max(j.sprintJusqua, fin);
+          });
+        return;
+      }
+      // Pressing normal (référence §4) : le plus proche presse le porteur, le
+      // suivant couvre entre le porteur et le but ; les autres tiennent leur place.
       const presseurs = s.joueurs
         .filter((j) => j.camp !== p.camp && j.poste.id !== "G" && dist(j.pos, p.pos) < r.pressingM)
         .sort((a, b) => dist(a.pos, p.pos) - dist(b.pos, p.pos))
         .slice(0, 2);
       presseurs.forEach((j, i) => {
-        j.cible = i === 0 ? { ...s.ballon } : { x: s.ballon.x, y: s.ballon.y - sens * 3 };
+        j.cible = i === 0 ? { ...s.ballon } : { x: s.ballon.x + (W / 2 - s.ballon.x) * 0.2, y: s.ballon.y + sens * 6 };
       });
       return;
     }

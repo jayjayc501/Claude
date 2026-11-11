@@ -97,6 +97,38 @@ describe("ballon réel : tir dans la surface", () => {
   });
 });
 
+describe("ballon réel : pressing et contre-pressing (référence §4)", () => {
+  test("juste après une perte, les plus proches attaquent le porteur ; ensuite un seul presse", () => {
+    const cp = reglages.ballon.contrePressing;
+    let contre = 0;
+    let normal = 0;
+    for (const g of GRAINES) {
+      const m = match(g);
+      for (let i = 0; i < 120 * 30; i++) {
+        m.pas();
+        const b = m.balle!;
+        const p = b.porteur;
+        if (!p || p.poste.id === "G") continue;
+        const eux = m.joueurs.filter((j) => j.camp !== p.camp && j.poste.id !== "G");
+        const proches = eux.filter((j) => Math.hypot(j.pos.x - p.pos.x, j.pos.y - p.pos.y) < cp.rayonM - 2); // marge : positions relevées après le déplacement
+        const surLeBallon = eux.filter((j) => Math.hypot(j.cible.x - m.ballon.x, j.cible.y - m.ballon.y) < 6).length;
+        const auBallon = eux.filter((j) => Math.hypot(j.cible.x - m.ballon.x, j.cible.y - m.ballon.y) < 0.5).length;
+        if (b.perte && b.perte.camp !== p.camp && m.temps - b.perte.a < cp.dureeS) {
+          if (proches.length >= 3) {
+            expect(surLeBallon).toBeGreaterThanOrEqual(3);
+            contre++;
+          }
+        } else {
+          expect(auBallon).toBeLessThanOrEqual(1);
+          normal++;
+        }
+      }
+    }
+    expect(contre).toBeGreaterThan(30);
+    expect(normal).toBeGreaterThan(300);
+  });
+});
+
 describe("ballon réel : réalisme du jeu (référence football §9.4)", () => {
   const MINUTES = 3;
   function jouer(g: number) {

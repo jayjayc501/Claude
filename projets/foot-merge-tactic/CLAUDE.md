@@ -212,6 +212,7 @@ Règles du dossier (§16), condensées :
 12. Rectangles, sous-zones, postes, attributs et paramètres modifiables sans réécrire le moteur.
 13. **Ne jamais déclarer le moteur « bon » parce que les tests passent ou que les statistiques semblent équilibrées.** Il faut regarder des matchs générés et faire valider le concepteur.
 14. **Avant de toucher un comportement du moteur, relire `docs/reference-football.md`**, et traduire chaque principe utilisé en test de réalisme (§9.4).
+15. **Prototype en phase de réglages grossiers : commit direct sur `main`**, sans demande de fusion (accord du concepteur, 11/11/2026). Toujours lancer les tests, vérifier au format téléphone et noter le changement dans `journal.md`.
 
 ## Feuille de route
 

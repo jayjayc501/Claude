@@ -20,6 +20,9 @@ mets-le à jour quand quelque chose d'important change.
 - Petits changements ou fichiers nouveaux : commit direct sur `main`, c'est OK.
 - Changements importants ou modification de code existant : travailler sur une
   branche et ouvrir une pull request pour relecture.
+  Exception : le prototype `projets/foot-merge-tactic/prototype` est en phase de
+  réglages grossiers, Claude committe et fusionne directement sur `main`
+  (accord du propriétaire, 11/11/2026), en testant avant.
 - Tester le code avant de le committer quand c'est possible.
 - Messages de commit courts et clairs, en français.
 - Ne jamais committer de mots de passe, clés d'API ou autres secrets.

@@ -68,13 +68,18 @@ svg.terrain { height: min(64vh, calc((min(100vw, 520px) - 24px) * 1.52)); }
 .case-prise rect { fill: var(--zone); fill-opacity: 0.12; }
 .case-lui rect { fill: var(--accent); fill-opacity: 0.25; stroke: var(--accent); stroke-width: 2; }
 .case-texte { font-size: 12px; text-anchor: middle; fill: var(--zone); pointer-events: none; }
-.jeton { cursor: pointer; }
+.jeton { cursor: grab; touch-action: none; }
 .jeton-zone-toucher { fill: transparent; }
 .jeton-rond { fill: var(--nous); stroke: var(--nous-fonce); stroke-width: 1.5; }
 .jeton-texte { font-size: 11px; font-weight: 600; text-anchor: middle; fill: #fff; pointer-events: none; }
 .jeton-choisi .jeton-rond { stroke: var(--accent); stroke-width: 4; }
 .jeton-hors .jeton-rond { stroke: var(--alerte); stroke-width: 3; stroke-dasharray: 4 3; }
-.jeton-autre { opacity: 0.55; pointer-events: none; }
+.jeton-autre { opacity: 0.55; }
+.jeton-souleve { opacity: 1; pointer-events: none; }
+.jeton-origine { opacity: 0.3; }
+.jeton-souleve .jeton-rond { transform-box: fill-box; transform-origin: center; transform: scale(1.25); stroke: var(--accent); stroke-width: 4; }
+.jeton-souleve .jeton-texte { font-size: 13px; }
+.cible-case { fill: var(--accent); fill-opacity: 0.22; stroke: var(--accent); stroke-width: 3; pointer-events: none; }
 .puces { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 10px 0; }
 .puce { min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; }
 .puce-id { font-weight: 600; }

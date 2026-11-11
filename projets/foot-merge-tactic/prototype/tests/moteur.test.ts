@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { chargerDonnees, chargerEquipes, chargerReglages } from "../src/sim/chargement";
-import { horsPoste, placer, retirer, verifier } from "../src/sim/placement";
+import { caseAuPoint, echanger, horsPoste, placer, retirer, verifier } from "../src/sim/placement";
 import { projeter } from "../src/sim/projection";
 import { MatchSim } from "../src/sim/simulation";
 import type { Equipe } from "../src/sim/types";
@@ -74,6 +74,33 @@ describe("règles de placement", () => {
   test("pas de douzième joueur", () => {
     const r = placer(effectif.composition, donnees, "lomont", "DC", 4);
     expect(r.ok).toBe(false);
+  });
+
+  test("échange de deux joueurs : chacun prend la case de l'autre, la composition reste valide", () => {
+    const r = echanger(effectif.composition, "belcourt", "oubrahim");
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.composition.find((p) => p.joueurId === "belcourt")).toEqual({ joueurId: "belcourt", poste: "MC", cellule: 0 });
+    expect(r.composition.find((p) => p.joueurId === "oubrahim")).toEqual({ joueurId: "oubrahim", poste: "DC", cellule: 0 });
+    expect(verifier(r.composition, donnees)).toEqual([]);
+  });
+
+  test("échange refusé avec un remplaçant (il doit passer par une case)", () => {
+    expect(echanger(effectif.composition, "belcourt", "lomont").ok).toBe(false);
+  });
+
+  test("case visée : le centre d'une case la désigne, et dans un chevauchement c'est la plus proche", () => {
+    for (const p of donnees.postes) {
+      for (const c of p.cases) {
+        const vise = caseAuPoint(donnees, c.centre);
+        expect(vise).toBeDefined();
+        // Le centre d'une case vise cette case, sauf si une case d'un autre poste a exactement le même centre.
+        expect(Math.hypot(vise!.centre.x - c.centre.x, vise!.centre.y - c.centre.y)).toBeCloseTo(0, 9);
+      }
+    }
+    // Point hors de tout rectangle : rien.
+    expect(caseAuPoint(donnees, { x: 0.5, y: 0.005 })).toBeDefined(); // zone du gardien
+    expect(caseAuPoint(donnees, { x: 0.02, y: 0.02 })).toBeUndefined(); // coin, hors des rectangles
   });
 
   test("hors poste : un milieu défensif sur la ligne offensive", () => {

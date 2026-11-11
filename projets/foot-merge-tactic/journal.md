@@ -105,3 +105,22 @@ Historique des étapes, des choix techniques et des résultats de tests.
 **Tests** : 40 verts. Nouveaux : forme en possession selon le ballon, ordre de profondeur gardé, cases extrêmes cohérentes avec les réglages, et quatre tests de réalisme sur de longues possessions (hors-jeu, défense adverse non repoussée, longueur et largeur, défense de couverture). L'ancien test « attaquant à plus de 80 m, ballon au centre » était faux en football (il plaçait l'attaquant derrière la défense) : remplacé.
 
 **Méthode changée** : chaque règle se teste dans les deux phases et sur la durée, et le match se regarde dans les trois modes à ×1 et ×4 avant chaque publication (référence football, §9.4).
+
+## 11/11/2026 — Plateau en hexagones de couleur, variante en carrés
+
+**Demande du concepteur** : « fais des hexagones de couleur et propose-moi la même chose en carré pour choisir » (modèle : le plateau de Merge Tactics).
+
+**Ce qui a été fait**
+- Un plateau unique sur le demi-terrain, sans chevauchement, toujours visible, en couleurs par bande de jeu : gardien (jaune), défense (bleu), milieu (violet), attaque (rouge) ; couloirs des côtés plus clairs ; rôle écrit dans chaque case (DC, MDC, MOC, MG, AG…).
+- Deux formes au choix (boutons sur l'écran de placement, choix enregistré) :
+  - **hexagones** : 5 et 4 cases en alternance, chaque rangée de 4 décalée d'une demi-case, donc à cheval sur deux cases des rangées voisines. 32 cases : G 2, DC 5 (3 + 2), DG 3, DD 3, milieu 8 (MDC 3, MC 2, MOC 3), côtés 3 + 3, attaque 5 (2 + 3) ;
+  - **carrés** : 5 cases par rangée, exactement le découpage validé. 35 cases : G 2, DC 6, DG 3, DD 3, milieu 9, côtés 3 + 3, attaque 6.
+- Gardien : deux petites cases (normal, avancé) dans sa zone, sous le plateau. Coins hauts (côtés de la dernière rangée) sans case.
+- En changeant de forme, chaque joueur garde son poste et prend la case libre la plus proche (aller-retour sans perte, testé).
+- Données : `postes.json` décrit chaque plateau rangée par rangée, comme un dessin. Les rectangles des postes sont déduits des cases.
+- Moteur : la profondeur des cases la plus basse et la plus haute (lignes arrière et avant en attaque) est déduite du plateau ; la largeur des lignes de défense et de milieu (3 joueurs ou plus) est tenue entre 38 et 44 m quel que soit le placement (en hexagones, les latéraux des rangées décalées sont plus près de l'axe : la ligne ne faisait plus que 32 m).
+- Faux ballon : une possession progresse (passes un peu plus souvent vers l'avant, circulation en retrait près de la surface adverse). Avant, il pouvait dériver jusqu'à notre surface pendant toute une possession « À vous ».
+
+**Tests** : 60 verts. Les tests de données tournent sur les deux plateaux (nombre de cases, aucun chevauchement, rôles du milieu, case visée, compositions valables), ceux de réalisme aussi. Nouveaux : cases à cheval en hexagones, passage d'un plateau à l'autre. Test « défense adverse non repoussée » précisé : un retard quand le ballon repart en arrière est permis (4 s au plus d'affilée), une ligne repoussée par nos attaquants non (moins de 5 % du temps).
+
+**Vérification au format téléphone** (390 × 844, clair et sombre) : la page de placement tient sur l'écran avec les deux formes ; glisser-déposer sur une case hexagonale et carrée, case visée surlignée à sa forme, joueur hors poste signalé, lâcher hors plateau sans effet, choix du plateau gardé après rechargement. Match en hexagones regardé à ×4 dans les trois modes.

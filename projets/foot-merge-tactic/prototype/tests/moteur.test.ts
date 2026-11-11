@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { chargerDonnees, chargerEquipes, chargerReglages } from "../src/sim/chargement";
-import { caseAuPoint, echanger, horsPoste, placer, remplacer, retirer, verifier } from "../src/sim/placement";
+import { caseAuPoint, convertirComposition, dansLaCase, echanger, horsPoste, placer, remplacer, retirer, verifier } from "../src/sim/placement";
 import { hauteurLigneDefensiveM, ligneAdverseM, lignesAttaqueM, projeter } from "../src/sim/projection";
 import { MatchSim } from "../src/sim/simulation";
 import type { Equipe } from "../src/sim/types";
@@ -14,30 +14,96 @@ function nouveauMatch(graine = 42, effectif?: Equipe): MatchSim {
   return new MatchSim(donnees, reglages, [effectif ?? e, adversaire], graine);
 }
 
-describe("données des postes", () => {
-  test("nombre de cases validé par le concepteur", () => {
-    const attendu: Record<string, number> = { G: 2, DC: 6, DG: 3, DD: 3, MC: 9, AG: 3, AD: 3, AC: 6 };
-    for (const [id, n] of Object.entries(attendu)) expect(donnees.poste(id).cases.length).toBe(n);
+const PLATEAUX = ["hexagones", "carres"] as const;
+
+describe.each(PLATEAUX)("plateau %s : données", (id) => {
+  const donnees = chargerDonnees(id);
+
+  test("nombre de cases (carrés : découpage validé ; hexagones : rangées décalées)", () => {
+    const attendu: Record<string, Record<string, number>> = {
+      carres: { G: 2, DC: 6, DG: 3, DD: 3, MC: 9, AG: 3, AD: 3, AC: 6 },
+      hexagones: { G: 2, DC: 5, DG: 3, DD: 3, MC: 8, AG: 3, AD: 3, AC: 5 },
+    };
+    for (const [poste, n] of Object.entries(attendu[id]!)) expect(donnees.poste(poste).cases.length).toBe(n);
   });
 
-  test("tous les rectangles et toutes les cases sont dans son propre camp (coup d'envoi)", () => {
+  test("toutes les cases sont dans son propre camp (coup d'envoi)", () => {
     for (const p of donnees.postes) {
-      expect(p.rect.x).toBeGreaterThanOrEqual(0);
+      expect(p.rect.x).toBeGreaterThanOrEqual(-1e-9);
       expect(p.rect.x + p.rect.w).toBeLessThanOrEqual(1 + 1e-9);
-      expect(p.rect.y).toBeGreaterThanOrEqual(0);
+      expect(p.rect.y).toBeGreaterThanOrEqual(-1e-9);
       expect(p.rect.y + p.rect.h).toBeLessThanOrEqual(0.5 + 1e-9);
+    }
+  });
+
+  test("les cases ne se chevauchent pas : un point du plateau désigne une seule case", () => {
+    let points = 0;
+    for (let i = 0; i < 97; i++) {
+      for (let k = 0; k < 89; k++) {
+        const pt = { x: (i + 0.37) / 97, y: ((k + 0.61) / 89) * 0.5 };
+        const n = donnees.postes.reduce((s, p) => s + p.cases.filter((c) => dansLaCase(c, pt)).length, 0);
+        expect(n).toBeLessThanOrEqual(1);
+        if (n === 1) points++;
+      }
+    }
+    expect(points).toBeGreaterThan(97 * 89 * 0.7); // le plateau couvre l'essentiel du demi-terrain
+  });
+
+  test("le milieu central va du milieu défensif (bas) au milieu offensif (haut)", () => {
+    const rang: Record<string, number> = { MDC: 0, MC: 1, MOC: 2 };
+    const cases = [...donnees.poste("MC").cases].sort((a, b) => a.centre.y - b.centre.y);
+    for (let i = 1; i < cases.length; i++) expect(rang[cases[i]!.role]!).toBeGreaterThanOrEqual(rang[cases[i - 1]!.role]!);
+    expect(cases[0]!.role).toBe("MDC");
+    expect(cases[cases.length - 1]!.role).toBe("MOC");
+  });
+
+  test("case visée : le centre d'une case la désigne ; hors du plateau, aucune", () => {
+    for (const p of donnees.postes) {
       for (const c of p.cases) {
-        expect(c.centre.x).toBeGreaterThan(p.rect.x);
-        expect(c.centre.x).toBeLessThan(p.rect.x + p.rect.w);
-        expect(c.centre.y).toBeGreaterThan(p.rect.y);
-        expect(c.centre.y).toBeLessThan(p.rect.y + p.rect.h);
+        const vise = caseAuPoint(donnees, c.centre);
+        expect(vise?.poste).toBe(p.id);
+        expect(vise?.index).toBe(c.index);
+      }
+    }
+    expect(caseAuPoint(donnees, { x: 0.5, y: 0.01 })?.poste).toBe("G"); // zone du gardien
+    expect(caseAuPoint(donnees, { x: 0.05, y: 0.02 })).toBeUndefined(); // coin du but, hors plateau
+    expect(caseAuPoint(donnees, { x: 0.1, y: 0.49 })).toBeUndefined(); // coin haut, sans case
+  });
+
+  test("les compositions par défaut sont valables sur ce plateau", () => {
+    const { effectif, adversaire } = chargerEquipes(donnees);
+    expect(verifier(effectif.composition, donnees)).toEqual([]);
+    expect(verifier(adversaire.composition, donnees)).toEqual([]);
+  });
+});
+
+describe("plateaux : passage de l'un à l'autre", () => {
+  const hex = chargerDonnees("hexagones");
+  const car = chargerDonnees("carres");
+
+  test("en hexagones, les cases d'une rangée décalée sont à cheval sur deux cases de la rangée du dessous", () => {
+    for (const id of ["DC", "MC", "AC"]) {
+      const cases = hex.poste(id).cases;
+      const ys = [...new Set(cases.map((c) => c.centre.y))].sort((a, b) => a - b);
+      for (let r = 1; r < ys.length; r++) {
+        const toutes = hex.postes.flatMap((p) => p.cases);
+        const dessous = toutes.filter((c) => Math.abs(c.centre.y - ys[r - 1]!) < 1e-9);
+        for (const c of cases.filter((x) => Math.abs(x.centre.y - ys[r]!) < 1e-9)) {
+          const voisines = dessous.filter((d) => Math.abs(Math.abs(d.centre.x - c.centre.x) - hex.pas.x / 2) < 1e-9);
+          expect(voisines.length).toBe(2);
+        }
       }
     }
   });
 
-  test("le milieu central couvre MDC, MC et MOC de bas en haut", () => {
-    const roles = donnees.poste("MC").cases.map((c) => c.role);
-    expect(roles).toEqual(["MDC", "MDC", "MDC", "MC", "MC", "MC", "MOC", "MOC", "MOC"]);
+  test("chaque joueur garde son poste et sa place (aller-retour sans perte)", () => {
+    const { effectif, adversaire } = chargerEquipes(hex);
+    for (const e of [effectif, adversaire]) {
+      const versCarres = convertirComposition(e.composition, hex, car);
+      expect(verifier(versCarres, car)).toEqual([]);
+      versCarres.forEach((p, i) => expect(p.poste).toBe(e.composition[i]!.poste));
+      expect(convertirComposition(versCarres, car, hex)).toEqual(e.composition);
+    }
   });
 });
 
@@ -54,8 +120,9 @@ describe("règles de placement", () => {
     expect(r3.ok).toBe(true);
     if (!r3.ok) return;
     comp = retirer(r3.composition, "pellerin");
-    const r4 = placer(comp, donnees, "pellerin", "DC", 5);
+    const r4 = placer(comp, donnees, "pellerin", "DC", 3);
     expect(r4.ok).toBe(false);
+    if (!r4.ok) expect(r4.erreur).toContain("maximum");
   });
 
   test("une case déjà prise est refusée", () => {
@@ -95,45 +162,8 @@ describe("règles de placement", () => {
     expect(remplacer(effectif.composition, "kessai", "belcourt").ok).toBe(false);
   });
 
-  test("cases de l'axe à cheval sur la gauche et la droite (DC, milieu, attaque)", () => {
-    for (const id of ["DC", "MC", "AC"]) {
-      const cases = donnees.poste(id).cases;
-      for (let ligne = 0; ligne < cases.length / 3; ligne++) {
-        const [g, a, d] = [cases[ligne * 3]!, cases[ligne * 3 + 1]!, cases[ligne * 3 + 2]!];
-        expect(a.rect.x).toBeLessThan(g.rect.x + g.rect.w);
-        expect(a.rect.x + a.rect.w).toBeGreaterThan(d.rect.x);
-      }
-    }
-  });
-
-  test("les grandes zones défense, milieu et attaque se chevauchent à peine (2 m au plus)", () => {
-    const hauteur = (id: string) => {
-      const r = donnees.poste(id).rect;
-      return [r.y * L, (r.y + r.h) * L] as const;
-    };
-    const [, hautDC] = hauteur("DC");
-    const [basMC, hautMC] = hauteur("MC");
-    const [basAC] = hauteur("AC");
-    expect(hautDC - basMC).toBeLessThanOrEqual(2);
-    expect(hautMC - basAC).toBeLessThanOrEqual(2);
-  });
-
   test("échange refusé avec un remplaçant (il doit passer par une case)", () => {
     expect(echanger(effectif.composition, "belcourt", "lomont").ok).toBe(false);
-  });
-
-  test("case visée : le centre d'une case la désigne, et dans un chevauchement c'est la plus proche", () => {
-    for (const p of donnees.postes) {
-      for (const c of p.cases) {
-        const vise = caseAuPoint(donnees, c.centre);
-        expect(vise).toBeDefined();
-        // Le centre d'une case vise cette case, sauf si une case d'un autre poste a exactement le même centre.
-        expect(Math.hypot(vise!.centre.x - c.centre.x, vise!.centre.y - c.centre.y)).toBeCloseTo(0, 9);
-      }
-    }
-    // Point hors de tout rectangle : rien.
-    expect(caseAuPoint(donnees, { x: 0.5, y: 0.005 })).toBeDefined(); // zone du gardien
-    expect(caseAuPoint(donnees, { x: 0.02, y: 0.02 })).toBeUndefined(); // coin, hors des rectangles
   });
 
   test("hors poste : un milieu défensif sur la ligne offensive", () => {
@@ -196,12 +226,14 @@ describe("règles de projection", () => {
     }
   });
 
-  test("les cases les plus basse et la plus haute du demi-terrain donnent la ligne arrière et la ligne avant", () => {
-    // Si le découpage change, les réglages profondeurPlacement doivent suivre.
-    const ys = donnees.postes.filter((p) => p.id !== "G").flatMap((p) => p.cases.map((c) => c.centre.y));
-    const { basY, hautY } = reglages.projection.attaque.profondeurPlacement;
-    expect(Math.abs(Math.min(...ys) - basY)).toBeLessThan(0.01);
-    expect(Math.abs(Math.max(...ys) - hautY)).toBeLessThan(0.01);
+  test("la case la plus basse donne la ligne arrière, la plus haute la ligne avant", () => {
+    const ballon = { x: 0.5, y: 0.6 };
+    const { arriereM, avantM } = lignesAttaqueM(ballon, reglages, L);
+    const toutes = donnees.postes.filter((p) => p.id !== "G").flatMap((p) => p.cases.map((c) => ({ p, c })));
+    const bas = toutes.reduce((m, x) => (x.c.centre.y < m.c.centre.y ? x : m));
+    const haut = toutes.reduce((m, x) => (x.c.centre.y > m.c.centre.y ? x : m));
+    expect(projeter(bas.c.centre, bas.p, "attaque", ballon, reglages, L).y * L).toBeCloseTo(arriereM, 6);
+    expect(projeter(haut.c.centre, haut.p, "attaque", ballon, reglages, L).y * L).toBeCloseTo(avantM, 6);
   });
 
   test("le bloc glisse du côté du ballon en défense", () => {
@@ -316,13 +348,20 @@ describe("simulation", () => {
     expect(ecartDefense).toBeLessThan(5);
     m.definirMode("nous");
     m.avancer(12);
-    expect(y("lomont") - (y("belcourt") + y("kessai")) / 2).toBeGreaterThan(8);
+    // Placé une rangée plus haut (6 m sur le plateau), il joue en attaque au
+    // moins 5 m devant les deux autres : l'écart du plateau est gardé.
+    expect(y("lomont") - (y("belcourt") + y("kessai")) / 2).toBeGreaterThan(5);
   });
 });
 
 // Contrôles tirés de docs/reference-football.md (§9.4) : le moteur ne doit pas
 // s'éloigner du football. Mesurés en défense organisée, après le repli.
-describe("réalisme (référence football)", () => {
+describe.each(PLATEAUX)("réalisme (référence football), plateau %s", (plateauId) => {
+  const donnees = chargerDonnees(plateauId);
+  const nouveauMatch = (graine = 42, effectif?: Equipe): MatchSim => {
+    const { effectif: e, adversaire } = chargerEquipes(donnees);
+    return new MatchSim(donnees, reglages, [effectif ?? e, adversaire], graine);
+  };
   const LIGNE: Record<string, "defense" | "milieu" | "attaque" | "gardien"> = {};
   for (const p of donnees.postes) LIGNE[p.id] = p.ligneDefense;
 
@@ -373,7 +412,7 @@ describe("réalisme (référence football)", () => {
   });
 
   test("un latéral placé haut revient dans la ligne des défenseurs centraux quand on défend", () => {
-    const { effectif } = chargerEquipes();
+    const { effectif } = chargerEquipes(donnees);
     const r = placer(effectif.composition, donnees, "ferrand", "DG", 2);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -386,7 +425,7 @@ describe("réalisme (référence football)", () => {
   });
 
   test("le latéral placé haut monte beaucoup plus haut que les défenseurs centraux quand on attaque", () => {
-    const { effectif } = chargerEquipes();
+    const { effectif } = chargerEquipes(donnees);
     const r = placer(effectif.composition, donnees, "ferrand", "DG", 2);
     if (!r.ok) throw new Error(r.erreur);
     const m = nouveauMatch(1, { ...effectif, composition: r.composition });
@@ -395,11 +434,13 @@ describe("réalisme (référence football)", () => {
     m.avancer(14);
     const dg = m.joueurs.find((j) => j.joueur.id === "ferrand")!;
     const dcs = m.joueurs.filter((j) => j.camp === 0 && j.poste.id === "DC");
-    expect(dg.pos.y - moyenneY(dcs)).toBeGreaterThan(15);
+    // Placé haut, le latéral est à hauteur du milieu défensif sur le
+    // plateau : en attaque, il joue au moins 10 m devant ses défenseurs centraux.
+    expect(dg.pos.y - moyenneY(dcs)).toBeGreaterThan(10);
   });
 
   test("le bloc coulisse : ballon à gauche, centre du bloc à gauche ; ballon à droite, à droite", () => {
-    const { effectif } = chargerEquipes();
+    const { effectif } = chargerEquipes(donnees);
     const centreDuBloc = (ballonX: number) => {
       const xs = effectif.composition
         .filter((p) => p.poste !== "G")
@@ -470,19 +511,35 @@ describe("réalisme (référence football)", () => {
   });
 
   test("la défense adverse n'est pas repoussée : elle tient la hauteur que lui donne le ballon", () => {
+    // Un défenseur peut être en retard quand le ballon repart vite en arrière
+    // (la ligne doit remonter) : c'est du football. Mais jamais repoussé par
+    // nos attaquants, et jamais en retard plus de 4 s d'affilée (remonter
+    // 20 m à 7 m/s au plus, accélération comprise, prend environ 3,5 s).
     for (const graine of [1, 2, 3, 4]) {
+      const m = nouveauMatch(graine);
+      m.demarrer();
+      m.definirMode("nous");
+      const historique: number[] = [];
       let n = 0;
-      let enfoncee = 0;
-      possession(graine, "nous", 60, (m, camp) => {
-        const adv = (1 - camp) as 0 | 1;
-        const ecarts = m.joueurs
-          .filter((j) => j.camp === adv && j.poste.ligneDefense === "defense")
-          .map((j) => yRepere(m, adv, j.cible) - yRepere(m, adv, j.pos));
+      let repoussee = 0;
+      let duree = 0;
+      let dureeMax = 0;
+      for (let t = 0; t < 60; t += 0.25) {
+        m.avancer(0.25);
+        historique.push(yRepere(m, 1, m.ballon));
+        if (t < 8 || m.enTransition) continue;
         n++;
-        if (Math.max(...ecarts) > 5) enfoncee++; // un défenseur 5 m plus bas que sa place
-      });
-      // Un peu de retard quand le ballon repart vite en arrière, jamais durablement.
-      expect(enfoncee / n).toBeLessThan(0.12);
+        const ecart = Math.max(
+          ...m.joueurs.filter((j) => j.camp === 1 && j.poste.ligneDefense === "defense").map((j) => yRepere(m, 1, j.cible) - yRepere(m, 1, j.pos)),
+        );
+        // Ballon reparti vers leur but (vers le haut de leur repère) dans les 2 dernières secondes ?
+        const ballonRecule = historique[historique.length - 1]! - historique[Math.max(0, historique.length - 9)]! > 5;
+        duree = ecart > 5 ? duree + 0.25 : 0;
+        dureeMax = Math.max(dureeMax, duree);
+        if (ecart > 5 && !ballonRecule) repoussee++;
+      }
+      expect(repoussee / n).toBeLessThan(0.05);
+      expect(dureeMax).toBeLessThanOrEqual(4);
     }
   });
 

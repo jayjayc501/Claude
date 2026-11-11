@@ -80,7 +80,7 @@ svg.planche { height: min(calc(100dvh - 190px), calc((min(100vw, 520px) - 24px) 
 .jeton-origine { opacity: 0.3; }
 .jeton-souleve .jeton-rond { transform-box: fill-box; transform-origin: center; transform: scale(1.25); stroke: var(--accent); stroke-width: 4; }
 .jeton-souleve .jeton-texte { font-size: 13px; }
-.cible-case { fill: var(--accent); fill-opacity: 0.22; stroke: var(--accent); stroke-width: 3; pointer-events: none; }
+.cible-case { fill: var(--accent); fill-opacity: 0.3; stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; pointer-events: none; }
 .puces { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 10px 0; }
 .puce { min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; }
 .puce-id { font-weight: 600; }
@@ -134,3 +134,32 @@ button[hidden] { display: none; }
 .bouton-actif { border-color: var(--accent); color: var(--accent); background: var(--accent-fond); }
 .bouton:disabled { opacity: 0.45; }
 @media (prefers-color-scheme: dark) { .jeton-banc .jeton-texte { fill: var(--zone); } }
+.choix-plateau { display: flex; gap: 4px; }
+.mini { font: inherit; font-size: 13px; color: var(--texte-2); background: var(--carte); border: 1px solid var(--bord); border-radius: 8px; min-height: 32px; padding: 0 8px; cursor: pointer; }
+.mini-actif { border-color: var(--accent); color: var(--accent); background: var(--accent-fond); }
+.ligne-statut { align-items: center; }
+/* Plateau de placement : couleurs par bande de jeu. Cases presque opaques :
+   le plateau se lit d'abord, les lignes du terrain n'apparaissent que dans les joints. */
+.case-plateau { stroke-width: 1.2; stroke-linejoin: round; pointer-events: none; fill-opacity: 0.88; }
+.case-gardien { fill: #fac775; stroke: #ba7517; }
+.case-defense { fill: #b5d4f4; stroke: #378add; }
+.case-milieu { fill: #cecbf6; stroke: #7f77dd; }
+.case-attaque { fill: #f7c1c1; stroke: #e24b4a; }
+.case-cote { fill-opacity: 0.55; }
+.case-role { font-size: 10px; font-weight: 600; text-anchor: middle; pointer-events: none; opacity: 0.8; }
+.case-role-gardien { fill: #854f0b; }
+.case-role-defense { fill: #185fa5; }
+.case-role-milieu { fill: #534ab7; }
+.case-role-attaque { fill: #a32d2d; }
+@media (prefers-color-scheme: dark) {
+  .case-plateau { fill-opacity: 0.9; }
+  .case-cote { fill-opacity: 0.6; }
+  .case-gardien { fill: #633806; stroke: #ba7517; }
+  .case-defense { fill: #0c447c; stroke: #378add; }
+  .case-milieu { fill: #3c3489; stroke: #7f77dd; }
+  .case-attaque { fill: #791f1f; stroke: #e24b4a; }
+  .case-role-gardien { fill: #fac775; }
+  .case-role-defense { fill: #b5d4f4; }
+  .case-role-milieu { fill: #cecbf6; }
+  .case-role-attaque { fill: #f7c1c1; }
+}

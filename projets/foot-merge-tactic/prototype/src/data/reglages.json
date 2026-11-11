@@ -16,6 +16,10 @@
         "attaque": 40
       },
       "ecartMinDansLigneM": 6,
+      "largeurLigneBornesM": {
+        "min": 38,
+        "max": 44
+      },
       "suiviLateral": 0.45,
       "influencePlacement": 0.2,
       "gardien": {
@@ -28,10 +32,6 @@
     "attaque": {
       "ecartement": 1.2,
       "glissementLateral": 0.15,
-      "profondeurPlacement": {
-        "basY": 0.11,
-        "hautY": 0.47
-      },
       "distanceDefenseBallonM": 20,
       "ligneArriereMinM": 15,
       "ligneArriereMaxM": 55,

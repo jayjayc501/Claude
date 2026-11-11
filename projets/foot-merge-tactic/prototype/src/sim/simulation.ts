@@ -148,6 +148,9 @@ export class MatchSim {
     if (this.temps >= this.prochaineCible) {
       // Faux ballon : il circule par passes courtes entre les joueurs proches,
       // comme une vraie possession, au lieu de sauter d'un bout à l'autre.
+      // Une possession progresse : on joue plus souvent vers un partenaire
+      // placé devant ; près de la surface adverse, on fait circuler en retrait.
+      const sens = this.possession === 0 ? 1 : -1;
       const candidats = this.joueurs
         .filter((j) => j.camp === this.possession && j.poste.id !== "G")
         .sort(
@@ -156,10 +159,12 @@ export class MatchSim {
             Math.hypot(b.pos.x - this.ballon.x, b.pos.y - this.ballon.y),
         )
         .slice(0, 4);
-      const porteur = candidats[this.rng.entier(candidats.length)];
+      const poids = candidats.map((j) => ((j.pos.y - this.ballon.y) * sens > 0 ? 1.5 : 1));
+      let tirage = this.rng.entre(0, poids.reduce((a, b) => a + b, 0));
+      const porteur = candidats.find((_, i) => (tirage -= poids[i]!) < 0) ?? candidats[0];
       if (porteur) {
-        const sens = this.possession === 0 ? 1 : -1;
-        const avance = this.rng.entre(-5, 8) * sens; // parfois une passe en retrait
+        const profondeur = this.versRepere(this.possession, this.ballon).y * this.donnees.longueurM;
+        const avance = (profondeur > 75 ? this.rng.entre(-8, 4) : this.rng.entre(-5, 8)) * sens;
         const cote = this.rng.entre(-4, 4);
         this.cibleBallon = {
           x: Math.min(this.donnees.largeurM - 2, Math.max(2, porteur.pos.x + cote)),
@@ -195,6 +200,7 @@ export class MatchSim {
    *  (6 à 8 m chez les entraîneurs, voir docs/reference-football.md §3). */
   private espacerLignes(camp: Camp): void {
     const ecart = this.reglages.projection.defense.ecartMinDansLigneM;
+    const bornes = this.reglages.projection.defense.largeurLigneBornesM;
     const W = this.donnees.largeurM;
     for (const ligne of ["defense", "milieu", "attaque"] as const) {
       const js = this.joueurs
@@ -204,6 +210,16 @@ export class MatchSim {
       const avant = js.reduce((s, j) => s + j.cible.x, 0) / js.length;
       const xs = js.map((j) => j.cible.x);
       for (let i = 1; i < xs.length; i++) xs[i] = Math.max(xs[i]!, xs[i - 1]! + ecart);
+      // Une ligne de 3 joueurs ou plus tient la largeur de la surface : on
+      // l'étire ou la resserre autour de son centre, en gardant les écarts relatifs.
+      if (ligne !== "attaque" && xs.length >= 3) {
+        const largeur = xs[xs.length - 1]! - xs[0]!;
+        const voulue = Math.min(bornes.max, Math.max(bornes.min, largeur));
+        if (largeur > 1e-6 && voulue !== largeur) {
+          const milieu = (xs[0]! + xs[xs.length - 1]!) / 2;
+          for (let i = 0; i < xs.length; i++) xs[i] = milieu + (xs[i]! - milieu) * (voulue / largeur);
+        }
+      }
       // Recentrer la ligne là où elle était, sans sortir du terrain.
       const apres = xs.reduce((s, x) => s + x, 0) / xs.length;
       let decalage = avant - apres;

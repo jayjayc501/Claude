@@ -92,7 +92,7 @@ function projeterAttaque(base: PointNorm, poste: Poste, ballon: PointNorm, regla
     return { x, y: yM / longueurM };
   }
 
-  const p = a.profondeurPlacement;
+  const p = poste.profondeurPlateau;
   const t = borner((base.y - p.basY) / (p.hautY - p.basY), 0, 1);
   return { x, y: (arriereM + t * (avantM - arriereM)) / longueurM };
 }

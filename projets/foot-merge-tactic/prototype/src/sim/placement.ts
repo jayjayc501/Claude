@@ -72,24 +72,45 @@ export function remplacer(composition: Placement[], entrant: string, sortant: st
   };
 }
 
-/** Case visée par un point du demi-terrain : parmi les cases qui contiennent le
- *  point (les rectangles se chevauchent), celle dont le centre est le plus proche. */
+/** Vrai si le point est dans la case (hexagone à pointe en haut, ou rectangle). */
+export function dansLaCase(c: Cellule, point: PointNorm): boolean {
+  const dx = Math.abs(point.x - c.centre.x) / (c.rect.w / 2);
+  const dy = Math.abs(point.y - c.centre.y) / (c.rect.h / 2);
+  if (c.forme === "carre") return dx <= 1 && dy <= 1;
+  return dx <= 1 && dy <= 1 - dx / 2;
+}
+
+/** Case visée par un point du demi-terrain : celle qui le contient (les cases
+ *  ne se chevauchent pas). Aucune hors du plateau. */
 export function caseAuPoint(donnees: Donnees, point: PointNorm): Cellule | undefined {
-  let meilleure: Cellule | undefined;
-  let distance = Infinity;
   for (const poste of donnees.postes) {
-    for (const c of poste.cases) {
-      const r = c.rect;
-      if (point.x < r.x || point.x > r.x + r.w || point.y < r.y || point.y > r.y + r.h) continue;
-      // Distance mesurée en mètres pour ne pas favoriser la largeur ou la longueur.
-      const d = Math.hypot((point.x - c.centre.x) * donnees.largeurM, (point.y - c.centre.y) * donnees.longueurM);
+    for (const c of poste.cases) if (dansLaCase(c, point)) return c;
+  }
+  return undefined;
+}
+
+/** Passe une composition d'un plateau à l'autre : chaque joueur garde son
+ *  poste et prend la case libre de ce poste la plus proche de l'ancienne
+ *  (distance mesurée en cases, pour ne favoriser ni la largeur ni la hauteur). */
+export function convertirComposition(composition: Placement[], de: Donnees, vers: Donnees): Placement[] {
+  if (de.plateauId === vers.plateauId) return composition.map((p) => ({ ...p }));
+  const prises = new Set<string>();
+  return composition.map((p) => {
+    const ancienne = de.cellule(p.poste, p.cellule).centre;
+    let meilleure = -1;
+    let distance = Infinity;
+    for (const c of vers.poste(p.poste).cases) {
+      if (prises.has(`${p.poste}:${c.index}`)) continue;
+      const d = Math.hypot((c.centre.x - ancienne.x) / vers.pas.x, (c.centre.y - ancienne.y) / vers.pas.y);
       if (d < distance) {
         distance = d;
-        meilleure = c;
+        meilleure = c.index;
       }
     }
-  }
-  return meilleure;
+    if (meilleure < 0) throw new Error(`Plus de case libre au poste ${p.poste} sur le plateau ${vers.plateauId}`);
+    prises.add(`${p.poste}:${meilleure}`);
+    return { ...p, cellule: meilleure };
+  });
 }
 
 /** Problèmes qui empêchent de lancer le match (liste vide = prêt). */

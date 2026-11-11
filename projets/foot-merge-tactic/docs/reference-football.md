@@ -206,7 +206,9 @@ de données pour être réglées sans toucher au code.
    ligne de défense**.
 5. **Largeur** : chaque ligne tient à peu près la largeur de la surface :
    **environ 40 m du joueur le plus à gauche au plus à droite** (pas
-   moins : une équipe resserrée dans l'axe laisse les côtés vides). L'ordre
+   moins : une équipe resserrée dans l'axe laisse les côtés vides). Le
+   moteur tient chaque ligne de 3 joueurs ou plus entre 38 et 44 m, quel
+   que soit le placement. L'ordre
    gauche-droite des joueurs est gardé : le latéral se resserre un peu vers
    l'axe, les défenseurs restent espacés de 6 à 8 m environ.
 6. **Coulissement** : tout le bloc glisse vers le côté du ballon (de 45 %

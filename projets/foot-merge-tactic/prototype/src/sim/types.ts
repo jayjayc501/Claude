@@ -22,32 +22,6 @@ export interface RectNorm {
   h: number;
 }
 
-export interface GrilleDef {
-  cols: number;
-  rows: number;
-  /** Rôle de chaque ligne, de la plus basse à la plus haute. */
-  roles: string[];
-  colonnes?: string[];
-  lignes?: string[];
-  /** Bornes de chaque colonne (0 à 1 dans le rectangle). Des bornes qui se
-   *  recouvrent donnent des cases qui se chevauchent (la case de l'axe à
-   *  cheval sur la gauche et la droite). Par défaut : colonnes égales. */
-  colonnesBornes?: [number, number][];
-  /** Idem pour les lignes, de la plus basse à la plus haute. */
-  lignesBornes?: [number, number][];
-}
-
-export interface CelluleDef {
-  /** Centre de la case, relatif au rectangle (0 à 1). */
-  u: number;
-  v: number;
-  /** Taille de la case, relative au rectangle. */
-  su: number;
-  sv: number;
-  role: string;
-  label: string;
-}
-
 /** Ligne que le poste rejoint quand l'équipe défend (voir docs/reference-football.md). */
 export type LigneDefense = "gardien" | "defense" | "milieu" | "attaque";
 
@@ -55,13 +29,29 @@ export interface PosteDef {
   id: string;
   nom: string;
   ligneDefense: LigneDefense;
-  rect: RectNorm;
-  grille?: GrilleDef;
-  cellules?: CelluleDef[];
   max: number;
   maxProvisoire?: boolean;
   /** Multiplicateur du suivi du ballon (1 par défaut ; le gardien bouge moins). */
   suiviBallon?: number;
+}
+
+export type FormeCase = "hexagone" | "carre";
+
+/** Plateau de placement : un quadrillage unique sur le demi-terrain, sans
+ *  chevauchement. Chaque case appartient à un poste. */
+export interface PlateauDef {
+  nom: string;
+  forme: FormeCase;
+  /** Cases par rangée pleine. En hexagones, une rangée d'une case de moins est
+   *  décalée d'une demi-case : chacune de ses cases est à cheval sur deux
+   *  cases des rangées voisines. */
+  colonnes: number;
+  /** Zone du gardien, sous le plateau : hauteur (m), largeur des cases
+   *  (fraction d'une colonne), cases de bas en haut. */
+  gardien: { zoneM: number; largeurCases: number; cases: { label: string }[] };
+  /** Rangées de la plus basse (près de son but) à la plus haute (ligne
+   *  médiane). Chaque case : "POSTE" ou "POSTE:RÔLE" ; "" = pas de case. */
+  rangees: string[][];
 }
 
 /** Case calculée, en coordonnées normalisées absolues (repère de l'équipe). */
@@ -71,17 +61,27 @@ export interface Cellule {
   role: string;
   label: string;
   centre: PointNorm;
+  /** Rectangle qui contient la case (l'hexagone y est inscrit). */
   rect: RectNorm;
+  forme: FormeCase;
 }
 
 export interface Poste extends PosteDef {
   cases: Cellule[];
+  /** Rectangle qui contient toutes les cases du poste (zone affichée en match). */
+  rect: RectNorm;
+  /** Profondeur de la case la plus basse et de la plus haute du plateau
+   *  (gardien exclu) : elles donnent, avec le ballon, la ligne arrière et la
+   *  ligne avant. Entre les deux, chaque joueur garde l'ordre du placement. */
+  profondeurPlateau: { basY: number; hautY: number };
 }
 
 export interface DonneesPostes {
   terrain: { longueur: number; largeur: number };
   postes: PosteDef[];
   roles: Record<string, string>;
+  plateauParDefaut: string;
+  plateaux: Record<string, PlateauDef>;
 }
 
 export interface Joueur {
@@ -117,6 +117,10 @@ export interface Reglages {
       largeurLigneM: { defense: number; milieu: number; attaque: number };
       /** Écart minimal entre deux joueurs voisins d'une même ligne défensive. */
       ecartMinDansLigneM: number;
+      /** Largeur d'une ligne de défense ou de milieu (3 joueurs ou plus), du
+       *  plus à gauche au plus à droite : environ 40 m, quel que soit le
+       *  placement (référence football §3 et §9.1, règle 5). */
+      largeurLigneBornesM: { min: number; max: number };
       suiviLateral: number;
       influencePlacement: number;
       gardien: { distanceDerriereLigneM: number; minM: number; maxM: number; suiviLateral: number };
@@ -124,10 +128,6 @@ export interface Reglages {
     attaque: {
       ecartement: number;
       glissementLateral: number;
-      /** Profondeur des cases (demi-terrain, repère de l'équipe) qui donnent la
-       *  ligne arrière (basY) et la ligne avant (hautY). Entre les deux, chaque
-       *  joueur garde sa place dans l'ordre de profondeur choisi au placement. */
-      profondeurPlacement: { basY: number; hautY: number };
       /** La ligne arrière se tient à cette distance derrière le ballon… */
       distanceDefenseBallonM: number;
       /** … sans descendre sous ce minimum ni monter au-dessus de ce maximum (m depuis son but). */

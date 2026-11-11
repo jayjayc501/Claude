@@ -4,8 +4,10 @@
 //   - lâché sur un autre joueur du terrain, ils échangent leurs places ;
 //   - un remplaçant lâché sur un joueur du terrain prend sa place ;
 //   - un joueur du terrain lâché sur le banc sort.
-// Les cases ne s'affichent que pendant le glissement, pour garder un terrain
-// lisible. Un simple toucher sur un rond affiche le joueur.
+// Le plateau (hexagones ou carrés, au choix) est toujours visible, en
+// couleurs : jaune le gardien, bleu la défense, violet le milieu, rouge
+// l'attaque ; les couloirs des côtés sont plus clairs. Un simple toucher sur
+// un rond affiche le joueur.
 
 import type { Donnees } from "../sim/donnees";
 import {
@@ -18,7 +20,7 @@ import {
   remplacer,
   retirer,
 } from "../sim/placement";
-import type { Equipe, Joueur, Placement } from "../sim/types";
+import type { Cellule, Equipe, Joueur, Placement } from "../sim/types";
 import { dessinerLignes, html, initiales, svg } from "./dom";
 
 const LARGEUR = 340;
@@ -35,6 +37,25 @@ const DELAI_APPUI_MS = 250;
 const SEUIL_GLISSEMENT_PX = 8;
 const DECALAGE_DOIGT = 34; // unités de la planche
 const RAYON_JOUEUR = 20; // lâcher à moins de 20 unités d'un rond = viser ce joueur
+
+/** Couleur d'une case selon son rôle (bande de jeu). */
+const FAMILLE: Record<string, string> = {
+  G: "gardien",
+  DC: "defense",
+  DG: "defense",
+  DD: "defense",
+  MDC: "milieu",
+  MC: "milieu",
+  MOC: "milieu",
+  MG: "milieu",
+  MD: "milieu",
+  MAG: "milieu",
+  MAD: "milieu",
+  AC: "attaque",
+  AG: "attaque",
+  AD: "attaque",
+};
+const POSTES_DE_COTE = new Set(["DG", "DD", "AG", "AD"]);
 
 export interface EtatPlacement {
   composition: Placement[];
@@ -76,6 +97,7 @@ export class EcranPlacement {
     private equipe: Equipe,
     private etat: EtatPlacement,
     private auChangement: (composition: Placement[]) => void,
+    private auChangementPlateau: (plateau: string) => void,
   ) {
     this.racine = html("section", { class: "ecran" });
     this.rendre();
@@ -117,7 +139,34 @@ export class EcranPlacement {
     if (!pl) return `${j.nom} · remplaçant · poste naturel : ${naturels}.`;
     const c = this.donnees.cellule(pl.poste, pl.cellule);
     const hp = horsPoste(j, this.donnees, pl.poste, pl.cellule) ? " · hors poste" : "";
-    return `${j.nom} · ${this.donnees.roles[c.role] ?? c.role} (${c.label})${hp} · naturel : ${naturels}.`;
+    return `${j.nom} · ${this.nomCase(c)}${hp} · naturel : ${naturels}.`;
+  }
+
+  private nomCase(c: Cellule): string {
+    const role = this.donnees.roles[c.role] ?? c.role;
+    return c.label ? `${role} (${c.label})` : role;
+  }
+
+  /** Dessine une case à sa forme (hexagone à pointe en haut, ou carré), un
+   *  peu en retrait pour laisser voir le joint entre les cases. */
+  private dessinerCase(c: Cellule, parent: SVGGElement, classe: string, retrait = 1.6): SVGElement {
+    const cx = this.X(c.centre.x);
+    const cy = this.Y(c.centre.y);
+    const w = c.rect.w * LARGEUR - 2 * retrait;
+    const h = (c.rect.h / 0.5) * HAUTEUR - 2 * retrait;
+    if (c.forme === "carre") {
+      return svg("rect", { x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: 5, class: classe }, parent);
+    }
+    const sommets = [
+      [0, -h / 2],
+      [w / 2, -h / 4],
+      [w / 2, h / 4],
+      [0, h / 2],
+      [-w / 2, h / 4],
+      [-w / 2, -h / 4],
+    ];
+    const points = sommets.map(([x, y]) => `${(cx + x!).toFixed(1)},${(cy + y!).toFixed(1)}`).join(" ");
+    return svg("polygon", { points, class: classe }, parent);
   }
 
   private info(texte: string, erreur = false): void {
@@ -254,20 +303,6 @@ export class EcranPlacement {
     if (!gl || !this.calqueCases) return;
     const calque = this.calqueCases;
     calque.replaceChildren();
-    // Toutes les cases, discrètes ; la case visée, en couleur.
-    for (const p of this.donnees.postes) {
-      for (const c of p.cases) {
-        const prise = !!occupant(this.etat.composition, p.id, c.index);
-        svg("rect", {
-          x: this.X(c.rect.x) + 1.5,
-          y: this.Y(c.rect.y + c.rect.h) + 1.5,
-          width: c.rect.w * LARGEUR - 3,
-          height: (c.rect.h / 0.5) * HAUTEUR - 3,
-          rx: 5,
-          class: prise ? "case-fond case-fond-prise" : "case-fond",
-        }, calque);
-      }
-    }
     const ci = this.cible(gl.id, gl.surTerrain, pos);
     const nom = this.joueur(gl.id).nom;
     let texte = gl.surTerrain
@@ -287,22 +322,12 @@ export class EcranPlacement {
     } else if (ci.type === "case") {
       visee = { poste: ci.poste, index: ci.cellule };
       const c = this.donnees.cellule(ci.poste, ci.cellule);
-      texte = `${nom} → ${this.donnees.roles[c.role] ?? c.role} (${c.label})`;
+      texte = `${nom} → ${this.nomCase(c)}`;
     } else if (ci.type === "banc") {
       texte = `${nom} sort et va sur le banc.`;
       svg("rect", { x: MARGE, y: Y_BANC, width: LARGEUR, height: HAUTEUR_BANC, rx: 10, class: "cible-case" }, calque);
     }
-    if (visee) {
-      const c = this.donnees.cellule(visee.poste, visee.index);
-      svg("rect", {
-        x: this.X(c.rect.x) + 1.5,
-        y: this.Y(c.rect.y + c.rect.h) + 1.5,
-        width: c.rect.w * LARGEUR - 3,
-        height: (c.rect.h / 0.5) * HAUTEUR - 3,
-        rx: 5,
-        class: "cible-case",
-      }, calque);
-    }
+    if (visee) this.dessinerCase(this.donnees.cellule(visee.poste, visee.index), calque, "cible-case", 1);
     if (this.elMessage) {
       this.elMessage.textContent = texte;
       this.elMessage.className = "message";
@@ -362,6 +387,19 @@ export class EcranPlacement {
 
     const tete = html("div", { class: "ligne-statut" }, r);
     html("span", { class: "compteur" }, tete, `${comp.length}/${JOUEURS_SUR_LE_TERRAIN} sur le terrain`);
+    const choix = html("div", { class: "choix-plateau", role: "group", "aria-label": "Forme des cases" }, tete);
+    for (const p of this.donnees.plateauxDisponibles) {
+      const actif = p.id === this.donnees.plateauId;
+      const b = html(
+        "button",
+        { type: "button", class: `mini${actif ? " mini-actif" : ""}`, "aria-pressed": String(actif) },
+        choix,
+        `${p.id === "hexagones" ? "⬡" : "▢"} ${p.nom}`,
+      );
+      b.addEventListener("click", () => {
+        if (!actif) this.auChangementPlateau(p.id);
+      });
+    }
     this.elMessage = html("p", { class: this.etat.messageErreur ? "message erreur" : "message", role: "status" }, r, this.etat.message);
 
     const s = svg("svg", {
@@ -379,7 +417,18 @@ export class EcranPlacement {
     const titre = svg("text", { x: MARGE + 10, y: Y_BANC + HAUTEUR_BANC / 2 + 4, class: "banc-titre" }, banc);
     titre.textContent = "Banc";
 
-    // Cases (pendant un glissement seulement), puis ronds, puis rond soulevé.
+    // Plateau : toutes les cases, en couleur, avec leur rôle.
+    const plateau = svg("g", { class: "plateau" }, s);
+    for (const p of this.donnees.postes) {
+      for (const c of p.cases) {
+        const cote = POSTES_DE_COTE.has(p.id) ? " case-cote" : "";
+        this.dessinerCase(c, plateau, `case-plateau case-${FAMILLE[c.role] ?? "milieu"}${cote}`);
+        const t = svg("text", { x: this.X(c.centre.x), y: this.Y(c.centre.y) + 3.5, class: `case-role case-role-${FAMILLE[c.role] ?? "milieu"}` }, plateau);
+        t.textContent = c.role;
+      }
+    }
+
+    // Case visée pendant un glissement, puis ronds, puis rond soulevé.
     this.calqueCases = svg("g", {}, s);
     const jetons = svg("g", {}, s);
     const tous = [...comp.map((p) => p.joueurId), ...this.remplacants().map((j) => j.id)];

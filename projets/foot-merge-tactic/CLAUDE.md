@@ -19,6 +19,7 @@ terminée (sections « Décisions validées », « Questions ouvertes », « Ét
 - Pour écrire du code ou sauvegarder des fichiers : ajouter le dépôt à la session et suivre son `CLAUDE.md` (à la racine et dans ce dossier).
 - Quand une discussion valide une décision ou change le plan, mettre à jour ce fichier **aux deux endroits** (dépôt et projet claude.ai). Sinon, les autres discussions ne seront pas au courant.
 - Pour une simple discussion de conception (sans code), répondre en s'appuyant sur ce fichier et sur le dossier, en indiquant toujours si un point est validé, proposé ou ouvert.
+- **Référence football** : `docs/reference-football.md` (dépôt) et `reference-football.md` (projet claude.ai). Vocabulaire, principes tactiques, rôles par poste et par moment, chiffres, règles du moteur qui en découlent et tests de réalisme. **À relire avant de modifier un comportement du moteur.** Demandée par le concepteur pour que le moteur ne s'éloigne pas du vrai football.
 
 ## Règle d'or : trois statuts à ne jamais mélanger
 
@@ -66,7 +67,8 @@ un plateau.
 - Un joueur a 1 ou 2 postes naturels. Placé hors de son poste, il est moins efficace mais reste utilisable.
 - **Pour l'instant, une seule organisation** : chaque poste a **un seul rectangle de référence fixe** (position, largeur, profondeur). Les deux organisations offensive et défensive (§6 du dossier) sont en pause : trop compliquées et trop longues à régler.
 - Le rectangle n'est ni une case exclusive ni une barrière physique. Les rectangles ne bougent pas. Ils doivent être **plus grands et plus chevauchants** que dans la maquette du 11/11.
-- **Chaque rectangle est découpé en sous-zones** (positions possibles) : G 2 (normal ou un peu avancé) ; DC 6 ; DD et DG 2 ou 3 (le concepteur hésite) ; milieu central 6, qui couvrent MDC, MC et MOC, un peu à gauche ou un peu à droite ; AD et AG 3 ; attaquant 5, dont 1 devant le but.
+- **Chaque rectangle est découpé en sous-zones** (positions possibles) : G 2 (normal ou un peu avancé) ; DC 6 sur 2 lignes ; DD et DG 2 ou 3 (le concepteur hésite) ; **milieu central 9 sur 3 lignes** (MDC, MC, MOC) ; AD et AG 3 ; **attaquant 6 sur 2 lignes** (décision du 11/11 ; remplace « milieu 6 » et « attaquant 5 dont 1 devant le but » ; pas encore appliquée dans le prototype).
+- **Les cases du milieu se chevauchent** : ce ne sont pas des carrés séparés ; sur trois cases, celle du milieu est à cheval sur les deux autres. À préciser : lignes (MDC / MC / MOC) ou colonnes (gauche / axe / droite) ?
 - Les 3 cases de AG et AD sont trois postes, du plus bas au plus haut : milieu de côté (MG / MD), milieu avancé, attaquant de côté. Il n'y a donc pas de poste MD / MG à part.
 - **Placement sur un demi-terrain** (idée du concepteur) : l'entraîneur place ses joueurs comme avant le coup d'envoi, dans son propre camp. Les **règles de projection** du moteur transforment ensuite chaque position en position de match, en attaque et en défense. La correspondance exacte (une petite table de règles) se règle ensemble en regardant le prototype.
 - L'entraîneur place chaque joueur dans une sous-zone ; le rectangle reste la zone de liberté dans laquelle le moteur fait bouger le joueur.
@@ -126,10 +128,11 @@ Placement :
 - Latéraux (DD, DG) : 3 cases en profondeur en attendant la décision (2 ou 3).
 - Un seul joueur par sous-zone.
 - Pour chaque poste, les données décrivent : rectangle, découpage (colonnes et lignes, ou liste de cases), maximum de joueurs.
-- **Règles de projection** (première version, codée dans le prototype 1, chiffres dans `reglages.json` et `postes.json`) :
-  - en défense : la position du demi-terrain, resserrée de 10 % en largeur, qui glisse du côté du ballon et avance ou recule avec lui (10 m au plus) ;
-  - en attaque : chaque poste monte de sa distance (G 5 m, DC 20 m, latéraux et milieux 30 m, côtés 35 m, attaquant 40 m), l'équipe s'écarte de 20 % et suit un peu le ballon ;
-  - bascule après un délai de 0,5 s, puis déplacement progressif (7 m/s au plus).
+- **Règles de projection, version 2** (11/11, d'après `docs/reference-football.md` §9 ; chiffres dans `reglages.json` et `postes.json`) :
+  - **sans le ballon, défense par lignes** : chaque poste rejoint sa ligne (gardien ; défense : DC, DG, DD ; milieu : milieu central et côtés ; attaque : attaquant). La ligne défensive se tient 22 m derrière le ballon, entre 12 et 38 m de son but (bloc médian) ; milieu 11 m devant, attaque 23 m devant. Le placement ne joue plus qu'à 20 % en profondeur : **un latéral placé haut revient dans la ligne de défense**. Largeur des lignes 40 m (attaque 28 m), ordre gauche-droite gardé, 6 m au moins entre voisins, coulissement vers le ballon (60 %) ;
+  - **avec le ballon** : chaque case monte de sa distance (G 10 m, DC 20 m, latéraux 30 m, milieu défensif 20 m, milieu 30 m, milieu offensif 35 m, côtés 35 m, attaquant 40 m) ; l'équipe s'écarte de 20 % ; **tout le bloc avance ou recule avec le ballon** (15 m au plus) ; **les attaquants restent au niveau de la ligne du hors-jeu** adverse ;
+  - bascule après 0,5 s, puis course à 7 m/s au plus ; un joueur placé haut revient donc en retard (contrepartie naturelle) ;
+  - **évitement anticipé** : les joueurs s'écartent avant de se croiser, environ 3 m au minimum entre deux joueurs.
 - Maximums provisoires (non validés) : DG 1, DD 1, milieu 4, AD 1, attaquant 3 (validés en exemple : 3 DC, 1 AG ; le gardien : 1).
 - Sur téléphone (maquette du 11/11) : terrain vertical, téléphone tenu droit ; on choisit un joueur puis on touche une case (une case de DC fait environ 65 × 45 pixels, un joueur environ 12 pixels) ; n'afficher que les cases du joueur choisi.
 
@@ -208,6 +211,7 @@ Règles du dossier (§16), condensées :
 11. Après chaque étape : une version exécutable et les instructions pour la lancer.
 12. Rectangles, sous-zones, postes, attributs et paramètres modifiables sans réécrire le moteur.
 13. **Ne jamais déclarer le moteur « bon » parce que les tests passent ou que les statistiques semblent équilibrées.** Il faut regarder des matchs générés et faire valider le concepteur.
+14. **Avant de toucher un comportement du moteur, relire `docs/reference-football.md`**, et traduire chaque principe utilisé en test de réalisme (§9.4).
 
 ## Feuille de route
 
@@ -264,3 +268,4 @@ possession), à la place du ballon simulé.
 - 11/11/2026 (suite) : 2 groupes de 4 ; une seule organisation pour l'instant ; nombre de sous-zones par poste ; fusions reportées après le moteur (§20.8). Maquette HTML montrée dans la discussion (terrain vertical, placement par cases), non conservée.
 - 11/11/2026 (suite) : placement sur un demi-terrain et règles de projection ; côtés à 3 postes (milieu, milieu avancé, attaquant) ; prototype en version web. **Prototype 1 réalisé** (`prototype/`, 20 tests verts, vérifié au format téléphone) et publié. Prochaine étape : retours du concepteur sur le prototype 1 (lisibilité, placement au doigt, chiffres de projection), puis mission 2.
 - 11/11/2026 (suite) : glisser-déposer des joueurs sur le demi-terrain, avec échange quand on lâche un joueur sur un autre (demande du concepteur). 23 tests verts. Page republiée.
+- 11/11/2026 (suite) : retours du concepteur sur le prototype 1 : interface trop longue (2 à 3 écrans), zones trop chevauchantes à l'écran, jeu trop figé, latéral placé haut qui ne revient pas défendre. Référence football écrite (`docs/reference-football.md`). Règles de projection refaites (défense par lignes, bloc qui suit le ballon, ligne du hors-jeu, évitement anticipé) avec 7 tests de réalisme ; 30 tests verts. Nouveau découpage décidé (DC 6, milieu 9, attaque 6), pas encore appliqué. Prochaine étape : interface sur un seul écran et nouveau découpage des cases.

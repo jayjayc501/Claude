@@ -1209,3 +1209,23 @@ Encore ouvertes, en plus de celles du §17 et des sections ci-dessus :
     (22 joueurs, possession simulée, blocs qui montent et redescendent
     sans téléportation). Pas encore de passes ni de tirs. En attente de
     validation du concepteur.
+
+## 20.10. Retours sur le prototype 1 et référence football (11/11/2026)
+
+-   [VALIDÉ] Nouveau découpage : DC 6 cases sur 2 lignes ; **milieu
+    central 9 cases sur 3 lignes** ; **attaquant 6 cases sur 2 lignes**.
+    Remplace « milieu 6 » et « attaquant 5 dont 1 devant le but ».
+-   [VALIDÉ] Les cases du milieu se chevauchent : sur trois cases, celle
+    du milieu est à cheval sur les deux autres. [OUVERT] S'agit-il des
+    lignes (MDC, MC, MOC) ou des colonnes (gauche, axe, droite) ?
+-   [VALIDÉ] Un latéral placé haut doit revenir défendre bas quand
+    l'équipe n'a pas le ballon. Plus généralement, le moteur doit rester
+    fidèle au vrai football : le concepteur a demandé une **référence
+    football** pour le projet (`docs/reference-football.md`).
+-   [PROPOSITION, codée] Règles de projection version 2 : défense par
+    lignes (bloc médian), placement surtout utile en attaque, bloc qui
+    suit le ballon en attaque, ligne du hors-jeu, évitement anticipé.
+    Détails dans `CLAUDE.md` et `journal.md`.
+-   À faire ensuite : interface sur un seul écran (banc sous forme de
+    ronds, sans longue liste), cases affichées seulement pendant le
+    glissement, nouveau découpage.

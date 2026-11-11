@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { chargerDonnees, chargerEquipes, chargerReglages } from "../src/sim/chargement";
 import { caseAuPoint, echanger, horsPoste, placer, retirer, verifier } from "../src/sim/placement";
-import { projeter } from "../src/sim/projection";
+import { hauteurLigneDefensiveM, projeter } from "../src/sim/projection";
 import { MatchSim } from "../src/sim/simulation";
 import type { Equipe } from "../src/sim/types";
 
@@ -112,13 +112,18 @@ describe("règles de placement", () => {
 
 describe("règles de projection", () => {
   const centre = { x: 0.5, y: 0.5 };
-  test("chaque case est plus haute en attaque qu'en défense", () => {
-    for (const p of donnees.postes) {
-      for (const c of p.cases) {
-        const att = projeter(c.centre, p, "attaque", centre, reglages, L);
-        const def = projeter(c.centre, p, "defense", centre, reglages, L);
-        expect(att.y).toBeGreaterThan(def.y);
-      }
+  test("pour une même position du ballon, l'équipe est plus haute en attaque qu'en défense", () => {
+    // Pas case par case : un défenseur central peut être aussi haut en défense
+    // (bloc médian) qu'en construction. Mais l'équipe, elle, monte.
+    const { effectif } = chargerEquipes();
+    for (const by of [0.3, 0.5, 0.7]) {
+      const ballon = { x: 0.5, y: by };
+      const moyenne = (phase: "attaque" | "defense") =>
+        effectif.composition.reduce((s, pl) => {
+          const c = donnees.cellule(pl.poste, pl.cellule);
+          return s + projeter(c.centre, donnees.poste(pl.poste), phase, ballon, reglages, L, c.monteeAttaqueM).y;
+        }, 0) / effectif.composition.length;
+      expect(moyenne("attaque") - moyenne("defense")).toBeGreaterThan(5 / L);
     }
   });
 
@@ -231,17 +236,115 @@ describe("simulation", () => {
     expect(minimum).toBeGreaterThan(1);
   });
 
-  test("avec 3 DC dont un placé haut, il est bien plus haut que les deux autres en match", () => {
+  test("avec 3 DC dont un placé haut : un peu plus haut en défense, nettement plus haut en attaque", () => {
     const { effectif } = chargerEquipes();
     const r = placer(retirer(effectif.composition, "oubrahim"), donnees, "lomont", "DC", 4);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     const m = nouveauMatch(3, { ...effectif, composition: r.composition });
+    // On regarde la position visée (règle de placement), pas la position après
+    // les écarts d'évitement : l'attaquant adverse se tient sur notre ligne et
+    // pousse le défenseur. Le marquage viendra avec le vrai ballon (mission 2).
+    const y = (id: string) => m.joueurs.find((j) => j.joueur.id === id)!.cible.y;
     m.demarrer();
     m.definirMode("eux");
-    m.avancer(10);
-    const y = (id: string) => m.joueurs.find((j) => j.joueur.id === id)!.pos.y;
-    expect(y("lomont")).toBeGreaterThan(y("belcourt") + 5);
-    expect(y("lomont")).toBeGreaterThan(y("kessai") + 5);
+    m.avancer(12);
+    const ecartDefense = y("lomont") - (y("belcourt") + y("kessai")) / 2;
+    expect(ecartDefense).toBeGreaterThan(0.5);
+    expect(ecartDefense).toBeLessThan(5);
+    m.definirMode("nous");
+    m.avancer(12);
+    expect(y("lomont") - (y("belcourt") + y("kessai")) / 2).toBeGreaterThan(8);
+  });
+});
+
+// Contrôles tirés de docs/reference-football.md (§9.4) : le moteur ne doit pas
+// s'éloigner du football. Mesurés en défense organisée, après le repli.
+describe("réalisme (référence football)", () => {
+  const LIGNE: Record<string, "defense" | "milieu" | "attaque" | "gardien"> = {};
+  for (const p of donnees.postes) LIGNE[p.id] = p.ligneDefense;
+
+  function defenseOrganisee(graine: number, effectif?: Equipe): MatchSim {
+    const m = nouveauMatch(graine, effectif);
+    m.demarrer();
+    m.definirMode("eux");
+    m.avancer(14);
+    return m;
+  }
+  const notreLigne = (m: MatchSim, ligne: string) =>
+    m.joueurs.filter((j) => j.camp === 0 && LIGNE[j.poste.id] === ligne);
+  const moyenneY = (js: { pos: { y: number } }[]) => js.reduce((s, j) => s + j.pos.y, 0) / js.length;
+
+  test("distance entre la ligne de défense et la ligne du milieu : 8 à 15 m", () => {
+    for (const graine of [1, 2, 3, 4, 5]) {
+      const m = defenseOrganisee(graine);
+      const d = moyenneY(notreLigne(m, "milieu")) - moyenneY(notreLigne(m, "defense"));
+      expect(d).toBeGreaterThanOrEqual(8);
+      expect(d).toBeLessThanOrEqual(15);
+    }
+  });
+
+  test("largeur de la ligne de défense : 45 m au plus", () => {
+    for (const graine of [1, 2, 3, 4, 5]) {
+      const xs = notreLigne(defenseOrganisee(graine), "defense").map((j) => j.pos.x);
+      expect(Math.max(...xs) - Math.min(...xs)).toBeLessThanOrEqual(45);
+    }
+  });
+
+  test("longueur de l'équipe en défense (dernier défenseur → joueur le plus avancé) : 40 m au plus", () => {
+    for (const graine of [1, 2, 3, 4, 5]) {
+      const m = defenseOrganisee(graine);
+      const champ = m.joueurs.filter((j) => j.camp === 0 && j.poste.id !== "G").map((j) => j.pos.y);
+      expect(Math.max(...champ) - Math.min(...champ)).toBeLessThanOrEqual(40);
+    }
+  });
+
+  test("un latéral placé haut revient dans la ligne des défenseurs centraux quand on défend", () => {
+    const { effectif } = chargerEquipes();
+    const r = placer(effectif.composition, donnees, "ferrand", "DG", 2);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    for (const graine of [1, 2, 3]) {
+      const m = defenseOrganisee(graine, { ...effectif, composition: r.composition });
+      const dg = m.joueurs.find((j) => j.joueur.id === "ferrand")!;
+      const dcs = m.joueurs.filter((j) => j.camp === 0 && j.poste.id === "DC");
+      expect(Math.abs(dg.pos.y - moyenneY(dcs))).toBeLessThan(5);
+    }
+  });
+
+  test("le latéral placé haut monte beaucoup plus haut que les défenseurs centraux quand on attaque", () => {
+    const { effectif } = chargerEquipes();
+    const r = placer(effectif.composition, donnees, "ferrand", "DG", 2);
+    if (!r.ok) throw new Error(r.erreur);
+    const m = nouveauMatch(1, { ...effectif, composition: r.composition });
+    m.demarrer();
+    m.definirMode("nous");
+    m.avancer(14);
+    const dg = m.joueurs.find((j) => j.joueur.id === "ferrand")!;
+    const dcs = m.joueurs.filter((j) => j.camp === 0 && j.poste.id === "DC");
+    expect(dg.pos.y - moyenneY(dcs)).toBeGreaterThan(15);
+  });
+
+  test("le bloc coulisse : ballon à gauche, centre du bloc à gauche ; ballon à droite, à droite", () => {
+    const { effectif } = chargerEquipes();
+    const centreDuBloc = (ballonX: number) => {
+      const xs = effectif.composition
+        .filter((p) => p.poste !== "G")
+        .map((p) => {
+          const poste = donnees.poste(p.poste);
+          const c = donnees.cellule(p.poste, p.cellule);
+          return projeter(c.centre, poste, "defense", { x: ballonX, y: 0.4 }, reglages, L).x;
+        });
+      return xs.reduce((s, x) => s + x, 0) / xs.length;
+    };
+    expect(centreDuBloc(0.1)).toBeLessThan(0.45);
+    expect(centreDuBloc(0.9)).toBeGreaterThan(0.55);
+  });
+
+  test("ligne défensive : plus basse quand le ballon approche du but, jamais sous le minimum du bloc", () => {
+    const l = reglages.projection.defense.ligneDefensive;
+    expect(hauteurLigneDefensiveM({ x: 0.5, y: 0.2 }, reglages, L)).toBe(l.hauteurMinM);
+    expect(hauteurLigneDefensiveM({ x: 0.5, y: 0.5 }, reglages, L)).toBeGreaterThan(l.hauteurMinM);
+    expect(hauteurLigneDefensiveM({ x: 0.5, y: 0.9 }, reglages, L)).toBe(l.hauteurMaxM);
   });
 });

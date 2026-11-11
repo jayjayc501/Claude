@@ -1,26 +1,54 @@
 {
   "projection": {
     "defense": {
-      "compression": 0.9,
-      "glissementLateral": 0.25,
-      "suiviProfondeur": 0.25,
-      "decalageMaxM": 10
+      "ligneDefensive": {
+        "distanceDerriereBallonM": 22,
+        "hauteurMinM": 12,
+        "hauteurMaxM": 38
+      },
+      "ecartLignesM": {
+        "milieu": 11,
+        "attaque": 23
+      },
+      "largeurLigneM": {
+        "defense": 40,
+        "milieu": 40,
+        "attaque": 28
+      },
+      "ecartMinDansLigneM": 6,
+      "suiviLateral": 0.6,
+      "influencePlacement": 0.2,
+      "gardien": {
+        "distanceDerriereLigneM": 22,
+        "minM": 3,
+        "maxM": 11,
+        "suiviLateral": 0.2
+      }
     },
     "attaque": {
       "ecartement": 1.2,
       "glissementLateral": 0.15,
-      "suiviProfondeur": 0.15,
-      "decalageMaxM": 5
+      "profondeurReference": 0.6,
+      "suiviProfondeur": 0.5,
+      "decalageMaxM": 15,
+      "margeHorsJeuM": 0.5
     },
-    "limites": { "xMin": 0.03, "xMax": 0.97, "yMin": 0.01, "yMax": 0.92 }
+    "limites": {
+      "xMin": 0.03,
+      "xMax": 0.97,
+      "yMin": 0.01,
+      "yMax": 0.92
+    }
   },
-  "transition": { "delaiS": 0.5 },
+  "transition": {
+    "delaiS": 0.5
+  },
   "mouvement": {
     "vitesseMaxMS": 7,
     "accelerationMS2": 5,
     "distanceFreinageM": 4,
     "distanceMinM": 3,
-    "forceSeparation": 3
+    "forceSeparation": 8
   },
   "possessionSimulee": {
     "dureeMinS": 4,

@@ -204,11 +204,14 @@ de données pour être réglées sans toucher au code.
    placé haut dans son rectangle est un peu plus haut dans sa ligne
    (quelques mètres), pas plus. Un latéral placé haut **revient dans la
    ligne de défense**.
-5. **Largeur** : chaque ligne tient à peu près la largeur de la surface
-   (environ 40 m ; un peu moins pour l'attaque). L'ordre gauche-droite des
-   joueurs est gardé : le latéral se resserre vers l'axe, les défenseurs
-   restent espacés de 6 à 8 m environ.
-6. **Coulissement** : tout le bloc glisse vers le côté du ballon.
+5. **Largeur** : chaque ligne tient à peu près la largeur de la surface :
+   **environ 40 m du joueur le plus à gauche au plus à droite** (pas
+   moins : une équipe resserrée dans l'axe laisse les côtés vides). L'ordre
+   gauche-droite des joueurs est gardé : le latéral se resserre un peu vers
+   l'axe, les défenseurs restent espacés de 6 à 8 m environ.
+6. **Coulissement** : tout le bloc glisse vers le côté du ballon (de 45 %
+   de l'écart entre le ballon et l'axe) ; le côté opposé reste surveillé
+   de loin par le latéral et le milieu de ce côté.
 7. **Gardien** : derrière sa ligne défensive, entre 3 et 12 m de son but
    environ.
 
@@ -239,7 +242,10 @@ ne s'éloigne pas du football :
 
 1. En défense organisée, distance entre la ligne de défense et la ligne
    du milieu : entre 8 et 15 m.
-2. Largeur de la ligne de défense (hors gardien) : au plus 45 m environ.
+2. Largeur des lignes de défense et du milieu (hors gardien) : entre 35
+   et 45 m ; largeur de toute l'équipe : entre 38 et 50 m. Le minimum
+   compte autant que le maximum (première version trop étroite, 30 m,
+   corrigée le 11/11 après le retour du concepteur).
 3. Longueur de l'équipe en défense (du dernier défenseur au joueur le
    plus avancé) : au plus 40 m environ.
 4. Un latéral placé haut est, en défense, à quelques mètres de la ligne

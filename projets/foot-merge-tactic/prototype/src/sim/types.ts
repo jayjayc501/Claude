@@ -110,6 +110,9 @@ export interface Reglages {
     defense: {
       ligneDefensive: { distanceDerriereBallonM: number; hauteurMinM: number; hauteurMaxM: number };
       ecartLignesM: { milieu: number; attaque: number };
+      /** Étalement de chaque ligne : x = centre du bloc + (x placé − 0,5) × cette valeur.
+       *  Avec les cases actuelles, 55 m donne une ligne de défense d'environ 40 m
+       *  (la largeur de la surface, voir docs/reference-football.md §3). */
       largeurLigneM: { defense: number; milieu: number; attaque: number };
       /** Écart minimal entre deux joueurs voisins d'une même ligne défensive. */
       ecartMinDansLigneM: number;

@@ -256,7 +256,8 @@ describe("simulation", () => {
   test("pas de téléportation et personne ne sort du terrain (90 s simulées)", () => {
     const m = nouveauMatch(7);
     m.demarrer();
-    const pasMax = reglages.mouvement.vitesseMaxMS * reglages.pasDeTempsS;
+    // Personne ne dépasse sa vitesse de sprint (transition), écart individuel compris.
+    const pasMax = reglages.transition.sprint.vitesseMS * (1 + reglages.mouvement.variationIndividuelle) * reglages.pasDeTempsS;
     for (let i = 0; i < 90 / reglages.pasDeTempsS; i++) {
       m.pas();
       for (const j of m.joueurs) {
@@ -281,19 +282,99 @@ describe("simulation", () => {
     expect(a.joueurs.map((j) => j.pos)).not.toEqual(c.joueurs.map((j) => j.pos));
   });
 
-  test("la bascule attaque / défense attend le délai de transition", () => {
-    const m = nouveauMatch();
-    m.demarrer();
-    m.definirMode("nous");
-    m.avancer(3);
-    expect(m.phases[0]).toBe("attaque");
-    m.definirMode("eux");
-    m.pas();
-    expect(m.phases[0]).toBe("attaque");
-    expect(m.enTransition).toBe(true);
-    m.avancer(reglages.transition.delaiS + 0.1);
-    expect(m.phases[0]).toBe("defense");
-    expect(m.phases[1]).toBe("attaque");
+  test("changement de possession : chacun réagit à son tour, les plus proches du ballon d'abord", () => {
+    // Retour du concepteur (12/11) : mouvements « robots », tous synchronisés.
+    const r = reglages.transition.reaction;
+    for (const graine of [1, 2, 3, 4]) {
+      const m = nouveauMatch(graine);
+      m.demarrer();
+      m.definirMode("nous");
+      m.avancer(10);
+      m.definirMode("eux");
+      m.pas();
+      expect(m.enTransition).toBe(true);
+      expect(m.phases[0]).toBe("attaque"); // personne n'a encore réagi
+      const reactions = m.joueurs.map((j) => ({
+        t: j.reagitA! - m.temps,
+        d: Math.hypot(j.pos.x - m.ballon.x, j.pos.y - m.ballon.y),
+      }));
+      const ts = reactions.map((x) => x.t);
+      expect(Math.min(...ts)).toBeGreaterThanOrEqual(r.minS - 1e-9);
+      expect(Math.max(...ts) - Math.min(...ts)).toBeGreaterThan(0.3);
+      const tri = [...reactions].sort((a, b) => a.d - b.d);
+      const moyenne = (v: { t: number }[]) => v.reduce((s, x) => s + x.t, 0) / v.length;
+      expect(moyenne(tri.slice(0, 5))).toBeLessThan(moyenne(tri.slice(-5)));
+      m.avancer(1.6);
+      expect(m.enTransition).toBe(false);
+      expect(m.phases[0]).toBe("defense");
+      expect(m.phases[1]).toBe("attaque");
+    }
+  });
+
+  test("les cibles ne changent pas toutes au même instant (bascule et ballon qui part)", () => {
+    const etalementsBascule: number[] = [];
+    const etalementsBallon: number[] = [];
+    for (const graine of [1, 2, 3, 4, 5, 6]) {
+      const m = nouveauMatch(graine);
+      m.demarrer();
+      m.definirMode("auto");
+      const dt = reglages.pasDeTempsS;
+      let precedentes = m.joueurs.map((j) => ({ ...j.cible }));
+      let possession = m.possession;
+      let debut = -1;
+      let premier = new Map<number, number>();
+      let immobileDepuis = 0;
+      let dernierBallon = { ...m.ballon };
+      let departBallon = -1;
+      let premierBallon = new Map<number, number>();
+      let ciblesImmobiles = false;
+      for (let k = 0; k < 90 / dt; k++) {
+        m.pas();
+        if (m.possession !== possession) {
+          possession = m.possession;
+          debut = m.temps;
+          premier = new Map();
+        }
+        // Bascule : premier instant où la cible de chacun saute (forme attaque ↔ défense).
+        m.joueurs.forEach((j, i) => {
+          const saut = Math.hypot(j.cible.x - precedentes[i]!.x, j.cible.y - precedentes[i]!.y);
+          if (debut > 0 && !premier.has(i) && saut > 1) premier.set(i, m.temps - debut);
+        });
+        if (debut > 0 && m.temps - debut > 2) {
+          if (premier.size >= 18) etalementsBascule.push(Math.max(...premier.values()) - Math.min(...premier.values()));
+          debut = -1;
+        }
+        // Ballon qui part alors que tout le monde était en place (ballon et
+        // cibles immobiles), hors transition : qui bouge quand ?
+        const bouge = Math.hypot(m.ballon.x - dernierBallon.x, m.ballon.y - dernierBallon.y) > 1e-6;
+        dernierBallon = { ...m.ballon };
+        if (!bouge) immobileDepuis += dt;
+        else {
+          if (immobileDepuis >= 0.6 && ciblesImmobiles && !m.enTransition && departBallon < 0) {
+            departBallon = m.temps;
+            premierBallon = new Map();
+          }
+          immobileDepuis = 0;
+        }
+        if (departBallon > 0) {
+          m.joueurs.forEach((j, i) => {
+            const d = Math.hypot(j.cible.x - precedentes[i]!.x, j.cible.y - precedentes[i]!.y);
+            if (!premierBallon.has(i) && d > 0.05) premierBallon.set(i, m.temps - departBallon);
+          });
+          if (m.temps - departBallon > 0.9 || m.enTransition) {
+            if (premierBallon.size >= 18) etalementsBallon.push(Math.max(...premierBallon.values()) - Math.min(...premierBallon.values()));
+            departBallon = -1;
+          }
+        }
+        ciblesImmobiles = m.joueurs.every((j, i) => Math.hypot(j.cible.x - precedentes[i]!.x, j.cible.y - precedentes[i]!.y) < 0.01);
+        precedentes = m.joueurs.map((j) => ({ ...j.cible }));
+      }
+    }
+    expect(etalementsBascule.length).toBeGreaterThan(20);
+    expect(etalementsBallon.length).toBeGreaterThan(5);
+    // Avant le 12/11 : 0 s (toutes les cibles sautaient au même pas).
+    for (const e of etalementsBascule) expect(e).toBeGreaterThan(0.25);
+    for (const e of etalementsBallon) expect(e).toBeGreaterThan(0.15);
   });
 
   test("le bloc monte quand on a le ballon et redescend quand on le perd", () => {
@@ -349,8 +430,10 @@ describe("simulation", () => {
     m.definirMode("nous");
     m.avancer(12);
     // Placé une rangée plus haut (6 m sur le plateau), il joue en attaque au
-    // moins 5 m devant les deux autres : l'écart du plateau est gardé.
-    expect(y("lomont") - (y("belcourt") + y("kessai")) / 2).toBeGreaterThan(5);
+    // moins 4 m devant les deux autres : l'écart du plateau est gardé, à
+    // l'échelle d'une équipe plus courte depuis le 12/11 (défense 15 m
+    // derrière le ballon au lieu de 20).
+    expect(y("lomont") - (y("belcourt") + y("kessai")) / 2).toBeGreaterThan(4);
   });
 });
 
@@ -576,5 +659,133 @@ describe.each(PLATEAUX)("réalisme (référence football), plateau %s", (plateau
       expect(n).toBeGreaterThan(0);
       expect(ok / n).toBeGreaterThan(0.95);
     }
+  });
+
+  // ---- Transitions (ajoutés le 12/11 après le retour du concepteur : à la
+  // récupération vers 40 m du but adverse, défense adverse restée vers 19 m
+  // de son but, loin de tout, milieux et attaquants 15 à 20 m plus haut, nos
+  // attaquants qui ne venaient pas jusqu'à sa ligne). Référence football §1
+  // (une transition dure 5 à 8 s), §3 (compacité) et §9.3. Mesurés sur toutes
+  // les récupérations de matchs en ballon alterné, plusieurs graines.
+
+  interface InstantTransition {
+    m: MatchSim;
+    /** Secondes depuis le changement de possession. */
+    dt: number;
+    /** Équipe qui vient de récupérer le ballon, équipe qui vient de le perdre. */
+    A: 0 | 1;
+    D: 0 | 1;
+    /** Distance du ballon au but adverse au moment de la récupération (m). */
+    recupAuButM: number;
+  }
+  function transitions(mesurer: (x: InstantTransition) => void) {
+    for (const graine of [1, 2, 3, 4, 5, 6, 7, 8]) {
+      const m = nouveauMatch(graine);
+      m.demarrer();
+      m.definirMode("auto");
+      let possession = m.possession;
+      let debut = -1;
+      let recupAuButM = 0;
+      for (let k = 0; k < 120 / reglages.pasDeTempsS; k++) {
+        m.pas();
+        if (m.possession !== possession) {
+          possession = m.possession;
+          debut = m.temps > 6 ? m.temps : -1; // pas le coup d'envoi
+          recupAuButM = L - yRepere(m, possession, m.ballon);
+        }
+        if (debut < 0 || k % 6 !== 0) continue; // un relevé toutes les 0,2 s
+        const dt = m.temps - debut;
+        if (dt > 6) {
+          debut = -1;
+          continue;
+        }
+        mesurer({ m, dt, A: possession, D: possession === 0 ? 1 : 0, recupAuButM });
+      }
+    }
+  }
+  const champ = (m: MatchSim, camp: 0 | 1) => m.joueurs.filter((j) => j.camp === camp && j.poste.id !== "G");
+  const longueur = (m: MatchSim, camp: 0 | 1) => {
+    const ys = champ(m, camp).map((j) => yRepere(m, camp, j.pos));
+    return Math.max(...ys) - Math.min(...ys);
+  };
+  const hauteurMoyenne = (m: MatchSim, camp: 0 | 1, garder: (j: MatchSim["joueurs"][number]) => boolean) => {
+    const js = m.joueurs.filter((j) => j.camp === camp && garder(j));
+    return js.reduce((s, j) => s + yRepere(m, camp, j.pos), 0) / js.length;
+  };
+  const part = (v: number[], ok: (x: number) => boolean) => v.filter(ok).length / v.length;
+  const mediane = (v: number[]) => [...v].sort((a, b) => a - b)[Math.floor(v.length / 2)]!;
+
+  test("transition défensive : l'équipe qui perd le ballon reste groupée et s'organise en 5 s", () => {
+    const longueurs: number[] = [];
+    const ecartsTard: number[] = [];
+    const longueursTard: number[] = [];
+    transitions(({ m, dt, D }) => {
+      longueurs.push(longueur(m, D));
+      if (dt < 5) return;
+      const def = hauteurMoyenne(m, D, (j) => j.poste.ligneDefense === "defense");
+      ecartsTard.push(hauteurMoyenne(m, D, (j) => j.poste.ligneDefense === "milieu") - def);
+      longueursTard.push(longueur(m, D));
+    });
+    expect(part(longueurs, (x) => x <= 50)).toBeGreaterThan(0.95);
+    // Après 5 s, défense organisée : 8 à 15 m entre défense et milieu, 40 m au plus de long.
+    expect(part(ecartsTard, (x) => x >= 8 && x <= 15)).toBeGreaterThan(0.9);
+    expect(part(longueursTard, (x) => x <= 40)).toBeGreaterThan(0.95);
+  });
+
+  test("transition défensive : la ligne recule pas à pas, sans lâcher son milieu", () => {
+    // Avant le 12/11 : la ligne filait tout de suite 22 m derrière le ballon,
+    // les milieux axiaux restaient plus de 20 m devant elle 17 % du temps.
+    const l = reglages.projection.defense.ligneDefensive;
+    const dt = reglages.pasDeTempsS;
+    for (const graine of [1, 2, 3]) {
+      const m = nouveauMatch(graine);
+      m.demarrer();
+      m.definirMode("auto");
+      let avant = [...m.lignesDef];
+      for (let k = 0; k < 60 / dt; k++) {
+        m.pas();
+        for (const camp of [0, 1] as const) {
+          const a = avant[camp];
+          const b = m.lignesDef[camp];
+          if (a === null || a === undefined || b === null) continue;
+          expect(a - b).toBeLessThanOrEqual(l.vitesseReculMS * dt + 1e-9);
+          expect(b - a).toBeLessThanOrEqual(l.vitesseMonteeMS * dt + 1e-9);
+        }
+        avant = [...m.lignesDef];
+      }
+    }
+    const milieuxAxe: number[] = [];
+    const ballonDefense: number[] = [];
+    transitions(({ m, D }) => {
+      const def = hauteurMoyenne(m, D, (j) => j.poste.ligneDefense === "defense");
+      milieuxAxe.push(hauteurMoyenne(m, D, (j) => j.poste.id === "MC") - def);
+      ballonDefense.push(yRepere(m, D, m.ballon) - def);
+    });
+    expect(part(milieuxAxe, (x) => x <= 20)).toBeGreaterThan(0.9);
+    // La défense n'est pas « loin de tout » (avant : 23 à 24 m du ballon en médiane).
+    expect(mediane(ballonDefense)).toBeLessThanOrEqual(21);
+  });
+
+  test("transition offensive : récupération à 30-50 m du but adverse, nos attaquants vont jusqu'à sa ligne", () => {
+    // Écart entre notre joueur le plus avancé et le dernier défenseur adverse
+    // (négatif : en deçà). Avant le 12/11 : −8 à −9 m en médiane après 3 s.
+    const a3: number[] = [];
+    const tard: number[] = [];
+    transitions(({ m, dt, A, D, recupAuButM }) => {
+      if (recupAuButM < 30 || recupAuButM > 50) return;
+      const devant = Math.max(...champ(m, A).map((j) => yRepere(m, A, j.pos)));
+      const dernier = L - Math.min(...champ(m, D).map((j) => yRepere(m, D, j.pos)));
+      if (dt >= 3 && dt < 3.5) a3.push(devant - dernier);
+      if (dt >= 4.5) tard.push(devant - dernier);
+    });
+    expect(a3.length).toBeGreaterThan(30);
+    expect(mediane(a3)).toBeGreaterThan(-7);
+    expect(part(tard, (x) => x >= -6)).toBeGreaterThan(0.9);
+  });
+
+  test("transition offensive : le bloc qui récupère monte ensemble", () => {
+    const longueurs: number[] = [];
+    transitions(({ m, A }) => longueurs.push(longueur(m, A)));
+    expect(part(longueurs, (x) => x <= 50)).toBeGreaterThan(0.95);
   });
 });

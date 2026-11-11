@@ -190,7 +190,7 @@ export class EcranMatch {
       for (const j of sim.joueurs) {
         if (j.camp !== 0 || vus.has(j.poste.id)) continue;
         vus.add(j.poste.id);
-        const r = projeterRect(j.poste.rect, j.poste, sim.phases[0], ballon, this.reglages, this.donnees.longueurM);
+        const r = projeterRect(j.poste.rect, j.poste, sim.phases[0], ballon, this.reglages, this.donnees.longueurM, sim.lignesTenues(0));
         const a = sim.versAbsolu(0, { x: r.x, y: r.y + r.h });
         svg("rect", {
           x: this.X(a.x),

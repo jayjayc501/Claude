@@ -109,7 +109,17 @@ export type Phase = "attaque" | "defense";
 export interface Reglages {
   projection: {
     defense: {
-      ligneDefensive: { distanceDerriereBallonM: number; hauteurMinM: number; hauteurMaxM: number };
+      /** La ligne défensive se tient à distanceDerriereBallonM derrière le
+       *  ballon, entre hauteurMinM et hauteurMaxM de son but. Elle s'y rend à
+       *  vitesse limitée : elle recule au plus à vitesseReculMS (le temps que
+       *  le milieu revienne) et remonte au plus à vitesseMonteeMS. */
+      ligneDefensive: {
+        distanceDerriereBallonM: number;
+        hauteurMinM: number;
+        hauteurMaxM: number;
+        vitesseReculMS: number;
+        vitesseMonteeMS: number;
+      };
       ecartLignesM: { milieu: number; attaque: number };
       /** Étalement de chaque ligne : x = centre du bloc + (x placé − 0,5) × cette valeur.
        *  Avec les cases actuelles, 55 m donne une ligne de défense d'environ 40 m
@@ -141,7 +151,14 @@ export interface Reglages {
     };
     limites: { xMin: number; xMax: number; yMin: number; yMax: number };
   };
-  transition: { delaiS: number };
+  transition: {
+    /** Temps de réaction de chaque joueur à un changement de possession :
+     *  minS + parMetreS × sa distance au ballon + un aléa entre 0 et aleaS. */
+    reaction: { minS: number; parMetreS: number; aleaS: number };
+    /** Course de transition (repli ou projection), plus rapide que les
+     *  replacements, pendant au plus dureeMaxS après la réaction. */
+    sprint: { vitesseMS: number; dureeMaxS: number };
+  };
   mouvement: {
     vitesseMaxMS: number;
     accelerationMS2: number;
@@ -151,6 +168,11 @@ export interface Reglages {
     /** Distance minimale entre adversaires (plus courte : un défenseur colle son attaquant). */
     distanceMinAdversaireM: number;
     forceSeparation: number;
+    /** Écart individuel de vitesse et d'accélération (± cette fraction). */
+    variationIndividuelle: number;
+    /** Retard avec lequel chacun voit le ballon bouger : une part propre au
+     *  joueur (entre minS et maxS) plus parMetreS par mètre qui le sépare du ballon. */
+    perception: { minS: number; maxS: number; parMetreS: number };
   };
   possessionSimulee: {
     dureeMinS: number;

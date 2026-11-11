@@ -33,9 +33,25 @@ export function hauteurLigneDefensiveM(ballon: PointNorm, reglages: Reglages, lo
   return borner(ballon.y * longueurM - l.distanceDerriereBallonM, l.hauteurMinM, l.hauteurMaxM);
 }
 
-function projeterDefense(base: PointNorm, poste: Poste, ballon: PointNorm, reglages: Reglages, longueurM: number): PointNorm {
+/** Hauteurs tenues par les lignes pendant le match (mètres depuis son but).
+ *  Sans elles, on prend celles que donne le ballon (forme « au repos »). */
+export interface LignesTenues {
+  /** Hauteur de notre ligne défensive quand on défend. */
+  ligneDefM?: number;
+  /** Hauteur de la ligne défensive adverse, dans notre repère. */
+  ligneAdverseM?: number;
+}
+
+function projeterDefense(
+  base: PointNorm,
+  poste: Poste,
+  ballon: PointNorm,
+  reglages: Reglages,
+  longueurM: number,
+  tenues: LignesTenues,
+): PointNorm {
   const d = reglages.projection.defense;
-  const ligneDef = hauteurLigneDefensiveM(ballon, reglages, longueurM);
+  const ligneDef = tenues.ligneDefM ?? hauteurLigneDefensiveM(ballon, reglages, longueurM);
   // Décalage dû au placement : la position dans le rectangle, fortement réduite.
   const centreRectY = poste.rect.y + poste.rect.h / 2;
   const decalageM = (base.y - centreRectY) * longueurM * d.influencePlacement;
@@ -67,22 +83,30 @@ export function lignesAttaqueM(
   ballon: PointNorm,
   reglages: Reglages,
   longueurM: number,
+  ligneAdverse: number = ligneAdverseM(ballon, reglages, longueurM),
 ): { arriereM: number; avantM: number } {
   const a = reglages.projection.attaque;
   const ballonM = ballon.y * longueurM;
   // Personne n'est hors-jeu derrière le ballon : si le ballon a dépassé la
   // ligne adverse, la ligne avant peut aller jusqu'à lui.
-  const avantM = Math.max(ligneAdverseM(ballon, reglages, longueurM), ballonM) - a.margeLigneAdverseM;
+  const avantM = Math.max(ligneAdverse, ballonM) - a.margeLigneAdverseM;
   let arriereM = borner(ballonM - a.distanceDefenseBallonM, a.ligneArriereMinM, a.ligneArriereMaxM);
   arriereM = borner(arriereM, avantM - a.longueurEquipeM.max, avantM - a.longueurEquipeM.min);
   return { arriereM, avantM };
 }
 
-function projeterAttaque(base: PointNorm, poste: Poste, ballon: PointNorm, reglages: Reglages, longueurM: number): PointNorm {
+function projeterAttaque(
+  base: PointNorm,
+  poste: Poste,
+  ballon: PointNorm,
+  reglages: Reglages,
+  longueurM: number,
+  tenues: LignesTenues,
+): PointNorm {
   const a = reglages.projection.attaque;
   const suivi = poste.suiviBallon ?? 1;
   const x = 0.5 + (base.x - 0.5) * a.ecartement + (ballon.x - 0.5) * a.glissementLateral * suivi;
-  const { arriereM, avantM } = lignesAttaqueM(ballon, reglages, longueurM);
+  const { arriereM, avantM } = lignesAttaqueM(ballon, reglages, longueurM, tenues.ligneAdverseM);
 
   if (poste.ligneDefense === "gardien") {
     const g = a.gardien;
@@ -105,11 +129,12 @@ export function projeter(
   ballon: PointNorm,
   reglages: Reglages,
   longueurM: number,
+  tenues: LignesTenues = {},
 ): PointNorm {
   const p =
     phase === "defense"
-      ? projeterDefense(base, poste, ballon, reglages, longueurM)
-      : projeterAttaque(base, poste, ballon, reglages, longueurM);
+      ? projeterDefense(base, poste, ballon, reglages, longueurM, tenues)
+      : projeterAttaque(base, poste, ballon, reglages, longueurM, tenues);
   const l = reglages.projection.limites;
   return { x: borner(p.x, l.xMin, l.xMax), y: borner(p.y, l.yMin, l.yMax) };
 }
@@ -122,8 +147,9 @@ export function projeterRect(
   ballon: PointNorm,
   reglages: Reglages,
   longueurM: number,
+  tenues: LignesTenues = {},
 ): RectNorm {
-  const a = projeter({ x: rect.x, y: rect.y }, poste, phase, ballon, reglages, longueurM);
-  const b = projeter({ x: rect.x + rect.w, y: rect.y + rect.h }, poste, phase, ballon, reglages, longueurM);
+  const a = projeter({ x: rect.x, y: rect.y }, poste, phase, ballon, reglages, longueurM, tenues);
+  const b = projeter({ x: rect.x + rect.w, y: rect.y + rect.h }, poste, phase, ballon, reglages, longueurM, tenues);
   return { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(b.x - a.x), h: Math.abs(b.y - a.y) };
 }

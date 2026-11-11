@@ -130,3 +130,34 @@ Historique des étapes, des choix techniques et des résultats de tests.
 - Le concepteur choisit les **hexagones** (les carrés restent en variante dans le prototype).
 - **AG et AD sont des cases d'ailier** à trois hauteurs (bas, milieu, haut) : les rôles « milieu gauche / droit » et « milieu avancé » disparaissent du plateau et des données ; postes naturels de l'effectif mis à jour (Sarrazin, Valmy : AG ; Cassagne : AD ; Ferrand DG et AG ; Tissier DD et AD). Couloirs d'ailiers en rouge clair.
 - 60 tests verts. Vérifié au format téléphone.
+
+## 12/11/2026 — Transitions groupées et mouvements moins « robots »
+
+**Retour du concepteur** (capture en « Ballon alterné », ×3) : quand on récupère le ballon vers 40 m du but adverse, la défense adverse reste vers 19 m de son but, loin de tout ; ses milieux et attaquants sont 15 à 20 m plus haut ; nos attaquants ne viennent pas jusqu'à sa ligne. « L'équipe doit rester groupée pendant les transitions. » Et : mouvements très « robots », synchronisés à la seconde près.
+
+**Mesures avant** (290 récupérations entre 30 et 50 m du but adverse, 40 graines) : à la récupération, défense adverse à 17 m du ballon puis 23 à 25 m ; 25 m entre sa défense et son milieu pendant 1,5 s, encore 15 m après 3,5 s ; équipe de 45 m ; notre joueur le plus avancé à 22 m de sa ligne, encore 9 m après 3 s. Toutes les cibles basculaient au même pas (0,5 s après le changement de possession).
+
+**Causes**
+- Forme d'attaque trop longue : défense 20 m derrière le ballon, donc isolée au moment de la perte.
+- Bloc défensif bas par rapport au ballon (22 m derrière lui).
+- La ligne défensive filait tout de suite à sa hauteur finale, pendant que le milieu, plus haut, mettait 3 à 4 s à revenir.
+- Nos attaquants visaient la ligne que l'adversaire aurait une fois replié, et partaient au même instant que tout le monde, à 7 m/s.
+- Un seul délai de 0,5 s pour les 22 joueurs, même vitesse et même accélération pour tous, même ballon vu par tous au même instant.
+
+**Correction** (`simulation.ts`, `projection.ts`, `reglages.json`)
+- Forme d'attaque : ligne arrière 15 m derrière le ballon (au lieu de 20).
+- Défense : ligne 18 m derrière le ballon (au lieu de 22), et **hauteur de ligne tenue par l'équipe**, qui va vers celle que donne le ballon à vitesse limitée (recule de 3 m/s, remonte de 5 m/s au plus). À la perte, elle part de la hauteur où jouaient les défenseurs en attaque. Donnée d'équipe, fonction du ballon et du temps seulement : pas de boucle.
+- Attaquants : ils visent la ligne que l'adversaire tient vraiment.
+- **Réactions individuelles** : 0,2 s + 0,008 s par mètre du ballon + 0 à 0,35 s ; les plus proches d'abord. Chaque joueur a sa propre forme (attaque ou défense) pendant la transition.
+- **Sprint de transition** : 8 m/s pendant 5 s au plus après la réaction (7 m/s sinon) ; ± 6 % de vitesse et d'accélération selon le joueur (en attendant l'attribut « vitesse »).
+- **Perception** : chacun voit le ballon et les lignes tenues avec un petit retard (0,1 à 0,3 s selon le joueur, + 0,004 s par mètre).
+- Largeur minimale des lignes portée à 39 m (marge : l'équipe passait à 37,99 m sur un relevé).
+
+**Mesures après** (mêmes récupérations) : défense adverse à 12 m du ballon à la récupération, 19 à 22 m ensuite ; 22 m entre défense et milieu à la perte (forme d'attaque, ailiers hauts), 15 m après 3 s, 11 à 12 m après 4 s ; équipe de 39 m puis 24 m ; notre joueur le plus avancé à 17 m de la ligne, 5 m après 3 s, 1,4 m après 4 s. Les cibles basculent sur 0,3 à 1,3 s, les plus proches du ballon d'abord.
+
+**Tests** : 69 verts. Nouveaux : réactions individuelles (les plus proches d'abord, étalement de plus de 0,3 s) ; cibles qui ne changent pas toutes au même instant (bascule et ballon qui part) ; et sur les deux plateaux, quatre tests de réalisme sur les transitions (équipe qui perd le ballon groupée et organisée en 5 s ; ligne qui recule pas à pas sans lâcher son milieu, défense pas « loin de tout » ; attaquants sur la ligne adverse après une récupération à 30-50 m du but ; bloc qui récupère qui monte ensemble). Les seuils sont choisis pour échouer sur l'ancien moteur (mesuré). Modifiés : vitesse maximale du contrôle anti-téléportation (sprint), écart du DC placé haut en attaque ramené à 4 m (équipe plus courte).
+
+**Vérification** : captures au format téléphone (390 × 844, sombre et clair) en « Ballon alterné » ×3 et ×4, « À vous » ×1, « À l'adversaire » ×4 ; aucune erreur dans la console. Planches image par image de récupérations vers 40 m du but adverse, avant et après.
+
+**Limites** : le faux ballon change de camp n'importe où, parfois loin de l'équipe qui récupère ; une partie des écarts mesurés vient de là. Le contre-pressing et la contre-attaque viendront avec le vrai ballon (mission 2).
+

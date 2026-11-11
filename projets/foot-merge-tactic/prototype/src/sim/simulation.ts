@@ -7,7 +7,7 @@
 // graine = même déroulé. Aucune dépendance à l'affichage.
 
 import type { Donnees } from "./donnees";
-import { projeter } from "./projection";
+import { hauteurLigneDefensiveM, lignesAttaqueM, projeter, type LignesTenues } from "./projection";
 import { Aleatoire } from "./rng";
 import type { Cellule, Equipe, Joueur, Phase, Placement, PointM, PointNorm, Poste, Reglages } from "./types";
 
@@ -26,6 +26,17 @@ export interface JoueurSim {
   pos: PointM;
   vit: PointM;
   cible: PointM;
+  /** Forme que suit ce joueur : chacun bascule à son propre instant. */
+  phase: Phase;
+  /** Instant où il réagira au dernier changement de possession (null : c'est fait). */
+  reagitA: number | null;
+  /** Fin de sa course de transition (sprint de repli ou de projection). */
+  sprintJusqua: number;
+  /** Écart individuel de vitesse et d'accélération, en attendant l'attribut
+   *  « vitesse » : deux joueurs ne courent jamais exactement pareil. */
+  facteur: number;
+  /** Part fixe de son temps de perception du ballon (secondes). */
+  perceptionS: number;
 }
 
 export class MatchSim {
@@ -36,14 +47,22 @@ export class MatchSim {
   mode: ModePossession = "auto";
   ballon: PointM;
   readonly joueurs: JoueurSim[];
+  /** Hauteur de la ligne défensive que tient chaque équipe quand elle défend
+   *  (mètres depuis son but ; null quand elle attaque). Elle suit le ballon à
+   *  vitesse limitée : à la perte du ballon, elle part de la hauteur des
+   *  défenseurs en attaque et recule progressivement, le temps que le milieu
+   *  revienne. L'équipe reste groupée (retour du concepteur, 12/11). */
+  lignesDef: [number | null, number | null] = [null, null];
   /** Plus grand déplacement d'un joueur pendant un pas (contrôle anti-téléportation). */
   maxDeplacementParPas = 0;
 
   private rng: Aleatoire;
-  private basculeA: number | null = null;
   private prochainChangement = Infinity;
   private prochaineCible = 0;
   private cibleBallon: PointM;
+  /** Ballon et lignes tenues des derniers instants (un relevé par pas), pour
+   *  que chacun voie le jeu avec son propre petit retard. */
+  private historique: { ballon: PointM; lignesDef: [number | null, number | null] }[] = [];
 
   constructor(
     readonly donnees: Donnees,
@@ -63,7 +82,22 @@ export class MatchSim {
         const poste = donnees.poste(placement.poste);
         const cellule = donnees.cellule(placement.poste, placement.cellule);
         const pos = this.versAbsolu(camp, cellule.centre);
-        this.joueurs.push({ camp, joueur, placement, poste, cellule, pos, vit: { x: 0, y: 0 }, cible: { ...pos } });
+        const v = reglages.mouvement.variationIndividuelle;
+        this.joueurs.push({
+          camp,
+          joueur,
+          placement,
+          poste,
+          cellule,
+          pos,
+          vit: { x: 0, y: 0 },
+          cible: { ...pos },
+          phase: "defense",
+          reagitA: null,
+          sprintJusqua: 0,
+          facteur: 1 + this.rng.entre(-v, v),
+          perceptionS: this.rng.entre(reglages.mouvement.perception.minS, reglages.mouvement.perception.maxS),
+        });
       }
     });
   }
@@ -85,12 +119,12 @@ export class MatchSim {
     return camp === 0 ? { x: p.x / W, y: p.y / L } : { x: 1 - p.x / W, y: 1 - p.y / L };
   }
 
-  /** Lance le jeu : l'équipe 0 a le ballon, les deux blocs basculent après le délai. */
+  /** Lance le jeu : l'équipe 0 a le ballon, chaque joueur bascule à son tour. */
   demarrer(): void {
     if (this.demarre) return;
     this.demarre = true;
     this.possession = 0;
-    this.basculeA = this.temps + this.reglages.transition.delaiS;
+    this.declencherReactions();
     this.programmerChangement();
     this.prochaineCible = this.temps;
   }
@@ -111,6 +145,9 @@ export class MatchSim {
     this.temps += dt;
     this.gererPossession();
     this.deplacerBallon(dt);
+    this.tenirLignes(dt);
+    this.historique.push({ ballon: { ...this.ballon }, lignesDef: [...this.lignesDef] });
+    if (this.historique.length > Math.ceil(1 / dt)) this.historique.shift();
     this.calculerCibles();
     this.deplacerJoueurs(dt);
   }
@@ -128,19 +165,39 @@ export class MatchSim {
 
     if (voulu !== this.possession) {
       this.possession = voulu;
-      this.basculeA = this.temps + this.reglages.transition.delaiS;
+      this.declencherReactions();
       this.programmerChangement();
       this.prochaineCible = this.temps;
     }
-    if (this.basculeA !== null && this.temps >= this.basculeA) {
-      this.phases = this.possession === 0 ? ["attaque", "defense"] : ["defense", "attaque"];
-      this.basculeA = null;
+    // Chaque joueur bascule quand il a réagi, puis part en course de transition.
+    const sprint = this.reglages.transition.sprint;
+    for (const j of this.joueurs) {
+      if (j.reagitA === null || this.temps < j.reagitA) continue;
+      j.phase = j.camp === this.possession ? "attaque" : "defense";
+      j.reagitA = null;
+      j.sprintJusqua = this.temps + sprint.dureeMaxS;
+    }
+    // La forme de l'équipe change dès que son premier joueur a réagi.
+    for (const camp of [0, 1] as const) {
+      const voulue: Phase = camp === this.possession ? "attaque" : "defense";
+      if (this.joueurs.some((j) => j.camp === camp && j.phase === voulue)) this.phases[camp] = voulue;
     }
   }
 
-  /** Vrai entre la perte (ou la récupération) du ballon et la bascule des blocs. */
+  /** Temps de réaction à un changement de possession : pas tous au même
+   *  instant. Les plus proches du ballon réagissent d'abord, les plus loin
+   *  ensuite, avec un petit écart propre à chacun (référence football §9.3). */
+  private declencherReactions(): void {
+    const r = this.reglages.transition.reaction;
+    for (const j of this.joueurs) {
+      const distance = Math.hypot(j.pos.x - this.ballon.x, j.pos.y - this.ballon.y);
+      j.reagitA = this.temps + r.minS + r.parMetreS * distance + this.rng.entre(0, r.aleaS);
+    }
+  }
+
+  /** Vrai entre le changement de possession et la réaction du dernier joueur. */
   get enTransition(): boolean {
-    return this.basculeA !== null;
+    return this.joueurs.some((j) => j.reagitA !== null);
   }
 
   private deplacerBallon(dt: number): void {
@@ -181,18 +238,73 @@ export class MatchSim {
     else this.ballon = { x: this.ballon.x + (dx / d) * v, y: this.ballon.y + (dy / d) * v };
   }
 
+  /** Hauteur de la ligne défensive de chaque équipe qui défend : elle va vers
+   *  celle que donne le ballon, sans reculer ni monter plus vite que les
+   *  vitesses du réglage. Ne dépend que du ballon et du temps, jamais des
+   *  positions des joueurs (pas de boucle). */
+  private tenirLignes(dt: number): void {
+    const l = this.reglages.projection.defense.ligneDefensive;
+    const L = this.donnees.longueurM;
+    for (const camp of [0, 1] as const) {
+      const defend = this.joueurs.filter((j) => j.camp === camp && j.phase === "defense").length;
+      if (defend === 0) {
+        this.lignesDef[camp] = null;
+        continue;
+      }
+      const ballon = this.versRepere(camp, this.ballon);
+      const voulue = hauteurLigneDefensiveM(ballon, this.reglages, L);
+      let h = this.lignesDef[camp];
+      if (h === null) {
+        // Elle vient de perdre le ballon : sa ligne part de la hauteur où
+        // jouaient ses défenseurs (forme d'attaque), sinon de sa place.
+        const attaquait = defend < this.joueurs.filter((j) => j.camp === camp).length;
+        h = attaquait ? lignesAttaqueM(ballon, this.reglages, L).arriereM : voulue;
+      }
+      this.lignesDef[camp] = voulue < h ? Math.max(voulue, h - l.vitesseReculMS * dt) : Math.min(voulue, h + l.vitesseMonteeMS * dt);
+    }
+  }
+
+  /** Lignes tenues vues par une équipe : sa ligne défensive, et celle de
+   *  l'adversaire dans son repère (pour ne pas être hors-jeu). */
+  lignesTenues(camp: Camp, lignesDef: [number | null, number | null] = this.lignesDef): LignesTenues {
+    const nous = lignesDef[camp];
+    const eux = lignesDef[camp === 0 ? 1 : 0];
+    return {
+      ligneDefM: nous ?? undefined,
+      ligneAdverseM: eux === null ? undefined : this.donnees.longueurM - eux,
+    };
+  }
+
+  /** Le jeu tel que ce joueur le voit : ballon et lignes avec un petit
+   *  retard, le sien, plus long s'il est loin du ballon. Les joueurs ne
+   *  bougent donc pas tous au même instant (retour du concepteur, 12/11 :
+   *  mouvements « robots », synchronisés à la seconde près). */
+  private jeuPercu(j: JoueurSim): { ballon: PointM; lignesDef: [number | null, number | null] } {
+    const h = this.historique;
+    if (h.length === 0) return { ballon: this.ballon, lignesDef: this.lignesDef };
+    const distance = Math.hypot(j.pos.x - this.ballon.x, j.pos.y - this.ballon.y);
+    const retardS = j.perceptionS + this.reglages.mouvement.perception.parMetreS * distance;
+    const pas = Math.min(h.length - 1, Math.round(retardS / this.reglages.pasDeTempsS));
+    const vu = h[h.length - 1 - pas]!;
+    // Une ligne qui n'existait pas encore à cet instant (bascule récente) : on prend l'actuelle.
+    return {
+      ballon: vu.ballon,
+      lignesDef: [vu.lignesDef[0] ?? this.lignesDef[0], vu.lignesDef[1] ?? this.lignesDef[1]],
+    };
+  }
+
   private calculerCibles(): void {
-    // Les cibles ne dépendent que du ballon et du placement, jamais des
-    // positions du moment : pas de boucle où un joueur bousculé entraîne
-    // les autres (la ligne adverse qui s'enfonçait dans sa surface, 11/11).
+    // Les cibles ne dépendent que du ballon (tel que chacun le perçoit), du
+    // placement et des lignes tenues, jamais des positions du moment : pas de
+    // boucle où un joueur bousculé entraîne les autres (la ligne adverse qui
+    // s'enfonçait dans sa surface, 11/11).
     for (const j of this.joueurs) {
-      const ballonRepere = this.versRepere(j.camp, this.ballon);
-      const p = projeter(j.cellule.centre, j.poste, this.phases[j.camp], ballonRepere, this.reglages, this.donnees.longueurM);
+      const vu = this.jeuPercu(j);
+      const ballonRepere = this.versRepere(j.camp, vu.ballon);
+      const p = projeter(j.cellule.centre, j.poste, j.phase, ballonRepere, this.reglages, this.donnees.longueurM, this.lignesTenues(j.camp, vu.lignesDef));
       j.cible = this.versAbsolu(j.camp, p);
     }
-    for (const camp of [0, 1] as const) {
-      if (this.phases[camp] === "defense") this.espacerLignes(camp);
-    }
+    for (const camp of [0, 1] as const) this.espacerLignes(camp);
   }
 
   /** En défense, deux joueurs d'une même ligne ne se marchent pas dessus :
@@ -204,7 +316,7 @@ export class MatchSim {
     const W = this.donnees.largeurM;
     for (const ligne of ["defense", "milieu", "attaque"] as const) {
       const js = this.joueurs
-        .filter((j) => j.camp === camp && j.poste.ligneDefense === ligne)
+        .filter((j) => j.camp === camp && j.phase === "defense" && j.poste.ligneDefense === ligne)
         .sort((a, b) => a.cible.x - b.cible.x || a.joueur.id.localeCompare(b.joueur.id));
       if (js.length < 2) continue;
       const avant = js.reduce((s, j) => s + j.cible.x, 0) / js.length;
@@ -235,6 +347,8 @@ export class MatchSim {
     const m = this.reglages.mouvement;
     const nouvelles: PointM[] = [];
     this.joueurs.forEach((j, i) => {
+      // Course de transition (sprint) juste après la réaction, sinon course normale.
+      const vMax = (this.temps < j.sprintJusqua ? this.reglages.transition.sprint.vitesseMS : m.vitesseMaxMS) * j.facteur;
       // 1. Course : vers la cible, en freinant à l'approche, accélération limitée.
       const dx = j.cible.x - j.pos.x;
       const dy = j.cible.y - j.pos.y;
@@ -242,14 +356,14 @@ export class MatchSim {
       let vx = 0;
       let vy = 0;
       if (d > 1e-6) {
-        const vitesse = m.vitesseMaxMS * Math.min(1, d / m.distanceFreinageM);
+        const vitesse = vMax * Math.min(1, d / m.distanceFreinageM);
         vx = (dx / d) * vitesse;
         vy = (dy / d) * vitesse;
       }
       let ax = vx - j.vit.x;
       let ay = vy - j.vit.y;
       const a = Math.hypot(ax, ay);
-      const aMax = m.accelerationMS2 * dt;
+      const aMax = m.accelerationMS2 * j.facteur * dt;
       if (a > aMax) {
         ax = (ax / a) * aMax;
         ay = (ay / a) * aMax;
@@ -288,11 +402,11 @@ export class MatchSim {
         ny += (cy / c) * force;
       });
 
-      // 3. Jamais plus vite que la vitesse maximale.
+      // 3. Jamais plus vite que sa vitesse maximale.
       const v = Math.hypot(nx, ny);
-      if (v > m.vitesseMaxMS) {
-        nx = (nx / v) * m.vitesseMaxMS;
-        ny = (ny / v) * m.vitesseMaxMS;
+      if (v > vMax) {
+        nx = (nx / v) * vMax;
+        ny = (ny / v) * vMax;
       }
       nouvelles.push({ x: nx, y: ny });
     });

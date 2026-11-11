@@ -29,5 +29,5 @@ mets-le à jour quand quelque chose d'important change.
 Ajouter ici une ligne par projet :
 `- projets/<nom> — description courte — état (en cours / terminé)`
 
-- projets/shorts-mythologie — Shorts YouTube pour la chaîne « La Pause Mytho…logique » (Kling + ElevenLabs + montage ffmpeg) — en cours (1er Short Odin terminé ; utiliser monter2.py)
+- projets/shorts-mythologie — Shorts YouTube pour la chaîne « La Pause Mytho…logique » (Kling + ElevenLabs + montage ffmpeg) — en cours (Short Odin terminé en 4K ; utiliser monter2.py, carte de fin commune dans commun/fin-chaine)
 - projets/jelavaisdit — App mobile « Je l'avais dit » : sceller une phrase datée et l'envoyer plus tard avec une carte d'authenticité — en cours (maquettes finies, code à venir)

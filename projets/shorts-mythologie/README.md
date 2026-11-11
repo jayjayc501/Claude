@@ -74,7 +74,8 @@ dissipe, halo doré et reflet de lumière (`logo_anime.py`).
     python3 monter2.py shorts/odin-oeil/montage.json --factice   # test sans médias
 
 Chaîne de production qui a donné le meilleur résultat (voir `shorts/odin-oeil/storyboard.md`) :
-1. Script validé → voix ElevenLabs (v3, stabilité 50 %, langue forcée FR).
+1. Script validé → voix ElevenLabs : voix Adam Composer Stockholm (`x0u3EW21dbrORJzOq1m9`),
+   Eleven v3, stabilité 50 %, langue forcée FR. Écrire « Odain » pour qu'il prononce « Odin ».
 2. Personnages de référence sur fond neutre (GPT-Image 2.5 via Kling).
 3. Une image clé par plan (GPT-Image 2.5, image-to-image avec les références).
 4. Animation Kling 4.0 en 1080p, durée = durée du plan (15 crédits/s).
@@ -86,3 +87,18 @@ Chaîne de production qui a donné le meilleur résultat (voir `shorts/odin-oeil
 | Sujet | Dossier | État |
 |---|---|---|
 | Odin va-t-il se faire dévorer par ce loup ? (l'œil d'Odin) | `shorts/odin-oeil` | terminé, v3 4K (51,7 s) — à publier |
+
+## Matériel commun à tous les Shorts
+
+`commun/fin-chaine/` : la carte de fin de la chaîne, à réutiliser telle quelle.
+- `fin-fond.mp4` : décor animé (corbeau sur pierre runique, oiseau doré, horizon en feu), 3 s, 1080x1920.
+- `fin-texte.png` : texte du logo détouré (La pause Mytho… logique, NORDIQUE, icônes).
+
+Dans le `montage.json` d'un nouveau Short (chemins relatifs au dossier du Short) :
+
+```json
+"fin": {"fichier": "../../commun/fin-chaine/fin-fond.mp4", "duree": 3.3, "vitesse": 0.92,
+        "fondu": 0.9, "logo": "../../commun/fin-chaine/fin-texte.png", "logo_anime": true,
+        "logo_largeur": 800, "logo_y": 500}
+```
+

@@ -3,7 +3,7 @@
 // nouvelle composition sans modifier l'ancienne.
 
 import type { Donnees } from "./donnees";
-import type { Joueur, Placement } from "./types";
+import type { Cellule, Joueur, Placement, PointNorm } from "./types";
 
 export const JOUEURS_SUR_LE_TERRAIN = 11;
 
@@ -40,6 +40,43 @@ export function placer(
 
 export function retirer(composition: Placement[], joueurId: string): Placement[] {
   return composition.filter((p) => p.joueurId !== joueurId);
+}
+
+/** Deux joueurs sur le terrain échangent leurs cases. Le nombre de joueurs par
+ *  poste ne change pas, donc l'échange respecte toujours les maximums. */
+export function echanger(composition: Placement[], joueurA: string, joueurB: string): Resultat {
+  const a = composition.find((p) => p.joueurId === joueurA);
+  const b = composition.find((p) => p.joueurId === joueurB);
+  if (!a || !b) return { ok: false, erreur: "Les deux joueurs doivent être sur le terrain." };
+  if (joueurA === joueurB) return { ok: true, composition };
+  return {
+    ok: true,
+    composition: composition.map((p) => {
+      if (p.joueurId === joueurA) return { joueurId: joueurA, poste: b.poste, cellule: b.cellule };
+      if (p.joueurId === joueurB) return { joueurId: joueurB, poste: a.poste, cellule: a.cellule };
+      return p;
+    }),
+  };
+}
+
+/** Case visée par un point du demi-terrain : parmi les cases qui contiennent le
+ *  point (les rectangles se chevauchent), celle dont le centre est le plus proche. */
+export function caseAuPoint(donnees: Donnees, point: PointNorm): Cellule | undefined {
+  let meilleure: Cellule | undefined;
+  let distance = Infinity;
+  for (const poste of donnees.postes) {
+    for (const c of poste.cases) {
+      const r = c.rect;
+      if (point.x < r.x || point.x > r.x + r.w || point.y < r.y || point.y > r.y + r.h) continue;
+      // Distance mesurée en mètres pour ne pas favoriser la largeur ou la longueur.
+      const d = Math.hypot((point.x - c.centre.x) * donnees.largeurM, (point.y - c.centre.y) * donnees.longueurM);
+      if (d < distance) {
+        distance = d;
+        meilleure = c;
+      }
+    }
+  }
+  return meilleure;
 }
 
 /** Problèmes qui empêchent de lancer le match (liste vide = prêt). */

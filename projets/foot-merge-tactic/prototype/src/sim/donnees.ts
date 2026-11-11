@@ -50,7 +50,6 @@ function calculerPoste(def: PosteDef): Poste {
           label: morceaux.join(", ") || `case ${index + 1}`,
           centre: { x: r.x + ((c0 + c1) / 2) * r.w, y: r.y + ((l0 + l1) / 2) * r.h },
           rect: { x: r.x + c0 * r.w, y: r.y + l0 * r.h, w: (c1 - c0) * r.w, h: (l1 - l0) * r.h },
-          monteeAttaqueM: g.monteeParLigneM?.[row] ?? def.monteeAttaqueM,
         });
       }
     }
@@ -63,7 +62,6 @@ function calculerPoste(def: PosteDef): Poste {
         label: c.label,
         centre: { x: r.x + c.u * r.w, y: r.y + c.v * r.h },
         rect: { x: r.x + (c.u - c.su / 2) * r.w, y: r.y + (c.v - c.sv / 2) * r.h, w: c.su * r.w, h: c.sv * r.h },
-        monteeAttaqueM: def.monteeAttaqueM,
       });
     });
   } else {

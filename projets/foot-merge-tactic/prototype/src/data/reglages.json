@@ -28,10 +28,23 @@
     "attaque": {
       "ecartement": 1.2,
       "glissementLateral": 0.15,
-      "profondeurReference": 0.6,
-      "suiviProfondeur": 0.5,
-      "decalageMaxM": 15,
-      "margeHorsJeuM": 0.5
+      "profondeurPlacement": {
+        "basY": 0.11,
+        "hautY": 0.47
+      },
+      "distanceDefenseBallonM": 20,
+      "ligneArriereMinM": 15,
+      "ligneArriereMaxM": 55,
+      "longueurEquipeM": {
+        "min": 30,
+        "max": 50
+      },
+      "margeLigneAdverseM": 1,
+      "gardien": {
+        "distanceDerriereLigneM": 20,
+        "minM": 4,
+        "maxM": 22
+      }
     },
     "limites": {
       "xMin": 0.03,
@@ -48,7 +61,8 @@
     "accelerationMS2": 5,
     "distanceFreinageM": 4,
     "distanceMinM": 3,
-    "forceSeparation": 8
+    "forceSeparation": 8,
+    "distanceMinAdversaireM": 2.5
   },
   "possessionSimulee": {
     "dureeMinS": 4,

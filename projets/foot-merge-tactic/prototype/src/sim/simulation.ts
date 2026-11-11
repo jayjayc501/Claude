@@ -176,35 +176,13 @@ export class MatchSim {
     else this.ballon = { x: this.ballon.x + (dx / d) * v, y: this.ballon.y + (dy / d) * v };
   }
 
-  /** Ligne du hors-jeu pour un camp, dans son repère : le plus avancé entre le
-   *  ballon et le dernier défenseur adverse (gardien exclu). */
-  ligneHorsJeu(camp: Camp): number {
-    const ballon = this.versRepere(camp, this.ballon).y;
-    let dernier = 0;
-    for (const o of this.joueurs) {
-      if (o.camp === camp || o.poste.id === "G") continue;
-      dernier = Math.max(dernier, this.versRepere(camp, o.pos).y);
-    }
-    return Math.max(ballon, dernier);
-  }
-
   private calculerCibles(): void {
-    const marge = this.reglages.projection.attaque.margeHorsJeuM / this.donnees.longueurM;
-    const horsJeu: [number, number] = [this.ligneHorsJeu(0), this.ligneHorsJeu(1)];
+    // Les cibles ne dépendent que du ballon et du placement, jamais des
+    // positions du moment : pas de boucle où un joueur bousculé entraîne
+    // les autres (la ligne adverse qui s'enfonçait dans sa surface, 11/11).
     for (const j of this.joueurs) {
       const ballonRepere = this.versRepere(j.camp, this.ballon);
-      const p = projeter(
-        j.cellule.centre,
-        j.poste,
-        this.phases[j.camp],
-        ballonRepere,
-        this.reglages,
-        this.donnees.longueurM,
-        j.cellule.monteeAttaqueM,
-      );
-      // En attaque, personne n'attend derrière la défense adverse : on reste
-      // au niveau de la ligne du hors-jeu (référence football, §3 et §8).
-      if (this.phases[j.camp] === "attaque") p.y = Math.min(p.y, horsJeu[j.camp] - marge);
+      const p = projeter(j.cellule.centre, j.poste, this.phases[j.camp], ballonRepere, this.reglages, this.donnees.longueurM);
       j.cible = this.versAbsolu(j.camp, p);
     }
     for (const camp of [0, 1] as const) {
@@ -280,7 +258,8 @@ export class MatchSim {
         let cx = px + rvx * t;
         let cy = py + rvy * t;
         let c = Math.hypot(cx, cy);
-        if (c >= m.distanceMinM) return;
+        const dMin = o.camp === j.camp ? m.distanceMinM : m.distanceMinAdversaireM;
+        if (c >= dMin) return;
         if (c < 1e-6) {
           const angle = (i - k) * 2.399963; // côté déterministe si les trajectoires se rejoignent exactement
           cx = Math.cos(angle);
@@ -288,7 +267,7 @@ export class MatchSim {
           c = 1;
         }
         const urgence = 1 - (0.5 * t) / HORIZON_EVITEMENT_S; // plus fort si le contact est imminent
-        const force = ((m.distanceMinM - Math.min(c, m.distanceMinM)) / m.distanceMinM) * m.forceSeparation * urgence;
+        const force = ((dMin - Math.min(c, dMin)) / dMin) * m.forceSeparation * urgence;
         nx += (cx / c) * force;
         ny += (cy / c) * force;
       });

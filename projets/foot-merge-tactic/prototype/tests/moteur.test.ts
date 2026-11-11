@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { chargerDonnees, chargerEquipes, chargerReglages } from "../src/sim/chargement";
 import { caseAuPoint, echanger, horsPoste, placer, remplacer, retirer, verifier } from "../src/sim/placement";
-import { hauteurLigneDefensiveM, projeter } from "../src/sim/projection";
+import { hauteurLigneDefensiveM, ligneAdverseM, lignesAttaqueM, projeter } from "../src/sim/projection";
 import { MatchSim } from "../src/sim/simulation";
 import type { Equipe } from "../src/sim/types";
 
@@ -154,7 +154,7 @@ describe("règles de projection", () => {
       const moyenne = (phase: "attaque" | "defense") =>
         effectif.composition.reduce((s, pl) => {
           const c = donnees.cellule(pl.poste, pl.cellule);
-          return s + projeter(c.centre, donnees.poste(pl.poste), phase, ballon, reglages, L, c.monteeAttaqueM).y;
+          return s + projeter(c.centre, donnees.poste(pl.poste), phase, ballon, reglages, L).y;
         }, 0) / effectif.composition.length;
       expect(moyenne("attaque") - moyenne("defense")).toBeGreaterThan(5 / L);
     }
@@ -171,10 +171,37 @@ describe("règles de projection", () => {
     }
   });
 
-  test("l'attaquant placé haut dans l'axe arrive près de la surface adverse en attaque", () => {
+  test("l'attaquant placé haut dans l'axe joue sur la ligne défensive adverse, et près de la surface quand le ballon y arrive", () => {
+    // Plus loin, il serait hors-jeu (ancienne règle : 80 m même ballon au
+    // centre, donc derrière la défense adverse).
     const ac = donnees.poste("AC");
-    const p = projeter(ac.cases[4]!.centre, ac, "attaque", centre, reglages, L);
-    expect(p.y * L).toBeGreaterThan(80);
+    for (const by of [0.3, 0.5, 0.6, 0.7]) {
+      const ballon = { x: 0.5, y: by };
+      const p = projeter(ac.cases[4]!.centre, ac, "attaque", ballon, reglages, L);
+      expect(Math.abs(p.y * L - ligneAdverseM(ballon, reglages, L))).toBeLessThanOrEqual(1.5);
+    }
+    expect(projeter(ac.cases[4]!.centre, ac, "attaque", { x: 0.5, y: 0.78 }, reglages, L).y * L).toBeGreaterThan(85);
+  });
+
+  test("avec le ballon, l'ordre de profondeur du placement est gardé (ce qui est placé haut joue haut)", () => {
+    const { effectif } = chargerEquipes();
+    const champ = effectif.composition.filter((p) => p.poste !== "G");
+    for (const by of [0.2, 0.5, 0.8]) {
+      const ballon = { x: 0.5, y: by };
+      const pts = champ.map((pl) => {
+        const c = donnees.cellule(pl.poste, pl.cellule);
+        return { base: c.centre.y, y: projeter(c.centre, donnees.poste(pl.poste), "attaque", ballon, reglages, L).y };
+      });
+      for (const a of pts) for (const b of pts) if (a.base < b.base - 1e-9) expect(a.y).toBeLessThanOrEqual(b.y + 1e-9);
+    }
+  });
+
+  test("les cases les plus basse et la plus haute du demi-terrain donnent la ligne arrière et la ligne avant", () => {
+    // Si le découpage change, les réglages profondeurPlacement doivent suivre.
+    const ys = donnees.postes.filter((p) => p.id !== "G").flatMap((p) => p.cases.map((c) => c.centre.y));
+    const { basY, hautY } = reglages.projection.attaque.profondeurPlacement;
+    expect(Math.abs(Math.min(...ys) - basY)).toBeLessThan(0.01);
+    expect(Math.abs(Math.max(...ys) - hautY)).toBeLessThan(0.01);
   });
 
   test("le bloc glisse du côté du ballon en défense", () => {
@@ -392,5 +419,105 @@ describe("réalisme (référence football)", () => {
     expect(hauteurLigneDefensiveM({ x: 0.5, y: 0.2 }, reglages, L)).toBe(l.hauteurMinM);
     expect(hauteurLigneDefensiveM({ x: 0.5, y: 0.5 }, reglages, L)).toBeGreaterThan(l.hauteurMinM);
     expect(hauteurLigneDefensiveM({ x: 0.5, y: 0.9 }, reglages, L)).toBe(l.hauteurMaxM);
+  });
+  // ---- Avec le ballon (ajoutés le 11/11 après le retour du concepteur :
+  // ligne adverse enfoncée dans sa surface, équipe étirée sur 60 m). Mesurés
+  // sur de longues possessions, plusieurs graines : un contrôle à un instant
+  // donné ne voit pas une dérive.
+
+  test("forme en possession (fonction du ballon) : défense 15 à 30 m derrière le ballon au milieu, équipe de 30 à 50 m", () => {
+    const a = reglages.projection.attaque;
+    for (let by = 0.05; by <= 0.95; by += 0.05) {
+      const { arriereM, avantM } = lignesAttaqueM({ x: 0.5, y: by }, reglages, L);
+      expect(avantM - arriereM).toBeGreaterThanOrEqual(a.longueurEquipeM.min - 1e-9);
+      expect(avantM - arriereM).toBeLessThanOrEqual(a.longueurEquipeM.max + 1e-9);
+      if (by * L >= 35 && by * L <= 70) {
+        expect(by * L - arriereM).toBeGreaterThanOrEqual(15);
+        expect(by * L - arriereM).toBeLessThanOrEqual(30);
+      }
+    }
+  });
+
+  function possession(graine: number, mode: "nous" | "auto", secondes: number, mesurer: (m: MatchSim, camp: 0 | 1) => void) {
+    const m = nouveauMatch(graine);
+    m.demarrer();
+    m.definirMode(mode);
+    for (let t = 0; t < secondes; t += 0.25) {
+      m.avancer(0.25);
+      if (t < 8) continue;
+      for (const camp of [0, 1] as const) if (m.phases[camp] === "attaque" && !m.enTransition) mesurer(m, camp);
+    }
+  }
+  const yRepere = (m: MatchSim, camp: 0 | 1, p: { x: number; y: number }) => m.versRepere(camp, p).y * L;
+
+  test("en attaque, personne ne s'installe derrière la défense adverse (hors-jeu)", () => {
+    for (const graine of [1, 2, 3, 4]) {
+      let n = 0;
+      let auDela = 0;
+      let pire = 0;
+      possession(graine, "nous", 60, (m, camp) => {
+        const dernier = Math.max(...m.joueurs.filter((j) => j.camp !== camp && j.poste.id !== "G").map((j) => yRepere(m, camp, j.pos)));
+        const ballon = yRepere(m, camp, m.ballon);
+        const devant = Math.max(...m.joueurs.filter((j) => j.camp === camp).map((j) => yRepere(m, camp, j.pos)));
+        const d = devant - Math.max(dernier, ballon);
+        n++;
+        if (d > 3) auDela++;
+        pire = Math.max(pire, d);
+      });
+      expect(auDela / n).toBeLessThan(0.05);
+      expect(pire).toBeLessThan(8);
+    }
+  });
+
+  test("la défense adverse n'est pas repoussée : elle tient la hauteur que lui donne le ballon", () => {
+    for (const graine of [1, 2, 3, 4]) {
+      let n = 0;
+      let enfoncee = 0;
+      possession(graine, "nous", 60, (m, camp) => {
+        const adv = (1 - camp) as 0 | 1;
+        const ecarts = m.joueurs
+          .filter((j) => j.camp === adv && j.poste.ligneDefense === "defense")
+          .map((j) => yRepere(m, adv, j.cible) - yRepere(m, adv, j.pos));
+        n++;
+        if (Math.max(...ecarts) > 5) enfoncee++; // un défenseur 5 m plus bas que sa place
+      });
+      // Un peu de retard quand le ballon repart vite en arrière, jamais durablement.
+      expect(enfoncee / n).toBeLessThan(0.12);
+    }
+  });
+
+  test("longueur et largeur en possession : 30 à 50 m de long (55 au plus), au moins 45 m de large", () => {
+    for (const graine of [1, 2, 3, 4]) {
+      const longueurs: number[] = [];
+      const largeurs: number[] = [];
+      possession(graine, "nous", 60, (m, camp) => {
+        const champ = m.joueurs.filter((j) => j.camp === camp && j.poste.id !== "G");
+        const ys = champ.map((j) => yRepere(m, camp, j.pos));
+        const xs = champ.map((j) => j.pos.x);
+        longueurs.push(Math.max(...ys) - Math.min(...ys));
+        largeurs.push(Math.max(...xs) - Math.min(...xs));
+      });
+      const mediane = (v: number[]) => [...v].sort((a, b) => a - b)[Math.floor(v.length / 2)]!;
+      expect(mediane(longueurs)).toBeGreaterThanOrEqual(30);
+      expect(mediane(longueurs)).toBeLessThanOrEqual(50);
+      expect(Math.max(...longueurs)).toBeLessThanOrEqual(55);
+      expect(mediane(largeurs)).toBeGreaterThanOrEqual(45);
+    }
+  });
+
+  test("défense de couverture : au moins 4 joueurs de champ derrière le ballon dans le camp adverse", () => {
+    for (const graine of [1, 2, 3, 4]) {
+      let n = 0;
+      let ok = 0;
+      possession(graine, "nous", 60, (m, camp) => {
+        const ballon = yRepere(m, camp, m.ballon);
+        if (ballon < L / 2) return;
+        const derriere = m.joueurs.filter((j) => j.camp === camp && j.poste.id !== "G" && yRepere(m, camp, j.pos) < ballon).length;
+        n++;
+        if (derriere >= 4) ok++;
+      });
+      expect(n).toBeGreaterThan(0);
+      expect(ok / n).toBeGreaterThan(0.95);
+    }
   });
 });

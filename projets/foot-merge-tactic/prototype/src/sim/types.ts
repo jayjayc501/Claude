@@ -35,8 +35,6 @@ export interface GrilleDef {
   colonnesBornes?: [number, number][];
   /** Idem pour les lignes, de la plus basse à la plus haute. */
   lignesBornes?: [number, number][];
-  /** Montée en attaque propre à chaque ligne de la grille (sinon celle du poste). */
-  monteeParLigneM?: number[];
 }
 
 export interface CelluleDef {
@@ -62,7 +60,6 @@ export interface PosteDef {
   cellules?: CelluleDef[];
   max: number;
   maxProvisoire?: boolean;
-  monteeAttaqueM: number;
   /** Multiplicateur du suivi du ballon (1 par défaut ; le gardien bouge moins). */
   suiviBallon?: number;
 }
@@ -75,8 +72,6 @@ export interface Cellule {
   label: string;
   centre: PointNorm;
   rect: RectNorm;
-  /** Montée en attaque de cette case, en mètres. */
-  monteeAttaqueM: number;
 }
 
 export interface Poste extends PosteDef {
@@ -129,12 +124,20 @@ export interface Reglages {
     attaque: {
       ecartement: number;
       glissementLateral: number;
-      /** Profondeur du ballon (repère de l'équipe) où le bloc n'est ni avancé ni reculé. */
-      profondeurReference: number;
-      suiviProfondeur: number;
-      decalageMaxM: number;
-      /** Les attaquants restent à cette distance en deçà de la ligne du hors-jeu. */
-      margeHorsJeuM: number;
+      /** Profondeur des cases (demi-terrain, repère de l'équipe) qui donnent la
+       *  ligne arrière (basY) et la ligne avant (hautY). Entre les deux, chaque
+       *  joueur garde sa place dans l'ordre de profondeur choisi au placement. */
+      profondeurPlacement: { basY: number; hautY: number };
+      /** La ligne arrière se tient à cette distance derrière le ballon… */
+      distanceDefenseBallonM: number;
+      /** … sans descendre sous ce minimum ni monter au-dessus de ce maximum (m depuis son but). */
+      ligneArriereMinM: number;
+      ligneArriereMaxM: number;
+      /** Longueur de l'équipe (ligne arrière → ligne avant), en mètres. */
+      longueurEquipeM: { min: number; max: number };
+      /** La ligne avant reste à cette distance en deçà de la ligne défensive adverse (hors-jeu). */
+      margeLigneAdverseM: number;
+      gardien: { distanceDerriereLigneM: number; minM: number; maxM: number };
     };
     limites: { xMin: number; xMax: number; yMin: number; yMax: number };
   };
@@ -143,7 +146,10 @@ export interface Reglages {
     vitesseMaxMS: number;
     accelerationMS2: number;
     distanceFreinageM: number;
+    /** Distance minimale entre coéquipiers. */
     distanceMinM: number;
+    /** Distance minimale entre adversaires (plus courte : un défenseur colle son attaquant). */
+    distanceMinAdversaireM: number;
     forceSeparation: number;
   };
   possessionSimulee: {

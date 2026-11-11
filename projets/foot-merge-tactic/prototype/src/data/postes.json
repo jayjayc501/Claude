@@ -27,7 +27,6 @@
         ]
       },
       "max": 1,
-      "monteeAttaqueM": 10,
       "suiviBallon": 0.3
     },
     {
@@ -71,8 +70,7 @@
           "haut"
         ]
       },
-      "max": 3,
-      "monteeAttaqueM": 20
+      "max": 3
     },
     {
       "id": "DG",
@@ -99,8 +97,7 @@
         ]
       },
       "max": 1,
-      "maxProvisoire": true,
-      "monteeAttaqueM": 30
+      "maxProvisoire": true
     },
     {
       "id": "DD",
@@ -127,8 +124,7 @@
         ]
       },
       "max": 1,
-      "maxProvisoire": true,
-      "monteeAttaqueM": 30
+      "maxProvisoire": true
     },
     {
       "id": "MC",
@@ -171,16 +167,10 @@
           "défensif",
           "central",
           "offensif"
-        ],
-        "monteeParLigneM": [
-          20,
-          30,
-          35
         ]
       },
       "max": 4,
-      "maxProvisoire": true,
-      "monteeAttaqueM": 30
+      "maxProvisoire": true
     },
     {
       "id": "AG",
@@ -206,8 +196,7 @@
           "attaquant"
         ]
       },
-      "max": 1,
-      "monteeAttaqueM": 35
+      "max": 1
     },
     {
       "id": "AD",
@@ -234,8 +223,7 @@
         ]
       },
       "max": 1,
-      "maxProvisoire": true,
-      "monteeAttaqueM": 35
+      "maxProvisoire": true
     },
     {
       "id": "AC",
@@ -279,8 +267,7 @@
         ]
       },
       "max": 3,
-      "maxProvisoire": true,
-      "monteeAttaqueM": 40
+      "maxProvisoire": true
     }
   ],
   "roles": {

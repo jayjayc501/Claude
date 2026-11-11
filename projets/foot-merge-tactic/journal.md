@@ -85,3 +85,23 @@ Historique des étapes, des choix techniques et des résultats de tests.
 **Tests** : 33 verts (nouveaux : remplacement, cases de l'axe à cheval, grandes zones séparées de 2 m au plus). Seuil du test « le bloc monte puis redescend » ramené à 8 m : perdu haut, le ballon reste loin de notre but et le bloc défend haut, ce qui est correct.
 
 **Vérification au format téléphone** : 390 × 844, la page de placement tient exactement sur l'écran ; 375 × 667, il reste 12 pixels de trop ; sur l'écran de match, les boutons de possession sont visibles sans défiler dans les deux cas. Parcours au glisser-déposer : entrée d'un remplaçant, sortie vers le banc, retour sur une case libre, refus d'un 12e joueur avec un message clair, échange, simple toucher.
+
+## 11/11/2026 — Placement en attaque pendant le match
+
+**Retour du concepteur** (capture à ×4, « À vous ») : placement « n'importe quoi » pendant le match. La défense adverse est dans sa surface alors que le ballon est au milieu de terrain, notre attaquant est collé à ses défenseurs, notre équipe est étirée.
+
+**Mesures** (8 graines × 2 modes, 120 s) : le dernier défenseur adverse finissait jusqu'à 17 m sous la hauteur que lui donne le ballon (17 m de son but, au lieu de 34 m) ; notre équipe s'étirait sur 56 à 64 m (référence : environ 38 m en possession).
+
+**Cause** : une boucle. Nos attaquants se calaient sur la position réelle du dernier défenseur adverse (ligne du hors-jeu) ; en le serrant, l'évitement le faisait reculer ; nos attaquants le suivaient ; et ainsi de suite jusque dans la surface. En plus, les défenseurs centraux ne suivaient presque pas le ballon (montée fixe), d'où l'équipe étirée. Aucun test ne regardait la phase d'attaque sur la durée : les tests de réalisme ne mesuraient que la défense.
+
+**Correction** (`projection.ts`, `simulation.ts`, `reglages.json`)
+- Avec le ballon, l'équipe s'étire entre deux lignes : ligne arrière 20 m derrière le ballon (entre 15 et 55 m de son but), ligne avant 1 m en deçà de la ligne que l'adversaire vise d'après le ballon. Longueur de 30 à 50 m. Entre les deux, l'ordre de profondeur du placement est gardé.
+- Plus aucune cible ne dépend de la position du moment d'un autre joueur : fin de la boucle.
+- Montées par poste et par case supprimées (remplacées par l'ordre de profondeur).
+- Écart minimal entre adversaires 2,5 m (3 m entre coéquipiers) : un défenseur serre son attaquant sans le repousser, et les ronds ne se chevauchent pas à l'écran.
+
+**Résultat mesuré** (6 graines, 90 s, « À vous ») : attaquant au-delà du dernier défenseur de plus de 3 m : 0 % du temps ; longueur médiane 37 à 43 m ; défense adverse plus de 5 m sous sa place 3 à 8 % du temps (le temps de remonter quand le ballon repart en arrière, pas de dérive) ; au moins 4 joueurs derrière le ballon dans le camp adverse.
+
+**Tests** : 40 verts. Nouveaux : forme en possession selon le ballon, ordre de profondeur gardé, cases extrêmes cohérentes avec les réglages, et quatre tests de réalisme sur de longues possessions (hors-jeu, défense adverse non repoussée, longueur et largeur, défense de couverture). L'ancien test « attaquant à plus de 80 m, ballon au centre » était faux en football (il plaçait l'attaquant derrière la défense) : remplacé.
+
+**Méthode changée** : chaque règle se teste dans les deux phases et sur la durée, et le match se regarde dans les trois modes à ×1 et ×4 avant chaque publication (référence football, §9.4).

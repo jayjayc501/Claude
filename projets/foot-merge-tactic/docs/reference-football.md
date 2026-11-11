@@ -217,13 +217,37 @@ de données pour être réglées sans toucher au code.
 
 ### 9.2. Avec le ballon : le placement compte
 
-1. Le joueur part de sa position du demi-terrain et monte selon son poste
-   (montées actuelles : gardien 5 m, DC 20 m, latéraux et milieux 30 m,
-   côtés 35 m, attaquant 40 m) ; l'équipe s'écarte en largeur.
-2. **Défense de couverture** : les DC et la ligne des milieux défensifs
-   montent moins, pour garder au moins quatre joueurs derrière le ballon
-   (à régler : montée du milieu défensif plus faible que celle du milieu
-   offensif).
+Révisé le 11/11 après le retour du concepteur (« gros problème de
+placement durant le match ») : la défense adverse s'enfonçait dans sa
+surface et notre équipe s'étirait sur 60 m.
+
+1. **L'équipe s'étire entre deux lignes.** La **ligne arrière** (les
+   défenseurs) se tient environ 20 m derrière le ballon, entre 15 et 55 m
+   de son but. La **ligne avant** (l'attaquant le plus haut) se cale 1 m
+   en deçà de la **ligne défensive adverse** : jamais derrière elle, sinon
+   il serait hors-jeu (sauf si le ballon l'a dépassée).
+2. **Longueur de l'équipe : 30 à 50 m** (repère : environ 38 m en
+   moyenne en Premier League pendant les possessions ; plus longue en
+   construction basse, plus courte près de la surface adverse).
+3. **Entre les deux lignes, l'ordre de profondeur du placement est
+   gardé** : la case la plus basse du demi-terrain donne la ligne
+   arrière, la plus haute la ligne avant, les autres se répartissent entre
+   les deux. Ce qui est placé haut joue haut ; un latéral placé haut monte
+   bien plus que les défenseurs centraux.
+4. **Largeur** : l'équipe s'écarte (couloirs extérieurs occupés, côtés
+   près de la ligne de touche).
+5. **Défense de couverture** : avec cette forme, au moins quatre joueurs
+   de champ restent derrière le ballon dans le camp adverse (contrôlé par
+   un test).
+6. **Règle de construction du moteur : une cible ne dépend jamais de la
+   position du moment d'un autre joueur**, seulement du ballon et du
+   placement. La ligne adverse utilisée est celle que l'adversaire *vise*
+   d'après le ballon. Première version fautive : nos attaquants se
+   calaient sur la position réelle du dernier défenseur ; en le serrant,
+   ils le faisaient reculer (évitement), le suivaient, et la ligne
+   s'enfonçait jusqu'à 17 m sous sa hauteur normale.
+7. Un défenseur peut serrer son attaquant de plus près (2,5 m) que deux
+   coéquipiers ne s'approchent (3 m).
 
 ### 9.3. Transitions
 
@@ -253,7 +277,19 @@ ne s'éloigne pas du football :
 5. Quand le ballon est sur un côté, le centre du bloc est décalé du même
    côté.
 6. En attaque, au moins quatre joueurs de champ derrière le ballon
-   (à vérifier quand le vrai ballon existera).
+   quand il est dans le camp adverse (95 % du temps au moins, avec le
+   ballon simulé ; à revérifier avec le vrai ballon).
+7. **En attaque, sur de longues possessions** (60 s, plusieurs graines) :
+   personne ne s'installe derrière le dernier défenseur adverse (plus de
+   3 m au-delà moins de 5 % du temps) ; la défense adverse n'est pas
+   repoussée sous sa hauteur normale (5 m plus bas moins de 12 % du temps,
+   le temps de remonter quand le ballon repart en arrière) ; équipe de 30
+   à 50 m de long (55 au plus), au moins 45 m de large.
+8. **Méthode** : chaque règle se vérifie dans les deux phases et sur la
+   durée. Un contrôle à un instant donné ne voit pas une dérive ; les
+   contrôles de la défense seuls n'avaient pas vu le défaut de l'attaque.
+   Avant chaque publication, regarder aussi le match en « À vous »,
+   « À l'adversaire » et « Ballon alterné », à ×1 et ×4.
 
 ---
 

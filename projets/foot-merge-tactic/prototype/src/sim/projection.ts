@@ -11,10 +11,14 @@
 // haut revient dans la ligne de défense). En largeur, chaque ligne garde
 // l'ordre gauche-droite des joueurs, se resserre et coulisse vers le ballon.
 //
-// Avec le ballon : le placement compte pleinement. Chaque case monte de sa
-// distance, l'équipe s'écarte en largeur, et tout le bloc avance ou recule
-// avec le ballon (construction basse ou attaque placée). La simulation
-// retient ensuite les attaquants au niveau de la ligne du hors-jeu adverse.
+// Avec le ballon : l'équipe s'étire entre deux lignes. La ligne arrière
+// (défenseurs) se tient derrière le ballon ; la ligne avant (attaquants) se
+// cale juste en deçà de la ligne défensive adverse, celle que l'adversaire
+// VISE d'après la position du ballon (pas sa position du moment : sinon un
+// défenseur bousculé recule, l'attaquant le suit, et la ligne s'enfonce
+// jusque dans la surface). Entre les deux lignes, chaque joueur garde l'ordre
+// de profondeur choisi au placement : ce qui est placé haut joue haut.
+// En largeur, l'équipe s'écarte.
 
 import type { Phase, PointNorm, Poste, RectNorm, Reglages } from "./types";
 
@@ -52,27 +56,48 @@ function projeterDefense(base: PointNorm, poste: Poste, ballon: PointNorm, regla
   return { x: xM / LARGEUR_M, y: yM / longueurM };
 }
 
-function projeterAttaque(
-  base: PointNorm,
-  poste: Poste,
+/** Ligne défensive que vise l'adversaire, en mètres depuis NOTRE but
+ *  (repère de l'équipe qui a le ballon). Fonction du ballon seulement. */
+export function ligneAdverseM(ballon: PointNorm, reglages: Reglages, longueurM: number): number {
+  return longueurM - hauteurLigneDefensiveM({ x: 1 - ballon.x, y: 1 - ballon.y }, reglages, longueurM);
+}
+
+/** Lignes arrière et avant de l'équipe qui a le ballon (mètres depuis son but). */
+export function lignesAttaqueM(
   ballon: PointNorm,
   reglages: Reglages,
   longueurM: number,
-  monteeM: number,
-): PointNorm {
+): { arriereM: number; avantM: number } {
   const a = reglages.projection.attaque;
-  const suivi = poste.suiviBallon ?? 1;
-  const dyMax = a.decalageMaxM / longueurM;
-  return {
-    x: 0.5 + (base.x - 0.5) * a.ecartement + (ballon.x - 0.5) * a.glissementLateral * suivi,
-    y: base.y + monteeM / longueurM + borner((ballon.y - a.profondeurReference) * a.suiviProfondeur, -dyMax, dyMax) * suivi,
-  };
+  const ballonM = ballon.y * longueurM;
+  // Personne n'est hors-jeu derrière le ballon : si le ballon a dépassé la
+  // ligne adverse, la ligne avant peut aller jusqu'à lui.
+  const avantM = Math.max(ligneAdverseM(ballon, reglages, longueurM), ballonM) - a.margeLigneAdverseM;
+  let arriereM = borner(ballonM - a.distanceDefenseBallonM, a.ligneArriereMinM, a.ligneArriereMaxM);
+  arriereM = borner(arriereM, avantM - a.longueurEquipeM.max, avantM - a.longueurEquipeM.min);
+  return { arriereM, avantM };
 }
 
-/**
- * Position de match d'un point du demi-terrain (repère de l'équipe).
- * `monteeM` : montée en attaque de la case (par défaut celle du poste).
- */
+function projeterAttaque(base: PointNorm, poste: Poste, ballon: PointNorm, reglages: Reglages, longueurM: number): PointNorm {
+  const a = reglages.projection.attaque;
+  const suivi = poste.suiviBallon ?? 1;
+  const x = 0.5 + (base.x - 0.5) * a.ecartement + (ballon.x - 0.5) * a.glissementLateral * suivi;
+  const { arriereM, avantM } = lignesAttaqueM(ballon, reglages, longueurM);
+
+  if (poste.ligneDefense === "gardien") {
+    const g = a.gardien;
+    // Case « avancée » du gardien : quelques mètres de plus, comme sur le demi-terrain.
+    const decalageM = (base.y - (poste.rect.y + poste.rect.h / 2)) * longueurM;
+    const yM = borner(arriereM - g.distanceDerriereLigneM + decalageM, g.minM, g.maxM);
+    return { x, y: yM / longueurM };
+  }
+
+  const p = a.profondeurPlacement;
+  const t = borner((base.y - p.basY) / (p.hautY - p.basY), 0, 1);
+  return { x, y: (arriereM + t * (avantM - arriereM)) / longueurM };
+}
+
+/** Position de match d'un point du demi-terrain (repère de l'équipe). */
 export function projeter(
   base: PointNorm,
   poste: Poste,
@@ -80,12 +105,11 @@ export function projeter(
   ballon: PointNorm,
   reglages: Reglages,
   longueurM: number,
-  monteeM: number = poste.monteeAttaqueM,
 ): PointNorm {
   const p =
     phase === "defense"
       ? projeterDefense(base, poste, ballon, reglages, longueurM)
-      : projeterAttaque(base, poste, ballon, reglages, longueurM, monteeM);
+      : projeterAttaque(base, poste, ballon, reglages, longueurM);
   const l = reglages.projection.limites;
   return { x: borner(p.x, l.xMin, l.xMax), y: borner(p.y, l.yMin, l.yMax) };
 }

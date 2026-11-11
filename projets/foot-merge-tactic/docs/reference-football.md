@@ -284,8 +284,9 @@ ne s'éloigne pas du football :
 7. **En attaque, sur de longues possessions** (60 s, plusieurs graines) :
    personne ne s'installe derrière le dernier défenseur adverse (plus de
    3 m au-delà moins de 5 % du temps) ; la défense adverse n'est pas
-   repoussée sous sa hauteur normale (5 m plus bas moins de 12 % du temps,
-   le temps de remonter quand le ballon repart en arrière) ; équipe de 30
+   repoussée sous sa hauteur normale (un défenseur 5 m trop bas sans que
+   le ballon soit reparti en arrière : moins de 5 % du temps ; en retard
+   quand le ballon repart en arrière : 4 s au plus d'affilée) ; équipe de 30
    à 50 m de long (55 au plus), au moins 45 m de large.
 8. **Méthode** : chaque règle se vérifie dans les deux phases et sur la
    durée. Un contrôle à un instant donné ne voit pas une dérive ; les

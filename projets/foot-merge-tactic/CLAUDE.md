@@ -196,7 +196,7 @@ Toujours ouvertes :
 
 - Prototype dans `prototype/` : TypeScript, sans dépendance. `bun test` lance les tests, `bun run construire` fabrique `dist/index.html` (page autonome, code et données inclus). Voir le `README.md` du projet.
 - Simulation en pas de temps fixe (1/30 s), avec son propre générateur aléatoire à graine (`src/sim/rng.ts`). Le code de `src/sim/` ne dépend pas de l'affichage : il tourne dans les tests sans navigateur.
-- Coordonnées **normalisées** dans le repère de chaque équipe (x de 0 à 1 sur la largeur, y de 0, sa ligne de but, à 1, la ligne adverse). L'équipe adverse utilise la symétrie. Les cases se déduisent d'une grille (colonnes × lignes) ou d'une liste de cases (attaquant).
+- Coordonnées **normalisées** dans le repère de chaque équipe (x de 0 à 1 sur la largeur, y de 0, sa ligne de but, à 1, la ligne adverse). L'équipe adverse utilise la symétrie. Les cases se déduisent du plateau choisi (hexagones ou carrés), décrit rangée par rangée dans `postes.json`.
 - Un match ne dépend que des deux équipes (joueurs, placements) et de la graine : utile pour les tests, et plus tard pour que le serveur simule les matchs en direct.
 - Validation visuelle : Claude vérifie la page dans un navigateur au format téléphone (captures, thèmes clair et sombre), puis la publie comme page claude.ai. Lien du prototype 1 : https://claude.ai/artifact/B86yGS9jR47LwubdEiL5EN (privé au concepteur jusqu'à ce qu'il le partage). Republier la même page à chaque version.
 - GitHub Pages sert l'app jetelavaisdit : ne pas y publier le prototype sans regrouper les deux sites.

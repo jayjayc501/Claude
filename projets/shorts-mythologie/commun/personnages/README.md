@@ -15,6 +15,7 @@ même costume d'un Short à l'autre. Descriptions complètes : `../../charte-vis
 | Mímir | `mimir/mimir-au-puits.jpg` | P10 | En entier avec sa corne, au bord du puits, face à Odin |
 | Fenrir | `fenrir/fenrir-hurlant.jpg` | P16b | En entier, hurle sur un rocher, restes de chaîne |
 | Fenrir | `fenrir/fenrir-gueule.jpg` | P01 | Gueule ouverte au-dessus d'Odin, dans le feu du Ragnarök |
+| Loki | `loki/loki-reference.png` | choisi par le propriétaire (11/11/2026) | En pied en forêt : longs cheveux bruns, oreilles légèrement pointues, yeux clairs, habits vert foncé, ceinture et bracelets de cuir, pendentif |
 
 Les portraits d'origine sur fond neutre (GPT-Image 2.5 pour Odin et Mímir, Kling Image 3.0
 Omni pour Fenrir) sont dans l'historique Kling du compte ; à ajouter ici dans `<nom>/portrait.png`

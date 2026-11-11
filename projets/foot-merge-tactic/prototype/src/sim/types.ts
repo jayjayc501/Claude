@@ -29,6 +29,8 @@ export interface GrilleDef {
   roles: string[];
   colonnes?: string[];
   lignes?: string[];
+  /** Montée en attaque propre à chaque ligne de la grille (sinon celle du poste). */
+  monteeParLigneM?: number[];
 }
 
 export interface CelluleDef {
@@ -42,9 +44,13 @@ export interface CelluleDef {
   label: string;
 }
 
+/** Ligne que le poste rejoint quand l'équipe défend (voir docs/reference-football.md). */
+export type LigneDefense = "gardien" | "defense" | "milieu" | "attaque";
+
 export interface PosteDef {
   id: string;
   nom: string;
+  ligneDefense: LigneDefense;
   rect: RectNorm;
   grille?: GrilleDef;
   cellules?: CelluleDef[];
@@ -63,6 +69,8 @@ export interface Cellule {
   label: string;
   centre: PointNorm;
   rect: RectNorm;
+  /** Montée en attaque de cette case, en mètres. */
+  monteeAttaqueM: number;
 }
 
 export interface Poste extends PosteDef {
@@ -99,8 +107,26 @@ export type Phase = "attaque" | "defense";
 
 export interface Reglages {
   projection: {
-    defense: { compression: number; glissementLateral: number; suiviProfondeur: number; decalageMaxM: number };
-    attaque: { ecartement: number; glissementLateral: number; suiviProfondeur: number; decalageMaxM: number };
+    defense: {
+      ligneDefensive: { distanceDerriereBallonM: number; hauteurMinM: number; hauteurMaxM: number };
+      ecartLignesM: { milieu: number; attaque: number };
+      largeurLigneM: { defense: number; milieu: number; attaque: number };
+      /** Écart minimal entre deux joueurs voisins d'une même ligne défensive. */
+      ecartMinDansLigneM: number;
+      suiviLateral: number;
+      influencePlacement: number;
+      gardien: { distanceDerriereLigneM: number; minM: number; maxM: number; suiviLateral: number };
+    };
+    attaque: {
+      ecartement: number;
+      glissementLateral: number;
+      /** Profondeur du ballon (repère de l'équipe) où le bloc n'est ni avancé ni reculé. */
+      profondeurReference: number;
+      suiviProfondeur: number;
+      decalageMaxM: number;
+      /** Les attaquants restent à cette distance en deçà de la ligne du hors-jeu. */
+      margeHorsJeuM: number;
+    };
     limites: { xMin: number; xMax: number; yMin: number; yMax: number };
   };
   transition: { delaiS: number };

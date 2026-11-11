@@ -1,25 +1,61 @@
 {
-  "terrain": { "longueur": 105, "largeur": 68 },
+  "terrain": {
+    "longueur": 105,
+    "largeur": 68
+  },
   "postes": [
     {
       "id": "G",
       "nom": "Gardien",
-      "rect": { "x": 0.36, "y": 0.0, "w": 0.28, "h": 0.09 },
-      "grille": { "cols": 1, "rows": 2, "roles": ["G", "G"], "lignes": ["normal", "avancé"] },
+      "ligneDefense": "gardien",
+      "rect": {
+        "x": 0.36,
+        "y": 0.0,
+        "w": 0.28,
+        "h": 0.09
+      },
+      "grille": {
+        "cols": 1,
+        "rows": 2,
+        "roles": [
+          "G",
+          "G"
+        ],
+        "lignes": [
+          "normal",
+          "avancé"
+        ]
+      },
       "max": 1,
-      "monteeAttaqueM": 5,
+      "monteeAttaqueM": 10,
       "suiviBallon": 0.3
     },
     {
       "id": "DC",
       "nom": "Défenseur central",
-      "rect": { "x": 0.18, "y": 0.06, "w": 0.64, "h": 0.2 },
+      "ligneDefense": "defense",
+      "rect": {
+        "x": 0.18,
+        "y": 0.06,
+        "w": 0.64,
+        "h": 0.2
+      },
       "grille": {
         "cols": 3,
         "rows": 2,
-        "roles": ["DC", "DC"],
-        "colonnes": ["gauche", "axe", "droite"],
-        "lignes": ["bas", "haut"]
+        "roles": [
+          "DC",
+          "DC"
+        ],
+        "colonnes": [
+          "gauche",
+          "axe",
+          "droite"
+        ],
+        "lignes": [
+          "bas",
+          "haut"
+        ]
       },
       "max": 3,
       "monteeAttaqueM": 20
@@ -27,8 +63,27 @@
     {
       "id": "DG",
       "nom": "Latéral gauche",
-      "rect": { "x": 0.0, "y": 0.08, "w": 0.26, "h": 0.3 },
-      "grille": { "cols": 1, "rows": 3, "roles": ["DG", "DG", "DG"], "lignes": ["bas", "milieu", "haut"] },
+      "ligneDefense": "defense",
+      "rect": {
+        "x": 0.0,
+        "y": 0.08,
+        "w": 0.26,
+        "h": 0.3
+      },
+      "grille": {
+        "cols": 1,
+        "rows": 3,
+        "roles": [
+          "DG",
+          "DG",
+          "DG"
+        ],
+        "lignes": [
+          "bas",
+          "milieu",
+          "haut"
+        ]
+      },
       "max": 1,
       "maxProvisoire": true,
       "monteeAttaqueM": 30
@@ -36,8 +91,27 @@
     {
       "id": "DD",
       "nom": "Latéral droit",
-      "rect": { "x": 0.74, "y": 0.08, "w": 0.26, "h": 0.3 },
-      "grille": { "cols": 1, "rows": 3, "roles": ["DD", "DD", "DD"], "lignes": ["bas", "milieu", "haut"] },
+      "ligneDefense": "defense",
+      "rect": {
+        "x": 0.74,
+        "y": 0.08,
+        "w": 0.26,
+        "h": 0.3
+      },
+      "grille": {
+        "cols": 1,
+        "rows": 3,
+        "roles": [
+          "DD",
+          "DD",
+          "DD"
+        ],
+        "lignes": [
+          "bas",
+          "milieu",
+          "haut"
+        ]
+      },
       "max": 1,
       "maxProvisoire": true,
       "monteeAttaqueM": 30
@@ -45,13 +119,35 @@
     {
       "id": "MC",
       "nom": "Milieu central",
-      "rect": { "x": 0.2, "y": 0.2, "w": 0.6, "h": 0.26 },
+      "ligneDefense": "milieu",
+      "rect": {
+        "x": 0.2,
+        "y": 0.2,
+        "w": 0.6,
+        "h": 0.26
+      },
       "grille": {
         "cols": 2,
         "rows": 3,
-        "roles": ["MDC", "MC", "MOC"],
-        "colonnes": ["gauche", "droite"],
-        "lignes": ["défensif", "central", "offensif"]
+        "roles": [
+          "MDC",
+          "MC",
+          "MOC"
+        ],
+        "colonnes": [
+          "gauche",
+          "droite"
+        ],
+        "lignes": [
+          "défensif",
+          "central",
+          "offensif"
+        ],
+        "monteeParLigneM": [
+          20,
+          30,
+          35
+        ]
       },
       "max": 4,
       "maxProvisoire": true,
@@ -60,12 +156,26 @@
     {
       "id": "AG",
       "nom": "Côté gauche",
-      "rect": { "x": 0.0, "y": 0.24, "w": 0.28, "h": 0.26 },
+      "ligneDefense": "milieu",
+      "rect": {
+        "x": 0.0,
+        "y": 0.24,
+        "w": 0.28,
+        "h": 0.26
+      },
       "grille": {
         "cols": 1,
         "rows": 3,
-        "roles": ["MG", "MAG", "AG"],
-        "lignes": ["milieu", "milieu avancé", "attaquant"]
+        "roles": [
+          "MG",
+          "MAG",
+          "AG"
+        ],
+        "lignes": [
+          "milieu",
+          "milieu avancé",
+          "attaquant"
+        ]
       },
       "max": 1,
       "monteeAttaqueM": 35
@@ -73,12 +183,26 @@
     {
       "id": "AD",
       "nom": "Côté droit",
-      "rect": { "x": 0.72, "y": 0.24, "w": 0.28, "h": 0.26 },
+      "ligneDefense": "milieu",
+      "rect": {
+        "x": 0.72,
+        "y": 0.24,
+        "w": 0.28,
+        "h": 0.26
+      },
       "grille": {
         "cols": 1,
         "rows": 3,
-        "roles": ["MD", "MAD", "AD"],
-        "lignes": ["milieu", "milieu avancé", "attaquant"]
+        "roles": [
+          "MD",
+          "MAD",
+          "AD"
+        ],
+        "lignes": [
+          "milieu",
+          "milieu avancé",
+          "attaquant"
+        ]
       },
       "max": 1,
       "maxProvisoire": true,
@@ -87,13 +211,54 @@
     {
       "id": "AC",
       "nom": "Attaquant",
-      "rect": { "x": 0.26, "y": 0.32, "w": 0.48, "h": 0.18 },
+      "ligneDefense": "attaque",
+      "rect": {
+        "x": 0.26,
+        "y": 0.32,
+        "w": 0.48,
+        "h": 0.18
+      },
       "cellules": [
-        { "u": 0.25, "v": 0.2, "su": 0.5, "sv": 0.4, "role": "AC", "label": "gauche, bas" },
-        { "u": 0.75, "v": 0.2, "su": 0.5, "sv": 0.4, "role": "AC", "label": "droite, bas" },
-        { "u": 0.25, "v": 0.55, "su": 0.5, "sv": 0.3, "role": "AC", "label": "gauche, haut" },
-        { "u": 0.75, "v": 0.55, "su": 0.5, "sv": 0.3, "role": "AC", "label": "droite, haut" },
-        { "u": 0.5, "v": 0.85, "su": 0.5, "sv": 0.3, "role": "AC", "label": "devant le but" }
+        {
+          "u": 0.25,
+          "v": 0.2,
+          "su": 0.5,
+          "sv": 0.4,
+          "role": "AC",
+          "label": "gauche, bas"
+        },
+        {
+          "u": 0.75,
+          "v": 0.2,
+          "su": 0.5,
+          "sv": 0.4,
+          "role": "AC",
+          "label": "droite, bas"
+        },
+        {
+          "u": 0.25,
+          "v": 0.55,
+          "su": 0.5,
+          "sv": 0.3,
+          "role": "AC",
+          "label": "gauche, haut"
+        },
+        {
+          "u": 0.75,
+          "v": 0.55,
+          "su": 0.5,
+          "sv": 0.3,
+          "role": "AC",
+          "label": "droite, haut"
+        },
+        {
+          "u": 0.5,
+          "v": 0.85,
+          "su": 0.5,
+          "sv": 0.3,
+          "role": "AC",
+          "label": "devant le but"
+        }
       ],
       "max": 3,
       "maxProvisoire": true,

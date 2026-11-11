@@ -12,6 +12,9 @@ import { Aleatoire } from "./rng";
 import type { Cellule, Equipe, Joueur, Phase, Placement, PointM, PointNorm, Poste, Reglages } from "./types";
 
 export type Camp = 0 | 1;
+
+/** Durée sur laquelle un joueur anticipe une collision (secondes). */
+const HORIZON_EVITEMENT_S = 1;
 export type ModePossession = "auto" | "nous" | "eux";
 
 export interface JoueurSim {
@@ -143,12 +146,21 @@ export class MatchSim {
   private deplacerBallon(dt: number): void {
     const ps = this.reglages.possessionSimulee;
     if (this.temps >= this.prochaineCible) {
-      const candidats = this.joueurs.filter((j) => j.camp === this.possession && j.poste.id !== "G");
+      // Faux ballon : il circule par passes courtes entre les joueurs proches,
+      // comme une vraie possession, au lieu de sauter d'un bout à l'autre.
+      const candidats = this.joueurs
+        .filter((j) => j.camp === this.possession && j.poste.id !== "G")
+        .sort(
+          (a, b) =>
+            Math.hypot(a.pos.x - this.ballon.x, a.pos.y - this.ballon.y) -
+            Math.hypot(b.pos.x - this.ballon.x, b.pos.y - this.ballon.y),
+        )
+        .slice(0, 4);
       const porteur = candidats[this.rng.entier(candidats.length)];
       if (porteur) {
         const sens = this.possession === 0 ? 1 : -1;
-        const avance = this.rng.entre(4, 12) * sens;
-        const cote = this.rng.entre(-5, 5);
+        const avance = this.rng.entre(2, 8) * sens;
+        const cote = this.rng.entre(-4, 4);
         this.cibleBallon = {
           x: Math.min(this.donnees.largeurM - 2, Math.max(2, porteur.pos.x + cote)),
           y: Math.min(this.donnees.longueurM - 4, Math.max(4, porteur.pos.y + avance)),
@@ -164,11 +176,64 @@ export class MatchSim {
     else this.ballon = { x: this.ballon.x + (dx / d) * v, y: this.ballon.y + (dy / d) * v };
   }
 
+  /** Ligne du hors-jeu pour un camp, dans son repère : le plus avancé entre le
+   *  ballon et le dernier défenseur adverse (gardien exclu). */
+  ligneHorsJeu(camp: Camp): number {
+    const ballon = this.versRepere(camp, this.ballon).y;
+    let dernier = 0;
+    for (const o of this.joueurs) {
+      if (o.camp === camp || o.poste.id === "G") continue;
+      dernier = Math.max(dernier, this.versRepere(camp, o.pos).y);
+    }
+    return Math.max(ballon, dernier);
+  }
+
   private calculerCibles(): void {
+    const marge = this.reglages.projection.attaque.margeHorsJeuM / this.donnees.longueurM;
+    const horsJeu: [number, number] = [this.ligneHorsJeu(0), this.ligneHorsJeu(1)];
     for (const j of this.joueurs) {
       const ballonRepere = this.versRepere(j.camp, this.ballon);
-      const p = projeter(j.cellule.centre, j.poste, this.phases[j.camp], ballonRepere, this.reglages, this.donnees.longueurM);
+      const p = projeter(
+        j.cellule.centre,
+        j.poste,
+        this.phases[j.camp],
+        ballonRepere,
+        this.reglages,
+        this.donnees.longueurM,
+        j.cellule.monteeAttaqueM,
+      );
+      // En attaque, personne n'attend derrière la défense adverse : on reste
+      // au niveau de la ligne du hors-jeu (référence football, §3 et §8).
+      if (this.phases[j.camp] === "attaque") p.y = Math.min(p.y, horsJeu[j.camp] - marge);
       j.cible = this.versAbsolu(j.camp, p);
+    }
+    for (const camp of [0, 1] as const) {
+      if (this.phases[camp] === "defense") this.espacerLignes(camp);
+    }
+  }
+
+  /** En défense, deux joueurs d'une même ligne ne se marchent pas dessus :
+   *  on garde l'ordre gauche-droite et un écart minimal entre voisins
+   *  (6 à 8 m chez les entraîneurs, voir docs/reference-football.md §3). */
+  private espacerLignes(camp: Camp): void {
+    const ecart = this.reglages.projection.defense.ecartMinDansLigneM;
+    const W = this.donnees.largeurM;
+    for (const ligne of ["defense", "milieu", "attaque"] as const) {
+      const js = this.joueurs
+        .filter((j) => j.camp === camp && j.poste.ligneDefense === ligne)
+        .sort((a, b) => a.cible.x - b.cible.x || a.joueur.id.localeCompare(b.joueur.id));
+      if (js.length < 2) continue;
+      const avant = js.reduce((s, j) => s + j.cible.x, 0) / js.length;
+      const xs = js.map((j) => j.cible.x);
+      for (let i = 1; i < xs.length; i++) xs[i] = Math.max(xs[i]!, xs[i - 1]! + ecart);
+      // Recentrer la ligne là où elle était, sans sortir du terrain.
+      const apres = xs.reduce((s, x) => s + x, 0) / xs.length;
+      let decalage = avant - apres;
+      decalage = Math.max(decalage, 1 - xs[0]!);
+      decalage = Math.min(decalage, W - 1 - xs[xs.length - 1]!);
+      js.forEach((j, i) => {
+        j.cible = { x: xs[i]! + decalage, y: j.cible.y };
+      });
     }
   }
 
@@ -176,7 +241,7 @@ export class MatchSim {
     const m = this.reglages.mouvement;
     const nouvelles: PointM[] = [];
     this.joueurs.forEach((j, i) => {
-      // Vitesse souhaitée : vers la cible, en freinant à l'approche.
+      // 1. Course : vers la cible, en freinant à l'approche, accélération limitée.
       const dx = j.cible.x - j.pos.x;
       const dy = j.cible.y - j.pos.y;
       const d = Math.hypot(dx, dy);
@@ -187,24 +252,6 @@ export class MatchSim {
         vx = (dx / d) * vitesse;
         vy = (dy / d) * vitesse;
       }
-      // Séparation : on s'écarte des joueurs trop proches (les deux équipes).
-      this.joueurs.forEach((o, k) => {
-        if (k === i) return;
-        const ex = j.pos.x - o.pos.x;
-        const ey = j.pos.y - o.pos.y;
-        const e = Math.hypot(ex, ey);
-        if (e >= m.distanceMinM) return;
-        const force = ((m.distanceMinM - e) / m.distanceMinM) * m.forceSeparation;
-        if (e > 1e-6) {
-          vx += (ex / e) * force;
-          vy += (ey / e) * force;
-        } else {
-          const angle = (i - k) * 2.399963; // décalage déterministe si deux joueurs sont au même point
-          vx += Math.cos(angle) * force;
-          vy += Math.sin(angle) * force;
-        }
-      });
-      // Accélération limitée, puis vitesse limitée.
       let ax = vx - j.vit.x;
       let ay = vy - j.vit.y;
       const a = Math.hypot(ax, ay);
@@ -215,6 +262,38 @@ export class MatchSim {
       }
       let nx = j.vit.x + ax;
       let ny = j.vit.y + ay;
+
+      // 2. Évitement : on anticipe le point où l'on passera le plus près de
+      //    chaque autre joueur (dans la seconde qui vient) et on s'écarte tout
+      //    de suite si ce sera trop près. Ce pas de côté n'attend pas
+      //    l'accélération : un joueur ne traverse jamais un autre.
+      this.joueurs.forEach((o, k) => {
+        if (k === i) return;
+        const px = j.pos.x - o.pos.x;
+        const py = j.pos.y - o.pos.y;
+        if (px * px + py * py > 100) return; // au-delà de 10 m, rien à craindre
+        const rvx = j.vit.x - o.vit.x;
+        const rvy = j.vit.y - o.vit.y;
+        const rv2 = rvx * rvx + rvy * rvy;
+        let t = rv2 > 1e-9 ? -(px * rvx + py * rvy) / rv2 : 0;
+        t = Math.min(HORIZON_EVITEMENT_S, Math.max(0, t));
+        let cx = px + rvx * t;
+        let cy = py + rvy * t;
+        let c = Math.hypot(cx, cy);
+        if (c >= m.distanceMinM) return;
+        if (c < 1e-6) {
+          const angle = (i - k) * 2.399963; // côté déterministe si les trajectoires se rejoignent exactement
+          cx = Math.cos(angle);
+          cy = Math.sin(angle);
+          c = 1;
+        }
+        const urgence = 1 - (0.5 * t) / HORIZON_EVITEMENT_S; // plus fort si le contact est imminent
+        const force = ((m.distanceMinM - Math.min(c, m.distanceMinM)) / m.distanceMinM) * m.forceSeparation * urgence;
+        nx += (cx / c) * force;
+        ny += (cy / c) * force;
+      });
+
+      // 3. Jamais plus vite que la vitesse maximale.
       const v = Math.hypot(nx, ny);
       if (v > m.vitesseMaxMS) {
         nx = (nx / v) * m.vitesseMaxMS;

@@ -4,6 +4,13 @@
 
 **Version de travail : 11 novembre 2026**
 
+> **Mise à jour du 11 novembre 2026 :** la séance de questions-réponses
+> avec Claude a validé de nouvelles règles et en a modifié certaines
+> (durée des phases, format des groupes, placement en sous-zones, deck de
+> nationalités, mercato, traits, adversaires). Elles sont rassemblées au
+> **§20**. En cas de contradiction avec les sections précédentes, le §20
+> prime.
+
 ------------------------------------------------------------------------
 
 # 1. Objet de ce document
@@ -199,6 +206,11 @@ déplacement.
 
 ## 5.4. Placement libre dans le cadre des rectangles
 
+> **Précisé le 11/11/2026 (voir §20.4) :** chaque rectangle est découpé en
+> sous-zones (par exemple 6 pour DC, 3 pour AG / AD). L'entraîneur place
+> chacun de ses joueurs dans une sous-zone. Plusieurs joueurs peuvent
+> occuper le même poste, dans la limite d'un maximum par poste.
+
 Le système recherché se situe entre : - une formation classique rigide,
 trop limitée ; - un placement totalement libre, qui serait difficile à
 organiser et à simuler.
@@ -308,6 +320,12 @@ uniquement dans un scénario idéal.
 
 # 8. Déroulement et durée d'un match
 
+> **Modifié le 11/11/2026 (voir §20.1) :** les mi-temps de jeu restent à
+> 10 secondes affichées, sous forme de montage accéléré à vitesse
+> variable. La préparation et la mi-temps durent désormais **plus de 10
+> secondes** (durée exacte à tester). Le total de 40 secondes ci-dessous
+> n'est donc plus valable.
+
 **Durée totale validée : 40 secondes.**
 
 Décomposition : 1. 10 secondes de préparation avant le match :
@@ -394,6 +412,10 @@ Le moteur doit permettre des contre-tactiques. Aucune tactique ne doit
 
 # 10. Tournois
 
+> **Modifié le 11/11/2026 (voir §20.6) :** les groupes sont des **groupes
+> de 4**, complétés par des équipes IA si besoin. Le format à 2 groupes de
+> 3 décrit ci-dessous est remplacé. Le nombre de groupes reste à confirmer.
+
 Format déjà décidé :
 
 -   6 équipes ;
@@ -430,6 +452,10 @@ suivants ont été retenus.
 Il existe deux niveaux distincts :
 
 ### A. Niveau de base permanent
+
+> **Précisé le 11/11/2026 (voir §20.3) :** chaque carte joueur a son propre
+> niveau, comme dans Clash Royale. La carte change de couleur quand elle
+> évolue en dehors des matchs.
 
 Les joueurs ont une catégorie de base inspirée des cartes de football
 : - Bronze ; - Argent ; - Or.
@@ -796,10 +822,15 @@ les tests passent ou que les statistiques semblent équilibrées.
 -   Pays réels, clubs et joueurs fictifs.
 -   Pas de divisions hebdomadaires à la Hattrick.
 -   Matchs jouables à tout moment.
--   Match de 40 secondes : 10 + 10 + 10 + 10.
--   Tournoi de 6 équipes, 2 groupes de 3, demi-finales et finale.
+-   ~~Match de 40 secondes : 10 + 10 + 10 + 10.~~ Remplacé le 11/11/2026 :
+    mi-temps de 10 s affichées (montage accéléré à vitesse variable),
+    préparation et mi-temps de plus de 10 s (voir §20.1).
+-   ~~Tournoi de 6 équipes, 2 groupes de 3, demi-finales et finale.~~
+    Remplacé le 11/11/2026 : groupes de 4, complétés par des IA si
+    besoin, puis demi-finales et finale (voir §20.6).
 -   Pas d'aller-retour.
--   Chaque équipe joue entre 2 et 4 matchs.
+-   ~~Chaque équipe joue entre 2 et 4 matchs.~~ À recalculer avec les
+    groupes de 4 (voir §20.6).
 -   Vue du dessus envisagée, 22 joueurs visibles.
 -   Le joueur est entraîneur, pas contrôleur individuel des joueurs.
 -   Postes classiques de football.
@@ -822,16 +853,23 @@ les tests passent ou que les statistiques semblent équilibrées.
 -   L'hybride conserve la nationalité commune.
 -   Pistes appréciées : combinaison des noms, visage partagé, meilleure
     statistique de chaque joueur, cumul des bonus.
+-   Décisions ajoutées le 11/11/2026 : voir la liste complète au §20.
 
 ## Éléments non encore décidés
+
+Liste d'origine ci-dessous. Elle est mise à jour au §20.7 : certains
+points sont tranchés, d'autres ont été ajoutés.
+
 
 -   Moteur technique final (Godot 4 est une proposition).
 -   Dimensions exactes du terrain.
 -   Nombre exact de lignes et de colonnes du quadrillage de référence.
 -   Coordonnées et dimensions de chaque rectangle.
 -   Liste finale des postes.
--   Possibilité de déplacer les rectangles eux-mêmes ou seulement de
-    choisir les zones prédéfinies.
+-   ~~Possibilité de déplacer les rectangles eux-mêmes ou seulement de
+    choisir les zones prédéfinies.~~ Tranché le 11/11/2026 : les
+    rectangles ne bougent pas, l'entraîneur place ses joueurs dans des
+    sous-zones (§20.4).
 -   Comportement exact de chaque poste.
 -   Liste et nombre de caractéristiques.
 -   Liste finale des consignes tactiques.
@@ -866,6 +904,14 @@ La première mission doit être :
 > référence, sans téléportation. Les rectangles doivent être visibles et
 > modifiables facilement dans les données. À ce stade, il n'est pas
 > nécessaire de simuler les passes ou les tirs.
+
+> **Complément du 11/11/2026 (§20.4) :** chaque rectangle est découpé en
+> sous-zones (6 pour DC, 3 pour AG / AD ; les autres postes à définir
+> dans les données). Chaque joueur est placé dans une sous-zone, et
+> plusieurs joueurs peuvent occuper le même poste dans la limite d'un
+> maximum par poste (par exemple 3 DC, 1 AG). Le prototype doit afficher
+> les sous-zones et permettre de tester plusieurs placements, par exemple
+> avec 3 DC.
 
 ### Critères de réussite de cette première mission
 
@@ -904,3 +950,175 @@ qu'elle déplace des pions sur un plateau.
 
 **La priorité est de réussir cette sensation avant de développer le
 reste du jeu.**
+
+------------------------------------------------------------------------
+
+# 20. Décisions de la séance du 11 novembre 2026
+
+Séance de questions-réponses entre le concepteur et Claude. Statuts :
+**[VALIDÉ]** décidé par le concepteur ; **[PROPOSITION]** piste de Claude,
+à tester ; **[OUVERT]** reste à décider.
+
+## 20.1. Affichage et durée du match
+
+-   [VALIDÉ] Format court adapté au téléphone : chaque mi-temps de jeu
+    dure 10 secondes à l'écran, et le jeu est accéléré.
+-   [VALIDÉ] Le match est montré sous forme de **montage accéléré à
+    vitesse variable**. Le moteur simule toute la mi-temps en
+    arrière-plan. L'écran enchaîne les actions importantes : la
+    construction passe très vite, la dernière passe et le tir reviennent
+    presque à vitesse réelle.
+-   [VALIDÉ] Référence visuelle : le moteur 2D de Football Manager (vue
+    du dessus, marqueurs simples). Le joueur doit voir sa tactique.
+-   [VALIDÉ] La préparation et la mi-temps durent plus de 10 secondes.
+-   [PROPOSITION] Commencer avec 20 à 30 secondes de préparation et de
+    mi-temps, soit un match d'environ 1 minute à 1 minute 20.
+-   [PROPOSITION] Les facteurs de vitesse sont des réglages dans les
+    données, ajustés sur téléphone. Au-delà de 3 à 4 fois la vitesse
+    réelle, le ballon risque de devenir difficile à suivre.
+-   [PROPOSITION] Choisir des temps forts qui montrent la conséquence des
+    choix tactiques (par exemple un but encaissé en transition après un
+    bloc trop haut).
+-   [OUVERT] Temps de football simulé par mi-temps (ce réglage fixe aussi
+    la part de hasard), nombre de temps forts montrés, durée exacte de la
+    préparation et de la mi-temps.
+
+Conséquence sur le plan : les phases 1 à 5 ne changent pas. La phase 6
+ajoute un module qui sélectionne et monte les temps forts.
+
+## 20.2. Boucle de tournoi : deck, mercato et fusions
+
+-   [VALIDÉ] Reprendre les idées de fusion du mode Merge Tactics de Clash
+    Royale (auto-battler de Supercell) : achat de joueurs entre les
+    matchs, fusion de copies identiques, bonus de traits.
+-   [VALIDÉ] Avant un tournoi, le joueur compose un deck de 4 ou 5
+    nationalités. Les joueurs proposés pendant le tournoi viennent de ces
+    nationalités.
+-   [VALIDÉ] Pour une nationalité donnée, tout le monde a accès aux mêmes
+    joueurs. Seuls les niveaux des cartes diffèrent (§20.3).
+-   [PROPOSITION] Transposition au football :
+    -   un budget de mercato gagné à chaque match (l'équivalent de
+        l'élixir) ;
+    -   un mercato de 3 joueurs proposés, renouvelés après chaque achat ;
+    -   deux copies identiques fusionnent automatiquement ;
+    -   les joueurs achetés attendent sur le banc des remplaçants ; on
+        peut les revendre ;
+    -   placer un joueur, c'est choisir son poste et sa sous-zone
+        (§20.4) ;
+    -   l'hybride (deux joueurs différents de même nationalité) reste une
+        fusion volontaire. C'est la signature du jeu : Merge Tactics ne
+        fusionne que des troupes identiques.
+-   [PROPOSITION] L'équipe compte 11 joueurs dès le premier match. Le
+    mercato sert à remplacer et à fusionner, pas à compléter l'équipe.
+-   [PROPOSITION] La tactique se règle avant le tournoi, sans chrono.
+    Pendant la préparation et la mi-temps, seulement des ajustements
+    rapides : glisser un joueur sur un autre pour fusionner, ou sur une
+    sous-zone pour le placer.
+-   [OUVERT] Taille de l'effectif de chaque pays (c'est ce réglage qui
+    fixe la fréquence des copies, donc des fusions) ; montant du budget ;
+    prix des joueurs ; revente.
+
+## 20.3. Cartes et niveaux
+
+-   [VALIDÉ] Chaque carte joueur a son propre niveau, comme dans Clash
+    Royale.
+-   [VALIDÉ] La carte change de couleur quand elle évolue en dehors des
+    matchs. Bronze, Argent et Or deviennent les couleurs du niveau ; tous
+    les joueurs ne commencent pas au même niveau (§11.1 A).
+-   [PROPOSITION] La couleur montre le niveau permanent ; des étoiles
+    montrent les fusions temporaires du tournoi.
+-   [OUVERT] Couleurs au-delà de l'Or ; écarts de niveau entre
+    adversaires (appariement selon le niveau, ou plafond pendant les
+    tournois) ; ressources pour faire évoluer les cartes.
+
+## 20.4. Placement : sous-zones
+
+-   [VALIDÉ] Les rectangles ne bougent pas. Chaque rectangle est découpé
+    en sous-zones : 6 pour le défenseur central (DC), 3 pour les ailiers
+    gauche et droit (AG / AD).
+-   [VALIDÉ] Plusieurs joueurs peuvent occuper le même poste, dans la
+    limite d'un nombre maximum par poste (exemple donné : 3 DC, 1 AG).
+-   [VALIDÉ] L'entraîneur place chaque joueur dans une sous-zone de son
+    rectangle. Le rectangle reste la zone de liberté dans laquelle le
+    moteur fait bouger le joueur.
+-   [PROPOSITION, choix par défaut non contredits] DC : 3 colonnes sur 2
+    lignes (gauche, axe, droite ; haut, bas). AG / AD : 3 sous-zones en
+    profondeur (bas, milieu, haut). Un seul joueur par sous-zone. La
+    sous-zone choisie vaut à la fois pour le rectangle offensif et pour
+    le rectangle défensif.
+-   [PROPOSITION] Pour chaque poste, les données décrivent : le rectangle
+    offensif, le rectangle défensif, le découpage (colonnes et lignes) et
+    le nombre maximum de joueurs. Tout se change sans toucher au moteur.
+-   [OUVERT] Découpage et maximum des autres postes ; valeurs définitives
+    des maximums.
+
+## 20.5. Traits : nationalité et style de jeu
+
+-   [VALIDÉ] Chaque joueur a deux traits : sa nationalité et un style de
+    jeu (sa spécialité).
+-   [VALIDÉ] Bonus quand on aligne plusieurs joueurs de même
+    nationalité, cohérent avec la tradition de football du pays.
+-   [PROPOSITION] Les bonus modifient des comportements du moteur plutôt
+    que d'ajouter des points de statistiques (§9.2). Exemples de styles :
+    presseur (pressing déclenché plus vite à la perte du ballon),
+    technicien (passes courtes plus sûres), rapide (projection et
+    contre-attaques plus rapides), rempart (bloc qui se replace plus
+    vite), créateur (passes qui cassent les lignes), combatif (duels au
+    milieu), finisseur (meilleure conversion des occasions). Certains
+    styles peuvent raccourcir le délai de transition.
+-   [PROPOSITION] Paliers de bonus à 3, 5 et 7 joueurs, pour les styles
+    comme pour la nationalité.
+-   [PROPOSITION] Exemples de traditions nationales : pressing pour
+    l'Allemagne, technique pour l'Espagne, rigueur défensive pour
+    l'Italie. Les joueurs d'un même pays gardent des styles individuels
+    variés, pour éviter la caricature et des équipes toutes identiques.
+-   [PROPOSITION] Le style est indépendant du poste.
+-   [OUVERT] Liste finale des styles et de leurs effets ; style ou styles
+    d'un hybride (à traiter avec l'équilibrage des fusions).
+
+Les traits n'arrivent qu'après le moteur de base (phases 4 et 5).
+
+## 20.6. Adversaires et tournoi
+
+-   [VALIDÉ] Les groupes sont des **groupes de 4** (et non de 3),
+    complétés par des équipes IA si besoin.
+-   [VALIDÉ] Au départ, les adversaires sont des entraîneurs IA (IA de
+    jeu). À terme, des adversaires humains **en direct**.
+-   [VALIDÉ] Aucune action pendant le match : on agit seulement pendant
+    la préparation et la mi-temps.
+-   [VALIDÉ] Si un joueur se déconnecte, son équipe reste en l'état
+    jusqu'à la fin du tournoi.
+-   [PROPOSITION] L'IA joue le rôle d'entraîneur : deck, mercato,
+    fusions, placement, ajustements. Elle suit les mêmes règles que le
+    joueur, sans tricher. La difficulté vient du niveau des cartes et de
+    la qualité des choix.
+-   [PROPOSITION] Le joueur et l'IA prennent leurs décisions par la même
+    interface, pour pouvoir remplacer l'un par l'autre.
+-   [PROPOSITION] En direct, le serveur reçoit les compositions, simule
+    le match avec une graine aléatoire et envoie la même séquence aux
+    téléphones. Le délai de connexion ne gêne pas, et la triche est
+    limitée.
+-   Avec des groupes de 4, deux matchs se jouent en même temps dans
+    chaque groupe : personne n'attend pendant la phase de groupes.
+-   [OUVERT] Nombre de groupes. Avec 2 groupes de 4 (8 équipes) et le
+    reste du format inchangé : 12 matchs de groupe, 2 demi-finales et 1
+    finale, soit 15 matchs. Chaque équipe jouerait de 3 à 5 matchs, donc
+    de 6 à 10 passages par la préparation ou la mi-temps. À confirmer.
+-   [OUVERT] Égalités : classement des groupes, matchs nuls en
+    demi-finale et en finale.
+
+## 20.7. Questions ouvertes après la séance
+
+Tranchées pendant la séance : ce que représentent les 10 secondes
+(§20.1) ; contre qui on joue (§20.6) ; d'où viennent les joueurs et les
+copies (§20.2) ; déplacer les rectangles ou non (§20.4) ; plusieurs
+joueurs au même poste (§20.4) ; le rectangle défensif est celui du poste,
+et la même sous-zone vaut pour les deux rectangles [PROPOSITION].
+
+Encore ouvertes, en plus de celles du §17 et des sections ci-dessus :
+
+-   Équilibrage des fusions (prochain sujet) ; postes naturels et style
+    d'un hybride ; « hybride A/B + copie de A » est-il autorisé ?
+-   Nom définitif du jeu : le titre de travail est trop proche de « Merge
+    Tactics » (Supercell). À changer avant toute publication.
+-   Modèle économique.

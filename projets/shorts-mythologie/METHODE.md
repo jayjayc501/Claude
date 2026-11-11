@@ -41,8 +41,9 @@
 ## 4. Images et clips (Kling)
 
 - Voir `charte-visuelle.md` : photoréaliste cinéma, or chaud + bleu nuit, personnages décrits.
-- Portraits de personnages : **sur fond neutre**, réutilisables. Ceux d'Odin, Mímir et Fenrir
-  sont dans l'historique Kling (Assets) ; leurs descriptions exactes sont dans la charte.
+- Personnages déjà créés : **`commun/personnages/`** (Odin, Mímir, Fenrir, tels qu'ils sont dans
+  le Short Odin). Les donner à Kling comme image de référence pour garder le même visage.
+  Pour un nouveau personnage : portrait **sur fond neutre**, puis l'ajouter à ce dossier.
 - Modèles : images clés **GPT-Image 2.5 qualité high** (~15 crédits) ; vidéos **Kling 4.0 en 1080p**
   (15 crédits/s, plans de 3 à 5 s).
 - Filtre de Kling : ne jamais écrire « Odin » (ni chapeau pointu), éviter les chaînes qui se

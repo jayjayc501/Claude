@@ -74,7 +74,13 @@
   téléchargent (fetch) depuis n'importe quelle page.
 - Une tâche Kling peut rester bloquée 15-20 min (« RUNNING ») avant de finir : la signaler (feedback)
   et continuer le reste en attendant.
-- Budget réel du Short Naglfar (13 plans, ~40 s) : ~1 100 crédits.
+- Budget réel du Short Naglfar (13 plans, ~40 s) : ~1 100 crédits, plus 600 de retouches (v2).
+- Gestes délicats (couper des ongles, une lame près du corps) : l'IA donne vite l'impression de couper
+  des doigts. Montrer **l'avant et l'après** (ongles longs + ciseaux posés à côté ; ongles courts + rognures
+  dans un bol) plutôt que la coupe elle-même.
+- Image de référence fournie par le propriétaire : l'envoi direct à Kling (file_upload) est bloqué depuis
+  le poste de travail. Solution qui marche : la ranger dans `commun/personnages/<nom>/` du dépôt (public),
+  pousser, puis donner à Kling son lien `https://raw.githubusercontent.com/jayjayc501/Claude/main/...`.
 
 ## 5. Récupérer les fichiers
 

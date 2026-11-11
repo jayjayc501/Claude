@@ -53,3 +53,15 @@ Mots-clés : *La fin du monde* · *L'armée des morts* · *Fabriqué avec des on
 `sortie/naglfar-ongles.mp4` : 2160×3840, 24 i/s, 43,96 s (dont 3,3 s de carte de fin), −14,3 LUFS, crête −1,8 dB,
 168 Mo. Sous-titres `sortie/naglfar-ongles.srt`. Musique : « Ritual of the Last Dawn » (même que Odin).
 Noms dorés `medias/noms/loki-crop.png` et `naglfar-crop.png` (même style que les noms de commun/noms).
+
+## Version 2 (11/11/2026) — retouches
+
+- **Ongles** : le propriétaire trouvait qu'on aurait dit des doigts coupés (P01 et P13). P01 montre maintenant
+  la main aux ongles longs avec les ciseaux posés à côté, sans contact ; P13 montre le résultat (ongles courts,
+  rognures dans un petit bol, la vieille femme repose les ciseaux). Plus aucune lame près des doigts.
+- **Loki** : remplacé par le personnage choisi par le propriétaire (longs cheveux bruns, oreilles légèrement
+  pointues, habits vert foncé, ceinture et bracelets de cuir, pendentif) dans P02, P03, P05, P06, P08, P09.
+- Anciens clips gardés dans `medias/clips-v1/`, ancien rendu `sortie/naglfar-ongles-v1.mp4`.
+- **P12** (vieille femme) : les ciseaux restaient près des doigts du mort pendant tout le plan. Recadré
+  serré sur son visage, la famille et le feu (`medias/clips/P12-cadre.mp4` : crop 660×1173 en haut à droite,
+  agrandi en 1080×1920), plus aucun doigt à l'image. Pas de nouveau crédit Kling.

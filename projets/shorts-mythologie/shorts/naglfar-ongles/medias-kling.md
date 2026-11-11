@@ -56,3 +56,20 @@ Base image : `https://s15-kling.klingai.com/kimg/<id>.origin?x-kcdn-pid=112372` 
 Notes : P04 a échoué une fois (remboursé), P10 et P11 refaits (le 1er essai copiait le cadrage de P09 ; P11 v2 ressemblait à des coquillages). P03 est resté bloqué ~18 min chez Kling avant de finir.
 
 Crédits Kling : environ 1 105 (références 90, images 280, vidéos 735).
+
+## Version 2 (11/11/2026, retouches demandées par le propriétaire)
+
+Nouveau Loki (référence `commun/personnages/loki/loki-reference.png`, passée à Kling par son lien GitHub public) et nouveaux plans des ongles.
+
+| Plan | id image clé | id vidéo (sans filigrane) |
+|---|---|---|
+| P01 | EMXN1y8qTwoGdXBsb2FkEg55bGFiLXN0dW50LXNncBo1c3RhcmdhdGUvMTIwLzI2YjM4MWEzLTNhYTQtNGZiNS1hMDgzLWZhMTYxYmNmY2ZhMi5wbmc | 89dfb67f-2743-4b1e-9139-d06f6807716e-2jA_VMYJXT8S4fCfxtW8WQ |
+| P02 | EMXN1y8qTwoGdXBsb2FkEg55bGFiLXN0dW50LXNncBo1c3RhcmdhdGUvMTIwLzhlMmJlN2UyLTIzMTgtNDg0NC1iYWM3LWI1ODdmMWRiNGNmOS5wbmc | cf622072-826f-43e0-a60a-86daa42787c0-Fw4mzdQGPm9Bz3t8BFFNDQ |
+| P03 | EMXN1y8qTwoGdXBsb2FkEg55bGFiLXN0dW50LXNncBo1c3RhcmdhdGUvMTIwL2Q0MDAxMzdlLTAzNjQtNGRhMi05ZWNmLTlmNGRlZjM1ZTc3ZS5wbmc | ba944019-7338-46ba-8b76-4fd01d060402-DoT9Qt5a5nIByNzSPJzUSA |
+| P05 | EMXN1y8qTwoGdXBsb2FkEg55bGFiLXN0dW50LXNncBo1c3RhcmdhdGUvMTIwLzcxOWE5Y2MyLWVjZWItNDY5Yi1hYzY4LWRlNzM1Njk0OGFlYi5wbmc | 15c27b0b-7c25-4753-8657-054f676c5cb7-G48L6e73asOYkQj5iknP2Q |
+| P06 | EMXN1y8qTwoGdXBsb2FkEg55bGFiLXN0dW50LXNncBo1c3RhcmdhdGUvMTIwLzZhOTkwMjIwLWQ4M2YtNDZkMC04MmMxLTgwOTZlYTZmNDFjMy5wbmc | e432b1c7-a11e-45d1-a1e0-e08b664fff5c-Ng4GlJnFV1lZOY_o9ZKZYA |
+| P08 | EMXN1y8qTwoGdXBsb2FkEg55bGFiLXN0dW50LXNncBo1c3RhcmdhdGUvMTIwLzhlZWE1OWIzLTZkMWItNGVkNC05ZTY3LThmZmFjYWRkNzRkZC5wbmc | e0a32063-e330-4e95-9aa5-5eb8b1f731d6-zDr6HVtzR5UiHdRhf3uZ5g |
+| P09 | EMXN1y8qTwoGdXBsb2FkEg55bGFiLXN0dW50LXNncBo1c3RhcmdhdGUvMTIwLzZjYjdmMmYxLThjYzUtNDJhOC05ZjA5LTBiNjM4MmMwNWQ4Ny5wbmc | eae5c08e-1167-49db-ba27-704e7422657e-XYk__yh0a_drwpSMm-awHA |
+| P13 | EMXN1y8qTwoGdXBsb2FkEg55bGFiLXN0dW50LXNncBo1c3RhcmdhdGUvMTIwL2M4ZDY3ZjVjLTUzZjYtNDgxMS05NGE4LTllZjg3NzhlMmE4MC5wbmc | 61208003-b6ff-4a3f-9bc4-d38dd0ba72dc-b4vWad12enVeoCJJcVyGVg |
+
+Crédits des retouches : 600 (images 150, vidéos 450). Total du Short : ~1 705.

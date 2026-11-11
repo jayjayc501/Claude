@@ -16,7 +16,7 @@
     {"fichier": "medias/clips/P09.mp4", "debut": 25.75, "fin": 29.35, "mouvement": "pull"},
     {"fichier": "medias/clips/P10.mp4", "debut": 29.35, "fin": 32.9,  "mouvement": "push"},
     {"fichier": "medias/clips/P11.mp4", "debut": 32.9,  "fin": 35.55, "mouvement": "punch"},
-    {"fichier": "medias/clips/P12.mp4", "debut": 35.55, "fin": 38.55, "mouvement": "push"},
+    {"fichier": "medias/clips/P12-cadre.mp4", "debut": 35.55, "fin": 38.55, "mouvement": "push"},
     {"fichier": "medias/clips/P13.mp4", "debut": 38.55, "fin": 41.6,  "mouvement": "push"}
   ],
   "noms": [

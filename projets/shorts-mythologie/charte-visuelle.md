@@ -20,6 +20,10 @@ Référence de qualité : les **vidéos longues** de la chaîne (pas les anciens
   avec mousse, très longue barbe blanche mêlée de racines, yeux dorés lumineux, corne
   à boire gravée.
 - **Fenrir** : loup colossal noir-gris, yeux ambrés, crocs, fragments de chaîne brisée.
+- **Loki** (choisi par le propriétaire, `commun/personnages/loki/`) : homme mince d'une trentaine d'années,
+  longs cheveux bruns lisses, oreilles légèrement pointues, yeux clairs perçants, habits **vert foncé**
+  (tunique de laine, long manteau à col effiloché), large ceinture de cuir à boucle ronde, bracelets de
+  cuir noir, pendentif sur un cordon, bottes de cuir. Jamais de casque à cornes ni de vert et or façon film.
 
 ## Texte à l'écran
 - **Noms des personnages** : lettres gothiques (Fraktur) or métallique, en haut à droite,

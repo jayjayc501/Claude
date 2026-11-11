@@ -1,0 +1,20 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "apk": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://joqzrjjgrntbyutytpnr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_Of4QFRmBGSZzaPU4w2xsYQ_gcUshBAr",
+        "EXPO_PUBLIC_URL_APP": "https://jayjayc501.github.io/Claude/app/",
+        "EXPO_PUBLIC_URL_CARTE": "https://jayjayc501.github.io/Claude/carte/"
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Je te l'avais dit",
+    "slug": "jetelavaisdit",
+    "scheme": "jetelavaisdit",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0D0C12",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.jetelavaisdit"
+    },
+    "android": {
+      "package": "app.jetelavaisdit",
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0D0C12"
+        }
+      ]
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "typedRoutes": false,
+      "baseUrl": "/Claude/app"
+    }
+  }
+}

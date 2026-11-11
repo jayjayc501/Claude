@@ -33,4 +33,5 @@ Ajouter ici une ligne par projet :
 `- projets/<nom> — description courte — état (en cours / terminé)`
 
 - projets/shorts-mythologie — Shorts YouTube pour la chaîne « La Pause Mytho…logique » (Kling + ElevenLabs + montage ffmpeg) — en cours (Short Odin terminé en 4K ; utiliser monter2.py, lire projets/shorts-mythologie/METHODE.md avant tout nouveau Short)
-- projets/jelavaisdit — App mobile « Je l'avais dit » : sceller une phrase datée et l'envoyer plus tard avec une carte d'authenticité — en cours (maquettes finies, code à venir)
+- projets/jetelavaisdit — App mobile « Je te l'avais dit » : sceller une phrase datée et l'envoyer plus tard avec une carte d'authenticité — en cours (prototype en ligne en version web : https://jayjayc501.github.io/Claude/app/ ; à tester)
+- projets/foot-merge-tactic — Jeu de football mobile : cartes, fusions de joueurs et matchs tactiques simulés ; priorité au moteur de match (contexte dans son `CLAUDE.md`) — en cours (conception, pas encore de code)

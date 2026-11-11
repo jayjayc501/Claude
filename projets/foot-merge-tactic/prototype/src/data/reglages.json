@@ -100,7 +100,7 @@
     "vitessePasseParMetre": 0.55,
     "imprecision": { "baseDeg": 1.5, "parMetreDeg": 0.12 },
     "vitesseTirMS": 26,
-    "tirDistanceM": 16,
+    "tirDistanceM": 22,
     "arretProba": 0.75,
     "dribbleAvanceM": 8,
     "dribbleFacteur": 0.9,

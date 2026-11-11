@@ -6,8 +6,9 @@
 
 > **Mise à jour du 11 novembre 2026 :** la séance de questions-réponses
 > avec Claude a validé de nouvelles règles et en a modifié certaines
-> (durée des phases, format des groupes, placement en sous-zones, deck de
-> nationalités, mercato, traits, adversaires). Elles sont rassemblées au
+> (durée des phases, format des groupes, placement en sous-zones, une
+> seule organisation pour l'instant, deck de nationalités, mercato,
+> traits, adversaires). Elles sont rassemblées au
 > **§20**. En cas de contradiction avec les sections précédentes, le §20
 > prime.
 
@@ -225,6 +226,11 @@ moteur.
 ------------------------------------------------------------------------
 
 # 6. Deux organisations distinctes : phase offensive et phase défensive
+
+> **En pause depuis le 11/11/2026 (voir §20.8) :** pour l'instant, une
+> seule organisation (un seul rectangle par poste). Les deux organisations
+> sont jugées trop compliquées et trop longues à régler. Le mouvement du
+> bloc selon la possession est confié au moteur.
 
 **Décision validée : il existe deux quadrillages / organisations de
 placement distincts.**
@@ -913,6 +919,14 @@ La première mission doit être :
 > les sous-zones et permettre de tester plusieurs placements, par exemple
 > avec 3 DC.
 
+> **Complément du 11/11/2026, suite (§20.8) :** pour l'instant, une seule
+> organisation : un seul rectangle par poste, plus grand et plus
+> chevauchant. Sous-zones : G 2, DC 6, DD et DG 2 ou 3, milieu central 6
+> (MDC, MC, MOC, à gauche ou à droite), AD et AG 3, attaquant 5 dont 1
+> devant le but. La bascule entre deux organisations est remplacée par un
+> mouvement automatique du bloc selon la possession simulée
+> [PROPOSITION].
+
 ### Critères de réussite de cette première mission
 
 -   Le terrain est lisible.
@@ -1100,10 +1114,11 @@ Les traits n'arrivent qu'après le moteur de base (phases 4 et 5).
     limitée.
 -   Avec des groupes de 4, deux matchs se jouent en même temps dans
     chaque groupe : personne n'attend pendant la phase de groupes.
--   [OUVERT] Nombre de groupes. Avec 2 groupes de 4 (8 équipes) et le
-    reste du format inchangé : 12 matchs de groupe, 2 demi-finales et 1
-    finale, soit 15 matchs. Chaque équipe jouerait de 3 à 5 matchs, donc
-    de 6 à 10 passages par la préparation ou la mi-temps. À confirmer.
+-   [VALIDÉ] **2 groupes de 4** (8 équipes), puis demi-finales et
+    finale. Soit 12 matchs de groupe, 2 demi-finales et 1 finale (15
+    matchs). Chaque équipe joue de 3 à 5 matchs, donc de 6 à 10 passages
+    par la préparation ou la mi-temps. À revoir plus tard si c'est trop
+    long.
 -   [OUVERT] Égalités : classement des groupes, matchs nuls en
     demi-finale et en finale.
 
@@ -1117,8 +1132,53 @@ et la même sous-zone vaut pour les deux rectangles [PROPOSITION].
 
 Encore ouvertes, en plus de celles du §17 et des sections ci-dessus :
 
--   Équilibrage des fusions (prochain sujet) ; postes naturels et style
-    d'un hybride ; « hybride A/B + copie de A » est-il autorisé ?
+-   Équilibrage des fusions : **reporté après le moteur** (décision du
+    concepteur). Pistes de Claude déjà présentées, non validées : coût
+    naturel (deux joueurs pour un), un poste naturel de chaque joueur
+    d'origine, niveau de la plus faible des deux cartes, hybride qui ne
+    progresse qu'avec un second hybride identique ; un seul style choisi
+    à la fusion. Restent ouverts : postes naturels et style d'un hybride ;
+    « hybride A/B + copie de A » est-il autorisé ?
 -   Nom définitif du jeu : le titre de travail est trop proche de « Merge
     Tactics » (Supercell). À changer avant toute publication.
 -   Modèle économique.
+
+## 20.8. Placement simplifié et priorités (suite de la séance)
+
+-   [VALIDÉ] Pour l'instant, **une seule organisation** : on abandonne
+    les deux tactiques à régler (rectangle offensif et rectangle
+    défensif), jugées trop compliquées et trop longues. Chaque poste a
+    un seul rectangle. Le §6 est en pause.
+-   [VALIDÉ] Des rectangles **plus grands** et **plus chevauchants** que
+    dans la maquette montrée le 11/11.
+-   [VALIDÉ] Nombre de sous-zones (« positions possibles ») par poste :
+    -   G : 2 (normal ou un peu avancé) ;
+    -   DC : 6 ;
+    -   DD et DG : 2 ou 3 (le concepteur hésite) ;
+    -   milieu central : 6, qui couvrent MDC, MC et MOC, un peu à gauche
+        ou un peu à droite ;
+    -   AD et AG : 3 ;
+    -   attaquant : 5, dont 1 devant le but.
+-   [VALIDÉ] Plus tard, des consignes d'équipe (« volontés ») : plus
+    défensive, plus offensive, jeu en contre, etc. Pas maintenant.
+-   [VALIDÉ] Priorités immédiates : un moteur jouable ; pouvoir choisir
+    les joueurs qui jouent et les placer ; un jeu équilibré ; un rendu
+    intéressant. Les fusions viennent après.
+-   [PROPOSITION] Milieu central : 3 lignes (MDC en bas, MC au milieu,
+    MOC en haut) sur 2 colonnes (gauche, droite). La ligne choisie
+    correspond au poste, ce qui garde le sens des postes naturels : un
+    MDC placé sur la ligne MOC joue hors de son poste.
+-   [PROPOSITION] Attaquant : 2 colonnes sur 2 lignes, plus une case
+    centrale devant le but.
+-   [PROPOSITION] Latéraux : 3 cases en profondeur en attendant la
+    décision. Le nombre se change dans les données.
+-   [PROPOSITION] Sans deuxième organisation, le moteur gère seul le
+    mouvement du bloc : quand l'équipe a le ballon, les joueurs montent
+    vers le haut de leur rectangle ; quand elle le perd, ils redescendent
+    progressivement. Le délai de transition est conservé dans ce
+    mouvement automatique. Le placement garde ses conséquences (une
+    équipe placée haut reste exposée à la perte du ballon) sans travail
+    en plus pour l'entraîneur.
+-   [OUVERT] MD et MG : postes à part, ou couverts par les cases basses
+    des ailiers ? Maximum de joueurs par poste (en dehors des exemples
+    3 DC et 1 AG). Positions et tailles exactes des rectangles.

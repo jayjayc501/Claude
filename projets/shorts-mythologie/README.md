@@ -87,6 +87,7 @@ Chaîne de production qui a donné le meilleur résultat (voir `shorts/odin-oeil
 | Sujet | Dossier | État |
 |---|---|---|
 | Odin va-t-il se faire dévorer par ce loup ? (l'œil d'Odin) | `shorts/odin-oeil` | terminé, v3 4K (51,7 s) — à publier |
+| Les Vikings coupaient-ils les ongles de leurs morts ? (Naglfar, Loki) | `shorts/naglfar-ongles` | montage 4K (44 s) — à valider |
 
 ## Matériel commun à tous les Shorts
 

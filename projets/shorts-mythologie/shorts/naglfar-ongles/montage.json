@@ -1,0 +1,56 @@
+{
+  "titre": "Les Vikings coupaient-ils les ongles de leurs morts ?",
+  "voix": "medias/voix.mp3",
+  "musique": "medias/musique.mp3",
+  "volume_musique": 0.3,
+  "depart_musique": 0,
+  "plans": [
+    {"fichier": "medias/clips/P01.mp4", "debut": 0.0,   "fin": 3.8,   "mouvement": "push"},
+    {"fichier": "medias/clips/P02.mp4", "debut": 3.8,   "fin": 7.15,  "mouvement": "push"},
+    {"fichier": "medias/clips/P03.mp4", "debut": 7.15,  "fin": 11.2,  "mouvement": "push", "vitesse": 0.95},
+    {"fichier": "medias/clips/P04.mp4", "debut": 11.2,  "fin": 14.3,  "mouvement": "pull"},
+    {"fichier": "medias/clips/P05.mp4", "debut": 14.3,  "fin": 16.25, "mouvement": "punch"},
+    {"fichier": "medias/clips/P06.mp4", "debut": 16.25, "fin": 18.8,  "mouvement": "push"},
+    {"fichier": "medias/clips/P07.mp4", "debut": 18.8,  "fin": 22.65, "mouvement": "push"},
+    {"fichier": "medias/clips/P08.mp4", "debut": 22.65, "fin": 25.75, "mouvement": "push"},
+    {"fichier": "medias/clips/P09.mp4", "debut": 25.75, "fin": 29.35, "mouvement": "pull"},
+    {"fichier": "medias/clips/P10.mp4", "debut": 29.35, "fin": 32.9,  "mouvement": "push"},
+    {"fichier": "medias/clips/P11.mp4", "debut": 32.9,  "fin": 35.55, "mouvement": "punch"},
+    {"fichier": "medias/clips/P12.mp4", "debut": 35.55, "fin": 38.55, "mouvement": "push"},
+    {"fichier": "medias/clips/P13.mp4", "debut": 38.55, "fin": 41.6,  "mouvement": "push"}
+  ],
+  "noms": [
+    {"image": "medias/noms/loki-crop.png",    "debut": 5.5,  "fin": 7.1},
+    {"image": "medias/noms/naglfar-crop.png", "debut": 26.0, "fin": 29.2}
+  ],
+  "sous_titres": [
+    {"debut": 0.0,   "fin": 2.65,  "texte": "Les Vikings coupaient-ils les *ongles* de leurs morts ?"},
+    {"debut": 2.95,  "fin": 5.74,  "texte": "Comme souvent… c'est encore *Loki* derrière tout ça."},
+    {"debut": 6.57,  "fin": 9.98,  "texte": "On l'avait laissé enchaîné au fond d'une grotte, dans le mythe de Baldr."},
+    {"debut": 10.44, "fin": 17.41, "texte": "Mais lors du *Ragnarök*, la fin du monde, ses chaînes vont se briser, et il partira en guerre contre les dieux."},
+    {"debut": 18.18, "fin": 21.37, "texte": "Ce jour-là, la mer engloutira les terres."},
+    {"debut": 21.97, "fin": 28.11, "texte": "Loki mènera sa grande armée de morts à bord de *Naglfar*, le plus grand navire du monde."},
+    {"debut": 28.6,  "fin": 34.12, "texte": "Et d'après la légende, ce fameux Naglfar est fabriqué avec les *ongles* des défunts."},
+    {"debut": 35.0,  "fin": 39.67, "texte": "Afin de repousser le jour du Ragnarök, les Vikings coupaient les ongles de leurs morts."}
+  ],
+  "son_plans": 0.12,
+  "decalage_voix": 1.0,
+  "police_texte": "Inter Display Black",
+  "sous_titres_incrustes": false,
+  "titre_accroche": {"texte": "Les Vikings\\Ncoupaient-ils\\Nles ongles\\Nde leurs morts ?", "debut": 0.0, "fin": 3.75},
+  "mots_cles": [
+    {"texte": "La fin\\Ndu monde",           "debut": 11.85, "fin": 13.4},
+    {"texte": "L'armée\\Ndes morts",          "debut": 23.7,  "fin": 24.95},
+    {"texte": "Fabriqué avec\\Ndes ongles",   "debut": 32.0,  "fin": 34.2, "taille": 116},
+    {"texte": "Repousser\\Nle Ragnarök",      "debut": 35.4,  "fin": 37.5}
+  ],
+  "fin": {"fichier": "../../commun/fin-chaine/fin-fond.mp4", "duree": 3.3, "vitesse": 0.92,
+          "fondu": 0.9, "logo": "../../commun/fin-chaine/fin-texte.png", "logo_anime": true,
+          "logo_largeur": 800, "logo_y": 500},
+  "resolution": [2160, 3840],
+  "ips": 24,
+  "crf": 18,
+  "preset": "medium",
+  "grain": 0,
+  "nettete": 0.35
+}

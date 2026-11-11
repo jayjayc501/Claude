@@ -26,7 +26,13 @@
 - Vocabulaire : « le Père-de-Tout » (jamais « le chef des dieux »).
 - Exactitude du mythe : ne pas mélanger les épisodes (ex. Odin pendu à Yggdrasil pour les
   runes ≠ l'œil donné au puits de Mímir). Vérifier avant d'écrire.
-- Durée de voix visée : 45 à 50 s.
+- Durée de voix visée : 45 à 50 s (le Short Naglfar fait 40 s de voix, validé).
+- Leçons du Short Naglfar (novembre 2026) : le propriétaire veut **entrer dans l'histoire**
+  (raconter, pas expliquer : « trop scolaire » refusé), **ne pas tout dévoiler dans la relance**
+  (« Comme souvent… c'est encore Loki derrière tout ça » plutôt que la réponse), garder les détails
+  **sur le sujet annoncé** (ici les ongles, pas le supplice de Loki), et faire le lien avec une vidéo
+  existante de la chaîne (« On l'avait laissé… dans le mythe de Baldr »). Il réécrit souvent lui-même :
+  proposer une version, puis reprendre la sienne en corrigeant seulement l'orthographe.
 
 ## 3. Voix (ElevenLabs)
 
@@ -35,6 +41,13 @@
 - Prononciation : écrire « Odain » pour « Odin ». Tester les autres noms propres de la même façon.
 - **Garder les pauses** de la prise originale ; accélérer au plus de 4 % (`atempo=1.04`).
   Une version sans pauses a été jugée « beaucoup trop rapide ».
+- Exception validée (Naglfar) : **accroche + relance plus nerveuses** — ces deux phrases à +12 %,
+  avec une mini-pause d'environ 0,3 s entre elles ; le reste à +4 %. Envoyer chaque essai de voix
+  en MP3 (SendUserFile) pour qu'il l'écoute.
+- Eleven **v4** : la voix Adam Composer Stockholm y a trop d'accent scandinave → rester en **v3**.
+  Voix françaises proches repérées si besoin : Roland Lescalde – Epic Narrator, Salvatore – Epic,
+  Martin Dupont – Thriller Narrator, Paul K — Deep French Narrator.
+- Écrire « Balder » pour « Baldr » dans le texte ElevenLabs.
 - Musique : ElevenLabs Music, instrumental épique nordique. `commun/musiques/` contient
   « Ritual of the Last Dawn » (utilisée pour Odin).
 
@@ -53,6 +66,15 @@
 - Cohérence : vérifier les détails d'un plan à l'autre (Odin borgne de l'**œil droit** partout ;
   un plan inversé avec `"miroir": true` si besoin).
 - Les liens Kling expirent au bout de ~24 h : noter les identifiants dans `medias-kling.md`.
+- GPT-Image 2.5 en image-to-image **recopie le cadrage** de la référence : pour un plan très différent
+  (macro, autre angle), passer en text-to-image en décrivant l'objet. Une révélation (ici la coque en
+  ongles) doit être reconnaissable au premier coup d'œil : vérifier l'image avant de l'animer.
+- Pour regarder les images et clips : dans un onglet déjà autorisé, poser par JavaScript une planche
+  d'`<img>`/`<video>` en plein écran, puis faire une capture. Les médias Kling se lisent et se
+  téléchargent (fetch) depuis n'importe quelle page.
+- Une tâche Kling peut rester bloquée 15-20 min (« RUNNING ») avant de finir : la signaler (feedback)
+  et continuer le reste en attendant.
+- Budget réel du Short Naglfar (13 plans, ~40 s) : ~1 100 crédits.
 
 ## 5. Récupérer les fichiers
 

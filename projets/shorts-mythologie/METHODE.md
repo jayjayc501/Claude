@@ -79,9 +79,9 @@
 ## 5. Récupérer les fichiers
 
 Si l'accès réseau à `klingai.com` et `elevenlabs.io` est ouvert dans les réglages de claude.ai,
-télécharger directement. Sinon : dans un onglet kling.ai, récupérer les fichiers en JavaScript,
-fabriquer un ZIP, l'enregistrer par un bouton visible, et demander au propriétaire de glisser
-le ZIP dans le chat.
+télécharger directement. Sinon : dans un onglet déjà autorisé (kling.ai ou même elevenlabs.io,
+comme pour Naglfar), récupérer les fichiers en JavaScript, fabriquer un ZIP, afficher un bouton
+visible que le propriétaire clique pour l'enregistrer, et lui demander de glisser le ZIP dans le chat.
 
 ## 6. Montage (`monter2.py`)
 

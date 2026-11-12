@@ -143,7 +143,7 @@ export class MatchSim {
     this.declencherReactions();
     this.programmerChangement();
     this.prochaineCible = this.temps;
-    this.balle?.remettre(this.centre(), 0);
+    this.balle?.remettre(this.centre(), 0, "engagement");
   }
 
   /** Une équipe prend la possession (ballon réel) : chacun réagit à son tour. */

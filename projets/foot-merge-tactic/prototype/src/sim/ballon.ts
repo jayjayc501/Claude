@@ -77,7 +77,9 @@ export class BallonReel {
   private decisionA = 0;
   private protegeJusqua = 0;
   /** Coup de pied arrêté en attente : le premier joueur de l'équipe qui prend le ballon le joue. */
-  private arrete: "corner" | "penalty" | null = null;
+  private arrete: "corner" | "penalty" | "engagement" | null = null;
+  /** Plongeon du gardien sur le tir en cours. */
+  private plongeon: { gardien: JoueurSim; point: PointM } | null = null;
   /** Le receveur de la passe en cours était hors-jeu au départ de la passe. */
   private horsJeu = false;
   private tirPenalty = false;
@@ -95,7 +97,7 @@ export class BallonReel {
   }
 
   /** Coup d'envoi (ou remise au centre) : le ballon est posé, l'équipe va le chercher. */
-  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | null = null, texte?: string, tireur: JoueurSim | null = null): void {
+  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | "engagement" | null = null, texte?: string, tireur: JoueurSim | null = null): void {
     const s = this.sim;
     this.tireur = tireur;
     this.arrete = arrete;
@@ -109,7 +111,8 @@ export class BallonReel {
     this.tirEnCours = false;
     this.dernier = null;
     this.perte = null;
-    this.reserve = { camp, jusqua: s.temps + s.reglages.ballon.reserveRepriseS };
+    // Engagement : l'équipe a tout son temps pour venir jouer le ballon.
+    this.reserve = { camp, jusqua: s.temps + (arrete === "engagement" ? 8 : s.reglages.ballon.reserveRepriseS) };
     s.prendrePossession(camp);
   }
 
@@ -122,21 +125,33 @@ export class BallonReel {
     this.engagement = { camp, depuis: s.temps };
   }
 
+  /** Joueur qui engage : le joueur de champ de l'équipe le plus proche du centre. */
+  private engageur(): JoueurSim {
+    const s = this.sim;
+    const camp = this.engagement!.camp;
+    return s.joueurs
+      .filter((j) => j.camp === camp && j.poste.id !== "G")
+      .reduce((a, b) => (dist(a.depart, s.ballon) <= dist(b.depart, s.ballon) ? a : b));
+  }
+
   pas(dt: number): void {
     if (this.engagement) {
       const s = this.sim;
       const L = s.donnees.longueurM;
-      const enPlace = s.joueurs.every((j) => (j.camp === 0 ? j.pos.y <= L / 2 + 0.5 : j.pos.y >= L / 2 - 0.5) && dist(j.pos, j.depart) < 3);
+      const kicker = this.engageur();
+      const enPlace =
+        dist(kicker.pos, s.ballon) < 1.5 &&
+        s.joueurs.every((j) => j === kicker || ((j.camp === 0 ? j.pos.y <= L / 2 + 0.5 : j.pos.y >= L / 2 - 0.5) && dist(j.pos, j.depart) < 3));
       if ((enPlace && s.temps - this.engagement.depuis > 2) || s.temps - this.engagement.depuis > 10) {
         const camp = this.engagement.camp;
         this.engagement = null;
-        this.remettre({ ...s.ballon }, camp, null, "Engagement");
+        this.remettre({ ...s.ballon }, camp, "engagement", "Engagement");
       }
       return;
     }
     if (this.porteur) {
       this.conduire();
-      this.tacler(dt);
+      if (this.arrete !== "engagement") this.tacler(dt); // à l'engagement, l'adversaire reste à distance
       if (this.porteur && this.sim.temps >= this.decisionA) this.decider();
     } else {
       this.rouler(dt);
@@ -213,13 +228,26 @@ export class BallonReel {
     const but = { x: W / 2, y: sens === 1 ? L : 0 };
     const dBut = dist(p.pos, but);
     const adverses = s.joueurs.filter((j) => j.camp !== p.camp);
-    const pression = Math.min(...adverses.map((o) => dist(o.pos, p.pos)));
+    const pression = Math.min(...adverses.filter((o) => (o.pos.y - p.pos.y) * sens > -1.5).map((o) => dist(o.pos, p.pos)));
     this.decisionA = s.temps + this.rng.entre(r.decisionS.min, r.decisionS.max);
 
+    if (this.arrete === "engagement") {
+      // Engagement : passe à un coéquipier proche, à côté ou en retrait.
+      this.arrete = null;
+      const options = s.joueurs
+        .filter((q) => q !== p && q.camp === p.camp && q.poste.id !== "G" && (q.pos.y - p.pos.y) * sens < 1)
+        .map((q) => ({ q, d: dist(p.pos, q.pos) }))
+        .filter((o) => o.d > 5 && o.d < 28)
+        .sort((a, b) => a.d - b.d);
+      const choix = options[Math.min(options.length - 1, this.rng.entier(3))];
+      if (choix) {
+        this.passer(choix.q, false, null, false); // dans ses pieds
+        return;
+      }
+    }
     if (this.arrete === "penalty") {
       this.arrete = null;
-      this.tirer({ x: but.x, y: but.y }, 3);
-      this.tirPenalty = true;
+      this.tirer(but, true);
       return;
     }
     if (this.arrete === "corner") {
@@ -254,9 +282,9 @@ export class BallonReel {
     const libreDevant = !adverses.some((o) => {
       if (o.poste.id === "G") return false;
       const avant = (o.pos.y - p.pos.y) * sens;
-      return avant > -1 && avant < 18 && Math.abs(o.pos.x - p.pos.x) < 3 + avant * 0.6;
+      return avant > 0.5 && avant < 18 && Math.abs(o.pos.x - p.pos.x) < 3 + avant * 0.6;
     });
-    if (p.poste.id !== "G" && libreDevant && pression >= r.pressionM && p.poste.ligneDefense !== "defense") {
+    if (p.poste.id !== "G" && libreDevant && pression >= r.pressionM) {
       if (dBut < r.seulTirM) this.tirer(but);
       return;
     }
@@ -354,7 +382,7 @@ export class BallonReel {
     this.arret = "?";
   }
 
-  private passer(q: JoueurSim, presse = false, point: PointM | null = null): void {
+  private passer(q: JoueurSim, presse = false, point: PointM | null = null, anticipe = true): void {
     const r = this.sim.reglages.ballon;
     const p = this.porteur!;
     const d = dist(p.pos, point ?? q.pos);
@@ -366,7 +394,8 @@ export class BallonReel {
       v = Math.max(8, Math.min(r.vitessePasseMaxMS, (k * d) / (1 - Math.exp(-k * T))));
     }
     const t = d / v;
-    const cible = point ?? { x: q.pos.x + q.vit.x * t * 0.8, y: q.pos.y + q.vit.y * t * 0.8 };
+    const a = anticipe ? t * 0.8 : 0;
+    const cible = point ?? { x: q.pos.x + q.vit.x * a, y: q.pos.y + q.vit.y * a };
     const dx = cible.x - this.sim.ballon.x;
     const dy = cible.y - this.sim.ballon.y;
     const n = Math.hypot(dx, dy) || 1;
@@ -395,16 +424,36 @@ export class BallonReel {
     return dq > (adv[1] ?? L) + this.sim.reglages.ballon.horsJeuToleranceM;
   }
 
-  private tirer(but: PointM, dispersionM = 6.5): void {
-    const r = this.sim.reglages.ballon;
+  /** Tir : vise un coin, loin du gardien ; l'erreur grandit avec la distance.
+   *  Le gardien plonge vers le point où le ballon passe à sa hauteur ; il a
+   *  d'autant plus de chances d'arrêter que ce point est proche de lui. */
+  private tirer(but: PointM, penalty = false): void {
+    const s = this.sim;
+    const r = s.reglages.ballon;
+    const t = r.tir;
     const p = this.porteur!;
-    const cible = { x: but.x + this.rng.entre(-dispersionM, dispersionM), y: but.y };
-    const dx = cible.x - this.sim.ballon.x;
-    const dy = cible.y - this.sim.ballon.y;
+    const gardien = s.joueurs.find((j) => j.camp !== p.camp && j.poste.id === "G");
+    const cote = gardien ? (gardien.pos.x > but.x ? -1 : 1) : this.rng.suivant() < 0.5 ? -1 : 1;
+    const vise = but.x + cote * this.rng.entre(t.viseMinM, t.viseMaxM);
+    const erreur = penalty ? t.erreurPenaltyM : t.erreurBaseM + t.erreurParMetre * dist(p.pos, but);
+    const cible = { x: vise + this.rng.entre(-erreur, erreur), y: but.y };
+    const dx = cible.x - s.ballon.x;
+    const dy = cible.y - s.ballon.y;
     const n = Math.hypot(dx, dy) || 1;
     this.stats.tirs[p.camp]++;
     this.lancer((dx / n) * r.vitesseTirMS, (dy / n) * r.vitesseTirMS);
     this.tirEnCours = true;
+    this.tirPenalty = penalty;
+    this.plongeon = null;
+    if (!gardien) return;
+    // Point de passage du ballon à la hauteur du gardien.
+    const k = Math.abs(dy) > 1e-6 ? (gardien.pos.y - s.ballon.y) / dy : 0;
+    const point = { x: s.ballon.x + dx * Math.max(0, Math.min(1, k)), y: gardien.pos.y };
+    const ecart = Math.abs(point.x - gardien.pos.x);
+    const proba = penalty ? r.fautes.arretPenaltyProba : Math.max(t.arretMin, Math.min(t.arretMax, t.arretMax - t.arretParMetre * Math.max(0, ecart - 0.5)));
+    this.arret = Math.abs(cible.x - but.x) > DEMI_BUT_M ? "non" : this.rng.suivant() < proba ? "oui" : "non";
+    this.plongeon = { gardien, point };
+    gardien.sprintJusqua = Math.max(gardien.sprintJusqua, s.temps + 1);
   }
 
   // --- Ballon libre -------------------------------------------------------
@@ -458,7 +507,7 @@ export class BallonReel {
       if (this.reserve && s.temps < this.reserve.jusqua && j.camp !== this.reserve.camp) continue;
       if (j === this.dernier && s.temps - this.dernierTemps < r.recontactS) continue;
       const gardienAdverse = j.poste.id === "G" && this.tirEnCours && this.dernier !== null && j.camp !== this.dernier.camp;
-      const rayon = j === this.receveur ? r.rayonReceveurM : gardienAdverse ? r.rayonGardienM + 1.4 : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM;
+      const rayon = j === this.receveur ? r.rayonReceveurM : gardienAdverse ? r.rayonGardienM + 0.8 : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM;
       const d = dist(j.pos, s.ballon);
       if (d > rayon) continue;
       const adverseDuTireur = this.dernier !== null && j.camp !== this.dernier.camp && j.poste.id !== "G";
@@ -512,6 +561,7 @@ export class BallonReel {
     if (j.camp !== avant) this.perte = { camp: avant, a: this.sim.temps };
     this.porteur = j;
     this.tireur = null;
+    this.plongeon = null;
     this.receveur = null;
     this.tirEnCours = false;
     this.tirPenalty = false;
@@ -522,6 +572,7 @@ export class BallonReel {
     this.decisionA = this.sim.temps + this.rng.entre(r.premiereDecisionS.min, r.premiereDecisionS.max);
     const L = this.sim.donnees.longueurM;
     const versBut = j.camp === 0 ? L - j.pos.y : j.pos.y;
+    if (this.arrete === "engagement") this.decisionA = this.sim.temps + 0.3;
     if (!this.arrete && j.poste.id !== "G" && versBut <= r.surface.profondeurM && Math.abs(j.pos.x - this.sim.donnees.largeurM / 2) <= r.surface.demiLargeurM)
       this.decisionA = this.sim.temps + 0.1; // dans la surface adverse : reprise immédiate
     this.sim.prendrePossession(j.camp);
@@ -562,7 +613,13 @@ export class BallonReel {
     for (const x of s.joueurs) x.auBallon = false;
     if (this.engagement) {
       for (const j of s.joueurs) j.cible = { ...j.depart };
+      const kicker = this.engageur();
+      kicker.cible = { x: s.ballon.x, y: s.ballon.y - (kicker.camp === 0 ? 0.8 : -0.8) };
       return;
+    }
+    if (this.tirEnCours && this.plongeon) {
+      this.plongeon.gardien.cible = { ...this.plongeon.point };
+      this.plongeon.gardien.auBallon = true;
     }
 
     if (this.porteur) {
@@ -578,6 +635,7 @@ export class BallonReel {
             ? { x: p.pos.x + ((butAdv.x - p.pos.x) / dBut) * r.dribbleAvanceM, y: p.pos.y + ((butAdv.y - p.pos.y) / dBut) * r.dribbleAvanceM }
             : { x: p.pos.x + (W / 2 - p.pos.x) * 0.2, y: Math.min(L - 3, Math.max(3, p.pos.y + sens * r.dribbleAvanceM)) };
       }
+      if (this.arrete === "engagement") return; // adversaires à 9,15 m tant que l'engagement n'est pas joué
       const cp = r.contrePressing;
       const contre = this.perte !== null && this.perte.camp !== p.camp && s.temps - this.perte.a < cp.dureeS;
       if (contre) {

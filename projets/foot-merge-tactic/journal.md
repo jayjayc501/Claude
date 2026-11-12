@@ -229,3 +229,12 @@ Retours du concepteur : engagement donné alors que les joueurs sont encore sur 
 - Après un but : ballon au centre, personne ne peut le toucher ; chaque joueur regagne sa case de coup d'envoi (son camp) ; engagement quand tout le monde y est (2 s au moins, 10 s au plus).
 - Six mètres : au coin de la surface de but (9,16 m de l'axe, 5,5 m de la ligne), du côté de la sortie, joué par le gardien.
 - Tests : 84 verts (nouveau : chacun regagne son camp avant l'engagement).
+
+## 12/11/2026 (suite) — Engagement en passe, seul devant, tirs et gardien
+
+Retours du concepteur : à l'engagement le joueur part tout droit au lieu de passer ; des joueurs seuls face au but font encore une passe en arrière ; les tirs vont trop sur le gardien, qui ne plonge jamais.
+- Engagement (début et après un but) : le joueur le plus proche du centre vient au ballon (les autres sur leur case) ; il passe dans les pieds d'un coéquipier proche, à côté ou en retrait. Tant que l'engagement n'est pas joué, pas de pressing ni de tacle (adversaires à distance) ; réserve de 8 s.
+- Seul devant : la pression ne compte plus que les adversaires devant ou à hauteur (un poursuivant ne bloque plus la course) ; le cône ne retient que les adversaires devant ; tous les joueurs de champ (défenseurs compris).
+- Tir : vise le côté opposé au gardien (1,5 à 3,4 m de l'axe), erreur 1,5 m + 0,12 m par mètre de distance (penalty 0,8 m). Le gardien plonge vers le point de passage du ballon ; arrêt 90 % si le tir arrive sur lui, 25 % de moins par mètre d'écart, 15 % au moins ; tir hors cadre jamais arrêté.
+- Mesures (6 graines × 3 min) : 61 tirs, 30 arrêts, 9 buts ; 75 % de passes réussies ; 6,4 changements de camp par minute.
+- Tests : 85 verts (nouveau : passe d'engagement à côté ou en retrait ; test de bascule jugé sur une possession gardée 2,5 s).

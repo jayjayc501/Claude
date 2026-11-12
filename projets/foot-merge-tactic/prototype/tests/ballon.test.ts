@@ -149,7 +149,8 @@ describe("ballon réel : arrêts de jeu (lot B)", () => {
     m.ballon = { ...p.pos };
     b.porteur = p;
     b.reserve = null;
-    (b as unknown as { decisionA: number }).decisionA = 1e9;
+    (b as unknown as { decisionA: number; arrete: unknown }).decisionA = 1e9;
+    (b as unknown as { arrete: unknown }).arrete = null; // engagement considéré comme joué
     m.pas();
     expect(b.stats.penalties[0]).toBe(1);
     expect(m.ballon).toEqual({ x: W / 2, y: L - 11 });
@@ -178,6 +179,19 @@ describe("ballon réel : engagement après un but", () => {
       m.pas();
     }
     for (const j of m.joueurs) expect(j.camp === 0 ? j.pos.y <= L / 2 + 0.5 : j.pos.y >= L / 2 - 0.5).toBe(true);
+  });
+});
+
+describe("ballon réel : coup d'envoi", () => {
+  test("le joueur qui engage passe à un coéquipier, à côté ou en retrait", () => {
+    for (const g of GRAINES) {
+      const m = match(g);
+      const b = m.balle!;
+      let i = 0;
+      while (b.stats.passes[0] === 0 && i++ < 6 * 30) m.pas();
+      expect(b.stats.passes[0]).toBe(1);
+      expect(b.vit.y).toBeLessThan(2); // le camp 0 attaque vers +y : pas de ballon vers l'avant
+    }
   });
 });
 
@@ -306,7 +320,13 @@ describe("ballon réel : réalisme du jeu (référence football §9.4)", () => {
         poss = m.possession;
         expect(m.enTransition).toBe(true);
         const camp = m.possession;
-        m.avancer(2.5);
+        let garde = true; // on juge seulement une possession gardée 2,5 s
+        for (let k = 0; k < 75 && garde; k++) {
+          m.pas();
+          garde = m.possession === camp;
+        }
+        poss = m.possession;
+        if (!garde) continue;
         expect(m.joueurs.filter((j) => j.camp === camp && j.phase === "attaque").length).toBeGreaterThanOrEqual(8);
         vu = true;
       }

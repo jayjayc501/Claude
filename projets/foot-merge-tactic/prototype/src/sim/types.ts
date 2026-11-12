@@ -134,6 +134,8 @@ export interface Reglages {
       largeurLigneM: { defense: number; milieu: number; attaque: number };
       /** Écart minimal entre deux joueurs voisins d'une même ligne défensive. */
       ecartMinDansLigneM: number;
+      /** Écart à l'axe des défenseurs centraux, réduit par ce facteur (ils restent près l'un de l'autre). */
+      resserrementDC: number;
       /** Largeur d'une ligne de défense ou de milieu (3 joueurs ou plus), du
        *  plus à gauche au plus à droite : environ 40 m, quel que soit le
        *  placement (référence football §3 et §9.1, règle 5). */
@@ -196,6 +198,8 @@ export interface Reglages {
     seuilPasse: number;
     /** Joueurs qui sortent sur le porteur (le premier presse, les autres couvrent). */
     presseurs: number;
+    /** Un défenseur central sort sur le porteur à moins de distanceM, s'il est dans l'axe (à moins de axeM du centre). */
+    sortieDC: { distanceM: number; axeM: number };
     /** Poids du gain vers l'avant et de l'espace autour du receveur dans la note d'une passe. */
     poidsProgression: number;
     poidsEspace: number;

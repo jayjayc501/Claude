@@ -380,17 +380,23 @@ describe("simulation", () => {
   test("le bloc monte quand on a le ballon et redescend quand on le perd", () => {
     const moyenneY = (m: MatchSim) =>
       m.joueurs.filter((j) => j.camp === 0).reduce((s, j) => s + j.pos.y, 0) / 11;
-    const m = nouveauMatch();
-    m.demarrer();
-    m.definirMode("nous");
-    m.avancer(15);
-    const enAttaque = moyenneY(m);
-    m.definirMode("eux");
-    m.avancer(15);
-    const enDefense = moyenneY(m);
+    // Moyenne sur 6 graines : le faux ballon (possession simulée) suit un
+    // trajet aléatoire qui change dès que les joueurs bougent un peu (12/11 :
+    // une seule graine rendait le test fragile).
+    let ecart = 0;
+    for (let g = 1; g <= 6; g++) {
+      const m = nouveauMatch(g);
+      m.demarrer();
+      m.definirMode("nous");
+      m.avancer(15);
+      const enAttaque = moyenneY(m);
+      m.definirMode("eux");
+      m.avancer(15);
+      ecart += (enAttaque - moyenneY(m)) / 6;
+    }
     // Perdu haut, le ballon est encore loin de notre but : le bloc défend
     // haut (bloc médian) et ne redescend donc pas jusqu'à sa surface.
-    expect(enAttaque - enDefense).toBeGreaterThan(8);
+    expect(ecart).toBeGreaterThan(8);
   });
 
   test("les joueurs ne s'empilent pas", () => {

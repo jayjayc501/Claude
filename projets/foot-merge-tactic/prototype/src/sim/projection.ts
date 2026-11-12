@@ -68,7 +68,10 @@ function projeterDefense(
   const yM = ligneDef + ecart + decalageM;
   const largeur = d.largeurLigneM[poste.ligneDefense];
   const centreBlocM = LARGEUR_M / 2 + (ballonXM - LARGEUR_M / 2) * d.suiviLateral;
-  const xM = centreBlocM + (base.x - 0.5) * largeur;
+  // Les défenseurs centraux restent proches l'un de l'autre (12 à 14 m) : ce
+  // sont les latéraux qui tiennent la largeur (référence §6 et §9.1).
+  const resserre = poste.id === "DC" ? d.resserrementDC : 1;
+  const xM = centreBlocM + (base.x - 0.5) * largeur * resserre;
   return { x: xM / LARGEUR_M, y: yM / longueurM };
 }
 

@@ -362,3 +362,15 @@ Tiki-taka             61%   42.4     86%    3.6    0.7    4.3   0.47   0.50   30
 
   Lecture : Pressing = ligne +6 m, plus de récupérations hautes et de tirs rapides, moins de buts encaissés, plus de fautes ; Contre = bloc bas, plus de récupérations, meilleure attaque, passes moins réussies ; Tiki-taka = 61 % de possession, 42 passes à 86 %, moins de changements de camp ; Gegenpressing = moins de buts encaissés ; les styles ont des effets plus faibles (3 joueurs sur 11), à juger en match. Pressing : la réussite des passes adverses ne baisse pas encore (73 % contre 69 %).
 - Tests : 100 verts (6 nouveaux : correctifs, réglages inchangés sans tactique ni style, palier à 3 joueurs, changement de tactique en plein match rejouable, réalisme du bloc (Pressing plus haut, Contre plus bas), réalisme du Tiki-taka). Page vérifiée au format téléphone, aucune erreur.
+
+## 12/11/2026 (suite) — Défenseurs centraux, styles visibles
+
+Retours du concepteur : « je ne sais pas quel joueur a quel style » ; « les défenseurs centraux sont trop décalés à droite et à gauche et ils ne vont pas vers le BU lorsqu'il a le ballon ». Référence relue : §6 (défenseur central : duels, couverture), §9.1 (largeur des lignes).
+- Écran de préparation : pastille du style (même pictogramme que les compteurs) sur chaque buste du terrain, du banc et du mercato ; au toucher, « Nom · Style » (ou « sans style »).
+- Moteur (comportement de base modifié) :
+  - les défenseurs centraux restent près de l'axe (écart à l'axe ×0,65, `projection.defense.resserrementDC`) ;
+  - une ligne trop étroite s'élargit par ses extrémités (latéraux, côtés) au lieu d'écarter tout le monde ;
+  - un défenseur central sort sur le porteur dans l'axe (à moins de 20 m du centre) jusqu'à 18 m (`ballon.sortieDC`) ; s'il n'est pas le plus proche, il couvre.
+- Mesures (équipe de la préparation, 6 matchs de 2 min) : écart moyen entre les deux DC en défense 15,6 m (23,9 avant) ; BU adverse avec le ballon à moins de 18 m d'un DC : un DC sort 39 % du temps (24 % avant).
+- Test « le bloc monte quand on a le ballon… » : moyenne sur 6 graines au lieu d'une seule (le faux ballon des anciens tests suivait un trajet aléatoire qui change dès que les joueurs bougent) ; écart moyen 20 m (16 avant), seuil inchangé (8 m).
+- Tests : 100 verts.

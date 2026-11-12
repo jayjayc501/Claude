@@ -56,12 +56,13 @@ const ETINCELLES =
 // aimant vertical (Récupérateur, il aimante le ballon), ballon (Technicien), éclair (Rapide).
 const PICTO = (corps: string) =>
   `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${corps}</svg>`;
-const PICTOS: Record<string, string> = {
-  REM: PICTO('<path d="M12 2.8 L19.5 5.8 V11 C19.5 15.6 16.4 19.3 12 21.2 C7.6 19.3 4.5 15.6 4.5 11 V5.8 Z"/>'),
-  REC: PICTO('<g transform="translate(12 12) scale(0.92) translate(-12 -12)"><path d="M3.5 3.5 H9 V12 C9 13.66 10.34 15 12 15 C13.66 15 15 13.66 15 12 V3.5 H20.5 V12 C20.5 16.7 16.7 20.5 12 20.5 C7.3 20.5 3.5 16.7 3.5 12 Z" stroke-width="1.8"/><path d="M3.5 3.5 H9 V7.6 H3.5 Z M15 3.5 H20.5 V7.6 H15 Z" fill="currentColor" stroke-width="1.8"/></g>'),
-  TEC: PICTO('<circle cx="12" cy="12" r="9"/><path d="M12 8.4 L15.2 10.7 L14 14.4 H10 L8.8 10.7 Z" fill="currentColor"/><path d="M12 8.4 V3 M15.2 10.7 L20.6 9.2 M14 14.4 L17.3 19.1 M10 14.4 L6.7 19.1 M8.8 10.7 L3.4 9.2" stroke-width="1.6"/>'),
-  RAP: PICTO('<path d="M13.5 2.5 L5.5 13.5 H11.5 L10.5 21.5 L18.5 10.5 H12.5 Z" fill="currentColor" stroke-width="1.4"/>'),
+const CORPS_PICTOS: Record<string, string> = {
+  REM: '<path d="M12 2.8 L19.5 5.8 V11 C19.5 15.6 16.4 19.3 12 21.2 C7.6 19.3 4.5 15.6 4.5 11 V5.8 Z"/>',
+  REC: '<g transform="translate(12 12) scale(0.92) translate(-12 -12)"><path d="M3.5 3.5 H9 V12 C9 13.66 10.34 15 12 15 C13.66 15 15 13.66 15 12 V3.5 H20.5 V12 C20.5 16.7 16.7 20.5 12 20.5 C7.3 20.5 3.5 16.7 3.5 12 Z" stroke-width="1.8"/><path d="M3.5 3.5 H9 V7.6 H3.5 Z M15 3.5 H20.5 V7.6 H15 Z" fill="currentColor" stroke-width="1.8"/></g>',
+  TEC: '<circle cx="12" cy="12" r="9"/><path d="M12 8.4 L15.2 10.7 L14 14.4 H10 L8.8 10.7 Z" fill="currentColor"/><path d="M12 8.4 V3 M15.2 10.7 L20.6 9.2 M14 14.4 L17.3 19.1 M10 14.4 L6.7 19.1 M8.8 10.7 L3.4 9.2" stroke-width="1.6"/>',
+  RAP: '<path d="M13.5 2.5 L5.5 13.5 H11.5 L10.5 21.5 L18.5 10.5 H12.5 Z" fill="currentColor" stroke-width="1.4"/>',
 };
+const PICTOS: Record<string, string> = Object.fromEntries(Object.entries(CORPS_PICTOS).map(([k, c]) => [k, PICTO(c)]));
 
 const X = (xn: number) => xn * W;
 const Y = (yn: number) => MH + ((0.5 - yn) / 0.5) * H;
@@ -413,7 +414,9 @@ export class EcranPreparation {
       // Les navigateurs ignorent `touch-action` sur les éléments SVG : sans
       // ceci, le doigt posé sur un buste ferait défiler la page.
       g.addEventListener("touchstart", (ev) => ev.preventDefault(), { passive: false });
-      if (pl.joueurId === this.choisi) this.etiquette(s, nom, x, socle - 48 * echelle - 4);
+      const style = this.prepa.fiche(pl.joueurId).style;
+      const libelle = style ? `${nom} · ${this.prepa.d.styles[style] ?? style}` : `${nom} · sans style`;
+      if (pl.joueurId === this.choisi) this.etiquette(s, libelle, x, socle - 48 * echelle - 4);
     }
   }
 
@@ -471,13 +474,27 @@ export class EcranPreparation {
     }
     if (fusions >= 3) svg("path", { d: ETINCELLES, fill: "#FFFFFF", stroke: "#C04BFF", "stroke-width": 0.9, "stroke-linejoin": "round" }, g);
     svg("image", { href: BUSTES[id] ?? "", x: 0, y: -1, width: 48, height: 49, filter: fusions ? `url(#prepa-aura-${Math.min(fusions, 3)})` : undefined }, g);
+    // Pastille du style (en bas à droite du buste), même pictogramme que les compteurs.
+    const style = this.prepa.fiche(id).style;
+    if (style && CORPS_PICTOS[style]) {
+      svg("circle", { cx: 41, cy: 41, r: 7.5, class: "prepa-pastille-style" }, g);
+      const ic = svg("g", { transform: "translate(35.25 35.25) scale(0.48)", class: "prepa-pastille-picto" }, g);
+      ic.innerHTML = CORPS_PICTOS[style]!;
+    }
     // Zone de toucher plus large que le buste.
     svg("rect", { x: 2, y: -2, width: 44, height: 54, fill: "transparent" }, g);
   }
 
+  /** Pastille du style d'un joueur (banc, mercato). */
+  private pastilleStyle(parent: HTMLElement, style: string | null): void {
+    if (!style || !PICTOS[style]) return;
+    const b = html("span", { class: "prepa-pastille", title: this.prepa.d.styles[style] ?? style }, parent);
+    b.innerHTML = PICTOS[style]!;
+  }
+
   /** Nom du joueur touché, au-dessus du buste. */
   private etiquette(s: SVGSVGElement, nom: string, x: number, bas: number): void {
-    const l = nom.length * 6.6 + 14;
+    const l = nom.length * 6.2 + 14;
     const g = svg("g", { class: "prepa-nom" }, s);
     svg("rect", { x: x - l / 2, y: bas - 16, width: l, height: 16, rx: 6 }, g);
     const t = svg("text", { x, y: bas - 4.5 }, g);
@@ -522,7 +539,9 @@ export class EcranPreparation {
       const f = this.prepa.fiche(id);
       const fusions = this.prepa.membre(id)?.fusions ?? 0;
       const p = html("div", { class: `prepa-place prepa-tirable${id === this.choisi ? " choisi" : ""}`, "aria-label": `${f.nom}, ${libellePoste(f.poste)}, remplaçant` }, places);
-      html("img", { src: BUSTES[id] ?? "", alt: "", class: `prepa-mini aura-${fusions}`, draggable: "false" }, p);
+      const boite = html("span", { class: "prepa-mini-boite" }, p);
+      html("img", { src: BUSTES[id] ?? "", alt: "", class: `prepa-mini aura-${fusions}`, draggable: "false" }, boite);
+      this.pastilleStyle(boite, f.style);
       html("span", { class: "prepa-poste" }, p, id === this.choisi ? f.nom : libellePoste(f.poste));
       p.addEventListener("pointerdown", (ev) => this.appui(ev, id, p));
       this.placesBanc.push({ id, el: p });
@@ -554,11 +573,13 @@ export class EcranPreparation {
         {
           type: "button",
           class: `prepa-carte${fusion ? " fusion" : ""}${trop ? " trop-cher" : ""}`,
-          "aria-label": `Recruter ${f.nom}, ${libellePoste(f.poste)}, ${f.prix} pièces${fusion ? ", fusion avec ta copie" : ""}`,
+          "aria-label": `Recruter ${f.nom}, ${libellePoste(f.poste)}, ${f.style ? this.prepa.d.styles[f.style] : "sans style"}, ${f.prix} pièces${fusion ? ", fusion avec ta copie" : ""}`,
         },
         cartes,
       );
-      html("img", { src: BUSTES[id] ?? "", alt: "", class: "prepa-mini", draggable: "false" }, k);
+      const boite = html("span", { class: "prepa-mini-boite" }, k);
+      html("img", { src: BUSTES[id] ?? "", alt: "", class: "prepa-mini", draggable: "false" }, boite);
+      this.pastilleStyle(boite, f.style);
       html("span", { class: "prepa-poste" }, k, libellePoste(f.poste));
       html("span", { class: "prepa-prix" }, k, String(f.prix));
       if (fusion) html("span", { class: "prepa-fusion" }, k, "Fusion");

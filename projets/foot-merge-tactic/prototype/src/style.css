@@ -266,3 +266,8 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .choix-tactique { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--texte-2); }
 .choix-tactique select { font: inherit; font-size: 16px; color: var(--texte); background: var(--carte); border: 1px solid var(--bord); border-radius: 8px; min-height: 36px; padding: 0 4px; max-width: 9.5em; }
 .infos-influences { font-size: 12px; min-height: 2.8em; }
+.prepa-pastille-style { fill: #2B2F36; stroke: #fff; stroke-width: 1.2; }
+.prepa-pastille-picto { color: #fff; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.prepa-mini-boite { position: relative; display: block; }
+.prepa-pastille { position: absolute; right: -3px; bottom: -1px; width: 16px; height: 16px; border-radius: 50%; background: #2B2F36; color: #fff; border: 1.5px solid #fff; display: flex; align-items: center; justify-content: center; }
+.prepa-pastille svg { width: 10px; height: 10px; }

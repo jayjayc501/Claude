@@ -20,6 +20,7 @@
         "attaque": 40
       },
       "ecartMinDansLigneM": 6,
+      "resserrementDC": 0.65,
       "largeurLigneBornesM": {
         "min": 39,
         "max": 44
@@ -98,6 +99,7 @@
     "pressionM": 4,
     "pressingM": 10,
     "presseurs": 2,
+    "sortieDC": { "distanceM": 18, "axeM": 20 },
     "decisionS": { "min": 0.6, "max": 1.2 },
     "premiereDecisionS": { "min": 0.4, "max": 0.9 },
     "vitessePasseMinMS": 10,

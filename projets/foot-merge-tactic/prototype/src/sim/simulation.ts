@@ -405,7 +405,13 @@ export class MatchSim {
       if (ligne !== "attaque" && xs.length >= 3) {
         const largeur = xs[xs.length - 1]! - xs[0]!;
         const voulue = Math.min(bornes.max, Math.max(bornes.min, largeur));
-        if (largeur > 1e-6 && voulue !== largeur) {
+        if (largeur > 1e-6 && voulue > largeur) {
+          // Trop étroite : seuls les joueurs des bouts s'écartent (latéraux,
+          // côtés) ; ceux de l'axe gardent leur place (12/11 : les défenseurs
+          // centraux étaient « trop décalés à droite et à gauche »).
+          xs[0] = xs[0]! - (voulue - largeur) / 2;
+          xs[xs.length - 1] = xs[xs.length - 1]! + (voulue - largeur) / 2;
+        } else if (largeur > 1e-6 && voulue < largeur) {
           const milieu = (xs[0]! + xs[xs.length - 1]!) / 2;
           for (let i = 0; i < xs.length; i++) xs[i] = milieu + (xs[i]! - milieu) * (voulue / largeur);
         }

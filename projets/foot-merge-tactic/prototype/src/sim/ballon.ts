@@ -890,7 +890,12 @@ export class BallonReel {
       // Pressing normal (référence §4) : le plus proche presse le porteur, le
       // suivant couvre entre le porteur et le but ; les autres tiennent leur place.
       const presseurs = s.joueurs
-        .filter((j) => j.camp !== p.camp && j.poste.id !== "G" && dist(j.pos, p.pos) < rd.pressingM * j.effet.pressing)
+        .filter((j) => {
+          if (j.camp === p.camp || j.poste.id === "G") return false;
+          // Un défenseur central sort sur le porteur dans l'axe devant lui (duel, référence §6).
+          const sortie = j.poste.id === "DC" && Math.abs(p.pos.x - W / 2) < rd.sortieDC.axeM ? rd.sortieDC.distanceM : 0;
+          return dist(j.pos, p.pos) < Math.max(rd.pressingM, sortie) * j.effet.pressing;
+        })
         .sort((a, b) => dist(a.pos, p.pos) - dist(b.pos, p.pos))
         .slice(0, rd.presseurs);
       // 1er : sur le porteur ; 2e : couvre vers le but ; 3e (pressing haut) : ferme la passe vers l'intérieur.

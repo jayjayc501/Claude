@@ -300,3 +300,9 @@ Demande du concepteur : intégrer l'écran de la maquette du 12/11 ; moteur fig�
 - Données : `src/data/preparation.json` (équipe de la maquette, 4 pays, styles d'après les postures, groupe, mercato). `equipes.json` inchangé (tests du moteur) ; l'adversaire du match en vient toujours.
 - Démonstration seulement : chrono et classement fixes ; budget (7), prix (2-3) et revente au prix de la carte sont provisoires ; les achats ne sont pas gardés au rechargement (la composition l'est). Choix hexagones / carrés retiré de l'écran (carrés gardés dans les données).
 - Tests : 93 verts (6 nouveaux : composition de la maquette, hors poste refusé, banc de 5, achat et fusion, vente, compteurs). Page vérifiée au format téléphone (390 × 844), aucune erreur.
+
+## 12/11/2026 (suite) — Pelouse de l'écran de préparation
+
+Retour du concepteur : « le fond vert pâle ne fait pas terrain de foot ».
+- Pelouse rayée (vert #4E9A5A / #58A564) et tracé blanc complet à l'échelle de la largeur : lignes de touche, ligne médiane, rond central, surface et petite surface, point de penalty, arc, corners, but.
+- Cases à 38 % (au lieu de 30 %), contour blanc à 45 %, noms de poste à 60 % : lisibles sur le vert.

@@ -207,10 +207,13 @@ button[hidden] { display: none; }
 .prepa-titulaires .prepa-nombre { font-size: 16px; color: #16201A; margin-bottom: 2px; }
 .prepa-terrain { flex: 1; min-width: 0; }
 svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
-.prepa-pelouse { fill: #c4dbcd; }
-.prepa-ligne { fill: none; stroke: #fff; stroke-opacity: 0.3; stroke-width: 2; }
-.prepa-case { fill-opacity: 0.3; stroke: #fff; stroke-opacity: 0.4; stroke-width: 2; stroke-linejoin: round; pointer-events: none; }
-.prepa-role { font-size: 11px; font-weight: 700; letter-spacing: 0.02em; text-anchor: middle; fill: #fff; opacity: 0.3; pointer-events: none; }
+.prepa-pelouse { fill: #4E9A5A; }
+.prepa-bande { fill: #58A564; }
+.prepa-ligne { fill: none; stroke: #fff; stroke-opacity: 0.8; stroke-width: 1.6; }
+.prepa-ligne .point { fill: #fff; stroke: none; }
+.prepa-ligne .but { fill: #fff; fill-opacity: 0.35; }
+.prepa-case { fill-opacity: 0.38; stroke: #fff; stroke-opacity: 0.45; stroke-width: 2; stroke-linejoin: round; pointer-events: none; }
+.prepa-role { font-size: 11px; font-weight: 700; letter-spacing: 0.02em; text-anchor: middle; fill: #fff; opacity: 0.6; pointer-events: none; }
 .prepa-buste { cursor: grab; touch-action: none; }
 .prepa-origine { opacity: 0.3; }
 .prepa-cible { stroke-width: 3; stroke-linejoin: round; pointer-events: none; }

@@ -23,7 +23,7 @@ import { type Action, type Issue, Preparation, libellePoste } from "./preparatio
 const W = 300;
 const H = 450;
 const MH = 26;
-const HAUT_TOTAL = MH + H + 4;
+const HAUT_TOTAL = MH + H + 10;
 
 const DELAI_APPUI_MS = 250;
 const SEUIL_GLISSEMENT_PX = 8;
@@ -363,13 +363,7 @@ export class EcranPreparation {
     this.plateau = s;
     this.definirAuras(svg("defs", {}, s));
 
-    // Pelouse et lignes (rond central coupé en haut, surface en bas), comme la maquette.
-    svg("rect", { x: 0, y: 0, width: W, height: HAUT_TOTAL, rx: 14, class: "prepa-pelouse" }, s);
-    const r = 0.16 * W;
-    svg("path", { d: `M ${W / 2 - r} ${MH} A ${r} ${r} 0 0 0 ${W / 2 + r} ${MH}`, class: "prepa-ligne" }, s);
-    const ls = 0.4 * W;
-    const hs = 0.17 * H;
-    svg("path", { d: `M ${(W - ls) / 2} ${HAUT_TOTAL} V ${MH + H - hs} H ${(W + ls) / 2} V ${HAUT_TOTAL}`, class: "prepa-ligne" }, s);
+    this.dessinerPelouse(s);
 
     // Cases : couleur de la zone à 30 %, fin contour blanc, nom du poste à 30 % (cases vides).
     const cases = svg("g", { class: "prepa-cases" }, s);
@@ -407,6 +401,36 @@ export class EcranPreparation {
       g.addEventListener("touchstart", (ev) => ev.preventDefault(), { passive: false });
       if (pl.joueurId === this.choisi) this.etiquette(s, nom, x, socle - 48 * echelle - 4);
     }
+  }
+
+  /** Pelouse rayée et tracé du demi-terrain. Les lignes sont à l'échelle de la
+   *  largeur (68 m), posées sur la ligne de but (en bas) et la ligne médiane (en haut). */
+  private dessinerPelouse(s: SVGSVGElement): void {
+    const M = W / 68;
+    const yBut = Y(0);
+    const yMed = Y(0.5);
+    const cx = W / 2;
+    const clip = svg("clipPath", { id: "prepa-bord" }, s.querySelector("defs") ?? s);
+    svg("rect", { x: 0, y: 0, width: W, height: HAUT_TOTAL, rx: 14 }, clip);
+    const g = svg("g", { "clip-path": "url(#prepa-bord)" }, s);
+    svg("rect", { x: 0, y: 0, width: W, height: HAUT_TOTAL, class: "prepa-pelouse" }, g);
+    const nb = 10;
+    const hb = H / nb;
+    for (let i = 0; i <= nb; i += 2) svg("rect", { x: 0, y: yBut - (i + 1) * hb, width: W, height: hb, class: "prepa-bande" }, g);
+    const l = svg("g", { class: "prepa-ligne" }, g);
+    svg("line", { x1: 0, y1: yMed, x2: W, y2: yMed }, l);
+    svg("line", { x1: 0, y1: yBut, x2: W, y2: yBut }, l);
+    svg("line", { x1: 1, y1: yMed, x2: 1, y2: yBut }, l);
+    svg("line", { x1: W - 1, y1: yMed, x2: W - 1, y2: yBut }, l);
+    svg("circle", { cx, cy: yMed, r: 9.15 * M }, l);
+    svg("circle", { cx, cy: yMed, r: 1.6, class: "point" }, l);
+    svg("rect", { x: cx - 20.16 * M, y: yBut - 16.5 * M, width: 40.32 * M, height: 16.5 * M }, l);
+    svg("rect", { x: cx - 9.16 * M, y: yBut - 5.5 * M, width: 18.32 * M, height: 5.5 * M }, l);
+    svg("circle", { cx, cy: yBut - 11 * M, r: 1.6, class: "point" }, l);
+    const dx = Math.sqrt(9.15 ** 2 - 5.5 ** 2) * M;
+    svg("path", { d: `M ${cx - dx} ${yBut - 16.5 * M} A ${9.15 * M} ${9.15 * M} 0 0 1 ${cx + dx} ${yBut - 16.5 * M}` }, l);
+    svg("path", { d: `M 1 ${yBut - M} A ${M} ${M} 0 0 0 ${1 + M} ${yBut} M ${W - 1} ${yBut - M} A ${M} ${M} 0 0 1 ${W - 1 - M} ${yBut}` }, l);
+    svg("rect", { x: cx - 3.66 * M, y: yBut, width: 7.32 * M, height: 7, class: "but" }, l);
   }
 
   private definirAuras(defs: SVGDefsElement): void {

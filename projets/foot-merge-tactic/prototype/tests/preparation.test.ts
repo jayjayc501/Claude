@@ -62,7 +62,7 @@ describe("écran de préparation", () => {
     ]);
     expect(styles).toEqual([
       { code: "REM", n: 2 },
-      { code: "PRE", n: 2 },
+      { code: "REC", n: 2 },
       { code: "TEC", n: 2 },
       { code: "RAP", n: 1 },
     ]); // 4 titulaires sans style

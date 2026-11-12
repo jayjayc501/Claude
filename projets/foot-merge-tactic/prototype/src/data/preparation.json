@@ -8,7 +8,7 @@
   ],
   "styles": {
     "REM": "Rempart",
-    "PRE": "Presseur",
+    "REC": "Récupérateur",
     "TEC": "Technicien",
     "RAP": "Rapide"
   },
@@ -38,8 +38,8 @@
   "joueurs": {
     "MO": { "nom": "Ollivier", "pays": "FRA", "poste": "G", "style": null, "prix": 2 },
     "JM": { "nom": "Marchal", "pays": "FRA", "poste": "DD", "style": "REM", "prix": 2 },
-    "TR": { "nom": "Roux", "pays": "FRA", "poste": "AC", "style": "PRE", "prix": 3 },
-    "HF": { "nom": "Ferrand", "pays": "FRA", "poste": "MC", "style": "PRE", "prix": 3 },
+    "TR": { "nom": "Roux", "pays": "FRA", "poste": "AC", "style": "REC", "prix": 3 },
+    "HF": { "nom": "Ferrand", "pays": "FRA", "poste": "MC", "style": "REC", "prix": 3 },
     "AM": { "nom": "Mercier", "pays": "FRA", "poste": "AG", "style": "RAP", "prix": 2 },
     "IS": { "nom": "Salvat", "pays": "ESP", "poste": "MC", "style": null, "prix": 3 },
     "RC": { "nom": "Castell", "pays": "ESP", "poste": "DG", "style": null, "prix": 2 },

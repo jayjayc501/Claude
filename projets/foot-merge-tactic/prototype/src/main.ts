@@ -69,7 +69,17 @@ function demarrer(): void {
   const ongletMatch = html("button", { type: "button", class: "onglet" }, onglets, "Match");
   const contenu = html("main", {}, app);
 
-  const match = new EcranMatch(donnees, reglages, equipes, prepa.d.tactiques, prepa.d.styles);
+  const couleurs = Object.fromEntries(prepa.d.deck.map((p) => [p.code, p.couleur]));
+  const match = new EcranMatch(donnees, reglages, equipes, {
+    nomNous: prepa.d.groupe.equipes.find((e) => e.toi)?.nom ?? "Toi",
+    nomEux: prepa.d.groupe.equipes.find((e) => e.prochain)?.nom ?? adversaire.nom,
+    tactiques: prepa.d.tactiques,
+    styles: prepa.d.styles,
+    infos: (id) => {
+      const f = prepa.d.joueurs[id];
+      return f ? { couleur: couleurs[f.pays] ?? "#1F3A93", style: f.style } : undefined;
+    },
+  });
   const preparation = new EcranPreparation(prepa, () => {
     ecrire(prepa.etat.composition);
     try {

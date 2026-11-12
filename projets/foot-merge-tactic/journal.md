@@ -374,3 +374,15 @@ Retours du concepteur : « je ne sais pas quel joueur a quel style » ; « les d
 - Mesures (équipe de la préparation, 6 matchs de 2 min) : écart moyen entre les deux DC en défense 15,6 m (23,9 avant) ; BU adverse avec le ballon à moins de 18 m d'un DC : un DC sort 39 % du temps (24 % avant).
 - Test « le bloc monte quand on a le ballon… » : moyenne sur 6 graines au lieu d'une seule (le faux ballon des anciens tests suivait un trajet aléatoire qui change dès que les joueurs bougent) ; écart moyen 20 m (16 avant), seuil inchangé (8 m).
 - Tests : 100 verts.
+
+## 12/11/2026 (suite) — Écran du match refait (aussi fun que la préparation)
+
+Demande du concepteur : « une IHM aussi fun et belle que celle de la préparation » ; « je parle aussi des joueurs, là c'est triste ». Moteur inchangé.
+- Panneaux clairs comme la préparation : tableau de score (Toi – Olympia, chrono, barre de possession bleu/rouge), bouton principal Coup d'envoi / Pause / Reprendre, puces Nouveau, vitesse, son, zones.
+- Pelouse rayée et tracé blanc, comme sur le plateau de préparation.
+- **Joueurs** : tes joueurs en pastilles avec le **visage de leur figurine** (tête cadrée d'après l'image), anneau de la couleur de leur pays ; adversaires en **petits avatars dessinés** (tête, cheveux, maillot rouge), différents d'un joueur à l'autre ; ombre portée.
+- **Porteur du ballon** : halo doré qui pulse et son nom au-dessus de lui ; ballon avec ombre (plus gros et décollé quand il est en l'air).
+- **Annonces** qui « sautent » (rouge pour faute, penalty, hors-jeu ; or pour un but de ton équipe, rouge pour un but encaissé) et **confettis** sur un but.
+- Tactiques : deux pilules (Toi / Olympia) modifiables en plein match ; interrupteurs « Tactiques activées / coupées », « Styles activés / coupés » ; tableau de bord en cartes (possession, passes réussies, ligne défensive, vous en bleu / eux en rouge) et paliers de styles avec leurs pictogrammes.
+- Pictogrammes des styles regroupés dans `src/ui/pictos.ts` ; position des têtes dans les images : `TETES` dans `src/ui/bustes.ts`.
+- Tests : 100 verts. Page vérifiée au format téléphone, aucune erreur.

@@ -22,3 +22,14 @@ import RC from "../../../docs/maquette-interface/bustes/bust-RC.png";
 import TR from "../../../docs/maquette-interface/bustes/bust-TR.png";
 
 export const BUSTES: Record<string, string> = { AM, AS, BL, CB, DA, DK, EL, HF, IS, JM, KM, LM, MO, MV, NV, PA, RC, TR };
+
+/** Tête dans chaque image (fractions de la largeur et de la hauteur) : centre
+ *  et rayon, pour cadrer le visage dans une pastille ronde. Mesuré sur les images. */
+export const TETES: Record<string, { cx: number; cy: number; r: number }> = {
+  AM: { cx: 0.51, cy: 0.237, r: 0.333 }, AS: { cx: 0.51, cy: 0.237, r: 0.333 }, BL: { cx: 0.51, cy: 0.237, r: 0.333 },
+  CB: { cx: 0.594, cy: 0.289, r: 0.302 }, DA: { cx: 0.521, cy: 0.289, r: 0.302 }, DK: { cx: 0.495, cy: 0.34, r: 0.297 },
+  EL: { cx: 0.526, cy: 0.227, r: 0.349 }, HF: { cx: 0.484, cy: 0.309, r: 0.307 }, IS: { cx: 0.594, cy: 0.289, r: 0.302 },
+  JM: { cx: 0.495, cy: 0.34, r: 0.297 }, KM: { cx: 0.521, cy: 0.289, r: 0.302 }, LM: { cx: 0.526, cy: 0.227, r: 0.349 },
+  MO: { cx: 0.583, cy: 0.299, r: 0.396 }, MV: { cx: 0.49, cy: 0.361, r: 0.365 }, NV: { cx: 0.484, cy: 0.309, r: 0.307 },
+  PA: { cx: 0.526, cy: 0.227, r: 0.349 }, RC: { cx: 0.49, cy: 0.361, r: 0.365 }, TR: { cx: 0.51, cy: 0.216, r: 0.281 },
+};

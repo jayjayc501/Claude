@@ -271,3 +271,84 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .prepa-mini-boite { position: relative; display: block; }
 .prepa-pastille { position: absolute; right: -3px; bottom: -1px; width: 16px; height: 16px; border-radius: 50%; background: #2B2F36; color: #fff; border: 1.5px solid #fff; display: flex; align-items: center; justify-content: center; }
 .prepa-pastille svg { width: 10px; height: 10px; }
+
+/* ---- Écran du match (12/11 : « aussi fun et belle que la préparation ») ---- */
+.match { max-width: 420px; margin: 0 auto; background: #EEF1EC; color: #16201A; border-radius: 16px; padding: 8px 6px 10px; display: flex; flex-direction: column; gap: 6px; }
+.match-tableau { background: #fff; border-radius: 14px; padding: 8px 10px 7px; display: flex; flex-direction: column; gap: 6px; }
+.match-ligne-score { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.match-equipe { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.match-equipe.eux { justify-content: flex-end; }
+.match-avatar { width: 26px; height: 26px; flex: none; border-radius: 50%; color: #fff; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.match-equipe.nous .match-avatar { background: #3563C0; }
+.match-equipe.eux .match-avatar { background: #C2413D; }
+.match-nom { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.match-centre { display: flex; flex-direction: column; align-items: center; line-height: 1.05; }
+.match-score { font-size: 28px; font-weight: 800; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.match-chrono { font-size: 11px; font-weight: 700; color: #4A5A50; background: #EEF1EC; border-radius: 999px; padding: 1px 8px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.match-possession { display: flex; height: 6px; border-radius: 999px; overflow: hidden; background: #C2413D; }
+.match-possession .nous { background: #3563C0; width: 50%; transition: width 0.5s; }
+.match-commandes { display: flex; gap: 6px; align-items: center; }
+.match-jouer { flex: 1; white-space: nowrap; font: inherit; font-size: 15px; font-weight: 800; color: #fff; background: #3563C0; border: none; border-radius: 999px; min-height: 40px; padding: 0 14px; cursor: pointer; box-shadow: 0 3px 0 #244A96; }
+.match-jouer:active { transform: translateY(2px); box-shadow: 0 1px 0 #244A96; }
+.match-jouer.en-jeu { background: #2B2F36; box-shadow: 0 3px 0 #16201A; }
+.match-puce { font: inherit; font-size: 12px; font-weight: 700; color: #4A5A50; background: #fff; border: 2px solid #fff; border-radius: 999px; min-height: 40px; padding: 0 9px; cursor: pointer; white-space: nowrap; }
+.match-puce.actif { border-color: #3563C0; color: #3563C0; }
+.match-statut { margin: 0 4px; font-size: 12px; font-weight: 600; color: #4A5A50; min-height: 1.3em; }
+.match-terrain { position: relative; }
+.match-terrain > svg { width: 100%; display: block; touch-action: manipulation; user-select: none; max-height: calc(100dvh - 150px); }
+.match-pelouse { fill: #4E9A5A; }
+.match-bande { fill: #58A564; }
+.match-lignes .pelouse { fill: transparent; }
+.match-lignes .lignes { stroke: #fff; stroke-opacity: 0.8; stroke-width: 1.6; }
+.match-lignes .lignes .point, .match-lignes .lignes .but { fill: #fff; }
+.match-pion .match-anneau { stroke: #fff; stroke-width: 1.4; }
+.match-pion { filter: drop-shadow(0 1.5px 1px rgba(0, 0, 0, 0.35)); }
+.match-fond-visage { fill: #F4F1EA; }
+.match-halo { fill: rgba(255, 196, 0, 0.25); stroke: #FFC400; stroke-width: 2.5; animation: match-halo 0.9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+.match-halo.eux { fill: rgba(255, 255, 255, 0.2); stroke: #fff; }
+@keyframes match-halo { from { transform: scale(0.92); } to { transform: scale(1.08); } }
+.match-etiquette rect { fill: #fff; stroke: #FFC400; stroke-width: 1.5; }
+.match-etiquette.eux rect { stroke: #C2413D; }
+.match-etiquette text { font: 700 9px system-ui, sans-serif; fill: #16201A; }
+.match-ballon { fill: #fff; stroke: #16201A; stroke-width: 1.2; }
+.match-ombre { fill: rgba(0, 0, 0, 0.3); }
+.match-terrain .zone-match { fill: #fff; fill-opacity: 0.08; stroke: #fff; stroke-opacity: 0.7; stroke-width: 1; stroke-dasharray: 4 3; }
+.match-annonce rect { fill: #fff; stroke: #16201A; stroke-width: 2; }
+.match-annonce text { fill: #16201A; font: 800 20px system-ui, sans-serif; letter-spacing: 0.5px; }
+.match-annonce.faute rect { fill: #FBE9E8; stroke: #C2413D; }
+.match-annonce.faute text { fill: #8E2A27; }
+.match-annonce.but rect { fill: #FFC400; stroke: #16201A; stroke-width: 3; }
+.match-annonce.but text { font-size: 30px; }
+.match-annonce.but.eux rect { fill: #C2413D; }
+.match-annonce.but.eux text { fill: #fff; }
+.match-annonce { animation: match-pop 0.42s cubic-bezier(0.2, 1.6, 0.4, 1); transform-box: fill-box; transform-origin: center; }
+@keyframes match-pop { from { transform: scale(0.3); opacity: 0; } 60% { opacity: 1; } to { transform: scale(1); } }
+.match-confettis { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 14px; }
+.match-confettis span { position: absolute; top: 30%; width: 7px; height: 11px; border-radius: 2px; opacity: 0; animation: match-confetti 1.7s ease-out forwards; }
+@keyframes match-confetti {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  20% { transform: translate(calc(var(--derive) * 0.3), -90px) rotate(calc(var(--tour) * 0.3)); }
+  100% { opacity: 0; transform: translate(var(--derive), 260px) rotate(var(--tour)); }
+}
+.match-tactiques { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.match-pilule { position: relative; display: flex; align-items: baseline; gap: 6px; background: #fff; border-radius: 10px; padding: 7px 26px 7px 10px; min-width: 0; border-left: 4px solid #3563C0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2316201A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; cursor: pointer; }
+.match-pilule.eux { border-left-color: #C2413D; }
+.match-pilule.coupee { opacity: 0.45; }
+.match-pilule-titre { font-size: 12px; font-weight: 600; color: #4A5A50; white-space: nowrap; }
+.match-pilule-valeur { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.match-pilule select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; cursor: pointer; }
+.match-interrupteurs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.match-interrupteur { font: inherit; font-size: 12px; font-weight: 700; color: #4A5A50; background: #E1E6E2; border: none; border-radius: 999px; min-height: 34px; cursor: pointer; }
+.match-interrupteur.actif { color: #fff; background: #2B2F36; }
+.match-bord { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.match-carte { background: #fff; border-radius: 12px; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.match-carte-titre { font-size: 9px; font-weight: 700; color: #4A5A50; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.match-carte-valeurs { display: flex; justify-content: space-between; gap: 4px; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.match-carte-valeurs .nous { color: #3563C0; }
+.match-carte-valeurs .eux { color: #C2413D; }
+.match-paliers { grid-column: 1 / -1; background: #fff; border-radius: 12px; padding: 6px 8px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.match-discret { font-size: 12px; color: #6B776F; }
+.match-palier { display: inline-flex; align-items: center; gap: 4px; background: #2B2F36; color: #fff; border-radius: 999px; padding: 2px 9px 2px 3px; font-size: 12px; font-weight: 700; }
+.match-palier-picto { width: 20px; height: 20px; border-radius: 50%; background: #fff; color: #2B2F36; display: flex; align-items: center; justify-content: center; }
+.match-palier-picto svg { width: 13px; height: 13px; }
+.match-note { margin: 0 4px; font-size: 11px; color: #6B776F; }

@@ -105,6 +105,7 @@ function projeterAttaque(
   reglages: Reglages,
   longueurM: number,
   tenues: LignesTenues,
+  vrai: PointNorm = ballon,
 ): PointNorm {
   const a = reglages.projection.attaque;
   const suivi = poste.suiviBallon ?? 1;
@@ -133,11 +134,13 @@ function projeterAttaque(
   // haut. Les défenseurs centraux et le latéral opposé restent en couverture.
   if (poste.id === "DG" || poste.id === "DD" || poste.id === "MC") {
     const s = a.surnombre;
-    const proche = borner(1 - Math.abs(x - ballon.x) / s.proximite, 0, 1);
-    const haut = borner((ballon.y - s.ballonDebut) / (s.ballonPlein - s.ballonDebut), 0, 1);
+    // Le surnombre suit le vrai ballon (pas le repère de forme, plus lent) :
+    // on vient aider tout de suite là où il est.
+    const proche = borner(1 - Math.abs(x - vrai.x) / s.proximite, 0, 1);
+    const haut = borner((vrai.y - s.ballonDebut) / (s.ballonPlein - s.ballonDebut), 0, 1);
     // Placé bas : il vient en soutien 6 m derrière le ballon (défense de
     // couverture, au moins 4 joueurs derrière lui) ; placé haut : jusqu'à la ligne avant.
-    const ballonM = ballon.y * longueurM;
+    const ballonM = Math.min(ballon.y, vrai.y) * longueurM;
     const plafond = Math.max(yM, t < 0.5 ? ballonM - 6 : ballonM - 6 + (t - 0.5) * 2 * (avantM - 2 - (ballonM - 6)));
     yM = Math.min(plafond, yM + s.distanceM * proche * haut * (0.5 + 0.5 * t));
   }
@@ -153,11 +156,13 @@ export function projeter(
   reglages: Reglages,
   longueurM: number,
   tenues: LignesTenues = {},
+  /** Vrai ballon (perçu), quand `ballon` est le repère de forme de l'équipe. */
+  vrai: PointNorm = ballon,
 ): PointNorm {
   const p =
     phase === "defense"
       ? projeterDefense(base, poste, ballon, reglages, longueurM, tenues)
-      : projeterAttaque(base, poste, ballon, reglages, longueurM, tenues);
+      : projeterAttaque(base, poste, ballon, reglages, longueurM, tenues, vrai);
   const l = reglages.projection.limites;
   return { x: borner(p.x, l.xMin, l.xMax), y: borner(p.y, l.yMin, l.yMax) };
 }

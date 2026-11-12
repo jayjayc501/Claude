@@ -74,12 +74,15 @@
   "mouvement": {
     "vitesseMaxMS": 7,
     "accelerationMS2": 5,
+    "freinageMS2": 8,
     "distanceFreinageM": 4,
     "distanceMinM": 3,
     "forceSeparation": 8,
     "distanceMinAdversaireM": 2.5,
     "variationIndividuelle": 0.06,
-    "respiration": { "amplitudeM": 2, "periodeMinS": 4, "periodeMaxS": 8 },
+    "respiration": { "amplitudeM": 2, "periodeMinS": 6, "periodeMaxS": 11 },
+    "forme": { "vitesseXMS": 4.5, "vitesseYMS": 5, "vitesseReculYMS": 10 },
+    "allure": { "reponseS": 1.1, "reponseRapideS": 0.5, "courseMS": 5.5, "toleranceM": 8, "rattrapageParM": 0.3, "zoneActiveM": 20, "reculUrgentM": 4, "suiviCible": 0.85, "lissageS": 0.4 },
     "perception": {
       "minS": 0.1,
       "maxS": 0.3,
@@ -132,7 +135,14 @@
     "construction": { "boucheM": 7, "baisseSeuil": 7, "largeurM": 18, "bonusLargeur": 2 },
     "marquage": { "declenchementM": 32, "zoneM": 24, "demiLargeurM": 22, "rayonM": 15, "distanceM": 1.5, "milieux": true, "zonePressingM": 0 },
     "horsJeuVuProba": 0.15,
-    "contrePressing": { "dureeS": 4, "rayonM": 20, "joueurs": 3 }
+    "contrePressing": { "dureeS": 4, "rayonM": 20, "joueurs": 3, "tacleFois": 1.3, "precipite": 1, "gene": 1 },
+    "contreAttaque": { "dureeS": 5, "bonusProgression": 0.2, "appelsFois": 2 },
+    "gene": { "rayonM": 4, "facteur": 1, "controleRayonM": 2, "controleRate": 0.08 },
+    "jeuLong": { "proba": 0.06, "probaContre": 0.2, "gainMinM": 18, "distanceMinM": 22, "distanceMaxM": 50, "profondeurMaxM": 62, "avanceS": 0.2, "vitesseMS": 20, "erreurDeg": 5 },
+    "sansBallon": {
+      "soutien": { "joueurs": 2, "rayonM": 28, "distanceM": 12, "rapprochementMaxM": 8, "decalagesM": [3, -3, 6, -6], "reculM": 4 },
+      "appel": { "parSeconde": 0.6, "dureeS": 2.6, "profondeurM": 13, "diagonale": 0.3, "ecartMinM": 2, "ecartMaxM": 14, "avanceBallonM": 6, "zoneM": 25, "suivreRayonM": 14 }
+    }
   },
   "possessionSimulee": {
     "dureeMinS": 4,

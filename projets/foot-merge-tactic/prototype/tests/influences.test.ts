@@ -90,6 +90,68 @@ describe("tactiques et styles (proposition du 12/11)", () => {
     expect(con).toBeLessThan(eq - 2);
   });
 
+  // Signature de chaque tactique (12/11 : « vérifie que les stats de chaque
+  // tactique sont cohérentes »), 12 matchs de 180 s, styles coupés.
+  const signatures = (() => {
+    let cache: Record<string, ReturnType<typeof signature>> | null = null;
+    return () => (cache ??= Object.fromEntries(["EQU", "PRS", "GEG", "CON"].map((t) => [t, signature(t)])));
+  })();
+  function signature(tactique: string) {
+    let gain = 0, passes = 0, longues = 0, passesAdv = 0, reussiesAdv = 0, hautes = 0, rapides = 0, pertes = 0, ligne = 0, nLigne = 0;
+    for (let g = 1; g <= 12; g++) {
+      const sim = new MatchSim(donnees, reglages, [nous(tactique), { ...adversaire, tactique: "EQU" }], g, true);
+      sim.definirOptions({ tactiques: true, styles: false });
+      sim.demarrer();
+      let avant = sim.possession;
+      let perte = -Infinity;
+      for (let t = 0; t < 180; t += reglages.pasDeTempsS) {
+        sim.pas();
+        if (sim.possession !== avant) {
+          if (sim.possession === 0) {
+            if (sim.ballon.y > donnees.longueurM / 2) hautes++;
+            if (sim.temps - perte < 5) rapides++;
+          } else {
+            // Perte en jeu (pas au gardien adverse, pas sur un arrêt) : on peut contre-presser.
+            const p = sim.balle!.porteur;
+            perte = p && p.poste.id !== "G" && !sim.balle!.arretDeJeu ? sim.temps : -Infinity;
+            if (perte > -Infinity) pertes++;
+          }
+          avant = sim.possession;
+        }
+        if (sim.lignesDef[0] !== null) {
+          ligne += sim.lignesDef[0];
+          nLigne++;
+        }
+      }
+      const st = sim.balle!.stats;
+      gain += st.gainPasses[0];
+      passes += st.passes[0];
+      longues += st.passesLongues[0];
+      passesAdv += st.passes[1];
+      reussiesAdv += st.passesReussies[1];
+    }
+    return { gain: gain / passes, longues: longues / passes, reussiteAdv: reussiesAdv / passesAdv, hautes, contrePressing: rapides / pertes, ligne: ligne / nLigne };
+  }
+
+  test("Contre : jeu plus direct (passes qui gagnent plus de terrain, plus de ballons longs), bloc plus bas", () => {
+    const { EQU: eq, CON: con } = signatures();
+    expect(con!.gain).toBeGreaterThan(eq!.gain + 1);
+    expect(con!.longues).toBeGreaterThan(eq!.longues + 0.05);
+    expect(con!.ligne).toBeLessThan(eq!.ligne - 2);
+  }, 60_000);
+
+  test("Pressing : l'adversaire rate plus de passes, on récupère plus haut", () => {
+    const { EQU: eq, PRS: prs } = signatures();
+    expect(prs!.reussiteAdv).toBeLessThan(eq!.reussiteAdv - 0.02);
+    expect(prs!.hautes).toBeGreaterThan(eq!.hautes);
+  }, 60_000);
+
+  test("Gegenpressing : plus de ballons repris dans les 5 s qui suivent une perte en jeu, et plus haut", () => {
+    const { EQU: eq, GEG: geg } = signatures();
+    expect(geg!.contrePressing).toBeGreaterThan(eq!.contrePressing + 0.05);
+    expect(geg!.hautes).toBeGreaterThan(eq!.hautes);
+  }, 60_000);
+
   test("réalisme (passes courtes) : plus de passes et mieux réussies en Tiki-taka", () => {
     const eq = mesurer(nous("EQU"), 4, 180);
     const tik = mesurer(nous("TIK"), 4, 180);

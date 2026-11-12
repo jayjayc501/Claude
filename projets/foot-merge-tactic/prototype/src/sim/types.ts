@@ -176,6 +176,8 @@ export interface Reglages {
   mouvement: {
     vitesseMaxMS: number;
     accelerationMS2: number;
+    /** Décélération maximale (freiner, se retourner), plus forte que l'accélération. */
+    freinageMS2: number;
     distanceFreinageM: number;
     /** Distance minimale entre coéquipiers. */
     distanceMinM: number;
@@ -189,6 +191,28 @@ export interface Reglages {
     /** Retard avec lequel chacun voit le ballon bouger : une part propre au
      *  joueur (entre minS et maxS) plus parMetreS par mètre qui le sépare du ballon. */
     perception: { minS: number; maxS: number; parMetreS: number };
+    /** Allures (12/11, « plus réaliste dans les mouvements ») : on ne court pas
+     *  tout le temps. Vitesse voulue = vitesse de sa place (suivie sans retard)
+     *  + rattrapage de l'écart (écart / reponseS) : marche pour 1 à 2 m, trot
+     *  pour quelques mètres. Loin du jeu, plafond de course (courseMS), relevé
+     *  de rattrapageParM par mètre au-delà de toleranceM. Pleine vitesse quand
+     *  on joue le ballon, en transition ou à moins de zoneActiveM du ballon. */
+    /** Repère de la forme d'équipe : vitesses maximales (m/s) en largeur et en profondeur (0 : vrai ballon). */
+    forme: { vitesseXMS: number; vitesseYMS: number; vitesseReculYMS: number };
+    allure: {
+      reponseS: number;
+      reponseRapideS: number;
+      courseMS: number;
+      toleranceM: number;
+      rattrapageParM: number;
+      zoneActiveM: number;
+      /** Plus de reculUrgentM devant sa place : retour rapide côté but. */
+      reculUrgentM: number;
+      /** Part de la vitesse de sa place qu'on suit directement (0 à 1). */
+      suiviCible: number;
+      /** Lissage de la vitesse estimée de sa place (secondes). */
+      lissageS: number;
+    };
   };
   /** Ballon réel (mission 2). */
   ballon: {
@@ -252,8 +276,48 @@ export interface Reglages {
     marquage: { declenchementM: number; zoneM: number; demiLargeurM: number; rayonM: number; distanceM: number; milieux: boolean; zonePressingM: number };
     /** Probabilité de passer quand même à un joueur hors-jeu. */
     horsJeuVuProba: number;
-    /** Juste après une perte : les plus proches (dans rayonM) pressent pendant dureeS. */
-    contrePressing: { dureeS: number; rayonM: number; joueurs: number };
+    /** Juste après une perte : les plus proches (dans rayonM) pressent pendant
+     *  dureeS, et taclent tacleFois plus souvent ; le porteur adverse décide
+     *  plus vite (temps de décision × precipite) et passe moins juste (× gene). */
+    contrePressing: { dureeS: number; rayonM: number; joueurs: number; tacleFois: number; precipite: number; gene: number };
+    /** Contre-attaque : pendant dureeS après la récupération, on joue plus vers
+     *  l'avant (+bonusProgression au poids de la progression) et les appels sont
+     *  appelsFois plus fréquents, même si le porteur est pressé. */
+    contreAttaque: { dureeS: number; bonusProgression: number; appelsFois: number };
+    /** Jeu long (12/11) : ballon aérien vers un attaquant lancé ou libre,
+     *  joué depuis sa moitié ou le milieu (proba à chaque décision ; probaContre
+     *  juste après la récupération). Le receveur doit gagner au moins gainMinM
+     *  et arriver au point avant les adversaires (avanceS de marge). */
+    jeuLong: { proba: number; probaContre: number; gainMinM: number; distanceMinM: number; distanceMaxM: number; profondeurMaxM: number; avanceS: number; vitesseMS: number; erreurDeg: number };
+    /** Gêne de l'équipe qui défend sur les passes adverses : un défenseur à
+     *  moins de rayonM du passeur multiplie l'imprécision par facteur ; un
+     *  receveur serré à moins de controleRayonM rate son contrôle (controleRate). */
+    gene: { rayonM: number; facteur: number; controleRayonM: number; controleRate: number };
+    /** Jeu sans ballon de l'équipe qui attaque (12/11, référence §5 : soutien, appels). */
+    sansBallon: {
+      /** Les `joueurs` coéquipiers les plus proches (à moins de rayonM) se
+       *  rapprochent du porteur jusqu'à distanceM (de rapprochementMaxM au plus,
+       *  triangles) et ouvrent une ligne de passe : pas de côté (decalagesM) ou
+       *  décrochage (reculM). */
+      soutien: { joueurs: number; rayonM: number; distanceM: number; rapprochementMaxM: number; decalagesM: number[]; reculM: number };
+      /** Appel en profondeur : chance par seconde quand le porteur a du temps ;
+       *  course de dureeS vers un point profondeurM derrière la défense adverse,
+       *  en diagonale vers l'axe ; l'attaquant part entre ecartMinM et ecartMaxM
+       *  derrière l'avant-dernier défenseur, au moins avanceBallonM devant le
+       *  ballon, quand le porteur est à plus de zoneM de son but. Le défenseur
+       *  le plus proche (à moins de suivreRayonM) le suit. */
+      appel: {
+        parSeconde: number;
+        dureeS: number;
+        profondeurM: number;
+        diagonale: number;
+        ecartMinM: number;
+        ecartMaxM: number;
+        avanceBallonM: number;
+        zoneM: number;
+        suivreRayonM: number;
+      };
+    };
   };
   possessionSimulee: {
     dureeMinS: number;

@@ -20,31 +20,37 @@ import { activer, basculerMuet, estMuet, jouer } from "./son";
 
 const ECHELLE = 5; // unités SVG par mètre
 const MARGE = 6;
-/** Trois rendus à comparer (12/11, « c'est quand même un sacré bordel » avec 22 figurines) :
- *  pions ronds et seul le porteur en figurine ; toutes les figurines en petit ;
- *  figurines plus grandes avec une caméra qui suit le ballon. */
-type Vue = "pions" | "figurines" | "camera";
+/** Trois rendus à comparer (12/11) : pions ronds et seul le porteur en
+ *  figurine ; toutes les figurines en petit ; « Action » : les joueurs proches
+ *  du ballon en figurines, les autres en pions (remplace la caméra, 12/11). */
+type Vue = "pions" | "figurines" | "action";
 const VUES: { id: Vue; nom: string }[] = [
+  { id: "action", nom: "Action" },
   { id: "pions", nom: "Pions" },
   { id: "figurines", nom: "Figurines" },
-  { id: "camera", nom: "Caméra" },
 ];
 /** Largeur d'une figurine (unités SVG) ; repère de la maquette : 48 × 53, socle en 24,47. */
-const LARGEUR_FIG: Record<Vue, number> = { pions: 34, figurines: 26, camera: 30 };
+const LARGEUR_FIG: Record<Vue, number> = { pions: 34, figurines: 26, action: 30 };
 /** Agrandissement du porteur. */
-const GRAND_PORTEUR: Record<Vue, number> = { pions: 1, figurines: 1.4, camera: 1.2 };
-/** Caméra : fenêtre de 44 m de large autour du ballon. */
-const ZOOM_CAMERA = 68 / 44;
+const GRAND_PORTEUR: Record<Vue, number> = { pions: 1, figurines: 1.4, action: 1.2 };
+/** Vue « Action » : un joueur passe en figurine à moins de ACTION_ENTREE_M du
+ *  ballon et redevient pion au-delà de ACTION_SORTIE_M (pas de clignotement),
+ *  après ACTION_MIN_S au moins dans son état. */
+const ACTION_ENTREE_M = 13;
+const ACTION_SORTIE_M = 18;
+const ACTION_MIN_S = 0.8;
 const RAYON_ROND = 7;
+/** Rayon du ballon à l'écran (unités SVG) ; plus gros que nature pour rester lisible. */
+const RAYON_BALLON = 5;
 const BLEU_NOUS = "#3563C0";
 /** Durée minimale (temps de jeu, s) pendant laquelle un joueur reste « en vedette » (porteur affiché). */
 const VEDETTE_MIN_S = 0.7;
 /** Écart minimal à l'écran entre deux pions ou figurines (unités SVG), selon la vue. */
-const ECART_AFFICHAGE: Record<Vue, number> = { pions: 2 * RAYON_ROND + 2, figurines: 18, camera: 20 };
-const CLE_VUE = "foot-merge-tactic.vue-match.v1";
-/** Une mi-temps : 180 s de jeu simulé, soit 45 s à l'écran en vitesse ×4 (12/11). */
+const ECART_AFFICHAGE: Record<Vue, number> = { pions: 2 * RAYON_ROND + 2, figurines: 18, action: 2 * RAYON_ROND + 3 };
+const CLE_VUE = "foot-merge-tactic.vue-match.v2";
+/** Une mi-temps : 180 s de jeu simulé, soit environ 51 s à l'écran en vitesse ×3,5 (12/11). */
 const DUREE_MI_TEMPS_S = 180;
-const VITESSE_PAR_DEFAUT = 4;
+const VITESSE_PAR_DEFAUT = 3.5;
 const COULEUR_EUX = "#C2413D";
 const BANDES = 12;
 
@@ -81,7 +87,8 @@ export class EcranMatch {
   private dernier = 0;
   private reserve = 0;
   /** Tactiques et styles actifs (gardés d'un match à l'autre). */
-  private options: OptionsInfluences = { tactiques: true, styles: true };
+  /** Styles coupés en match pour l'instant (concepteur, 12/11) ; l'interrupteur reste pour essayer. */
+  private options: OptionsInfluences = { tactiques: true, styles: false };
   /** Tactique choisie sur cet écran pour chaque équipe (null : celle de l'équipe). */
   private tactiquesForcees: [string | null, string | null] = [null, null];
 
@@ -89,7 +96,7 @@ export class EcranMatch {
   private vue: Vue = (() => {
     try {
       const v = localStorage.getItem(CLE_VUE);
-      return v === "figurines" || v === "camera" ? v : "pions";
+      return v === "figurines" || v === "pions" ? v : "action";
     } catch {
       return "pions";
     }
@@ -97,7 +104,15 @@ export class EcranMatch {
   /** Échelle des figurines : LARGEUR_FIG / 48. */
   private k = LARGEUR_FIG.pions / 48;
   private svgTerrain!: SVGSVGElement;
-  private camera: { x: number; y: number } | null = null;
+  /** Vue « Action » : figurine de chaque joueur (montrée près du ballon), état et instant du dernier changement. */
+  private figsAction: SVGGElement[] = [];
+  private enAction: boolean[] = [];
+  private actionDepuis: number[] = [];
+  /** Ballon : groupe, motif qui tourne quand il roule, traînée, angle et dernière position. */
+  private ballonMotif!: SVGGElement;
+  private trainee!: SVGPathElement;
+  private ballonAngle = 0;
+  private ballonAvant: { x: number; y: number } | null = null;
   private annonceCadre!: SVGGElement;
   private images_: (string | undefined)[] = [];
   private figPorteur: SVGGElement | null = null;
@@ -109,12 +124,14 @@ export class EcranMatch {
   private vedetteDepuis = -Infinity;
   private boutonsVue: HTMLButtonElement[] = [];
   private calquePions!: SVGGElement;
+  private calqueFigs: SVGGElement | null = null;
   private images = 0;
   private halo!: SVGEllipseElement;
   private etiquette!: SVGGElement;
   private etiquetteFond!: SVGRectElement;
   private etiquetteTexte!: SVGTextElement;
-  private ballon!: SVGCircleElement;
+  private ballon!: SVGGElement;
+  private degradeTrainee!: SVGLinearGradientElement;
   private ombreBallon!: SVGEllipseElement;
   private calqueZones!: SVGGElement;
   private terrain!: HTMLElement;
@@ -217,11 +234,12 @@ export class EcranMatch {
       this.graine += 1;
       this.nouveauMatch();
     });
-    const vitesses = [0.5, 1, 2, 3, 4];
-    const bVitesse = html("button", { type: "button", class: "match-puce", "aria-label": "Vitesse" }, cmd, `×${this.vitesse}`);
+    const vitesses = [0.5, 1, 2, 3, 3.5, 4];
+    const libelle = () => `×${String(this.vitesse).replace(".", ",")}`;
+    const bVitesse = html("button", { type: "button", class: "match-puce", "aria-label": "Vitesse" }, cmd, libelle());
     bVitesse.addEventListener("click", () => {
       this.vitesse = vitesses[(vitesses.indexOf(this.vitesse) + 1) % vitesses.length]!;
-      bVitesse.textContent = `×${this.vitesse}`;
+      bVitesse.textContent = libelle();
     });
     const bSon = html("button", { type: "button", class: "match-puce", "aria-label": "Son" }, cmd, estMuet() ? "Muet" : "Son");
     bSon.addEventListener("click", () => {
@@ -323,7 +341,6 @@ export class EcranMatch {
     this.terrain.replaceChildren(s);
     this.svgTerrain = s;
     this.k = LARGEUR_FIG[this.vue] / 48;
-    this.camera = null;
     this.dernierPorteur = null;
     this.vedette = null;
     this.vedetteDepuis = -Infinity;
@@ -335,6 +352,18 @@ export class EcranMatch {
       [["#FFC400", 1.2], ["#FFC400", 2.6]],
       [["#FFFFFF", 0.8], ["#C04BFF", 2.4], ["#FF4FD8", 4.5]],
     ];
+    // Ballon moderne (12/11, « le ballon n'est pas beau ») : sphère brillante,
+    // motif de match bleu et or qui tourne quand il roule, reflet, traînée.
+    const sphere = svg("radialGradient", { id: "match-ballon-sphere", cx: "38%", cy: "32%", r: "75%" }, defs);
+    svg("stop", { offset: "0%", "stop-color": "#FFFFFF" }, sphere);
+    svg("stop", { offset: "55%", "stop-color": "#F1F4F8" }, sphere);
+    svg("stop", { offset: "100%", "stop-color": "#B9C3D0" }, sphere);
+    const queue = svg("linearGradient", { id: "match-ballon-trainee", gradientUnits: "userSpaceOnUse", x1: "0", y1: "0", x2: "1", y2: "0" }, defs);
+    this.degradeTrainee = queue as SVGLinearGradientElement;
+    svg("stop", { offset: "0%", "stop-color": "#FFFFFF", "stop-opacity": "0" }, queue);
+    svg("stop", { offset: "100%", "stop-color": "#FFFFFF", "stop-opacity": "0.75" }, queue);
+    const clip = svg("clipPath", { id: "match-ballon-clip" }, defs);
+    svg("circle", { r: RAYON_BALLON }, clip);
     auras.forEach((ombres, n) => {
       if (!n) return;
       const f = svg("filter", { id: `match-aura-${n}`, x: "-60%", y: "-60%", width: "220%", height: "220%", "color-interpolation-filters": "sRGB" }, defs);
@@ -352,7 +381,7 @@ export class EcranMatch {
 
     // Halo du porteur, ombre du ballon, joueurs, ballon.
     this.halo = svg("ellipse", { rx: 22 * K, ry: 7 * K, class: "match-halo" }, s);
-    this.ombreBallon = svg("ellipse", { rx: 3.4, ry: 1.6, class: "match-ombre" }, s);
+    this.ombreBallon = svg("ellipse", { rx: RAYON_BALLON * 0.95, ry: RAYON_BALLON * 0.45, class: "match-ombre" }, s);
     const g = svg("g", {}, s);
     this.calquePions = g;
     // Figurines adverses : d'abord celles qui ne sont pas sur ton terrain, pour
@@ -365,8 +394,23 @@ export class EcranMatch {
     // Maillots d'équipe en match : bleu pour toi, rouge pour l'adversaire (12/11).
     this.images_ = this.sim.joueurs.map((j) => (j.camp === 1 ? (j.poste.id === "G" ? GARDIEN_ROUGE : rouges[rang++ % rouges.length]!) : (BUSTES_BLEUS[j.joueur.id] ?? BUSTES[j.joueur.id])));
     this.pions = this.sim.joueurs.map((j, i) =>
-      this.vue === "pions" ? this.pionRond(g, j.camp, j.joueur.id, j.joueur.nom) : this.pion(g, j.camp, j.joueur.id, j.joueur.nom, this.images_[i]),
+      this.vue === "figurines" ? this.pion(g, j.camp, j.joueur.id, j.joueur.nom, this.images_[i]) : this.pionRond(g, j.camp, j.joueur.id, j.joueur.nom),
     );
+    // Vue « Action » : une figurine par joueur, au-dessus des pions, montrée près du ballon.
+    this.figsAction = [];
+    this.calqueFigs = null;
+    this.enAction = this.sim.joueurs.map(() => false);
+    this.actionDepuis = this.sim.joueurs.map(() => -Infinity);
+    if (this.vue === "action") {
+      const gf = svg("g", {}, s);
+      this.calqueFigs = gf;
+      this.figsAction = this.sim.joueurs.map((j, i) => {
+        // Groupe extérieur : position ; intérieur (la figurine) : animation d'apparition.
+        const f = svg("g", { style: "display:none" }, gf);
+        this.pion(f, j.camp, j.joueur.id, j.joueur.nom, this.images_[i]);
+        return f;
+      });
+    }
     // Vue « pions » : le porteur surgit en figurine sur un socle doré.
     this.figPorteur = null;
     if (this.vue === "pions") {
@@ -375,7 +419,19 @@ export class EcranMatch {
       svg("ellipse", { cx: 0, cy: 0, rx: 17 * K, ry: 5 * K, class: "match-ombre-pion" }, this.figPorteurAnim);
       this.figPorteurImage = svg("image", { x: -24 * K, y: -48 * K, width: 48 * K, height: 49 * K }, this.figPorteurAnim);
     }
-    this.ballon = svg("circle", { r: 3.4, class: "match-ballon" }, s);
+    this.trainee = svg("path", { class: "match-trainee", fill: "url(#match-ballon-trainee)" }, s);
+    this.ballon = svg("g", { class: "match-ballon" }, s);
+    svg("circle", { r: RAYON_BALLON, fill: "url(#match-ballon-sphere)" }, this.ballon);
+    const motif = svg("g", { "clip-path": "url(#match-ballon-clip)" }, this.ballon);
+    this.ballonMotif = svg("g", {}, motif);
+    const R = RAYON_BALLON;
+    // Panneaux du ballon : une virgule bleue et une or, symétriques (motif moderne).
+    svg("path", { d: `M ${-R * 0.95} ${-R * 0.2} C ${-R * 0.4} ${-R * 0.9}, ${R * 0.35} ${-R * 0.7}, ${R * 0.15} ${-R * 0.05} C ${-R * 0.1} ${-R * 0.45}, ${-R * 0.55} ${-R * 0.45}, ${-R * 0.95} ${-R * 0.2} Z`, class: "match-ballon-bleu" }, this.ballonMotif);
+    svg("path", { d: `M ${R * 0.95} ${R * 0.2} C ${R * 0.4} ${R * 0.9}, ${-R * 0.35} ${R * 0.7}, ${-R * 0.15} ${R * 0.05} C ${R * 0.1} ${R * 0.45}, ${R * 0.55} ${R * 0.45}, ${R * 0.95} ${R * 0.2} Z`, class: "match-ballon-or" }, this.ballonMotif);
+    svg("circle", { r: R * 0.16, class: "match-ballon-centre" }, this.ballonMotif);
+    svg("circle", { r: RAYON_BALLON, class: "match-ballon-bord" }, this.ballon);
+    svg("ellipse", { cx: -R * 0.35, cy: -R * 0.42, rx: R * 0.32, ry: R * 0.2, class: "match-ballon-reflet", transform: `rotate(-30 ${-R * 0.35} ${-R * 0.42})` }, this.ballon);
+    this.ballonAvant = null;
     this.etiquette = svg("g", { class: "match-etiquette", style: "display:none" }, s);
     this.etiquetteFond = svg("rect", { y: -9, height: 15, rx: 7.5 }, this.etiquette);
     this.etiquetteTexte = svg("text", { y: 1.5, "text-anchor": "middle" }, this.etiquette);
@@ -509,9 +565,10 @@ export class EcranMatch {
       }
     }
     sim.joueurs.forEach((j, i) => {
-      const e = j === porteur && grand !== 1 ? ` scale(${grand})` : "";
+      const e = j === porteur && grand !== 1 && this.vue === "figurines" ? ` scale(${grand})` : "";
       this.pions[i]!.setAttribute("transform", `translate(${pos[i]!.x.toFixed(1)} ${pos[i]!.y.toFixed(1)})${e}`);
     });
+    if (this.vue === "action") this.dessinerAction(pos, porteur, grand);
     if (this.figPorteur) {
       this.figPorteur.style.display = porteur ? "" : "none";
       if (porteur) {
@@ -533,8 +590,9 @@ export class EcranMatch {
     this.dernierPorteur = porteur;
     // Ceux du bas de l'écran passent devant ceux du haut (comme des figurines posées sur le terrain).
     if (this.images++ % 10 === 0) {
-      const ordre = sim.joueurs.map((j, i) => ({ y: this.Y(j.pos.y), p: this.pions[i]! })).sort((a, b) => a.y - b.y);
-      for (const { p } of ordre) this.calquePions.appendChild(p);
+      const ordre = sim.joueurs.map((j, i) => ({ y: this.Y(j.pos.y), i })).sort((a, b) => a.y - b.y);
+      for (const { i } of ordre) this.calquePions.appendChild(this.pions[i]!);
+      if (this.calqueFigs) for (const { i } of ordre) this.calqueFigs.appendChild(this.figsAction[i]!);
     }
     this.halo.style.display = porteur ? "" : "none";
     if (porteur) {
@@ -550,21 +608,11 @@ export class EcranMatch {
         this.etiquetteFond.setAttribute("width", l.toFixed(1));
       }
       this.etiquette.setAttribute("class", `match-etiquette${porteur.camp === 0 ? "" : " eux"}`);
-      this.etiquette.setAttribute("transform", `translate(${pp.x.toFixed(1)} ${(pp.y - 48 * this.k * grand - 7).toFixed(1)})`);
+      const hauteurFig = this.vue === "pions" || this.vue === "action" || this.vue === "figurines" ? 48 * this.k * grand : 0;
+      this.etiquette.setAttribute("transform", `translate(${pp.x.toFixed(1)} ${(pp.y - hauteurFig - 7).toFixed(1)})`);
     }
     this.etiquette.style.display = porteur ? "" : "none";
-    const enLAir = !!sim.balle?.enLAir;
-    const bx = this.X(sim.ballon.x);
-    const by = this.Y(sim.ballon.y);
-    this.ballon.setAttribute("r", enLAir ? "5" : "3.4");
-    this.ballon.setAttribute("cx", bx.toFixed(1));
-    this.ballon.setAttribute("cy", (by - (enLAir ? 5 : 0)).toFixed(1)); // ballon aérien : plus gros, au-dessus de son ombre
-    this.ombreBallon.setAttribute("cx", bx.toFixed(1));
-    this.ombreBallon.setAttribute("cy", (by + 2.5).toFixed(1));
-    this.ballon.style.display = sim.demarre ? "" : "none";
-    this.ombreBallon.style.display = sim.demarre ? "" : "none";
-
-    this.suivreCamera();
+    this.dessinerBallon();
 
     this.calqueZones.replaceChildren();
     if (this.zonesVisibles) {
@@ -617,7 +665,7 @@ export class EcranMatch {
     this.barreNous.style.width = `${total > 0 ? (100 * sim.tempsPossession[0]) / total : 50}%`;
 
     let texte: string;
-    if (!sim.demarre) texte = "Positions au coup d'envoi. Une mi-temps dure 45 s en vitesse ×4.";
+    if (!sim.demarre) texte = "Positions au coup d'envoi. Une mi-temps dure environ 50 s en vitesse ×3,5.";
     else if (this.arret) texte = this.arret === "fin" ? "Fin du match." : "Mi-temps : change ta tactique si tu veux, puis lance la 2e mi-temps.";
     else {
       const qui = sim.possession === 0 ? "Tu as le ballon" : `${this.habillage.nomEux} a le ballon`;
@@ -690,27 +738,81 @@ export class EcranMatch {
     this.panneau = p;
   }
 
-  /** Vue « caméra » : la fenêtre suit le ballon en douceur, sans sortir du terrain. */
-  private suivreCamera(): void {
-    const W = 68 * ECHELLE + 2 * MARGE;
-    const H = 105 * ECHELLE + 2 * MARGE;
-    if (this.vue !== "camera") {
-      this.annonceCadre.removeAttribute("transform");
-      return;
+  /** Vue « Action » (12/11, à la place de la caméra) : les joueurs proches du
+   *  ballon passent en figurines, les autres restent des pions. Hystérésis et
+   *  durée minimale : un joueur ne clignote pas d'un état à l'autre. */
+  private dessinerAction(pos: { x: number; y: number }[], porteur: import("../sim/simulation").JoueurSim | null, grand: number): void {
+    const sim = this.sim;
+    sim.joueurs.forEach((j, i) => {
+      const d = Math.hypot(j.pos.x - sim.ballon.x, j.pos.y - sim.ballon.y);
+      const voulu = sim.demarre && (j === porteur || (this.enAction[i] ? d < ACTION_SORTIE_M : d < ACTION_ENTREE_M));
+      if (voulu !== this.enAction[i] && (j === porteur || sim.temps - this.actionDepuis[i]! >= ACTION_MIN_S || !sim.demarre)) {
+        this.enAction[i] = voulu;
+        this.actionDepuis[i] = sim.temps;
+        const f = this.figsAction[i]!;
+        f.style.display = voulu ? "" : "none";
+        this.pions[i]!.style.display = voulu ? "none" : "";
+        if (voulu) {
+          // La figurine surgit de son pion.
+          const fig = f.firstElementChild as SVGGElement;
+          fig.classList.remove("match-surgit");
+          void fig.getBoundingClientRect();
+          fig.classList.add("match-surgit");
+        }
+      }
+      if (this.enAction[i]) {
+        const e = j === porteur ? ` scale(${grand})` : "";
+        this.figsAction[i]!.setAttribute("transform", `translate(${pos[i]!.x.toFixed(1)} ${pos[i]!.y.toFixed(1)})${e}`);
+      }
+    });
+  }
+
+  /** Ballon : au sol il roule (le motif tourne), en l'air il monte au-dessus
+   *  de son ombre et grossit ; une traînée suit les ballons rapides. */
+  private dessinerBallon(): void {
+    const sim = this.sim;
+    const visible = sim.demarre;
+    this.ballon.style.display = visible ? "" : "none";
+    this.ombreBallon.style.display = visible ? "" : "none";
+    this.trainee.style.display = "none";
+    if (!visible) return;
+    const bx = this.X(sim.ballon.x);
+    const by = this.Y(sim.ballon.y);
+    const h = sim.balle?.hauteur ?? 0;
+    const lift = h * 16;
+    const echelle = 1 + 0.45 * h;
+    if (this.ballonAvant) {
+      const d = Math.hypot(bx - this.ballonAvant.x, by - this.ballonAvant.y);
+      if (d < 40) this.ballonAngle = (this.ballonAngle + (d / RAYON_BALLON) * (180 / Math.PI) * (bx >= this.ballonAvant.x ? 1 : -1)) % 360;
     }
-    const vw = W / ZOOM_CAMERA;
-    const vh = H / ZOOM_CAMERA;
-    const cible = { x: this.X(this.sim.ballon.x), y: this.Y(this.sim.ballon.y) };
-    if (!this.camera) this.camera = { ...cible };
-    else {
-      this.camera.x += (cible.x - this.camera.x) * 0.08;
-      this.camera.y += (cible.y - this.camera.y) * 0.08;
+    this.ballonAvant = { x: bx, y: by };
+    this.ballonMotif.setAttribute("transform", `rotate(${this.ballonAngle.toFixed(0)})`);
+    this.ballon.setAttribute("transform", `translate(${bx.toFixed(1)} ${(by - lift).toFixed(1)}) scale(${echelle.toFixed(2)})`);
+    this.ombreBallon.setAttribute("cx", bx.toFixed(1));
+    this.ombreBallon.setAttribute("cy", (by + RAYON_BALLON * 0.55).toFixed(1));
+    this.ombreBallon.setAttribute("transform", `translate(${bx.toFixed(1)} ${(by + RAYON_BALLON * 0.55).toFixed(1)}) scale(${(1 - 0.35 * h).toFixed(2)}) translate(${(-bx).toFixed(1)} ${(-(by + RAYON_BALLON * 0.55)).toFixed(1)})`);
+    this.ombreBallon.style.opacity = (1 - 0.5 * h).toFixed(2);
+    // Traînée : ballon rapide (passe appuyée, tir, dégagement).
+    const v = sim.balle?.vit ?? { x: 0, y: 0 };
+    const vitesse = Math.hypot(v.x, v.y);
+    if (vitesse > 9 && !sim.balle?.porteur) {
+      const ux = (this.X(sim.ballon.x + v.x) - bx) / vitesse;
+      const uy = (this.Y(sim.ballon.y + v.y) - by) / vitesse;
+      const n = Math.hypot(ux, uy) || 1;
+      const dx = ux / n;
+      const dy = uy / n;
+      const long = Math.min(46, (vitesse - 6) * 2.2);
+      const w = RAYON_BALLON * 0.9 * echelle;
+      const cy = by - lift;
+      const qx = bx - dx * long;
+      const qy = cy - dy * long;
+      this.trainee.setAttribute("d", `M ${(bx - dy * w).toFixed(1)} ${(cy + dx * w).toFixed(1)} L ${qx.toFixed(1)} ${qy.toFixed(1)} L ${(bx + dy * w).toFixed(1)} ${(cy - dx * w).toFixed(1)} Z`);
+      this.degradeTrainee.setAttribute("x1", qx.toFixed(1));
+      this.degradeTrainee.setAttribute("y1", qy.toFixed(1));
+      this.degradeTrainee.setAttribute("x2", bx.toFixed(1));
+      this.degradeTrainee.setAttribute("y2", cy.toFixed(1));
+      this.trainee.style.display = "";
     }
-    const x0 = Math.min(W - vw, Math.max(0, this.camera.x - vw / 2));
-    const y0 = Math.min(H - vh, Math.max(0, this.camera.y - vh / 2));
-    this.svgTerrain.setAttribute("viewBox", `${x0.toFixed(1)} ${y0.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`);
-    // Les annonces restent au centre de ce qu'on voit.
-    this.annonceCadre.setAttribute("transform", `translate(${(x0 + vw / 2 - W / 2).toFixed(1)} ${(y0 + vh / 2 - H / 2).toFixed(1)})`);
   }
 
   /** Pluie de confettis sur le terrain (but). */

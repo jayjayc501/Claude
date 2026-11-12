@@ -49,6 +49,9 @@ export interface JoueurSim {
   perceptionS: number;
   /** Effet individuel de son style (vitesse, pressing, tacle…) ; neutre sans style. */
   effet: EffetJoueur;
+  /** Cible du pas précédent et vitesse lissée de sa cible (allures). */
+  ciblePrec: PointM;
+  vitCible: PointM;
 }
 
 export class MatchSim {
@@ -87,7 +90,13 @@ export class MatchSim {
   private cibleBallon: PointM;
   /** Ballon et lignes tenues des derniers instants (un relevé par pas), pour
    *  que chacun voie le jeu avec son propre petit retard. */
-  private historique: { ballon: PointM; lignesDef: [number | null, number | null] }[] = [];
+  private historique: { ballon: PointM; formes: [PointM, PointM]; lignesDef: [number | null, number | null] }[] = [];
+  /** Repère de la forme de chaque équipe (12/11, mouvements plus réalistes) :
+   *  il suit le ballon à vitesse limitée. Le bloc coulisse et monte avec le
+   *  jeu sans sauter à chaque passe ; le porteur, le receveur et les presseurs
+   *  jouent toujours le vrai ballon. Fonction du ballon et du temps seulement. */
+  formes: [PointM, PointM];
+  private ballonAvant: PointM;
 
   constructor(
     readonly donnees: Donnees,
@@ -102,6 +111,8 @@ export class MatchSim {
     this.regs = [reglages, reglages];
     this.balle = ballonReel ? new BallonReel(this, graine) : null;
     this.ballon = this.centre();
+    this.formes = [this.centre(), this.centre()];
+    this.ballonAvant = this.centre();
     this.cibleBallon = this.centre();
     this.joueurs = [];
     equipes.forEach((equipe, i) => {
@@ -132,6 +143,8 @@ export class MatchSim {
           facteur: 1 + this.rng.entre(-v, v),
           perceptionS: this.rng.entre(reglages.mouvement.perception.minS, reglages.mouvement.perception.maxS),
           effet: effetJoueur(joueur, this.influences, this.options),
+          ciblePrec: { ...pos },
+          vitCible: { x: 0, y: 0 },
         });
       }
     });
@@ -219,7 +232,8 @@ export class MatchSim {
     if (this.balle) this.balle.pas(dt);
     else this.deplacerBallon(dt);
     this.tenirLignes(dt);
-    this.historique.push({ ballon: { ...this.ballon }, lignesDef: [...this.lignesDef] });
+    this.suivreFormes(dt);
+    this.historique.push({ ballon: { ...this.ballon }, formes: [{ ...this.formes[0] }, { ...this.formes[1] }], lignesDef: [...this.lignesDef] });
     if (this.historique.length > Math.ceil(1 / dt)) this.historique.shift();
     this.calculerCibles();
     this.deplacerJoueurs(dt);
@@ -341,6 +355,29 @@ export class MatchSim {
     }
   }
 
+  /** Le repère de forme de chaque équipe va vers le ballon, sans dépasser
+   *  ses vitesses (en largeur, en profondeur). Ballon replacé (engagement,
+   *  remise en jeu lointaine) : le repère y saute. */
+  private suivreFormes(dt: number): void {
+    // Jeu arrêté : les équipes se replacent autour du ballon (le repère y va tout de suite).
+    const saut = Math.hypot(this.ballon.x - this.ballonAvant.x, this.ballon.y - this.ballonAvant.y) > 4 || !!this.balle?.arretDeJeu;
+    this.ballonAvant = { ...this.ballon };
+    for (const camp of [0, 1] as const) {
+      const f = this.reg(camp).mouvement.forme;
+      const p = this.formes[camp];
+      if (saut || f.vitesseXMS <= 0) {
+        this.formes[camp] = { ...this.ballon };
+        continue;
+      }
+      const dx = Math.max(-f.vitesseXMS * dt, Math.min(f.vitesseXMS * dt, this.ballon.x - p.x));
+      // L'équipe monte pas à pas, mais revient vite soutenir un ballon joué en arrière.
+      const sens = camp === 0 ? 1 : -1;
+      const vy = (this.ballon.y - p.y) * sens > 0 ? f.vitesseYMS : f.vitesseReculYMS;
+      const dy = Math.max(-vy * dt, Math.min(vy * dt, this.ballon.y - p.y));
+      this.formes[camp] = { x: p.x + dx, y: p.y + dy };
+    }
+  }
+
   /** Lignes tenues vues par une équipe : sa ligne défensive, et celle de
    *  l'adversaire dans son repère (pour ne pas être hors-jeu). */
   lignesTenues(camp: Camp, lignesDef: [number | null, number | null] = this.lignesDef): LignesTenues {
@@ -356,16 +393,17 @@ export class MatchSim {
    *  retard, le sien, plus long s'il est loin du ballon. Les joueurs ne
    *  bougent donc pas tous au même instant (retour du concepteur, 12/11 :
    *  mouvements « robots », synchronisés à la seconde près). */
-  private jeuPercu(j: JoueurSim): { ballon: PointM; lignesDef: [number | null, number | null] } {
+  private jeuPercu(j: JoueurSim): { ballon: PointM; vrai: PointM; lignesDef: [number | null, number | null] } {
     const h = this.historique;
-    if (h.length === 0) return { ballon: this.ballon, lignesDef: this.lignesDef };
+    if (h.length === 0) return { ballon: this.formes[j.camp], vrai: this.ballon, lignesDef: this.lignesDef };
     const distance = Math.hypot(j.pos.x - this.ballon.x, j.pos.y - this.ballon.y);
     const retardS = j.perceptionS + this.reglages.mouvement.perception.parMetreS * distance;
     const pas = Math.min(h.length - 1, Math.round(retardS / this.reglages.pasDeTempsS));
     const vu = h[h.length - 1 - pas]!;
     // Une ligne qui n'existait pas encore à cet instant (bascule récente) : on prend l'actuelle.
     return {
-      ballon: vu.ballon,
+      ballon: vu.formes[j.camp],
+      vrai: vu.ballon,
       lignesDef: [vu.lignesDef[0] ?? this.lignesDef[0], vu.lignesDef[1] ?? this.lignesDef[1]],
     };
   }
@@ -378,7 +416,7 @@ export class MatchSim {
     for (const j of this.joueurs) {
       const vu = this.jeuPercu(j);
       const ballonRepere = this.versRepere(j.camp, vu.ballon);
-      const p = projeter(j.cellule.centre, j.poste, j.phase, ballonRepere, this.reg(j.camp), this.donnees.longueurM, this.lignesTenues(j.camp, vu.lignesDef));
+      const p = projeter(j.cellule.centre, j.poste, j.phase, ballonRepere, this.reg(j.camp), this.donnees.longueurM, this.lignesTenues(j.camp, vu.lignesDef), this.versRepere(j.camp, vu.vrai));
       j.cible = this.versAbsolu(j.camp, p);
       // Respiration (12/11, « encore de la robotisation ») : en attaque, chacun
       // bouge un peu autour de sa place, à son propre rythme (fonction du temps
@@ -452,21 +490,51 @@ export class MatchSim {
       const vMax = plonge
         ? this.reglages.ballon.tir.plongeonVitesseMS
         : (this.temps < j.sprintJusqua ? this.reg(j.camp).transition.sprint.vitesseMS : m.vitesseMaxMS) * j.facteur * j.effet.vitesse * conduit;
-      // 1. Course : vers la cible, en freinant à l'approche, accélération limitée.
+      // 1. Course vers la cible (allures, 12/11) : on suit sa place qui bouge
+      //    (vitesse de la cible, lissée) et on rattrape l'écart en douceur :
+      //    marche pour un petit écart, trot, course ; pleine vitesse seulement
+      //    quand on joue le ballon, en transition ou près du ballon. Loin du
+      //    jeu, on trotte ou on court sans sprinter, sauf très en retard.
+      const al = m.allure;
+      const sx = j.cible.x - j.ciblePrec.x;
+      const sy = j.cible.y - j.ciblePrec.y;
+      const saut = Math.hypot(sx, sy);
+      // Un saut de cible (bascule, ballon joué) n'est pas une vitesse à suivre.
+      const ivx = saut > 0.5 ? 0 : sx / dt;
+      const ivy = saut > 0.5 ? 0 : sy / dt;
+      const kL = Math.min(1, dt / al.lissageS);
+      j.vitCible = { x: j.vitCible.x + (ivx - j.vitCible.x) * kL, y: j.vitCible.y + (ivy - j.vitCible.y) * kL };
+      j.ciblePrec = { ...j.cible };
       const dx = j.cible.x - j.pos.x;
       const dy = j.cible.y - j.pos.y;
       const d = Math.hypot(dx, dy);
+      // En transition, seuls les joueurs loin de leur place sprintent (repli,
+      // projection) ; les autres trottent ou courent pour se replacer.
+      // Contre-attaque : toute l'équipe qui récupère se projette en sprint.
+      const transition = this.temps < j.sprintJusqua && d > (j.phase === "attaque" ? al.toleranceM / 2 : al.toleranceM);
+      // Pris devant sa place (ballon joué derrière lui) : il se replace vite,
+      // côté but (défense de couverture).
+      const recule = (j.cible.y - j.pos.y) * (j.camp === 0 ? 1 : -1) < -al.reculUrgentM;
+      // Près du ballon, ou en route vers l'action (sa place est près du ballon) : on y va franchement.
+      const versAction = Math.hypot(j.cible.x - this.ballon.x, j.cible.y - this.ballon.y) < al.zoneActiveM * 0.75;
+      const actif = plonge || j.auBallon || transition || recule || versAction || Math.hypot(j.pos.x - this.ballon.x, j.pos.y - this.ballon.y) < al.zoneActiveM;
+      const plafond = actif ? vMax : Math.min(vMax, (al.courseMS + Math.max(0, d - al.toleranceM) * al.rattrapageParM) * j.facteur);
       let vx = 0;
       let vy = 0;
-      if (d > 1e-6) {
-        const vitesse = vMax * Math.min(1, d / m.distanceFreinageM);
-        vx = (dx / d) * vitesse;
-        vy = (dy / d) * vitesse;
+      const tau = actif ? al.reponseRapideS : al.reponseS;
+      vx = j.vitCible.x * al.suiviCible + (d > 1e-6 ? (dx / d) * (d / tau) : 0);
+      vy = j.vitCible.y * al.suiviCible + (d > 1e-6 ? (dy / d) * (d / tau) : 0);
+      const vv = Math.hypot(vx, vy);
+      if (vv > plafond) {
+        vx = (vx / vv) * plafond;
+        vy = (vy / vv) * plafond;
       }
       let ax = vx - j.vit.x;
       let ay = vy - j.vit.y;
       const a = Math.hypot(ax, ay);
-      const aMax = m.accelerationMS2 * j.facteur * dt * (plonge ? 10 : 1);
+      // On freine (ou on se retourne) plus fort qu'on n'accélère.
+      const freine = ax * j.vit.x + ay * j.vit.y < 0;
+      const aMax = (freine ? m.freinageMS2 : m.accelerationMS2) * j.facteur * dt * (plonge ? 10 : 1);
       if (a > aMax) {
         ax = (ax / a) * aMax;
         ay = (ay / a) * aMax;

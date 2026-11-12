@@ -351,6 +351,24 @@ ne s'éloigne pas du football :
    contrôles de la défense seuls n'avaient pas vu le défaut de l'attaque.
    Avant chaque publication, regarder aussi le match en « À vous »,
    « À l'adversaire » et « Ballon alterné », à ×1 et ×4.
+11. **Allures** (ajouté le 12/11, §7) : on ne court pas tout le temps.
+   Vitesse moyenne des joueurs de champ sous 4,6 m/s, sprint (7 m/s et
+   plus) moins de 18 % du temps, marche (moins de 2 m/s) plus de 12 %.
+   Le vrai football est vers 2 m/s en moyenne : notre match, très
+   condensé (beaucoup de tirs et de changements de camp), reste au-dessus.
+12. **Jeu sans ballon** (ajouté le 12/11, §5) : plusieurs appels en
+   profondeur par match, dont certains servis ; un appel part en jeu
+   (2 à 14 m derrière l'avant-dernier défenseur) et le défenseur le plus
+   proche le suit. Le soutien (deux coéquipiers qui se rapprochent du
+   porteur et ouvrent une ligne de passe) dépend des adversaires : c'est
+   la seule exception à la règle 6 du §9.2, bornée autour de la place
+   (quelques mètres), donc sans dérive.
+13. **Signature des tactiques** (ajouté le 12/11, 12 matchs de 3 min
+   contre une équipe équilibrée) : Contre, des passes qui gagnent plus de
+   terrain, plus de ballons longs, un bloc plus bas ; Pressing,
+   l'adversaire rate plus de passes et on récupère plus haut ;
+   Gegenpressing, plus de pertes en jeu reprises dans les 5 s et des
+   récupérations plus hautes ; Tiki-taka, plus de passes, mieux réussies.
 
 ---
 

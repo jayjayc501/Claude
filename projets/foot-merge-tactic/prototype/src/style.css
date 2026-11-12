@@ -311,8 +311,15 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-etiquette rect { fill: #fff; stroke: #FFC400; stroke-width: 1.5; }
 .match-etiquette.eux rect { stroke: #C2413D; }
 .match-etiquette text { font: 800 10px system-ui, sans-serif; fill: #16201A; }
-.match-ballon { fill: #fff; stroke: #16201A; stroke-width: 1.2; }
-.match-ombre { fill: rgba(0, 0, 0, 0.3); }
+/* Ballon moderne (12/11) : sphère brillante, motif bleu et or, reflet, halo clair pour le voir sur la pelouse. */
+.match-ballon { filter: drop-shadow(0 0 1.6px rgba(255, 255, 255, 0.85)) drop-shadow(0 0.6px 0.8px rgba(0, 0, 0, 0.35)); }
+.match-ballon-bleu { fill: #2D5BD8; }
+.match-ballon-or { fill: #F2B705; }
+.match-ballon-centre { fill: #1B2A4A; }
+.match-ballon-bord { fill: none; stroke: rgba(22, 32, 48, 0.6); stroke-width: 0.7; }
+.match-ballon-reflet { fill: rgba(255, 255, 255, 0.9); }
+.match-trainee { pointer-events: none; }
+.match-ombre { fill: rgba(0, 0, 0, 0.32); }
 .match-terrain .zone-match { fill: #fff; fill-opacity: 0.08; stroke: #fff; stroke-opacity: 0.7; stroke-width: 1; stroke-dasharray: 4 3; }
 .match-annonce rect { fill: #fff; stroke: #16201A; stroke-width: 2; }
 .match-annonce text { fill: #16201A; font: 800 20px system-ui, sans-serif; letter-spacing: 0.5px; }

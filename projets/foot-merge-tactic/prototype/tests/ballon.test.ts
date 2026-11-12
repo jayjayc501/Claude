@@ -223,7 +223,8 @@ describe("ballon réel : défense de la surface (lot D)", () => {
 describe("ballon réel : touche", () => {
   test("sur une touche, le joueur marque une pause puis fait une passe, sans partir avec le ballon", () => {
     let vues = 0;
-    for (const g of GRAINES) {
+    // Plus de graines que les autres tests : il y a peu de touches par match (12/11).
+    for (const g of [...GRAINES, 101, 102, 103]) {
       const m = match(g);
       const b = m.balle!;
       let attente = false;
@@ -394,5 +395,51 @@ describe("ballon réel : réalisme du jeu (référence football §9.4)", () => {
       }
     }
     expect(vu).toBe(true);
+  });
+});
+
+// ---- Mouvements plus réalistes (12/11 : « améliore le moteur pour le rendre
+// encore plus réaliste dans les mouvements »). Référence football §5 (appels,
+// soutien) et §7 (vitesses : course rapide dès 5,5 m/s, sprint dès 7 m/s).
+describe("ballon réel : allures et jeu sans ballon (12/11)", () => {
+  const parties = [1, 2, 3, 4, 5, 6].map((g) => {
+    const m = match(g);
+    const b = m.balle! as unknown as { appel: { joueur: unknown } | null; receveur: unknown };
+    let n = 0;
+    let vitesse = 0;
+    let sprint = 0;
+    let marche = 0;
+    const appels = new Set<unknown>();
+    const servis = new Set<unknown>();
+    for (let i = 0; i < 180 * 30; i++) {
+      m.pas();
+      if (b.appel) {
+        appels.add(b.appel);
+        if (b.receveur === b.appel.joueur) servis.add(b.appel);
+      }
+      for (const j of m.joueurs) {
+        if (j.poste.id === "G") continue;
+        const v = Math.hypot(j.vit.x, j.vit.y);
+        n++;
+        vitesse += v;
+        if (v >= 7) sprint++;
+        if (v < 2) marche++;
+      }
+    }
+    return { vitesse: vitesse / n, sprint: sprint / n, marche: marche / n, appels: appels.size, servis: servis.size };
+  });
+
+  test("on ne court pas tout le temps : vitesse moyenne sous 4,6 m/s, sprint moins de 18 % du temps, marche plus de 12 %", () => {
+    const moy = (k: "vitesse" | "sprint" | "marche") => parties.reduce((s, p) => s + p[k], 0) / parties.length;
+    expect(moy("vitesse")).toBeLessThan(4.6); // 4,7 avant les allures
+    expect(moy("sprint")).toBeLessThan(0.18); // 18 % avant
+    expect(moy("marche")).toBeGreaterThan(0.12);
+  });
+
+  test("appels en profondeur : plusieurs par match, et certains sont servis", () => {
+    const appels = parties.reduce((s, p) => s + p.appels, 0);
+    const servis = parties.reduce((s, p) => s + p.servis, 0);
+    expect(appels / parties.length).toBeGreaterThan(2);
+    expect(servis).toBeGreaterThan(parties.length / 2);
   });
 });

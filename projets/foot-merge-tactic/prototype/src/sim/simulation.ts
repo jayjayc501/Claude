@@ -289,7 +289,10 @@ export class MatchSim {
         const attaquait = defend < this.joueurs.filter((j) => j.camp === camp).length;
         h = attaquait ? lignesAttaqueM(ballon, this.reglages, L).arriereM : voulue;
       }
-      this.lignesDef[camp] = voulue < h ? Math.max(voulue, h - l.vitesseReculMS * dt) : Math.min(voulue, h + l.vitesseMonteeMS * dt);
+      // Ballon qui arrive sur la ligne : elle recule vite (les défenseurs se
+      // retournent et courent), sinon pas à pas (transitions groupées).
+      const recul = ballon.y * L - h < l.dangerM ? l.vitesseReculDangerMS : l.vitesseReculMS;
+      this.lignesDef[camp] = voulue < h ? Math.max(voulue, h - recul * dt) : Math.min(voulue, h + l.vitesseMonteeMS * dt);
     }
   }
 

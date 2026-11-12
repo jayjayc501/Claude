@@ -255,3 +255,18 @@ Retours du concepteur : pas d'annonce sur un arrêt (le jeu continue) ; le score
 - Sifflet refait : note stable vers 3,2 kHz, souffle, léger roulement (avant : trille en modulation de fréquence, d'où l'effet oiseau). Penalty : un seul coup long (avant : deux coups, probable origine du « double sifflet »).
 - Coup franc : les adversaires se tiennent à 9,15 m et ne taclent pas avant que le tireur ait joué. Mesure : aucune faute à moins de 4 s d'une autre, avant comme après (8 graines × 3 min).
 - Tests : 85 verts ; page vérifiée dans le navigateur.
+
+## 12/11/2026 (suite) — Lot D : défense de la surface et jeu sur les côtés
+
+Retour du concepteur : trop de buts, pas assez d'arrêts ; presque pas de fautes, touches, corners, hors-jeu ; « on avance, on fait des passes, on tire, on marque ». Décision : lot D avant les notes ; les notes et l'interface viendront dans une autre conversation, une fois le moteur stable.
+
+Diagnostic mesuré : 75 % des tirs se faisaient sans aucun défenseur entre le tireur et le but. La ligne défensive reculait au plus à 3 m/s, le porteur courait à plus de 6 m/s.
+- Ligne défensive : recul rapide (7 m/s) quand le ballon arrive à moins de 8 m devant elle ; sinon toujours pas à pas (transitions groupées).
+- Marquage : ballon à moins de 32 m du but, chaque défenseur ou milieu libre suit un attaquant dangereux (à moins de 24 m du but), côté but, à 1,5 m.
+- Centres : sur l'aile (plus de 12 m de l'axe), à moins de 28 m de la ligne de but, avec un coéquipier dans la surface : centre aérien une fois sur deux. Corners joués de la même façon.
+- Ballon aérien (centres, dégagements) : personne ne le touche pendant 80 % du vol ; dessiné plus gros.
+- Dégagement : défenseur pressé à moins de 22 m de son but : long ballon aérien vers l'avant et le côté.
+- Construction : avant bouché (adversaire à moins de 7 m dans le cône), il fait tourner (seuil de passe abaissé) ; petit bonus aux passes vers les côtés.
+- Tirs : tirs de loin moins fréquents ; erreur 2,2 m + 0,16 m par mètre ; gardien meilleur de loin (+2 % par mètre au-delà de 11 m), arrêt 30 % au moins ; parade 4 fois sur 10 : ballon repoussé de côté, souvent en corner.
+- Mesures (12 matchs de 3 min) : 107 tirs, 50 arrêts, 15 buts (1,25 par match, contre 1,7) ; 21 fautes, 9 corners, 29 touches, 16 centres, 7 dégagements, 30 contres ; 77 % de passes réussies ; 5,8 changements de camp par minute. Tirs sans défenseur entre le tireur et le but : 35 % (75 % avant).
+- Tests : 86 verts (nouveau : moins de la moitié des tirs sans défenseur entre le tireur et le but ; deux tests adaptés au recul rapide et au ballon aérien à 30 m/s).

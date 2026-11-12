@@ -32,7 +32,7 @@ describe("ballon réel : cohérence physique", () => {
         const porteur = m.balle!.porteur;
         const saut = Math.hypot(b.x - avant.x, b.y - avant.y);
         // un coup de pied ne dépasse pas la vitesse du tir ; un remise en jeu repose le ballon ailleurs
-        if (!porteur && !m.balle!.reserve && !m.balle!.engagement) expect(saut).toBeLessThanOrEqual((reglages.ballon.vitesseTirMS + 1) / 30);
+        if (!porteur && !m.balle!.reserve && !m.balle!.engagement) expect(saut).toBeLessThanOrEqual((Math.max(reglages.ballon.vitesseTirMS, 30) + 1) / 30); // 30 m/s : ballon aérien le plus rapide
         if (porteur) {
           expect(m.possession).toBe(porteur.camp);
           if (Math.hypot(porteur.pos.x - b.x, porteur.pos.y - b.y) > 1.5) ecartPorteur++;
@@ -192,6 +192,30 @@ describe("ballon réel : coup d'envoi", () => {
       expect(b.stats.passes[0]).toBe(1);
       expect(b.vit.y).toBeLessThan(2); // le camp 0 attaque vers +y : pas de ballon vers l'avant
     }
+  });
+});
+
+describe("ballon réel : défense de la surface (lot D)", () => {
+  test("la plupart des tirs se font avec au moins un défenseur entre le tireur et le but", () => {
+    let tirs = 0;
+    let seuls = 0;
+    for (const g of GRAINES) {
+      const m = match(g);
+      const b = m.balle!;
+      for (let i = 0; i < 180 * 30; i++) {
+        const p = b.porteur;
+        const avant = p ? { ...p.pos } : null;
+        const n = b.stats.tirs[0] + b.stats.tirs[1];
+        m.pas();
+        if (!p || !avant || b.stats.tirs[0] + b.stats.tirs[1] === n) continue;
+        const by = p.camp === 0 ? L : 0;
+        const dB = Math.hypot(avant.x - W / 2, avant.y - by);
+        tirs++;
+        if (!m.joueurs.some((o) => o.camp !== p.camp && o.poste.id !== "G" && Math.hypot(o.pos.x - W / 2, o.pos.y - by) < dB)) seuls++;
+      }
+    }
+    expect(tirs).toBeGreaterThan(10);
+    expect(seuls / tirs).toBeLessThan(0.5); // avant le lot D : 75 %
   });
 });
 

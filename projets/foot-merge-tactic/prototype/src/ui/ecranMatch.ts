@@ -186,6 +186,7 @@ export class EcranMatch {
       c.setAttribute("cx", this.X(j.pos.x).toFixed(1));
       c.setAttribute("cy", this.Y(j.pos.y).toFixed(1));
     });
+    this.ballon.setAttribute("r", sim.balle?.enLAir ? "4.8" : "3.2"); // ballon aérien : plus gros
     this.ballon.setAttribute("cx", this.X(sim.ballon.x).toFixed(1));
     this.ballon.setAttribute("cy", this.Y(sim.ballon.y).toFixed(1));
     this.ballon.style.display = sim.demarre ? "" : "none";

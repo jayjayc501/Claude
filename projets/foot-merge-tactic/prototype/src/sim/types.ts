@@ -118,6 +118,9 @@ export interface Reglages {
         hauteurMinM: number;
         hauteurMaxM: number;
         vitesseReculMS: number;
+        /** Ballon à moins de dangerM devant la ligne : recul rapide. */
+        dangerM: number;
+        vitesseReculDangerMS: number;
         vitesseMonteeMS: number;
       };
       ecartLignesM: { milieu: number; attaque: number };
@@ -200,7 +203,7 @@ export interface Reglages {
     /** Seul face au but : tire à cette distance. */
     seulTirM: number;
     /** Visée (m de l'axe du but), erreur, arrêt du gardien selon l'écart au point de passage. */
-    tir: { viseMinM: number; viseMaxM: number; erreurBaseM: number; erreurParMetre: number; erreurPenaltyM: number; arretMax: number; arretMin: number; arretParMetre: number; plongeonVitesseMS: number; plongeonDureeS: number; rayonPlongeonM: number };
+    tir: { viseMinM: number; viseMaxM: number; erreurBaseM: number; erreurParMetre: number; erreurPenaltyM: number; arretMax: number; arretMin: number; arretParMetre: number; plongeonVitesseMS: number; plongeonDureeS: number; rayonPlongeonM: number; arretParMetreDistance: number; paradeProba: number };
     /** Surface de réparation : on y tire toujours. */
     surface: { profondeurM: number; demiLargeurM: number };
     arretProba: number;
@@ -221,6 +224,10 @@ export interface Reglages {
     /** Faute sur un duel gagné : coup franc, penalty dans la surface. */
     fautes: { proba: number; arretPenaltyProba: number };
     horsJeuToleranceM: number;
+    centre: { zoneProfondeurM: number; ecartAxeM: number; proba: number; dureeS: number; erreurDeg: number; partEnLAir: number };
+    degagement: { zoneM: number; longueurMinM: number; longueurMaxM: number; dureeS: number; erreurDeg: number };
+    construction: { boucheM: number; baisseSeuil: number; largeurM: number; bonusLargeur: number };
+    marquage: { declenchementM: number; zoneM: number; demiLargeurM: number; rayonM: number; distanceM: number; milieux: boolean };
     /** Probabilité de passer quand même à un joueur hors-jeu. */
     horsJeuVuProba: number;
     /** Juste après une perte : les plus proches (dans rayonM) pressent pendant dureeS. */

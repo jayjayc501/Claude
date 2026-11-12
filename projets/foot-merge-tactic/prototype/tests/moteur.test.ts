@@ -748,7 +748,7 @@ describe.each(PLATEAUX)("réalisme (référence football), plateau %s", (plateau
           const a = avant[camp];
           const b = m.lignesDef[camp];
           if (a === null || a === undefined || b === null) continue;
-          expect(a - b).toBeLessThanOrEqual(l.vitesseReculMS * dt + 1e-9);
+          expect(a - b).toBeLessThanOrEqual(Math.max(l.vitesseReculMS, l.vitesseReculDangerMS) * dt + 1e-9); // recul rapide si le ballon arrive sur la ligne
           expect(b - a).toBeLessThanOrEqual(l.vitesseMonteeMS * dt + 1e-9);
         }
         avant = [...m.lignesDef];

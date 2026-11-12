@@ -164,6 +164,19 @@ export class BallonReel {
       }
     }
 
+    // Champ libre devant lui (aucun joueur de champ adverse dans un cône vers
+    // le but) et pas pressé : il fonce vers le but et tire à portée, sans
+    // passe en retrait.
+    const libreDevant = !adverses.some((o) => {
+      if (o.poste.id === "G") return false;
+      const avant = (o.pos.y - p.pos.y) * sens;
+      return avant > -1 && avant < 18 && Math.abs(o.pos.x - p.pos.x) < 3 + avant * 0.6;
+    });
+    if (p.poste.id !== "G" && libreDevant && pression >= r.pressionM && p.poste.ligneDefense !== "defense") {
+      if (dBut < r.seulTirM) this.tirer(but);
+      return;
+    }
+
     // Dribble : face à un adversaire tout proche, un joueur offensif tente
     // parfois de l'éliminer plutôt que de passer.
     const db = r.dribble;
@@ -193,7 +206,7 @@ export class BallonReel {
       }
       const options: { point: PointM | null; vise: PointM }[] = [{ point: null, vise: q.pos }];
       const esp = { x: q.pos.x, y: q.pos.y + sens * r.passeEspace.avanceM };
-      if (avance > 0 && esp.y > 2 && esp.y < L - 2) {
+      if (avance > 0 && q.vit.y * sens > r.passeEspace.courseMinMS && esp.y > 2 && esp.y < L - 2) {
         // L'espace est à lui s'il y arrive nettement avant tout adversaire.
         const vCourse = s.reglages.mouvement.vitesseMaxMS;
         const tLui = dist(q.pos, esp) / (vCourse * q.facteur);
@@ -365,7 +378,8 @@ export class BallonReel {
 
   private devier(j: JoueurSim, v: number): void {
     const c = this.sim.reglages.ballon.contre;
-    const a = Math.atan2(this.vit.y, this.vit.x) + ((this.rng.entre(-1, 1) * c.angleMaxDeg) * Math.PI) / 180;
+    const cote = this.rng.suivant() < 0.5 ? -1 : 1; // dévié franchement d'un côté ou de l'autre
+    const a = Math.atan2(this.vit.y, this.vit.x) + (cote * this.rng.entre(c.angleMinDeg, c.angleMaxDeg) * Math.PI) / 180;
     const nv = v * c.perteVitesse;
     this.stats.contres++;
     this.vit = { x: Math.cos(a) * nv, y: Math.sin(a) * nv };
@@ -429,11 +443,14 @@ export class BallonReel {
       const sens = p.camp === 0 ? 1 : -1;
       p.auBallon = true;
       if (p.poste.id === "G") p.cible = { ...p.pos };
-      else
-        p.cible = {
-          x: p.pos.x + (W / 2 - p.pos.x) * 0.2,
-          y: Math.min(L - 3, Math.max(3, p.pos.y + sens * r.dribbleAvanceM)),
-        };
+      else {
+        const butAdv = { x: W / 2, y: sens === 1 ? L : 0 };
+        const dBut = dist(p.pos, butAdv);
+        p.cible =
+          dBut < 35 // dernier tiers : droit vers le but
+            ? { x: p.pos.x + ((butAdv.x - p.pos.x) / dBut) * r.dribbleAvanceM, y: p.pos.y + ((butAdv.y - p.pos.y) / dBut) * r.dribbleAvanceM }
+            : { x: p.pos.x + (W / 2 - p.pos.x) * 0.2, y: Math.min(L - 3, Math.max(3, p.pos.y + sens * r.dribbleAvanceM)) };
+      }
       const cp = r.contrePressing;
       const contre = this.perte !== null && this.perte.camp !== p.camp && s.temps - this.perte.a < cp.dureeS;
       if (contre) {

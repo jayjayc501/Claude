@@ -197,6 +197,8 @@ export interface Reglages {
     imprecision: { baseDeg: number; parMetreDeg: number; sousPressionFacteur: number };
     vitesseTirMS: number;
     tirDistanceM: number;
+    /** Seul face au but : tire à cette distance. */
+    seulTirM: number;
     /** Surface de réparation : on y tire toujours. */
     surface: { profondeurM: number; demiLargeurM: number };
     arretProba: number;
@@ -205,9 +207,9 @@ export interface Reglages {
     tacle: { rayonM: number; parSeconde: number };
     reserveRepriseS: number;
     /** Passe dans l'espace : devant le receveur, dans le sens du jeu. */
-    passeEspace: { avanceM: number; avanceSurAdversaireS: number };
+    passeEspace: { avanceM: number; avanceSurAdversaireS: number; courseMinMS: number };
     /** Ballon rapide qui frôle un adversaire : contrôlé ou dévié (contre). */
-    contre: { vitesseMinMS: number; probaControle: number; perteVitesse: number; angleMaxDeg: number };
+    contre: { vitesseMinMS: number; probaControle: number; perteVitesse: number; angleMinDeg: number; angleMaxDeg: number };
     /** Dribble en 1 contre 1 face à un adversaire proche. */
     dribble: { distanceM: number; probaTentative: number; probaReussite: number; eliminationS: number };
     /** Porteur qui protège le ballon : tacle moins probable. */

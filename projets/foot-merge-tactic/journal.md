@@ -202,3 +202,13 @@ Décision du concepteur : pressing, contre-pressing, contre, tiki-taka = choix t
 - Tacle : 2 m, 0,2 par seconde (avant 2,8 m, 0,5).
 - Mesures (6 graines × 3 min) : changements de camp 8,8 → 7,6 par minute ; passes réussies 67 → 72 % ; 30 dribbles dont la moitié réussis ; 18 contres. Le reste des pertes vient surtout des passes : à régler avec les notes (lot C).
 - Tests : 79 verts (deux seuils élargis : réussite des passes d'une équipe sur 3 min ≥ 40 %, presseurs au ballon ≤ 2).
+
+## 12/11/2026 (suite) — Passes approximatives, attaquant seul qui passe en arrière
+
+Retours du concepteur : « beaucoup de passes très approximatives » (passes en profondeur mal gérées, ou contres sans changement de direction visible) ; « attaquant seul au but qui fait une grosse passe en arrière au lieu de tirer ».
+- Seul devant (aucun joueur de champ adverse dans un cône de 18 m vers le but) et pas pressé : le porteur offensif fonce vers le but et tire à 18 m, sans passe. Dans les 35 derniers mètres, la conduite va droit vers le but.
+- Passe dans l'espace seulement vers un coéquipier qui court déjà vers l'avant (plus de 2,5 m/s).
+- Imprécision sous pression × 1,8 (× 3 avant).
+- Contre : déviation franche, 35 à 100° d'un côté ou de l'autre (avant : 0 à 70°, souvent invisible).
+- Mesures (6 graines × 3 min) : passes réussies 72 → 81 % ; changements de camp 7,4 par minute.
+- Tests : 80 verts (nouveau : attaquant seul qui tire sans passer).

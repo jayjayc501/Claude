@@ -97,6 +97,30 @@ describe("ballon réel : tir dans la surface", () => {
   });
 });
 
+describe("ballon réel : seul face au but", () => {
+  test("un attaquant seul devant le but fonce et tire, sans passe en retrait", () => {
+    for (const camp of [0, 1] as const) {
+      const m = match(13);
+      m.pas();
+      const b = m.balle!;
+      const sens = camp === 0 ? 1 : -1;
+      const yBut = camp === 0 ? L : 0;
+      const j = m.joueurs.find((x) => x.camp === camp && x.poste.ligneDefense === "attaque")!;
+      j.pos = { x: W / 2, y: yBut - sens * 32 };
+      for (const o of m.joueurs)
+        if (o.camp !== camp && o.poste.id !== "G") o.pos = { x: o.pos.x, y: yBut - sens * (52 + Math.abs(o.pos.y - L / 2) * 0.1) };
+      m.ballon = { ...j.pos };
+      b.porteur = j;
+      b.reserve = null;
+      (b as unknown as { decisionA: number }).decisionA = 0;
+      const passes = b.stats.passes[camp];
+      for (let i = 0; i < 4 * 30 && b.stats.tirs[camp] === 0; i++) m.pas();
+      expect(b.stats.passes[camp]).toBe(passes);
+      expect(b.stats.tirs[camp]).toBe(1);
+    }
+  });
+});
+
 describe("ballon réel : pressing et contre-pressing (référence §4)", () => {
   test("juste après une perte, les plus proches attaquent le porteur ; ensuite un seul presse", () => {
     const cp = reglages.ballon.contrePressing;

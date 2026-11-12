@@ -245,5 +245,6 @@ Historique détaillé : `journal.md` (par jour) et `docs/historique-etat.md` (an
 - **12/11 : mission 2, étape 1 : ballon réel** (`src/sim/ballon.ts`) : porté ou libre, conduite, passes, tirs, interception, tacle, gardien, touche, sortie de but, but, score. 77 tests verts, page republiée. **En attente : l'avis du concepteur sur le jeu.**
 - 12/11 (suite) : tir systématique dans la surface ; gardien à 16 m au plus en attaque ; pressing normal mesuré (1 presse, 1 couvre) ; contre-pressing 4 s (3 joueurs) ; passe sous pression moins précise. 79 tests verts.
 - 12/11 (suite) : **lot A** fait (passe dans l'espace, contres, dribble, protection du ballon, course au point d'interception). 7,6 changements de camp par minute, 72 % de passes réussies. 79 tests verts.
-- Suite décidée : **lot B** (hors-jeu, fautes et coups francs, penalty, corners), puis **lot C** (notes des joueurs : la réussite des passes en dépendra).
+- 12/11 (suite) : passes plus propres (81 %), attaquant seul qui tire. **Lot B** fait : hors-jeu, fautes (coup franc, penalty), corners, événements affichés. 83 tests verts.
+- Suite : **lot C** (notes des joueurs : la réussite des passes en dépendra). À surveiller : beaucoup de tirs (1,5 par équipe et par minute).
 - Règle de séance (concepteur, 12/11) : **économiser les tokens** : peu de lectures, peu de tests et de captures, le concepteur valide lui-même ; mettre à jour le projet claude.ai seulement aux grandes étapes ; réponses courtes.

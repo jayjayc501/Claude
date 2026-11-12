@@ -212,3 +212,13 @@ Retours du concepteur : « beaucoup de passes très approximatives » (passes en
 - Contre : déviation franche, 35 à 100° d'un côté ou de l'autre (avant : 0 à 70°, souvent invisible).
 - Mesures (6 graines × 3 min) : passes réussies 72 → 81 % ; changements de camp 7,4 par minute.
 - Tests : 80 verts (nouveau : attaquant seul qui tire sans passer).
+
+## 12/11/2026 (suite) — Lot B : hors-jeu, fautes, penalty, corners
+
+- Hors-jeu : jugé au départ de la passe (camp adverse, devant le ballon et l'avant-dernier adversaire, tolérance 0,5 m) ; sanctionné quand le receveur touche le ballon : coup franc pour l'adversaire. Le passeur évite le joueur hors-jeu 85 fois sur 100.
+- Fautes : un duel gagné par le défenseur est une faute 4 fois sur 10 : coup franc à l'endroit de la faute ; dans la surface du fautif : penalty (point à 11 m, tir, arrêt 22 %, pas de contre).
+- Corner : ballon sorti derrière la ligne de but, touché en dernier par un défenseur ; centre dosé dans la surface (6 à 12 m du but). Sinon sortie de but.
+- Reprise immédiate : un joueur qui reçoit le ballon dans la surface adverse décide en 0,1 s (il tire).
+- Affichage : l'événement (But, Corner, Faute, Penalty, Hors-jeu, Touche, Sortie de but) s'affiche 2,5 s sous le terrain.
+- Mesures (6 graines × 3 min) : 8 fautes, 1 à 3 corners, 1 hors-jeu, 76 % de passes réussies, 7,1 changements de camp par minute ; tirs 1,5 par équipe et par minute (trop : la règle « dans la surface on tire » joue à plein).
+- Tests : 83 verts (corner, hors-jeu, penalty) ; seuil des tirs relevé à 2 par équipe et par minute.

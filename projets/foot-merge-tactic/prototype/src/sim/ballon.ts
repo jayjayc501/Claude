@@ -31,6 +31,10 @@ export interface StatsBallon {
   tacles: [number, number];
   tirs: [number, number];
   contres: number;
+  fautes: [number, number];
+  penalties: [number, number];
+  corners: [number, number];
+  horsJeu: [number, number];
   dribbles: [number, number];
   dribblesReussis: [number, number];
   arrets: [number, number];
@@ -57,6 +61,10 @@ export class BallonReel {
     tacles: [0, 0],
     tirs: [0, 0],
     contres: 0,
+    fautes: [0, 0],
+    penalties: [0, 0],
+    corners: [0, 0],
+    horsJeu: [0, 0],
     dribbles: [0, 0],
     dribblesReussis: [0, 0],
     arrets: [0, 0],
@@ -68,6 +76,13 @@ export class BallonReel {
   private dir: PointM = { x: 0, y: 1 };
   private decisionA = 0;
   private protegeJusqua = 0;
+  /** Coup de pied arrêté en attente : le premier joueur de l'équipe qui prend le ballon le joue. */
+  private arrete: "corner" | "penalty" | null = null;
+  /** Le receveur de la passe en cours était hors-jeu au départ de la passe. */
+  private horsJeu = false;
+  private tirPenalty = false;
+  /** Dernier événement de jeu, pour l'affichage (« Corner », « Hors-jeu »…). */
+  evenement: { texte: string; a: number } | null = null;
   private arret: "?" | "oui" | "non" = "?";
   private rng: Aleatoire;
 
@@ -76,8 +91,12 @@ export class BallonReel {
   }
 
   /** Coup d'envoi (ou remise au centre) : le ballon est posé, l'équipe va le chercher. */
-  remettre(point: PointM, camp: Camp): void {
+  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | null = null, texte?: string): void {
     const s = this.sim;
+    this.arrete = arrete;
+    this.horsJeu = false;
+    this.tirPenalty = false;
+    if (texte) this.evenement = { texte, a: s.temps };
     s.ballon = { ...point };
     this.vit = { x: 0, y: 0 };
     this.porteur = null;
@@ -130,11 +149,33 @@ export class BallonReel {
       if (dist(o.pos, p.pos) > t.rayonM) continue;
       const f = this.sim.temps < this.protegeJusqua ? this.sim.reglages.ballon.protection.facteurTacle : 1;
       if (this.rng.suivant() < 1 - Math.exp(-t.parSeconde * f * dt)) {
-        this.stats.tacles[o.camp]++;
-        this.donner(o);
+        this.duelGagne(o);
         return;
       }
     }
+  }
+
+  /** Un défenseur gagne un duel sur le porteur : tacle propre, ou faute
+   *  (coup franc, penalty si c'est dans sa surface). */
+  private duelGagne(o: JoueurSim): void {
+    const s = this.sim;
+    const r = s.reglages.ballon;
+    const p = this.porteur!;
+    if (this.rng.suivant() >= r.fautes.proba) {
+      this.stats.tacles[o.camp]++;
+      this.donner(o);
+      return;
+    }
+    this.stats.fautes[o.camp]++;
+    const W = s.donnees.largeurM;
+    const L = s.donnees.longueurM;
+    const deSonBut = o.camp === 0 ? p.pos.y : L - p.pos.y; // distance au but du fautif
+    if (deSonBut <= r.surface.profondeurM && Math.abs(p.pos.x - W / 2) <= r.surface.demiLargeurM) {
+      this.stats.penalties[p.camp]++;
+      this.remettre({ x: W / 2, y: o.camp === 0 ? 11 : L - 11 }, p.camp, "penalty", "Penalty");
+      return;
+    }
+    this.remettre({ x: Math.min(W - 1, Math.max(1, p.pos.x)), y: p.pos.y }, p.camp, null, "Faute");
   }
 
   private decider(): void {
@@ -149,6 +190,24 @@ export class BallonReel {
     const adverses = s.joueurs.filter((j) => j.camp !== p.camp);
     const pression = Math.min(...adverses.map((o) => dist(o.pos, p.pos)));
     this.decisionA = s.temps + this.rng.entre(r.decisionS.min, r.decisionS.max);
+
+    if (this.arrete === "penalty") {
+      this.arrete = null;
+      this.tirer({ x: but.x, y: but.y }, 3);
+      this.tirPenalty = true;
+      return;
+    }
+    if (this.arrete === "corner") {
+      // Centre dans la surface, dosé pour arriver en un peu plus d'une seconde.
+      this.arrete = null;
+      const point = { x: W / 2 + this.rng.entre(-8, 8), y: but.y - sens * this.rng.entre(6, 12) };
+      const k = r.frottementParS;
+      const v = Math.min(r.vitessePasseMaxMS, (k * dist(p.pos, point)) / (1 - Math.exp(-k * 1.2)));
+      const n = dist(p.pos, point) || 1;
+      this.stats.passes[p.camp]++;
+      this.lancer(((point.x - p.pos.x) / n) * v, ((point.y - p.pos.y) / n) * v);
+      return;
+    }
 
     // Tir : dans la surface, on tire toujours (jamais de passe en retrait) ;
     // plus loin mais à portée et pas trop excentré, on tire parfois.
@@ -197,6 +256,7 @@ export class BallonReel {
     for (const q of s.joueurs) {
       if (q === p || q.camp !== p.camp) continue;
       if (q.poste.id === "G" && p.poste.id !== "G") continue;
+      if (this.estHorsJeu(q) && this.rng.suivant() > r.horsJeuVuProba) continue; // le passeur voit presque toujours le hors-jeu
       const d = dist(p.pos, q.pos);
       if (d < r.passeMinM || d > r.passeMaxM) continue;
       const avance = (q.pos.y - p.pos.y) * sens;
@@ -254,8 +314,7 @@ export class BallonReel {
       return;
     }
     if (this.rng.suivant() < 0.5) {
-      this.stats.tacles[o.camp]++;
-      this.donner(o);
+      this.duelGagne(o);
     } else {
       const a = this.rng.entre(-Math.PI, Math.PI);
       this.lancer(Math.cos(a) * 5, Math.sin(a) * 5 + sens * 2);
@@ -291,14 +350,30 @@ export class BallonReel {
     const c = Math.cos(erreur);
     const si = Math.sin(erreur);
     this.stats.passes[p.camp]++;
+    const horsJeu = this.estHorsJeu(q);
     this.lancer(((dx * c - dy * si) / n) * v, ((dx * si + dy * c) / n) * v);
     this.receveur = q;
+    this.horsJeu = horsJeu;
   }
 
-  private tirer(but: PointM): void {
+  /** Hors-jeu : dans le camp adverse, plus près du but adverse que le ballon et
+   *  que l'avant-dernier adversaire, au moment de la passe. */
+  private estHorsJeu(q: JoueurSim): boolean {
+    const L = this.sim.donnees.longueurM;
+    const prof = (y: number) => (q.camp === 0 ? y : L - y); // profondeur vers le but adverse
+    const dq = prof(q.pos.y);
+    if (dq <= L / 2 || dq <= prof(this.sim.ballon.y)) return false;
+    const adv = this.sim.joueurs
+      .filter((o) => o.camp !== q.camp)
+      .map((o) => prof(o.pos.y))
+      .sort((a, b) => b - a);
+    return dq > (adv[1] ?? L) + this.sim.reglages.ballon.horsJeuToleranceM;
+  }
+
+  private tirer(but: PointM, dispersionM = 6.5): void {
     const r = this.sim.reglages.ballon;
     const p = this.porteur!;
-    const cible = { x: but.x + this.rng.entre(-6.5, 6.5), y: but.y };
+    const cible = { x: but.x + this.rng.entre(-dispersionM, dispersionM), y: but.y };
     const dx = cible.x - this.sim.ballon.x;
     const dy = cible.y - this.sim.ballon.y;
     const n = Math.hypot(dx, dy) || 1;
@@ -323,17 +398,21 @@ export class BallonReel {
       const marqueur: Camp = y >= L ? 0 : 1;
       if (Math.abs(x - W / 2) <= DEMI_BUT_M) {
         s.score[marqueur]++;
-        this.remettre({ x: W / 2, y: L / 2 }, marqueur === 0 ? 1 : 0);
+        this.remettre({ x: W / 2, y: L / 2 }, marqueur === 0 ? 1 : 0, null, "But !");
       } else {
         this.stats.sorties++;
-        this.remettre({ x: W / 2, y: y >= L ? L - 5.5 : 5.5 }, marqueur === 0 ? 1 : 0); // sortie de but
+        if (this.dernier && this.dernier.camp !== marqueur) {
+          // dernier touché par un défenseur : corner
+          this.stats.corners[marqueur]++;
+          this.remettre({ x: x < W / 2 ? 0.5 : W - 0.5, y: y >= L ? L - 0.5 : 0.5 }, marqueur, "corner", "Corner");
+        } else this.remettre({ x: W / 2, y: y >= L ? L - 5.5 : 5.5 }, marqueur === 0 ? 1 : 0, null, "Sortie de but");
       }
       return;
     }
     if (x <= 0 || x >= W) {
       this.stats.sorties++;
       const camp: Camp = this.dernier ? (this.dernier.camp === 0 ? 1 : 0) : s.possession;
-      this.remettre({ x: x <= 0 ? 0.5 : W - 0.5, y }, camp); // touche
+      this.remettre({ x: x <= 0 ? 0.5 : W - 0.5, y }, camp, null, "Touche");
       return;
     }
     s.ballon = { x, y };
@@ -353,7 +432,7 @@ export class BallonReel {
       const d = dist(j.pos, s.ballon);
       if (d > rayon) continue;
       const adverseDuTireur = this.dernier !== null && j.camp !== this.dernier.camp && j.poste.id !== "G";
-      if (adverseDuTireur && vBalle > r.contre.vitesseMinMS && d <= r.rayonControleM) {
+      if (adverseDuTireur && !this.tirPenalty && vBalle > r.contre.vitesseMinMS && d <= r.rayonControleM) {
         // Ballon rapide qui arrive sur un adversaire : contrôlé, ou dévié (contre).
         if (vBalle > r.vitesseControleMaxMS || this.rng.suivant() > r.contre.probaControle) {
           this.devier(j, vBalle);
@@ -361,7 +440,7 @@ export class BallonReel {
         }
       } else if (vBalle > r.vitesseControleMaxMS && j !== this.receveur && j.poste.id !== "G") continue;
       if (gardienAdverse) {
-        if (this.arret === "?") this.arret = this.rng.suivant() < r.arretProba ? "oui" : "non";
+        if (this.arret === "?") this.arret = this.rng.suivant() < (this.tirPenalty ? r.fautes.arretPenaltyProba : r.arretProba) ? "oui" : "non";
         if (this.arret === "non") continue;
       }
       if (d < meilleurD) {
@@ -370,6 +449,12 @@ export class BallonReel {
       }
     }
     if (!gagnant) return;
+    if (gagnant === this.receveur && this.horsJeu) {
+      this.stats.horsJeu[gagnant.camp]++;
+      const adv: Camp = gagnant.camp === 0 ? 1 : 0;
+      this.remettre({ ...gagnant.pos }, adv, null, "Hors-jeu");
+      return;
+    }
     if (this.tirEnCours && gagnant.poste.id === "G") this.stats.arrets[gagnant.camp]++;
     if (gagnant === this.receveur) this.stats.passesReussies[gagnant.camp]++;
     else if (this.dernier && gagnant.camp !== this.dernier.camp) this.stats.interceptions[gagnant.camp]++;
@@ -387,6 +472,7 @@ export class BallonReel {
     this.dernierTemps = this.sim.temps;
     this.receveur = null;
     this.tirEnCours = false;
+    this.horsJeu = false;
   }
 
   /** Le joueur prend le ballon aux pieds ; son équipe a la possession. */
@@ -397,10 +483,16 @@ export class BallonReel {
     this.porteur = j;
     this.receveur = null;
     this.tirEnCours = false;
+    this.tirPenalty = false;
+    this.horsJeu = false;
     this.reserve = null;
     this.dernier = j;
     this.dernierTemps = this.sim.temps;
     this.decisionA = this.sim.temps + this.rng.entre(r.premiereDecisionS.min, r.premiereDecisionS.max);
+    const L = this.sim.donnees.longueurM;
+    const versBut = j.camp === 0 ? L - j.pos.y : j.pos.y;
+    if (!this.arrete && j.poste.id !== "G" && versBut <= r.surface.profondeurM && Math.abs(j.pos.x - this.sim.donnees.largeurM / 2) <= r.surface.demiLargeurM)
+      this.decisionA = this.sim.temps + 0.1; // dans la surface adverse : reprise immédiate
     this.sim.prendrePossession(j.camp);
   }
 

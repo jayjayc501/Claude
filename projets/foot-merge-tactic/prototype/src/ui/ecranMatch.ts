@@ -193,7 +193,9 @@ export class EcranMatch {
     let texte: string;
     if (!sim.demarre) texte = "Positions au coup d'envoi. Touchez « Coup d'envoi » pour lancer.";
     else {
-      const qui = `${sim.score[0]} – ${sim.score[1]} · ${sim.possession === 0 ? "Vous avez le ballon" : "L'adversaire a le ballon"}`;
+      const ev = sim.balle?.evenement;
+      const fait = ev && sim.temps - ev.a < 2.5 ? ` · ${ev.texte}` : "";
+      const qui = `${sim.score[0]} – ${sim.score[1]} · ${sim.possession === 0 ? "Vous avez le ballon" : "L'adversaire a le ballon"}${fait}`;
       const etat = sim.enTransition
         ? "transition…"
         : sim.phases[0] === "attaque"

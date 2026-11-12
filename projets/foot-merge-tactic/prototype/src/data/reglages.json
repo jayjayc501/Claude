@@ -113,6 +113,9 @@
     "dribble": { "distanceM": 3.5, "probaTentative": 0.3, "probaReussite": 0.5, "eliminationS": 1.2 },
     "protection": { "dureeS": 1.2, "facteurTacle": 0.4 },
     "zoneDegagementM": 35,
+    "fautes": { "proba": 0.4, "arretPenaltyProba": 0.22 },
+    "horsJeuToleranceM": 0.5,
+    "horsJeuVuProba": 0.15,
     "contrePressing": { "dureeS": 4, "rayonM": 20, "joueurs": 3 }
   },
   "possessionSimulee": {

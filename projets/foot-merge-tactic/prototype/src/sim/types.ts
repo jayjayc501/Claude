@@ -216,6 +216,11 @@ export interface Reglages {
     protection: { dureeS: number; facteurTacle: number };
     /** Dégagement seulement dans son tiers défensif (en mètres de son but). */
     zoneDegagementM: number;
+    /** Faute sur un duel gagné : coup franc, penalty dans la surface. */
+    fautes: { proba: number; arretPenaltyProba: number };
+    horsJeuToleranceM: number;
+    /** Probabilité de passer quand même à un joueur hors-jeu. */
+    horsJeuVuProba: number;
     /** Juste après une perte : les plus proches (dans rayonM) pressent pendant dureeS. */
     contrePressing: { dureeS: number; rayonM: number; joueurs: number };
   };

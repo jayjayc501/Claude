@@ -275,5 +275,5 @@ Diagnostic mesuré : 75 % des tirs se faisaient sans aucun défenseur entre le t
 
 Retours du concepteur : sur une touche, le joueur part avec le ballon au lieu de faire une passe ; il faudrait de petites pauses aux six mètres, touches, engagements, coups francs.
 - Touche : passe (à la main, dans les pieds) vers le coéquipier le plus libre à moins de 22 m.
-- Remises en jeu (touche, six mètres, coup franc, corner, engagement) : le tireur s'arrête sur place 0,8 à 1,4 s avant de jouer ; pas de tacle tant qu'il n'a pas joué.
+- Remises en jeu (touche, six mètres, coup franc, corner, engagement) : le tireur s'arrête net, le ballon reste à sa place, pause de 0,8 à 1,4 s avant de jouer ; pas de tacle tant qu'il n'a pas joué.
 - Tests : 87 verts (nouveau : sur une touche, pause puis passe, le tireur ne part pas avec le ballon).

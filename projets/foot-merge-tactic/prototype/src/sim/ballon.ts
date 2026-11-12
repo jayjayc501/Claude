@@ -194,8 +194,14 @@ export class BallonReel {
       return;
     }
     if (this.porteur) {
-      this.conduire();
-      if (!this.arrete) this.tacler(dt); // remise en jeu pas encore jouée : adversaires à distance
+      if (this.arrete) {
+        // Remise en jeu : le tireur s'arrête, le ballon reste à sa place.
+        this.porteur.vit = { x: 0, y: 0 };
+        this.vit = { x: 0, y: 0 };
+      } else {
+        this.conduire();
+        this.tacler(dt);
+      } // remise en jeu pas encore jouée : ni conduite ni tacle
       if (this.porteur && this.sim.temps >= this.decisionA) this.decider();
     } else {
       this.rouler(dt);

@@ -35,7 +35,8 @@ describe("ballon réel : cohérence physique", () => {
         if (!porteur && !m.balle!.reserve && !m.balle!.engagement) expect(saut).toBeLessThanOrEqual((Math.max(reglages.ballon.vitesseTirMS, 30) + 1) / 30); // 30 m/s : ballon aérien le plus rapide
         if (porteur) {
           expect(m.possession).toBe(porteur.camp);
-          if (Math.hypot(porteur.pos.x - b.x, porteur.pos.y - b.y) > 1.5) ecartPorteur++;
+          const pause = (m.balle as unknown as { arrete: unknown }).arrete !== null; // remise en jeu : il prend le ballon à 1,6 m et s'arrête
+          if (!pause && Math.hypot(porteur.pos.x - b.x, porteur.pos.y - b.y) > 1.5) ecartPorteur++;
         }
         avant = { ...b };
       }

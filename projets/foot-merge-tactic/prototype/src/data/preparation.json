@@ -1,0 +1,82 @@
+{
+  "_note": "Écran de préparation (maquette du 12/11). Équipe, groupe et mercato de démonstration. Postes : identifiants de postes.json (AC s'affiche BU). Budget, prix et revente : chiffres provisoires, non validés.",
+  "deck": [
+    { "code": "FRA", "nom": "France", "couleur": "#1F3A93" },
+    { "code": "ESP", "nom": "Espagne", "couleur": "#B85600" },
+    { "code": "BRA", "nom": "Brésil", "couleur": "#17773F" },
+    { "code": "ITA", "nom": "Italie", "couleur": "#0B7FA8" }
+  ],
+  "styles": {
+    "REM": "Rempart",
+    "PRE": "Presseur",
+    "TEC": "Technicien",
+    "RAP": "Rapide",
+    "COM": "Combatif",
+    "CRE": "Créateur",
+    "FIN": "Finisseur"
+  },
+  "paliers": [3, 5, 7],
+  "bancMax": 5,
+  "fusionsMax": 3,
+  "budget": 7,
+  "chrono": "0:24",
+  "groupe": {
+    "nom": "Groupe A",
+    "match": "Match 2/3",
+    "equipes": [
+      { "nom": "Toi", "points": 3, "toi": true },
+      { "nom": "Rives FC", "points": 3 },
+      { "nom": "Olympia", "points": 1, "prochain": true },
+      { "nom": "Union Vale", "points": 0 }
+    ]
+  },
+  "joueurs": {
+    "MO": { "nom": "Ollivier", "pays": "FRA", "poste": "G", "style": "REM", "prix": 2 },
+    "JM": { "nom": "Marchal", "pays": "FRA", "poste": "DD", "style": "REM", "prix": 2 },
+    "TR": { "nom": "Roux", "pays": "FRA", "poste": "AC", "style": "PRE", "prix": 3 },
+    "HF": { "nom": "Ferrand", "pays": "FRA", "poste": "MC", "style": "PRE", "prix": 3 },
+    "AM": { "nom": "Mercier", "pays": "FRA", "poste": "AG", "style": "RAP", "prix": 2 },
+    "IS": { "nom": "Salvat", "pays": "ESP", "poste": "MC", "style": "CRE", "prix": 3 },
+    "RC": { "nom": "Castell", "pays": "ESP", "poste": "DG", "style": "FIN", "prix": 2 },
+    "PA": { "nom": "Arnau", "pays": "ESP", "poste": "MC", "style": "TEC", "prix": 3 },
+    "AS": { "nom": "Sanz", "pays": "ESP", "poste": "AC", "style": "RAP", "prix": 3 },
+    "DA": { "nom": "Almar", "pays": "ESP", "poste": "MC", "style": "COM", "prix": 3 },
+    "KM": { "nom": "Moura", "pays": "BRA", "poste": "AD", "style": "COM", "prix": 2 },
+    "BL": { "nom": "Lima", "pays": "BRA", "poste": "AG", "style": "RAP", "prix": 2 },
+    "CB": { "nom": "Brandão", "pays": "BRA", "poste": "AD", "style": "CRE", "prix": 2 },
+    "EL": { "nom": "Lobo", "pays": "BRA", "poste": "MC", "style": "TEC", "prix": 3 },
+    "LM": { "nom": "Monti", "pays": "ITA", "poste": "DC", "style": "TEC", "prix": 2 },
+    "NV": { "nom": "Vitale", "pays": "ITA", "poste": "DC", "style": "REM", "prix": 2 },
+    "DK": { "nom": "Conti", "pays": "ITA", "poste": "DC", "style": "REM", "prix": 2 },
+    "MV": { "nom": "Vianello", "pays": "ITA", "poste": "DC", "style": "FIN", "prix": 2 }
+  },
+  "effectif": [
+    { "id": "MO", "fusions": 0 },
+    { "id": "LM", "fusions": 0 },
+    { "id": "NV", "fusions": 1 },
+    { "id": "RC", "fusions": 0 },
+    { "id": "JM", "fusions": 0 },
+    { "id": "HF", "fusions": 1 },
+    { "id": "IS", "fusions": 1 },
+    { "id": "PA", "fusions": 0 },
+    { "id": "BL", "fusions": 3 },
+    { "id": "KM", "fusions": 1 },
+    { "id": "TR", "fusions": 2 },
+    { "id": "AS", "fusions": 0 },
+    { "id": "DK", "fusions": 0 }
+  ],
+  "composition": [
+    { "joueurId": "MO", "poste": "G", "cellule": 0 },
+    { "joueurId": "LM", "poste": "DC", "cellule": 0 },
+    { "joueurId": "NV", "poste": "DC", "cellule": 2 },
+    { "joueurId": "RC", "poste": "DG", "cellule": 1 },
+    { "joueurId": "JM", "poste": "DD", "cellule": 1 },
+    { "joueurId": "HF", "poste": "MC", "cellule": 1 },
+    { "joueurId": "IS", "poste": "MC", "cellule": 3 },
+    { "joueurId": "PA", "poste": "MC", "cellule": 4 },
+    { "joueurId": "BL", "poste": "AG", "cellule": 1 },
+    { "joueurId": "KM", "poste": "AD", "cellule": 1 },
+    { "joueurId": "TR", "poste": "AC", "cellule": 3 }
+  ],
+  "mercato": ["HF", "DA", "CB", "MV", "AM", "EL"]
+}

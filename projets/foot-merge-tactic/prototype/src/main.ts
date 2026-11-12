@@ -1,129 +1,92 @@
-// Point d'entrée de la page : deux écrans, placement et match. On peut
-// choisir la forme des cases du plateau (hexagones ou carrés) : la
-// composition suit, chaque joueur prend la case la plus proche de son poste.
+// Point d'entrée de la page : deux écrans, préparation (maquette du 12/11) et
+// match. Le plateau est celui des hexagones. L'équipe de la préparation vient
+// de data/preparation.json ; l'adversaire, de data/equipes.json.
 
 import { chargerDonnees, chargerEquipes, chargerReglages } from "./sim/chargement";
-import type { Donnees } from "./sim/donnees";
-import { convertirComposition } from "./sim/placement";
 import type { Equipe, Placement } from "./sim/types";
 import { html } from "./ui/dom";
 import { EcranMatch } from "./ui/ecranMatch";
-import { EcranPlacement, type EtatPlacement } from "./ui/ecranPlacement";
+import { EcranPreparation } from "./ui/ecranPreparation";
+import { Preparation } from "./ui/preparation";
 
-const CLE_STOCKAGE = "foot-merge-tactic.composition.v3"; // v3 : plateau au choix
-const CLE_ANCIENNE = "foot-merge-tactic.composition.v2"; // ancien découpage = plateau des carrés
+const CLE_STOCKAGE = "foot-merge-tactic.preparation.v1";
 
-interface Sauvegarde {
-  plateau: string;
-  composition: Placement[];
-}
-
-function lire(): Sauvegarde | null {
+function lire(): Placement[] | null {
   try {
     const brut = localStorage.getItem(CLE_STOCKAGE);
-    if (brut) return JSON.parse(brut) as Sauvegarde;
-    const ancienne = localStorage.getItem(CLE_ANCIENNE);
-    if (ancienne) return { plateau: "carres", composition: JSON.parse(ancienne) as Placement[] };
-  } catch {
-    // stockage indisponible ou illisible : composition par défaut
-  }
-  return null;
-}
-
-function ecrire(s: Sauvegarde): void {
-  try {
-    localStorage.setItem(CLE_STOCKAGE, JSON.stringify(s));
-  } catch {
-    // stockage indisponible : sans conséquence
-  }
-}
-
-/** Composition enregistrée, convertie pour `donnees` ; null si elle ne correspond plus aux données. */
-function compositionValide(s: Sauvegarde, donnees: Donnees, effectif: Equipe): Placement[] | null {
-  try {
-    const source = chargerDonnees(s.plateau);
-    for (const p of s.composition) source.cellule(p.poste, p.cellule);
-    if (!s.composition.every((p) => effectif.joueurs.some((j) => j.id === p.joueurId))) return null;
-    return convertirComposition(s.composition, source, donnees);
+    return brut ? (JSON.parse(brut) as Placement[]) : null;
   } catch {
     return null;
   }
 }
 
+function ecrire(composition: Placement[]): void {
+  try {
+    localStorage.setItem(CLE_STOCKAGE, JSON.stringify(composition));
+  } catch {
+    // stockage indisponible : sans conséquence
+  }
+}
+
+/** Composition enregistrée encore valable pour l'effectif de départ (les achats ne sont pas gardés). */
+function compositionValide(prepa: Preparation, composition: Placement[]): boolean {
+  try {
+    if (!Array.isArray(composition) || composition.length > 11) return false;
+    const cases = new Set<string>();
+    for (const p of composition) {
+      prepa.donnees.cellule(p.poste, p.cellule);
+      if (!prepa.membre(p.joueurId) || prepa.fiche(p.joueurId).poste !== p.poste) return false;
+      if (p.poste === "G" && p.cellule !== 0) return false;
+      cases.add(`${p.poste}:${p.cellule}`);
+    }
+    const joueurs = new Set(composition.map((p) => p.joueurId));
+    return cases.size === composition.length && joueurs.size === composition.length && prepa.etat.effectif.length - composition.length <= prepa.d.bancMax;
+  } catch {
+    return false;
+  }
+}
+
 function demarrer(): void {
   const reglages = chargerReglages();
-  const sauvegarde = lire();
-  let donnees = (() => {
-    try {
-      return chargerDonnees(sauvegarde?.plateau);
-    } catch {
-      return chargerDonnees();
-    }
-  })();
-  let { effectif, adversaire } = chargerEquipes(donnees);
-
-  const etat: EtatPlacement = {
-    composition: (sauvegarde && compositionValide(sauvegarde, donnees, effectif)) ?? effectif.composition,
-    joueurChoisi: null,
-    message: "",
-    messageErreur: false,
-  };
-  const enregistrer = () => ecrire({ plateau: donnees.plateauId, composition: etat.composition });
-  const equipes = (): [Equipe, Equipe] => [{ ...effectif, composition: etat.composition }, adversaire];
+  const donnees = chargerDonnees("hexagones");
+  const { adversaire } = chargerEquipes(donnees);
+  const prepa = new Preparation(donnees);
+  const sauvee = lire();
+  if (sauvee && compositionValide(prepa, sauvee)) prepa.etat.composition = sauvee;
+  const equipes = (): [Equipe, Equipe] => [{ ...prepa.equipe(), nationalite: prepa.d.deck.map((p) => p.code).join(" · ") }, adversaire];
 
   const app = document.getElementById("app")!;
   const entete = html("header", { class: "entete" }, app);
-  html("h1", {}, entete, "Prototype 1 · placement et blocs");
+  html("h1", {}, entete, "Prototype 1");
   const onglets = html("nav", { class: "onglets" }, entete);
-  const ongletPlacement = html("button", { type: "button", class: "onglet onglet-actif" }, onglets, "Placement");
+  const ongletPrepa = html("button", { type: "button", class: "onglet onglet-actif" }, onglets, "Préparation");
   const ongletMatch = html("button", { type: "button", class: "onglet" }, onglets, "Match");
   const contenu = html("main", {}, app);
 
-  let match: EcranMatch;
-  let placement: EcranPlacement;
-  const construireEcrans = () => {
-    match = new EcranMatch(donnees, reglages, equipes);
-    placement = new EcranPlacement(donnees, effectif, etat, () => enregistrer(), (id) => changerPlateau(id));
-  };
+  const match = new EcranMatch(donnees, reglages, equipes);
+  const preparation = new EcranPreparation(prepa, () => ecrire(prepa.etat.composition));
 
-  function changerPlateau(id: string): void {
-    const nouvelles = chargerDonnees(id);
-    etat.composition = convertirComposition(etat.composition, donnees, nouvelles);
-    donnees = nouvelles;
-    ({ effectif, adversaire } = chargerEquipes(donnees));
-    etat.joueurChoisi = null;
-    etat.message = `Plateau en ${donnees.plateau.nom.toLowerCase()} : chaque joueur a gardé son poste, sur la case la plus proche.`;
-    etat.messageErreur = false;
-    enregistrer();
-    construireEcrans();
-    montrer("placement");
-  }
-
-  function montrer(ecran: "placement" | "match"): void {
-    ongletPlacement.classList.toggle("onglet-actif", ecran === "placement");
+  function montrer(ecran: "preparation" | "match"): void {
+    if (ecran === "match" && !prepa.pret()) {
+      preparation.signaler("Il faut 11 joueurs sur le terrain avant de voir le match.", true);
+      return;
+    }
+    ongletPrepa.classList.toggle("onglet-actif", ecran === "preparation");
     ongletMatch.classList.toggle("onglet-actif", ecran === "match");
     if (ecran === "match") {
-      if (etat.composition.length !== 11) {
-        etat.message = "Il faut 11 joueurs sur le terrain avant de voir le match.";
-        etat.messageErreur = true;
-        placement.rendre();
-        montrer("placement");
-        return;
-      }
       contenu.replaceChildren(match.racine);
       match.ouvrir();
     } else {
       match.fermer();
-      placement.rendre();
-      contenu.replaceChildren(placement.racine);
+      preparation.rendre();
+      contenu.replaceChildren(preparation.racine);
     }
     window.scrollTo({ top: 0 });
   }
 
-  construireEcrans();
-  ongletPlacement.addEventListener("click", () => montrer("placement"));
+  ongletPrepa.addEventListener("click", () => montrer("preparation"));
   ongletMatch.addEventListener("click", () => montrer("match"));
-  montrer("placement");
+  montrer("preparation");
 }
 
 demarrer();

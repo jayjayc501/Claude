@@ -10,6 +10,18 @@ const resultat = await Bun.build({
   entrypoints: [join(racine, "src/main.ts")],
   target: "browser",
   minify: true,
+  plugins: [
+    {
+      // Images PNG incluses dans la page (le chargeur « dataurl » de Bun les rend vides).
+      name: "png-en-data-url",
+      setup(b) {
+        b.onLoad({ filter: /\.png$/ }, ({ path }) => ({
+          contents: `export default ${JSON.stringify(`data:image/png;base64,${readFileSync(path).toString("base64")}`)};`,
+          loader: "js",
+        }));
+      },
+    },
+  ],
 });
 if (!resultat.success) {
   for (const log of resultat.logs) console.error(log);

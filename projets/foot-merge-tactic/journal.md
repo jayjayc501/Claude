@@ -290,3 +290,13 @@ Retours du concepteur : sur une touche, le joueur part avec le ballon au lieu de
 **Décisions du concepteur** : voir `CLAUDE.md`, section « Interface (séance du 12/11) » : postes des joueurs (G, DC, DG/DD, MC, AG/AD, BU), hors poste refusé, gardien unique en double losange, banc de 5, une couleur par pays, Bronze/Argent/Or en pause, bustes avec postures, fusions bleu/or/violet.
 
 **Prochaine étape** : concept des cartes et des notes des joueurs, puis intégration de l'écran dans le prototype.
+
+## 12/11/2026 (suite) — Écran de préparation intégré au prototype
+
+Demande du concepteur : intégrer l'écran de la maquette du 12/11 ; moteur figé (aucun fichier de `src/sim/` modifié).
+- Nouvel écran « Préparation » (remplace l'écran de placement) : en-tête avec chrono et classement du groupe (prochain adversaire en rouge), compteurs de pays et de styles à gauche (paliers 3/5/7, fond grisé sous le premier palier), plateau en hexagones au centre (terrain #c4dbcd, cases à 30 % avec fin contour blanc, noms de poste à 30 %, AC affiché BU, cases basses des ailiers MG/MD, gardien en double losange), banc de 5, mercato de 6.
+- Joueurs en bustes (images de référence de la maquette, incluses dans la page) ; fusions : aura et anneau du socle bleu, or, violet avec étincelles. Nom au toucher.
+- Glisser-déposer : case libre de son poste, échange dans le même poste, remplaçant sur un titulaire, sortie sur le banc (5 places), vente sur le mercato. **Hors poste refusé** (message). Toucher une carte du mercato l'achète : fusion automatique avec la copie (3 au plus), sinon le joueur va sur le banc.
+- Données : `src/data/preparation.json` (équipe de la maquette, 4 pays, styles d'après les postures, groupe, mercato). `equipes.json` inchangé (tests du moteur) ; l'adversaire du match en vient toujours.
+- Démonstration seulement : chrono et classement fixes ; budget (7), prix (2-3) et revente au prix de la carte sont provisoires ; les achats ne sont pas gardés au rechargement (la composition l'est). Choix hexagones / carrés retiré de l'écran (carrés gardés dans les données).
+- Tests : 93 verts (6 nouveaux : composition de la maquette, hors poste refusé, banc de 5, achat et fusion, vente, compteurs). Page vérifiée au format téléphone (390 × 844), aucune erreur.

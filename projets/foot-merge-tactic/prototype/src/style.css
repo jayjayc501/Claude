@@ -171,3 +171,85 @@ button[hidden] { display: none; }
 .annonce-but rect { fill: rgba(200, 40, 40, 0.88); }
 .annonce-but text { font-size: 34px; }
 @keyframes annonce-entree { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+
+/* ---- Écran de préparation (maquette du 12/11) : panneaux clairs, peu de noir ---- */
+.prepa { max-width: 420px; margin: 0 auto; background: #EEF1EC; color: #16201A; border-radius: 16px; padding: 8px 6px 10px; }
+.prepa-contenu { display: flex; flex-direction: column; gap: 6px; }
+.prepa-tete { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
+.prepa-titre { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.prepa-h { font-size: 18px; font-weight: 700; }
+.prepa-h.petit { font-size: 14px; }
+.prepa-sous { font-size: 11px; font-weight: 600; color: #4A5A50; }
+.prepa-chrono { display: flex; align-items: center; gap: 5px; background: #fff; border: 1px solid #D5DCD6; border-radius: 999px; padding: 1px 10px; font-size: 15px; font-weight: 700; }
+.prepa-groupe { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 4px; }
+.prepa-equipe { position: relative; display: flex; align-items: center; gap: 5px; padding: 4px 5px; border-radius: 10px; border: 2px solid #D5DCD6; background: #fff; min-height: 38px; }
+.prepa-equipe.toi { border-color: #3563C0; background: #E6EDFA; }
+.prepa-equipe.prochain { border-color: #C2413D; background: #FBE9E8; }
+.prepa-avatar { width: 20px; height: 20px; flex: none; border-radius: 50%; background: #4A5A50; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.toi .prepa-avatar { background: #3563C0; }
+.prochain .prepa-avatar { background: #C2413D; }
+.prepa-equipe-texte { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.prepa-equipe-nom { font-size: 10px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prepa-equipe-pts { font-size: 10px; color: #4A5A50; }
+.prepa-prochain { position: absolute; top: -8px; right: 4px; background: #C2413D; color: #fff; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 1px 4px; border-radius: 4px; line-height: 1.4; }
+
+.prepa-milieu { display: flex; gap: 8px; align-items: stretch; }
+.prepa-traits { width: 60px; flex: none; display: flex; flex-direction: column; gap: 3px; }
+.prepa-etiquette { font-size: 9px; font-weight: 700; color: #4A5A50; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+.prepa-trait { display: flex; align-items: center; gap: 4px; padding: 2px 3px; border-radius: 8px; background: #E1E6E2; color: #4F5B54; }
+.prepa-trait.atteint { background: #fff; color: #16201A; }
+.prepa-badge { width: 24px; height: 24px; flex: none; border-radius: 6px; border: 2px solid; color: #fff; font-size: 8.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.prepa-trait.style .prepa-badge { background: #fff; border-color: #B5BEB8; color: #4F5B54; }
+.prepa-trait.style.atteint .prepa-badge { background: #2B2F36; border-color: #2B2F36; color: #fff; }
+.prepa-nombre { font-size: 15px; font-weight: 700; line-height: 1; }
+.prepa-palier { font-size: 9px; font-weight: 600; }
+.prepa-titulaires { margin-top: auto; display: flex; flex-direction: column; align-items: center; background: #fff; border-radius: 8px; padding: 6px 2px; font-size: 9px; color: #4A5A50; }
+.prepa-titulaires .prepa-nombre { font-size: 16px; color: #16201A; margin-bottom: 2px; }
+.prepa-terrain { flex: 1; min-width: 0; }
+svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.prepa-pelouse { fill: #c4dbcd; }
+.prepa-ligne { fill: none; stroke: #fff; stroke-opacity: 0.3; stroke-width: 2; }
+.prepa-case { fill-opacity: 0.3; stroke: #fff; stroke-opacity: 0.4; stroke-width: 2; stroke-linejoin: round; pointer-events: none; }
+.prepa-role { font-size: 11px; font-weight: 700; letter-spacing: 0.02em; text-anchor: middle; fill: #fff; opacity: 0.3; pointer-events: none; }
+.prepa-buste { cursor: grab; touch-action: none; }
+.prepa-origine { opacity: 0.3; }
+.prepa-cible { stroke-width: 3; stroke-linejoin: round; pointer-events: none; }
+.prepa-cible.cible-ok { fill: #fff; fill-opacity: 0.35; stroke: #fff; }
+.prepa-cible.cible-non { fill: #C2413D; fill-opacity: 0.25; stroke: #C2413D; }
+.prepa-nom rect { fill: #fff; stroke: #FFC400; stroke-width: 2; }
+.prepa-nom text { font-size: 10px; font-weight: 700; text-anchor: middle; fill: #16201A; }
+.prepa-fantome { position: fixed; left: 0; top: 0; width: 56px; height: 57px; pointer-events: none; z-index: 20; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.3)); }
+
+.prepa-banc, .prepa-mercato { background: #fff; border-radius: 14px; outline: 3px solid transparent; outline-offset: -3px; transition: outline-color 0.1s; }
+.prepa-banc { display: flex; align-items: center; gap: 8px; padding: 4px 10px; }
+.prepa-banc.cible-ok, .prepa-mercato.cible-ok { outline-color: #3563C0; }
+.prepa-banc.cible-non, .prepa-mercato.cible-non { outline-color: #C2413D; }
+.prepa-banc-titre { display: flex; flex-direction: column; width: 40px; flex: none; line-height: 1.3; }
+.prepa-gras { font-size: 12px; font-weight: 700; }
+.prepa-discret { font-size: 10px; color: #4A5A50; }
+.prepa-places { flex: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.prepa-place { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; }
+.prepa-tirable { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.prepa-place.choisi .prepa-poste { color: #16201A; background: #FFF4CC; border-radius: 4px; padding: 0 3px; }
+.prepa-mini { display: block; width: 36px; height: 37px; pointer-events: none; }
+.prepa-vide { width: 36px; height: 36px; border-radius: 50%; border: 2px dashed #B5BEB8; }
+.prepa-poste { font-size: 9px; font-weight: 700; color: #4A5A50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.prepa-mercato { display: flex; flex-direction: column; gap: 6px; padding: 6px 8px 8px; }
+.prepa-mercato-tete { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.prepa-budget { display: flex; align-items: center; gap: 4px; background: #FFF4CC; border-radius: 999px; padding: 2px 8px 2px 3px; }
+.prepa-piece { width: 18px; height: 18px; border-radius: 50%; background: #FFC400; border: 1.5px solid #16201A; }
+.prepa-cartes { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.prepa-carte { position: relative; font: inherit; color: #16201A; border: 2px solid #F1F4F0; padding: 3px 2px; margin: 0; background: #F1F4F0; border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 1px; cursor: pointer; min-height: 58px; }
+.prepa-carte.vide { border: 2px dashed #D5DCD6; background: transparent; cursor: default; }
+.prepa-carte.fusion { border-color: #7347B8; }
+.prepa-carte.trop-cher { opacity: 0.5; }
+.prepa-carte .prepa-poste { font-size: 10px; color: #16201A; }
+.prepa-prix { position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; border-radius: 50%; background: #FFC400; border: 1.5px solid #16201A; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.prepa-fusion { position: absolute; top: -7px; left: 50%; transform: translateX(-50%); font-size: 8px; font-weight: 700; color: #fff; background: #7347B8; border-radius: 4px; padding: 1px 4px; text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.4; }
+.prepa-toast { position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 20px); max-width: min(360px, calc(100vw - 32px)); background: #16201A; color: #fff; font-size: 13px; line-height: 1.35; padding: 8px 14px; border-radius: 12px; opacity: 0; pointer-events: none; transition: opacity 0.15s, transform 0.15s; z-index: 30; text-align: center; }
+.prepa-toast.visible { opacity: 0.94; transform: translate(-50%, 0); }
+.prepa-toast.erreur { background: #8E2A27; }
+/* Auras de fusion (bustes du banc et du glisser) : bleu, or, violet. */
+.aura-1 { filter: drop-shadow(0 0 2px #5EC8FF) drop-shadow(0 0 5px #5EC8FF) drop-shadow(0 0 9px #5EC8FF); }
+.aura-2 { filter: drop-shadow(0 0 2px #FFC400) drop-shadow(0 0 5px #FFC400) drop-shadow(0 0 9px #FFC400); }
+.aura-3 { filter: drop-shadow(0 0 2px #FFFFFF) drop-shadow(0 0 3px #E9A8FF) drop-shadow(0 0 6px #C04BFF) drop-shadow(0 0 10px #8A2BE2) drop-shadow(0 0 14px #FF4FD8); }

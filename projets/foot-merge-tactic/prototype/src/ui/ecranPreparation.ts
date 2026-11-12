@@ -52,6 +52,17 @@ const DOUBLE_LOSANGE = [
 const ETINCELLES =
   "M5 3 L6.4 6.6 L10 8 L6.4 9.4 L5 13 L3.6 9.4 L0 8 L3.6 6.6 Z M43 -1 L44.68 3.32 L49 5 L44.68 6.68 L43 11 L41.32 6.68 L37 5 L41.32 3.32 Z M2 26.5 L2.98 29.02 L5.5 30 L2.98 30.98 L2 33.5 L1.02 30.98 L-1.5 30 L1.02 29.02 Z M46 23 L47.12 25.88 L50 27 L47.12 28.12 L46 31 L44.88 28.12 L42 27 L44.88 25.88 Z M24 -11.5 L25.26 -8.26 L28.5 -7 L25.26 -5.74 L24 -2.5 L22.74 -5.74 L19.5 -7 L22.74 -8.26 Z";
 
+// Pictogrammes des styles (24 × 24, couleur du texte) : bouclier, flèches qui
+// se resserrent, ballon, éclair.
+const PICTO = (corps: string) =>
+  `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${corps}</svg>`;
+const PICTOS: Record<string, string> = {
+  REM: PICTO('<path d="M12 2.8 L19.5 5.8 V11 C19.5 15.6 16.4 19.3 12 21.2 C7.6 19.3 4.5 15.6 4.5 11 V5.8 Z"/>'),
+  PRE: PICTO('<path d="M2.5 12 H8.5 M5.8 8.8 L9 12 L5.8 15.2 M21.5 12 H15.5 M18.2 8.8 L15 12 L18.2 15.2"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/>'),
+  TEC: PICTO('<circle cx="12" cy="12" r="9"/><path d="M12 8.4 L15.2 10.7 L14 14.4 H10 L8.8 10.7 Z" fill="currentColor"/><path d="M12 8.4 V3 M15.2 10.7 L20.6 9.2 M14 14.4 L17.3 19.1 M10 14.4 L6.7 19.1 M8.8 10.7 L3.4 9.2" stroke-width="1.6"/>'),
+  RAP: PICTO('<path d="M13.5 2.5 L5.5 13.5 H11.5 L10.5 21.5 L18.5 10.5 H12.5 Z" fill="currentColor" stroke-width="1.4"/>'),
+};
+
 const X = (xn: number) => xn * W;
 const Y = (yn: number) => MH + ((0.5 - yn) / 0.5) * H;
 
@@ -300,6 +311,7 @@ export class EcranPreparation {
     const milieu = html("div", { class: "prepa-milieu" }, c);
     this.rendreTraits(milieu);
     this.rendrePlateau(html("div", { class: "prepa-terrain" }, milieu));
+    this.rendreTactique(c);
     this.rendreBanc(c);
     this.rendreMercato(c);
   }
@@ -348,7 +360,8 @@ export class EcranPreparation {
       const { prochain, atteint } = this.prepa.palier(s.n);
       const nom = d.styles[s.code] ?? s.code;
       const r = html("div", { class: `prepa-trait style${atteint ? " atteint" : ""}`, title: nom, "aria-label": `${nom} : ${s.n} sur ${prochain}` }, col);
-      html("span", { class: "prepa-badge" }, r, s.code);
+      const b = html("span", { class: "prepa-badge" }, r);
+      b.innerHTML = PICTOS[s.code] ?? s.code;
       const n = html("span", { class: "prepa-nombre" }, r, String(s.n));
       html("span", { class: "prepa-palier" }, n, `/${prochain}`);
     }
@@ -468,6 +481,25 @@ export class EcranPreparation {
     svg("rect", { x: x - l / 2, y: bas - 16, width: l, height: 16, rx: 6 }, g);
     const t = svg("text", { x, y: bas - 4.5 }, g);
     t.textContent = nom;
+  }
+
+  private rendreTactique(parent: HTMLElement): void {
+    const d = this.prepa.d;
+    const p = html("div", { class: "prepa-tactique" }, parent);
+    html("span", { class: "prepa-etiquette" }, p, "Tactique d'équipe");
+    const choix = html("div", { class: "prepa-choix", role: "radiogroup", "aria-label": "Tactique d'équipe" }, p);
+    for (const t of d.tactiques) {
+      const actif = t.code === this.prepa.etat.tactique;
+      const b = html(
+        "button",
+        { type: "button", class: `prepa-puce${actif ? " actif" : ""}`, role: "radio", "aria-checked": String(actif), title: `${t.nom} : ${t.aide}` },
+        choix,
+        t.court ?? t.nom,
+      );
+      b.addEventListener("click", () => {
+        if (!actif) this.afficherIssue(this.prepa.choisirTactique(t.code));
+      });
+    }
   }
 
   private rendreBanc(parent: HTMLElement): void {

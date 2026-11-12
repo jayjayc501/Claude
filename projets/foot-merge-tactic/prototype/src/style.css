@@ -200,6 +200,7 @@ button[hidden] { display: none; }
 .prepa-trait.atteint { background: #fff; color: #16201A; }
 .prepa-badge { width: 24px; height: 24px; flex: none; border-radius: 6px; border: 2px solid; color: #fff; font-size: 8.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 .prepa-trait.style .prepa-badge { background: #fff; border-color: #B5BEB8; color: #4F5B54; }
+.prepa-badge svg { display: block; }
 .prepa-trait.style.atteint .prepa-badge { background: #2B2F36; border-color: #2B2F36; color: #fff; }
 .prepa-nombre { font-size: 15px; font-weight: 700; line-height: 1; }
 .prepa-palier { font-size: 9px; font-weight: 600; }
@@ -256,3 +257,8 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .aura-1 { filter: drop-shadow(0 0 2px #5EC8FF) drop-shadow(0 0 5px #5EC8FF) drop-shadow(0 0 9px #5EC8FF); }
 .aura-2 { filter: drop-shadow(0 0 2px #FFC400) drop-shadow(0 0 5px #FFC400) drop-shadow(0 0 9px #FFC400); }
 .aura-3 { filter: drop-shadow(0 0 2px #FFFFFF) drop-shadow(0 0 3px #E9A8FF) drop-shadow(0 0 6px #C04BFF) drop-shadow(0 0 10px #8A2BE2) drop-shadow(0 0 14px #FF4FD8); }
+.prepa-tactique { display: flex; flex-direction: column; gap: 3px; background: #fff; border-radius: 14px; padding: 3px 6px 6px; }
+.prepa-tactique .prepa-etiquette { margin: 0 0 0 4px; }
+.prepa-choix { display: flex; gap: 4px; }
+.prepa-puce { flex: 1 1 auto; min-width: 0; font: inherit; font-size: 10px; font-weight: 700; color: #4A5A50; background: #F1F4F0; border: 2px solid #F1F4F0; border-radius: 8px; padding: 4px 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prepa-puce.actif { color: #fff; background: #2B2F36; border-color: #2B2F36; }

@@ -69,4 +69,13 @@ describe("écran de préparation", () => {
     expect(p.palier(4)).toEqual({ prochain: 5, atteint: true });
     expect(p.palier(2)).toEqual({ prochain: 3, atteint: false });
   });
+
+  test("tactique d'équipe : une seule, Équilibrée par défaut", () => {
+    const p = nouvelle();
+    expect(p.etat.tactique).toBe("EQU");
+    expect(p.choisirTactique("TIK").ok).toBe(true);
+    expect(p.etat.tactique).toBe("TIK");
+    expect(p.choisirTactique("XXX").ok).toBe(false);
+    expect(p.etat.tactique).toBe("TIK");
+  });
 });

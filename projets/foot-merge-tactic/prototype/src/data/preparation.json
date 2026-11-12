@@ -1,5 +1,5 @@
 {
-  "_note": "Écran de préparation (maquette du 12/11). Équipe, groupe et mercato de démonstration. Postes : identifiants de postes.json (AC s'affiche BU). Budget, prix et revente : chiffres provisoires, non validés. Styles : 4 pour la première version (12/11), style null = aucun style.",
+  "_note": "Écran de préparation (maquette du 12/11). Équipe, groupe et mercato de démonstration. Postes : identifiants de postes.json (AC s'affiche BU). Budget, prix et revente : chiffres provisoires, non validés. Styles : 4 pour la première version (12/11), style null = aucun style. Tactique d'équipe : une seule, sans effet sur le moteur pour l'instant (12/11).",
   "deck": [
     { "code": "FRA", "nom": "France", "couleur": "#1F3A93" },
     { "code": "ESP", "nom": "Espagne", "couleur": "#B85600" },
@@ -12,6 +12,14 @@
     "TEC": "Technicien",
     "RAP": "Rapide"
   },
+  "tactiques": [
+    { "code": "EQU", "nom": "Équilibrée", "aide": "le réglage moyen du moteur" },
+    { "code": "PRS", "nom": "Pressing", "aide": "bloc haut, on presse tôt" },
+    { "code": "GEG", "nom": "Gegenpressing", "court": "Gegenpress", "aide": "on presse tout de suite après une perte" },
+    { "code": "CON", "nom": "Contre", "aide": "bloc bas, on attaque vite à la récupération" },
+    { "code": "TIK", "nom": "Tiki-taka", "aide": "passes courtes, on garde le ballon" }
+  ],
+  "tactique": "EQU",
   "paliers": [3, 5, 7],
   "bancMax": 5,
   "fusionsMax": 3,

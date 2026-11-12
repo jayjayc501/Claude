@@ -29,11 +29,15 @@ export interface EtatPrepa {
   budget: number;
   /** Cartes du mercato (identifiant du joueur), null = place vide. */
   mercato: (string | null)[];
+  /** Tactique d'équipe choisie (une seule). Sans effet sur le moteur pour l'instant. */
+  tactique: string;
 }
 
 export interface DonneesPrepa {
   deck: { code: string; nom: string; couleur: string }[];
   styles: Record<string, string>;
+  tactiques: { code: string; nom: string; court?: string; aide: string }[];
+  tactique: string;
   paliers: number[];
   bancMax: number;
   fusionsMax: number;
@@ -70,6 +74,7 @@ export function etatInitial(d: DonneesPrepa): EtatPrepa {
     composition: d.composition.map((p) => ({ ...p })),
     budget: d.budget,
     mercato: [...d.mercato],
+    tactique: d.tactique,
   };
 }
 
@@ -221,6 +226,14 @@ export class Preparation {
     };
     const message = copie ? `${f.nom} fusionne : niveau ${copie.fusions + 1}.` : `${f.nom} rejoint le banc.`;
     return { ok: true, etat: this.etat, message };
+  }
+
+  /** Choix de la tactique d'équipe (une seule à la fois). */
+  choisirTactique(code: string): Issue {
+    const t = this.d.tactiques.find((x) => x.code === code);
+    if (!t) return { ok: false, erreur: "Tactique inconnue." };
+    this.etat = { ...this.etat, tactique: code };
+    return { ok: true, etat: this.etat, message: `Tactique : ${t.nom} (${t.aide}). Pas encore d'effet sur le match.` };
   }
 
   /** Composition prête pour le match ? */

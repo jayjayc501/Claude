@@ -312,3 +312,11 @@ Retour du concepteur : « le fond vert pâle ne fait pas terrain de foot ».
 Décisions du concepteur : tactique d'équipe séparée des styles ; pas de style de gardien ; styles avant les notes ; 4 styles (Presseur, Technicien, Rapide, Rempart) ; certains joueurs sans style.
 - Écran de préparation : compteurs des 4 styles (toujours affichés, du plus fréquent au moins fréquent) ; `preparation.json` ramené à ces 4 styles, 7 joueurs sur 18 sans style (`null`), dont le gardien.
 - Tests : 6 verts pour l'écran (compteurs mis à jour).
+
+## 12/11/2026 (suite) — Tactique d'équipe et pictogrammes des styles
+
+Demandes du concepteur : « ajouter la possibilité d'ajouter une tactique : Pressing, Gegenpress, Contre, Tiki-taka… » (écran seulement, une seule à la fois, Équilibrée par défaut) ; « modifie les styles par des pictos ».
+- Écran de préparation : bandeau « Tactique d'équipe » sous le plateau, 5 choix (Équilibrée, Pressing, Gegenpress, Contre, Tiki-taka) ; un toucher choisit, un message rappelle l'intention et « pas encore d'effet sur le match ». Choix gardé au rechargement. **Moteur inchangé.**
+- Compteurs de styles : pictogrammes au lieu des codes (Rempart : bouclier ; Presseur : flèches qui se resserrent ; Technicien : ballon ; Rapide : éclair). Nom du style au survol et pour la lecture d'écran.
+- Titre « Prototype 1 » retiré au-dessus des onglets (place gagnée).
+- Tests : 7 verts pour l'écran (nouveau : tactique). Vérifié à 390 et 360 px de large, aucune erreur.

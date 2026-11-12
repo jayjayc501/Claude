@@ -10,6 +10,7 @@ import { EcranPreparation } from "./ui/ecranPreparation";
 import { Preparation } from "./ui/preparation";
 
 const CLE_STOCKAGE = "foot-merge-tactic.preparation.v1";
+const CLE_TACTIQUE = "foot-merge-tactic.tactique.v1";
 
 function lire(): Placement[] | null {
   try {
@@ -53,18 +54,30 @@ function demarrer(): void {
   const prepa = new Preparation(donnees);
   const sauvee = lire();
   if (sauvee && compositionValide(prepa, sauvee)) prepa.etat.composition = sauvee;
+  try {
+    const t = localStorage.getItem(CLE_TACTIQUE);
+    if (t) prepa.choisirTactique(t);
+  } catch {
+    // stockage indisponible : tactique par défaut
+  }
   const equipes = (): [Equipe, Equipe] => [{ ...prepa.equipe(), nationalite: prepa.d.deck.map((p) => p.code).join(" · ") }, adversaire];
 
   const app = document.getElementById("app")!;
   const entete = html("header", { class: "entete" }, app);
-  html("h1", {}, entete, "Prototype 1");
   const onglets = html("nav", { class: "onglets" }, entete);
   const ongletPrepa = html("button", { type: "button", class: "onglet onglet-actif" }, onglets, "Préparation");
   const ongletMatch = html("button", { type: "button", class: "onglet" }, onglets, "Match");
   const contenu = html("main", {}, app);
 
   const match = new EcranMatch(donnees, reglages, equipes);
-  const preparation = new EcranPreparation(prepa, () => ecrire(prepa.etat.composition));
+  const preparation = new EcranPreparation(prepa, () => {
+    ecrire(prepa.etat.composition);
+    try {
+      localStorage.setItem(CLE_TACTIQUE, prepa.etat.tactique);
+    } catch {
+      // stockage indisponible : sans conséquence
+    }
+  });
 
   function montrer(ecran: "preparation" | "match"): void {
     if (ecran === "match" && !prepa.pret()) {

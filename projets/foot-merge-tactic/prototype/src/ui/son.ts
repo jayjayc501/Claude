@@ -114,6 +114,11 @@ export function jouer(evenement: string): void {
       sifflet(t, 0.25);
       foule(t + 0.05, 2.2, 0.5, 800);
       break;
+    case "Mi-temps":
+    case "Fin du match":
+      sifflet(t, 0.9); // un seul coup, long
+      break;
+    case "2e mi-temps":
     case "Faute":
     case "Hors-jeu":
       sifflet(t, 0.35);

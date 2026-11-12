@@ -42,6 +42,9 @@ const VEDETTE_MIN_S = 0.7;
 /** Écart minimal à l'écran entre deux pions ou figurines (unités SVG), selon la vue. */
 const ECART_AFFICHAGE: Record<Vue, number> = { pions: 2 * RAYON_ROND + 2, figurines: 18, camera: 20 };
 const CLE_VUE = "foot-merge-tactic.vue-match.v1";
+/** Une mi-temps : 180 s de jeu simulé, soit 60 s à l'écran en vitesse ×3 (12/11). */
+const DUREE_MI_TEMPS_S = 180;
+const VITESSE_PAR_DEFAUT = 3;
 const COULEUR_EUX = "#C2413D";
 const BANDES = 12;
 
@@ -65,7 +68,13 @@ export class EcranMatch {
   readonly racine: HTMLElement;
   private sim!: MatchSim;
   private graine = 1;
-  private vitesse = 1;
+  private vitesse = VITESSE_PAR_DEFAUT;
+  /** Mi-temps en cours et arrêt du jeu (mi-temps, fin du match). */
+  private periode: 1 | 2 = 1;
+  private debutPeriode = 0;
+  private arret: "mi-temps" | "fin" | null = null;
+  private scoreMiTemps: [number, number] = [0, 0];
+  private panneau: HTMLElement | null = null;
   private enPause = false;
   private zonesVisibles = false;
   private actif = false;
@@ -157,6 +166,10 @@ export class EcranMatch {
     });
     this.reserve = 0;
     this.enPause = false;
+    this.periode = 1;
+    this.debutPeriode = 0;
+    this.arret = null;
+    this.scoreMiTemps = [0, 0];
     this.dernierEvenement = -1;
     this.annonceDepuis = -Infinity;
     this.construire();
@@ -190,7 +203,12 @@ export class EcranMatch {
     this.boutonJouer = html("button", { type: "button", class: "match-jouer" }, cmd);
     this.boutonJouer.addEventListener("click", () => {
       activer(); // le son ne peut démarrer qu'après un geste
-      if (!this.sim.demarre) this.sim.demarrer();
+      if (this.arret === "mi-temps") this.secondeMiTemps();
+      else if (this.arret === "fin") {
+        this.graine += 1;
+        this.nouveauMatch();
+        return;
+      } else if (!this.sim.demarre) this.sim.demarrer();
       else this.enPause = !this.enPause;
       this.majCommandes();
     });
@@ -230,6 +248,7 @@ export class EcranMatch {
           // stockage indisponible : sans conséquence
         }
         this.construireTerrain();
+        if (this.arret) this.montrerStats();
         this.majCommandes();
         this.dessiner();
       });
@@ -410,8 +429,13 @@ export class EcranMatch {
   }
 
   private majCommandes(): void {
-    const enJeu = this.sim.demarre && !this.enPause;
-    this.boutonJouer.textContent = !this.sim.demarre ? "▶ Coup d'envoi" : enJeu ? "❚❚ Pause" : "▶ Reprendre";
+    const enJeu = this.sim.demarre && !this.enPause && !this.arret;
+    this.boutonJouer.textContent =
+      this.arret === "mi-temps" ? "▶ 2e mi-temps"
+      : this.arret === "fin" ? "↺ Nouveau match"
+      : !this.sim.demarre ? "▶ Coup d'envoi"
+      : enJeu ? "❚❚ Pause"
+      : "▶ Reprendre";
     this.boutonJouer.classList.toggle("en-jeu", enJeu);
     this.boutonZones.classList.toggle("actif", this.zonesVisibles);
     VUES.forEach((v, i) => {
@@ -429,7 +453,7 @@ export class EcranMatch {
     if (!this.actif) return;
     const ecoule = Math.min(0.1, (t - this.dernier) / 1000);
     this.dernier = t;
-    if (this.sim.demarre && !this.enPause) {
+    if (this.sim.demarre && !this.enPause && !this.arret) {
       this.reserve += ecoule * this.vitesse;
       const dt = this.reglages.pasDeTempsS;
       let n = 0;
@@ -437,6 +461,10 @@ export class EcranMatch {
         this.sim.pas();
         this.reserve -= dt;
         n++;
+        if (this.sim.temps - this.debutPeriode >= DUREE_MI_TEMPS_S) {
+          this.finDePeriode();
+          break;
+        }
       }
     }
     this.dessiner();
@@ -580,14 +608,17 @@ export class EcranMatch {
     // Tableau de score.
     const score = `${sim.score[0]} – ${sim.score[1]}`;
     if (this.score.textContent !== score) this.score.textContent = score;
-    const t = Math.floor(sim.temps);
-    const chrono = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
+    // Minutes de match : chaque mi-temps de 180 s de jeu simulé vaut 45 minutes.
+    const dansPeriode = Math.min(DUREE_MI_TEMPS_S, sim.temps - this.debutPeriode);
+    const minute = Math.floor((dansPeriode / DUREE_MI_TEMPS_S) * 45) + (this.periode === 2 ? 45 : 0);
+    const chrono = this.arret === "mi-temps" ? "Mi-temps" : this.arret === "fin" ? "Terminé" : `${this.periode === 1 ? "1re" : "2e"} MT · ${minute}'`;
     if (this.chrono.textContent !== chrono) this.chrono.textContent = chrono;
     const total = sim.tempsPossession[0] + sim.tempsPossession[1];
     this.barreNous.style.width = `${total > 0 ? (100 * sim.tempsPossession[0]) / total : 50}%`;
 
     let texte: string;
-    if (!sim.demarre) texte = "Positions au coup d'envoi.";
+    if (!sim.demarre) texte = "Positions au coup d'envoi. Une mi-temps dure 60 s en vitesse ×3.";
+    else if (this.arret) texte = this.arret === "fin" ? "Fin du match." : "Mi-temps : change ta tactique si tu veux, puis lance la 2e mi-temps.";
     else {
       const qui = sim.possession === 0 ? "Tu as le ballon" : `${this.habillage.nomEux} a le ballon`;
       const etat = sim.enTransition ? "transition…" : sim.phases[0] === "attaque" ? "ton équipe monte" : "ton équipe défend";
@@ -595,6 +626,68 @@ export class EcranMatch {
     }
     if (this.statut.textContent !== texte) this.statut.textContent = texte;
     this.majBord();
+  }
+
+  /** Fin d'une mi-temps : coup de sifflet et panneau de statistiques. */
+  private finDePeriode(): void {
+    this.reserve = 0;
+    this.arret = this.periode === 1 ? "mi-temps" : "fin";
+    if (this.periode === 1) this.scoreMiTemps = [...this.sim.score];
+    jouer(this.arret === "fin" ? "Fin du match" : "Mi-temps");
+    this.majCommandes();
+    this.montrerStats();
+  }
+
+  /** Deuxième mi-temps : l'adversaire engage, chacun regagne sa place. */
+  private secondeMiTemps(): void {
+    this.panneau?.remove();
+    this.panneau = null;
+    this.arret = null;
+    this.periode = 2;
+    this.debutPeriode = this.sim.temps;
+    this.enPause = false;
+    this.sim.balle?.coupDEnvoi(1, "2e mi-temps");
+  }
+
+  /** Panneau de statistiques sur le terrain (mi-temps, fin du match). */
+  private montrerStats(): void {
+    const sim = this.sim;
+    const st = sim.balle?.stats;
+    if (!st) return;
+    this.panneau?.remove();
+    const h = this.habillage;
+    const p = html("div", { class: "match-panneau", role: "dialog", "aria-label": this.arret === "fin" ? "Fin du match" : "Mi-temps" }, this.terrain);
+    const carte = html("div", { class: "match-panneau-carte" }, p);
+    html("span", { class: "match-panneau-titre" }, carte, this.arret === "fin" ? "Fin du match" : "Mi-temps");
+    const score = html("div", { class: "match-panneau-score" }, carte);
+    html("span", { class: "nous" }, score, h.nomNous);
+    html("strong", {}, score, `${sim.score[0]} – ${sim.score[1]}`);
+    html("span", { class: "eux" }, score, h.nomEux);
+    if (this.arret === "fin") html("span", { class: "match-panneau-sous" }, carte, `Mi-temps : ${this.scoreMiTemps[0]} – ${this.scoreMiTemps[1]}`);
+    const total = sim.tempsPossession[0] + sim.tempsPossession[1];
+    const pc = (a: number, b: number) => (b > 0 ? `${Math.round((100 * a) / b)} %` : "—");
+    const cadres = (c: 0 | 1) => sim.score[c] + st.arrets[c === 0 ? 1 : 0];
+    const lignes: [string, string, string][] = [
+      ["Possession", pc(sim.tempsPossession[0], total), pc(sim.tempsPossession[1], total)],
+      ["Tirs (cadrés)", `${st.tirs[0]} (${cadres(0)})`, `${st.tirs[1]} (${cadres(1)})`],
+      ["Passes réussies", `${st.passesReussies[0]}/${st.passes[0]}`, `${st.passesReussies[1]}/${st.passes[1]}`],
+      ["Réussite des passes", pc(st.passesReussies[0], st.passes[0]), pc(st.passesReussies[1], st.passes[1])],
+      ["Tacles gagnés", String(st.tacles[0]), String(st.tacles[1])],
+      ["Fautes", String(st.fautes[0]), String(st.fautes[1])],
+      ["Corners", String(st.corners[0]), String(st.corners[1])],
+      ["Hors-jeu", String(st.horsJeu[0]), String(st.horsJeu[1])],
+      ["Arrêts du gardien", String(st.arrets[0]), String(st.arrets[1])],
+    ];
+    const table = html("div", { class: "match-panneau-stats" }, carte);
+    for (const [nom, a, b] of lignes) {
+      html("span", { class: "nous" }, table, a);
+      html("span", { class: "nom" }, table, nom);
+      html("span", { class: "eux" }, table, b);
+    }
+    if (this.arret === "mi-temps") html("p", { class: "match-panneau-aide" }, carte, "Tu peux changer ta tactique sous le terrain avant de reprendre.");
+    const b = html("button", { type: "button", class: "match-jouer" }, carte, this.arret === "fin" ? "↺ Nouveau match" : "▶ 2e mi-temps");
+    b.addEventListener("click", () => this.boutonJouer.click());
+    this.panneau = p;
   }
 
   /** Vue « caméra » : la fenêtre suit le ballon en douceur, sans sortir du terrain. */

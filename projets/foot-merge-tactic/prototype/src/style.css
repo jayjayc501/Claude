@@ -362,3 +362,17 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-rond { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)); }
 .match-surgit { animation: match-surgit 0.3s cubic-bezier(0.2, 1.5, 0.4, 1); transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes match-surgit { from { transform: scale(0.3); opacity: 0.2; } to { transform: scale(1); opacity: 1; } }
+.match-panneau { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(22, 32, 26, 0.35); border-radius: 14px; padding: 12px; z-index: 5; }
+.match-panneau-carte { width: 100%; max-width: 330px; background: #fff; border-radius: 16px; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); animation: match-pop 0.4s cubic-bezier(0.2, 1.5, 0.4, 1); }
+.match-panneau-titre { align-self: center; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: #2B2F36; border-radius: 999px; padding: 3px 12px; }
+.match-panneau-score { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.match-panneau-score strong { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.match-panneau-score .nous { color: #3563C0; font-weight: 800; text-align: right; }
+.match-panneau-score .eux { color: #C2413D; font-weight: 800; }
+.match-panneau-sous { align-self: center; font-size: 12px; color: #4A5A50; margin-top: -6px; }
+.match-panneau-stats { display: grid; grid-template-columns: 1fr auto 1fr; gap: 4px 10px; align-items: center; font-variant-numeric: tabular-nums; }
+.match-panneau-stats .nom { font-size: 11px; font-weight: 600; color: #4A5A50; text-align: center; }
+.match-panneau-stats .nous { font-size: 14px; font-weight: 800; color: #3563C0; text-align: right; }
+.match-panneau-stats .eux { font-size: 14px; font-weight: 800; color: #C2413D; }
+.match-panneau-aide { margin: 0; font-size: 12px; color: #4A5A50; text-align: center; }
+.match-panneau-carte .match-jouer { flex: none; }

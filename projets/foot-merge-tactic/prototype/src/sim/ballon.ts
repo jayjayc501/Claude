@@ -128,6 +128,12 @@ export class BallonReel {
     s.prendrePossession(camp);
   }
 
+  /** Coup d'envoi d'une nouvelle période (2e mi-temps) : comme après un but,
+   *  chacun regagne sa place de départ, puis `camp` engage. */
+  coupDEnvoi(camp: Camp, texte: string): void {
+    this.preparerEngagement(camp, texte);
+  }
+
   /** But : ballon au centre, les deux équipes regagnent leur camp ; l'engagement
    *  a lieu quand tout le monde y est (10 s au plus). */
   private preparerEngagement(camp: Camp, texte: string): void {

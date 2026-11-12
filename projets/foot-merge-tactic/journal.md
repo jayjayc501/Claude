@@ -405,3 +405,11 @@ Demande du concepteur : « une IHM aussi fun et belle que celle de la préparati
   - Page : 1,08 Mo (images incluses). Tests : 100 verts ; vues Pions et Figurines vérifiées au format téléphone, aucune erreur.
 - (suite) « Les 2 joueurs brésiliens n'ont pas de maillot bleu et le cercle en dessous n'est pas comme les autres » : les bandes jaune citron de Lima (et de Mercier) dominaient en petit : passées en blanc (maillot bleu à bandes blanches). Le cercle différent sous Lima et Moura est l'aura de fusion (Lima niveau 3 violet, Moura niveau 1 bleu), comme sur la préparation : gardée.
 - (suite) « Les maillots de tous les joueurs de l'équipe doivent être les mêmes, pas avec ou sans bandes, et le cercle aussi ; c'est juste la flamme orange ou violette qui doit rester colorée. » **Décision** notée. `scripts/maillots.py` : chaque maillot (bandes comprises) prend exactement la même couleur, même teinte, saturation et luminosité moyenne (bleu pour toi, rouge pour l'adversaire), plis gardés. Socle : l'avant de l'anneau est redessiné par-dessus l'aura, il reste blanc pour tous ; seule la flamme est colorée. Vérifié sur les 29 figurines et au format téléphone.
+
+## 12/11/2026 (suite) — Match en deux mi-temps, statistiques à la mi-temps
+
+Demande du concepteur : « un timer de 60 s en vitesse ×3 pour faire une mi-temps, et des stats à la mi-temps ».
+- Écran du match : vitesse ×3 par défaut ; une mi-temps = 180 s de jeu simulé (60 s à l'écran en ×3) ; chrono en minutes de match (« 1re MT · 22' », puis 45' → 90').
+- Mi-temps : un coup de sifflet long, panneau sur le terrain : score, possession, tirs (cadrés = buts + arrêts du gardien adverse), passes réussies et pourcentage, tacles gagnés, fautes, corners, hors-jeu, arrêts. Tactique modifiable avant de reprendre. Bouton « 2e mi-temps » : l'adversaire engage, chacun regagne sa place (`BallonReel.coupDEnvoi`, même mécanisme qu'après un but).
+- Fin du match : même panneau avec les totaux et le score à la mi-temps ; bouton « Nouveau match ».
+- Tests : 101 verts (nouveau : coup d'envoi de la 2e mi-temps). Match complet vérifié dans le navigateur (horloge accélérée) : mi-temps à 61 s, 2e mi-temps, fin ; aucune erreur.

@@ -77,7 +77,7 @@ function demarrer(): void {
     styles: prepa.d.styles,
     infos: (id) => {
       const f = prepa.d.joueurs[id];
-      return f ? { couleur: couleurs[f.pays] ?? "#1F3A93", style: f.style } : undefined;
+      return f ? { couleur: couleurs[f.pays] ?? "#1F3A93", style: f.style, fusions: prepa.membre(id)?.fusions ?? 0 } : undefined;
     },
   });
   const preparation = new EcranPreparation(prepa, () => {

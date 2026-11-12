@@ -387,3 +387,6 @@ Demande du concepteur : « une IHM aussi fun et belle que celle de la préparati
 - Pictogrammes des styles regroupés dans `src/ui/pictos.ts` ; position des têtes dans les images : `TETES` dans `src/ui/bustes.ts`.
 - Tests : 100 verts. Page vérifiée au format téléphone, aucune erreur.
 - (suite) « Pas assez visibles, les petites têtes » : pastilles agrandies (rayon 15 au lieu de 11, environ 30 px à l'écran), marge du terrain réduite ; ceux du bas de l'écran passent devant ceux du haut (ordre refait toutes les 10 images) ; étiquette du porteur plus grande.
+- (suite) « Le cercle avec les têtes n'est pas terrible » : pastilles abandonnées. **Les joueurs sont des figurines sur leur socle**, comme sur l'écran de préparation (36 px de large, socle blanc pour toi, rouge pour l'adversaire, ombre, aura de fusion bleue, or ou violette, porteur sur un socle doré avec son nom ; ceux du bas passent devant).
+- Adversaires : bustes de la maquette **recolorés en maillot rouge et retournés** (`scripts/recolorer-adversaires.py`, images dans `src/images/adversaires/`) ; on prend d'abord ceux qui ne sont pas sur ton terrain. Avec 18 images seulement, quelques adversaires restent des copies de tes joueurs : il faudra des figurines propres à l'adversaire.
+- Page : 732 Ko (images incluses). Tests : 100 verts. Vérifié au format téléphone, aucune erreur.

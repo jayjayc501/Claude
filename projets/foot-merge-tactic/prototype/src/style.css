@@ -301,10 +301,11 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-lignes .pelouse { fill: transparent; }
 .match-lignes .lignes { stroke: #fff; stroke-opacity: 0.8; stroke-width: 1.6; }
 .match-lignes .lignes .point, .match-lignes .lignes .but { fill: #fff; }
-.match-pion .match-anneau { stroke: #fff; stroke-width: 1.8; }
-.match-pion { filter: drop-shadow(0 1.5px 1px rgba(0, 0, 0, 0.35)); }
-.match-fond-visage { fill: #F4F1EA; }
-.match-halo { fill: rgba(255, 196, 0, 0.25); stroke: #FFC400; stroke-width: 2.5; animation: match-halo 0.9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+.match-ombre-pion { fill: rgba(0, 0, 0, 0.32); }
+.match-socle { fill: none; stroke-width: 2.2; }
+.match-pion.nous .match-socle { stroke: #fff; }
+.match-pion.eux .match-socle { stroke: #C2413D; }
+.match-halo { fill: rgba(255, 196, 0, 0.45); stroke: #FFC400; stroke-width: 3; animation: match-halo 0.9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
 .match-halo.eux { fill: rgba(255, 255, 255, 0.2); stroke: #fff; }
 @keyframes match-halo { from { transform: scale(0.92); } to { transform: scale(1.08); } }
 .match-etiquette rect { fill: #fff; stroke: #FFC400; stroke-width: 1.5; }

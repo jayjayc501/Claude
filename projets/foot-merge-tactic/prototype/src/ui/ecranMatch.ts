@@ -1,8 +1,8 @@
 // Écran de match, dans l'esprit de l'écran de préparation (12/11 : « une IHM
 // aussi fun et belle que celle de la préparation ») : tableau de score avec
-// chrono et barre de possession, pelouse rayée, tes joueurs en pastilles avec
-// le visage de leur figurine (anneau de la couleur du pays), le porteur du
-// ballon entouré d'or, annonces qui sautent, confettis sur un but.
+// chrono et barre de possession, pelouse rayée, joueurs en figurines sur leur
+// socle (les adversaires en maillot rouge), aura de fusion, le porteur du
+// ballon sur un socle doré avec son nom, annonces qui sautent, confettis.
 // Votre équipe attaque vers le haut. Tactique de chaque équipe modifiable en
 // plein match, tactiques et styles activables ou non (proposition du 12/11).
 
@@ -11,20 +11,24 @@ import type { OptionsInfluences } from "../sim/influences";
 import { projeterRect } from "../sim/projection";
 import { MatchSim } from "../sim/simulation";
 import type { Equipe, Reglages } from "../sim/types";
-import { BUSTES, TETES } from "./bustes";
+import { CHAMP_ROUGE, GARDIEN_ROUGE } from "./adversaires";
+import { BUSTES } from "./bustes";
 import { dessinerLignes, html, svg } from "./dom";
 import { PICTOS } from "./pictos";
 import { activer, basculerMuet, estMuet, jouer } from "./son";
 
 const ECHELLE = 5; // unités SVG par mètre
 const MARGE = 6;
-const RAYON_PION = 15;
+/** Largeur d'une figurine sur le terrain (unités SVG ≈ pixels) ; repère de la maquette : 48 × 53, socle en 24,47. */
+const LARGEUR_FIG = 36;
+const K = LARGEUR_FIG / 48;
 const COULEUR_EUX = "#C2413D";
 const BANDES = 12;
 
 export interface InfosJoueur {
   couleur: string;
   style: string | null;
+  fusions: number;
 }
 
 export interface HabillageMatch {
@@ -55,7 +59,7 @@ export class EcranMatch {
   private pions: SVGGElement[] = [];
   private calquePions!: SVGGElement;
   private images = 0;
-  private halo!: SVGCircleElement;
+  private halo!: SVGEllipseElement;
   private etiquette!: SVGGElement;
   private etiquetteFond!: SVGRectElement;
   private etiquetteTexte!: SVGTextElement;
@@ -238,8 +242,17 @@ export class EcranMatch {
     });
     this.terrain.replaceChildren(s);
     const defs = svg("defs", {}, s);
-    const clip = svg("clipPath", { id: "match-tete" }, defs);
-    svg("circle", { cx: 0, cy: 0, r: RAYON_PION - 1.8 }, clip);
+    const auras: [string, number][][] = [
+      [],
+      [["#5EC8FF", 1.2], ["#5EC8FF", 2.6]],
+      [["#FFC400", 1.2], ["#FFC400", 2.6]],
+      [["#FFFFFF", 0.8], ["#C04BFF", 2.4], ["#FF4FD8", 4.5]],
+    ];
+    auras.forEach((ombres, n) => {
+      if (!n) return;
+      const f = svg("filter", { id: `match-aura-${n}`, x: "-60%", y: "-60%", width: "220%", height: "220%", "color-interpolation-filters": "sRGB" }, defs);
+      for (const [c, e] of ombres) svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: e, "flood-color": c, "flood-opacity": 1 }, f);
+    });
 
     // Pelouse rayée, comme sur l'écran de préparation.
     const W = 68 * ECHELLE + 2 * MARGE;
@@ -251,11 +264,21 @@ export class EcranMatch {
     this.calqueZones = svg("g", { class: "zones-match" }, s);
 
     // Halo du porteur, ombre du ballon, joueurs, ballon.
-    this.halo = svg("circle", { r: RAYON_PION + 4, class: "match-halo" }, s);
+    this.halo = svg("ellipse", { rx: 22 * K, ry: 7 * K, class: "match-halo" }, s);
     this.ombreBallon = svg("ellipse", { rx: 3.4, ry: 1.6, class: "match-ombre" }, s);
     const g = svg("g", {}, s);
     this.calquePions = g;
-    this.pions = this.sim.joueurs.map((j) => this.pion(g, j.camp, j.joueur.id, j.joueur.nom));
+    // Figurines adverses : d'abord celles qui ne sont pas sur ton terrain, pour
+    // éviter de voir ton joueur et sa copie rouge côte à côte.
+    const tesTitulaires = new Set(this.sim.joueurs.filter((j) => j.camp === 0).map((j) => j.joueur.id));
+    const rouges = Object.entries(CHAMP_ROUGE)
+      .sort(([a], [b]) => Number(tesTitulaires.has(a)) - Number(tesTitulaires.has(b)))
+      .map(([, image]) => image);
+    let rang = 0;
+    this.pions = this.sim.joueurs.map((j) => {
+      const image = j.camp === 1 ? (j.poste.id === "G" ? GARDIEN_ROUGE : rouges[rang++ % rouges.length]!) : undefined;
+      return this.pion(g, j.camp, j.joueur.id, j.joueur.nom, image);
+    });
     this.ballon = svg("circle", { r: 3.4, class: "match-ballon" }, s);
     this.etiquette = svg("g", { class: "match-etiquette", style: "display:none" }, s);
     this.etiquetteFond = svg("rect", { y: -9, height: 15, rx: 7.5 }, this.etiquette);
@@ -268,52 +291,30 @@ export class EcranMatch {
     this.annonceTexte = svg("text", { x: cx, y: cy + 1, "text-anchor": "middle", "dominant-baseline": "central" }, this.annonce);
   }
 
-  /** Pastille d'un joueur : visage de sa figurine dans l'anneau de son pays
-   *  (votre équipe), ou rond rouge avec ses initiales (adversaire). */
-  private pion(parent: SVGGElement, camp: 0 | 1, id: string, nom: string): SVGGElement {
+  /** Figurine d'un joueur, posée sur son socle à sa position : le buste de
+   *  la carte (votre équipe, avec l'aura de fusion) ou un buste en maillot
+   *  rouge (adversaire). Le socle a la couleur de l'équipe. */
+  private pion(parent: SVGGElement, camp: 0 | 1, id: string, nom: string, imageAdverse?: string): SVGGElement {
     const g = svg("g", { class: `match-pion${camp === 0 ? " nous" : " eux"}` }, parent);
-    const infos = camp === 0 ? this.habillage.infos(id) : undefined;
-    const tete = TETES[id];
-    if (camp === 0 && infos && BUSTES[id] && tete) {
-      svg("circle", { r: RAYON_PION, fill: infos.couleur, class: "match-anneau" }, g);
-      svg("circle", { r: RAYON_PION - 1.8, class: "match-fond-visage" }, g);
-      // Le visage remplit la pastille : on agrandit l'image pour que la tête fasse le diamètre intérieur.
-      const largeur = ((RAYON_PION - 1.8) * 1.0) / tete.r;
-      const hauteur = largeur * (97 / 96);
-      svg("image", { href: BUSTES[id], x: -tete.cx * largeur, y: -(tete.cy + 0.03) * hauteur, width: largeur, height: hauteur, "clip-path": "url(#match-tete)" }, g);
+    svg("ellipse", { cx: 0, cy: 0, rx: 17 * K, ry: 5 * K, class: "match-ombre-pion" }, g);
+    svg("ellipse", { cx: 0, cy: 0, rx: 17 * K, ry: 5 * K, class: "match-socle" }, g);
+    const image = camp === 0 ? BUSTES[id] : imageAdverse;
+    const fusions = camp === 0 ? (this.habillage.infos(id)?.fusions ?? 0) : 0;
+    if (image) {
+      svg("image", {
+        href: image,
+        x: -24 * K,
+        y: -48 * K,
+        width: 48 * K,
+        height: 49 * K,
+        filter: fusions ? `url(#match-aura-${Math.min(3, fusions)})` : undefined,
+      }, g);
     } else {
-      this.avatar(g, camp === 0 ? "#1F3A93" : COULEUR_EUX, nom);
+      svg("circle", { cy: -14, r: 9, fill: camp === 0 ? "#3563C0" : COULEUR_EUX, stroke: "#fff", "stroke-width": 1.5 }, g);
     }
     const titre = svg("title", {}, g);
     titre.textContent = nom;
     return g;
-  }
-
-  /** Petit avatar dessiné (adversaires, sans figurine) : tête, cheveux et
-   *  maillot, différents d'un joueur à l'autre. Original, rien de copié. */
-  private avatar(g: SVGGElement, maillot: string, nom: string): void {
-    let h = 0;
-    for (const c of nom) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-    const peaux = ["#F1C7A5", "#D9A47E", "#B07A52", "#7A4E30", "#E8B892"];
-    const cheveux = ["#2A1C14", "#16120F", "#5A3A22", "#C9A15A", "#B5532A", "#3B2A1E"];
-    const peau = peaux[h % peaux.length]!;
-    const chev = cheveux[(h >> 3) % cheveux.length]!;
-    const coupe = (h >> 6) % 4;
-    const ri = 8.2;
-    svg("circle", { r: RAYON_PION, fill: maillot, class: "match-anneau" }, g);
-    const cadre = svg("g", { "clip-path": "url(#match-tete)" }, g);
-    const interieur = svg("g", { transform: `scale(${((RAYON_PION - 1.8) / ri).toFixed(3)})` }, cadre);
-    svg("circle", { r: ri, fill: "#F4F1EA" }, interieur);
-    svg("ellipse", { cx: 0, cy: ri + 1.2, rx: ri, ry: 5.2, fill: maillot }, interieur); // épaules et maillot
-    svg("path", { d: `M -2 ${ri - 4} L 0 ${ri - 2.2} L 2 ${ri - 4}`, fill: "none", stroke: "#fff", "stroke-width": 0.8 }, interieur); // col
-    svg("circle", { cx: 0, cy: -1.2, r: 4.4, fill: peau }, interieur); // tête
-    if (coupe === 0) svg("path", { d: "M -4.5 -1.6 A 4.6 4.6 0 0 1 4.5 -1.6 L 3.4 -3 L -3.4 -3 Z", fill: chev }, interieur); // courts
-    if (coupe === 1) svg("path", { d: "M -4.6 -0.6 C -5 -6 5 -6 4.6 -0.6 C 3.6 -3.6 -3.6 -3.6 -4.6 -0.6 Z", fill: chev }, interieur); // mèche
-    if (coupe === 2) for (const [x, y] of [[-3.4, -3.6], [-1.2, -4.9], [1.2, -4.9], [3.4, -3.6], [0, -5.5]]) svg("circle", { cx: x, cy: y, r: 1.7, fill: chev }, interieur); // bouclés
-    if (coupe === 3) svg("rect", { x: -4.4, y: -4.2, width: 8.8, height: 1.4, rx: 0.7, fill: "#fff" }, interieur); // bandeau
-    svg("circle", { cx: -1.5, cy: -1, r: 0.65, fill: "#16201A" }, interieur); // yeux
-    svg("circle", { cx: 1.5, cy: -1, r: 0.65, fill: "#16201A" }, interieur);
-    svg("path", { d: "M -1.2 1.2 Q 0 2 1.2 1.2", fill: "none", stroke: "#16201A", "stroke-width": 0.5, "stroke-linecap": "round" }, interieur); // sourire
   }
 
   private majCommandes(): void {
@@ -368,7 +369,7 @@ export class EcranMatch {
         this.etiquetteFond.setAttribute("width", l.toFixed(1));
       }
       this.etiquette.setAttribute("class", `match-etiquette${porteur.camp === 0 ? "" : " eux"}`);
-      this.etiquette.setAttribute("transform", `translate(${this.X(porteur.pos.x).toFixed(1)} ${(this.Y(porteur.pos.y) - RAYON_PION - 8).toFixed(1)})`);
+      this.etiquette.setAttribute("transform", `translate(${this.X(porteur.pos.x).toFixed(1)} ${(this.Y(porteur.pos.y) - 48 * K - 7).toFixed(1)})`);
     }
     this.etiquette.style.display = porteur ? "" : "none";
     const enLAir = !!sim.balle?.enLAir;

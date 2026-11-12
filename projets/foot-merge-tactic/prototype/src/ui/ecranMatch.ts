@@ -17,8 +17,8 @@ import { PICTOS } from "./pictos";
 import { activer, basculerMuet, estMuet, jouer } from "./son";
 
 const ECHELLE = 5; // unités SVG par mètre
-const MARGE = 10;
-const RAYON_PION = 11;
+const MARGE = 6;
+const RAYON_PION = 15;
 const COULEUR_EUX = "#C2413D";
 const BANDES = 12;
 
@@ -53,6 +53,8 @@ export class EcranMatch {
   private tactiquesForcees: [string | null, string | null] = [null, null];
 
   private pions: SVGGElement[] = [];
+  private calquePions!: SVGGElement;
+  private images = 0;
   private halo!: SVGCircleElement;
   private etiquette!: SVGGElement;
   private etiquetteFond!: SVGRectElement;
@@ -252,10 +254,11 @@ export class EcranMatch {
     this.halo = svg("circle", { r: RAYON_PION + 4, class: "match-halo" }, s);
     this.ombreBallon = svg("ellipse", { rx: 3.4, ry: 1.6, class: "match-ombre" }, s);
     const g = svg("g", {}, s);
+    this.calquePions = g;
     this.pions = this.sim.joueurs.map((j) => this.pion(g, j.camp, j.joueur.id, j.joueur.nom));
     this.ballon = svg("circle", { r: 3.4, class: "match-ballon" }, s);
     this.etiquette = svg("g", { class: "match-etiquette", style: "display:none" }, s);
-    this.etiquetteFond = svg("rect", { y: -8, height: 13, rx: 6.5 }, this.etiquette);
+    this.etiquetteFond = svg("rect", { y: -9, height: 15, rx: 7.5 }, this.etiquette);
     this.etiquetteTexte = svg("text", { y: 1.5, "text-anchor": "middle" }, this.etiquette);
 
     const cx = W / 2;
@@ -346,6 +349,11 @@ export class EcranMatch {
     sim.joueurs.forEach((j, i) => {
       this.pions[i]!.setAttribute("transform", `translate(${this.X(j.pos.x).toFixed(1)} ${this.Y(j.pos.y).toFixed(1)})`);
     });
+    // Ceux du bas de l'écran passent devant ceux du haut (comme des figurines posées sur le terrain).
+    if (this.images++ % 10 === 0) {
+      const ordre = sim.joueurs.map((j, i) => ({ y: this.Y(j.pos.y), p: this.pions[i]! })).sort((a, b) => a.y - b.y);
+      for (const { p } of ordre) this.calquePions.appendChild(p);
+    }
     const porteur = sim.balle?.porteur;
     this.halo.style.display = porteur ? "" : "none";
     if (porteur) {
@@ -355,12 +363,12 @@ export class EcranMatch {
       const nom = porteur.joueur.nom;
       if (this.etiquetteTexte.textContent !== nom) {
         this.etiquetteTexte.textContent = nom;
-        const l = nom.length * 5.6 + 12;
+        const l = nom.length * 6.3 + 14;
         this.etiquetteFond.setAttribute("x", (-l / 2).toFixed(1));
         this.etiquetteFond.setAttribute("width", l.toFixed(1));
       }
       this.etiquette.setAttribute("class", `match-etiquette${porteur.camp === 0 ? "" : " eux"}`);
-      this.etiquette.setAttribute("transform", `translate(${this.X(porteur.pos.x).toFixed(1)} ${(this.Y(porteur.pos.y) - RAYON_PION - 9).toFixed(1)})`);
+      this.etiquette.setAttribute("transform", `translate(${this.X(porteur.pos.x).toFixed(1)} ${(this.Y(porteur.pos.y) - RAYON_PION - 8).toFixed(1)})`);
     }
     this.etiquette.style.display = porteur ? "" : "none";
     const enLAir = !!sim.balle?.enLAir;

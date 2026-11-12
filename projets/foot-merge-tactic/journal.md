@@ -386,3 +386,4 @@ Demande du concepteur : « une IHM aussi fun et belle que celle de la préparati
 - Tactiques : deux pilules (Toi / Olympia) modifiables en plein match ; interrupteurs « Tactiques activées / coupées », « Styles activés / coupés » ; tableau de bord en cartes (possession, passes réussies, ligne défensive, vous en bleu / eux en rouge) et paliers de styles avec leurs pictogrammes.
 - Pictogrammes des styles regroupés dans `src/ui/pictos.ts` ; position des têtes dans les images : `TETES` dans `src/ui/bustes.ts`.
 - Tests : 100 verts. Page vérifiée au format téléphone, aucune erreur.
+- (suite) « Pas assez visibles, les petites têtes » : pastilles agrandies (rayon 15 au lieu de 11, environ 30 px à l'écran), marge du terrain réduite ; ceux du bas de l'écran passent devant ceux du haut (ordre refait toutes les 10 images) ; étiquette du porteur plus grande.

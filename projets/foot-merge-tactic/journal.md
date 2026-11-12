@@ -325,3 +325,4 @@ Demandes du concepteur : « ajouter la possibilité d'ajouter une tactique : Pre
 - (suite) Pictogramme du Récupérateur : bras plié musclé (poing en haut, biceps bombé) à la place de la main, à la demande du concepteur ; dessin choisi après plusieurs essais pour rester lisible en 17 px.
 - (suite) Poing du bras redessiné à la demande du concepteur (« pas un poing serré ») : doigts repliés visibles (bosses des phalanges, deux plis).
 - (suite) Pictogramme du Récupérateur : **poing fermé vu de face** (4 doigts repliés, pouce en travers), sans bras : le bras « n'était pas compréhensible » (concepteur).
+- (suite) Le concepteur veut un pictogramme plus facile à identifier : **aimant penché** (🧲, pôles pleins) pour le Récupérateur, qui « aimante » le ballon.

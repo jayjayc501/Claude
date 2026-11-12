@@ -83,6 +83,15 @@ un plateau.
 - Plus tard, des **consignes d'équipe** (« volontés ») : plus défensive, plus offensive, jeu en contre, etc. Pas maintenant.
 - **Pressing, contre-pressing, jeu en contre, jeu de passes courtes (tiki-taka)… seront des choix tactiques** (12/11). Le moteur garde un réglage de base moyen ; les consignes le moduleront. La réussite des passes dépendra des notes des joueurs.
 
+### Jeu avec ballon (concepteur, 12/11)
+- **Moteur avec ballon réel jugé satisfaisant pour ce stade du prototype** (12/11). Prochaine étape : interface, puis concept des cartes et des notes, dans une nouvelle conversation.
+- Dans la surface adverse, le porteur **tire toujours** (jamais de passe en retrait). Seul face au but, il **fonce et tire**.
+- **Engagement** : chaque équipe dans son camp ; le joueur qui engage **passe à un coéquipier** (à côté ou en retrait).
+- **Touche** : une passe, pas une conduite. **Six mètres** : au coin de la petite surface, du côté de la sortie, sans adversaire dans la surface.
+- **Petite pause** avant chaque remise en jeu (touche, six mètres, coup franc, corner, engagement).
+- **Son et annonce** à chaque arrêt de jeu (faute, penalty, hors-jeu, corner, six mètres, touche, but avec le score) ; **pas d'annonce sur un arrêt du gardien** (le jeu continue). Sifflet d'un seul coup.
+- Le nombre de tirs ne gêne pas (match très court) ; il faut des arrêts du gardien et un jeu varié (côtés, centres, arrêts de jeu), pas seulement « on avance, on tire, on marque ».
+
 ### Priorités immédiates (concepteur, 11/11)
 - Un moteur jouable ; pouvoir choisir les joueurs qui jouent et les placer ; un jeu équilibré ; un rendu intéressant.
 - Les fusions viennent après le moteur.
@@ -131,19 +140,26 @@ Placement :
 - Un seul joueur par case.
 - Les données décrivent les postes (maximum de joueurs, ligne défensive) et chaque plateau rangée par rangée ; les rectangles des postes sont déduits des cases.
 - **Règles de projection, version 4** (12/11, d'après `docs/reference-football.md` §9 ; chiffres dans `reglages.json`) :
-  - **sans le ballon, défense par lignes** : chaque poste rejoint sa ligne (gardien ; défense : DC, DG, DD ; milieu : milieu central et côtés ; attaque : attaquant). La ligne défensive se tient 18 m derrière le ballon, entre 12 et 38 m de son but (bloc médian), et **s'y rend à vitesse limitée** (recule de 3 m/s, remonte de 5 m/s au plus) ; milieu 11 m devant, attaque 23 m devant. Le placement ne joue plus qu'à 20 % en profondeur : **un latéral placé haut revient dans la ligne de défense**. Chaque ligne de 3 joueurs ou plus tient entre 39 et 44 m de large, ordre gauche-droite gardé, 6 m au moins entre voisins, coulissement vers le ballon (45 %) ;
+  - **sans le ballon, défense par lignes** : chaque poste rejoint sa ligne (gardien ; défense : DC, DG, DD ; milieu : milieu central et côtés ; attaque : attaquant). La ligne défensive se tient 18 m derrière le ballon, entre 12 et 38 m de son but (bloc médian), et **s'y rend à vitesse limitée** (recule de 3 m/s, remonte de 5 m/s au plus ; recule à 7 m/s si le ballon arrive à moins de 8 m devant elle) ; milieu 11 m devant, attaque 23 m devant. Le placement compte en profondeur à 45 % en défense, 70 % au milieu et en attaque (12/11, « zones trop étroites sur la hauteur ») : **un latéral placé haut revient dans la ligne de défense**, mais les hauteurs de placement restent lisibles. Chaque ligne de 3 joueurs ou plus tient entre 39 et 44 m de large, ordre gauche-droite gardé, 6 m au moins entre voisins, coulissement vers le ballon (45 %) ;
   - **avec le ballon** (refait le 11/11 après « gros problème de placement durant le match ») : l'équipe s'étire entre une **ligne arrière à 15 m derrière le ballon** (entre 15 et 55 m de son but) et une **ligne avant 1 m en deçà de la ligne que tient l'adversaire** (hors-jeu) ; 30 à 50 m de long ; **entre les deux, l'ordre de profondeur du placement est gardé** (la case la plus basse du plateau donne la ligne arrière, la plus haute la ligne avant) ; l'équipe s'écarte en largeur ;
   - **aucune cible ne dépend de la position du moment d'un autre joueur**, seulement du ballon, du placement et des hauteurs de ligne tenues par les équipes (fonction du ballon et du temps) ; sinon boucle : la ligne adverse s'enfonçait dans sa surface ;
   - **transitions** (12/11, après « l'équipe doit rester groupée pendant les transitions » et « mouvements robots, synchronisés ») : chaque joueur réagit à son tour (0,2 s + 0,008 s par mètre du ballon + 0 à 0,35 s), les plus proches du ballon d'abord ; puis sprint de transition à 8 m/s pendant 5 s au plus, sinon course à 7 m/s, avec ± 6 % de vitesse et d'accélération selon le joueur ; à la perte du ballon, la ligne défensive part de la hauteur des défenseurs en attaque et recule pas à pas pendant que le milieu revient ; les attaquants qui récupèrent visent la ligne que l'adversaire tient vraiment ; un joueur placé haut revient toujours en retard (contrepartie naturelle) ;
   - **perception** : chacun voit le ballon avec un petit retard (0,1 à 0,3 s selon le joueur, + 0,004 s par mètre) ; le bloc ne démarre plus d'un seul coup ;
   - **évitement anticipé** : 3 m au minimum entre coéquipiers, 2,5 m entre adversaires.
+- **Ballon et actions** (12/11, `src/sim/ballon.ts`, chiffres dans `reglages.json` → `ballon`) :
+  - ballon porté ou libre (frottement), possession au dernier qui l'a touché ; ballon aérien (centres, dégagements) intouchable pendant 80 % du vol ;
+  - porteur : décision toutes les 0,6 à 1,2 s ; tir (surface, seul devant, parfois de loin), centre depuis l'aile, dribble face à un adversaire proche, passe notée (progression, espace, distance, voie libre, largeur), passe dans l'espace vers un coéquipier lancé, rotation du ballon si l'avant est bouché, dégagement long sous pression près de son but, protection du ballon ;
+  - défense : un presse, un couvre ; contre-pressing 4 s après une perte (3 joueurs) ; près de son but, marquage côté but et recul rapide de la ligne ; contres (ballon rapide dévié) ; tacle, faute 4 fois sur 10 ;
+  - gardien : plonge vers le point de passage du tir, arrête selon l'écart et la distance, repousse parfois en corner ;
+  - règles : hors-jeu au départ de la passe, faute → coup franc (adversaires à 9,15 m) ou penalty, corner, six mètres, touche, but et engagement ;
+  - repères mesurés (12 matchs de 3 min) : 1,25 but, 9 tirs, 4 arrêts, 2 fautes, 2 à 3 touches par match ; 77 % de passes réussies ; 5,8 changements de camp par minute (vrai football : 2 à 3).
 - **Plateau de placement** (hexagones validés le 11/11 ; carrés gardés en variante) : couleurs jaune gardien, bleu défense, violet milieu, rouge attaque ; couloirs des côtés plus clairs ; rôle écrit dans la case.
   - **Hexagones (par défaut)** : G 2, DC 5 (3 + 2), DG 3, DD 3, milieu 8 (MDC 3, MC 2, MOC 3), ailiers 3 + 3, attaque 5 (2 + 3). **Nombre de cases à valider** : le découpage validé (DC 6, milieu 9, attaque 6) n'est exact qu'en carrés.
   - **Carrés** : 5 cases par rangée, exactement le découpage validé.
   - Gardien : deux petites cases (normal, avancé) sous le plateau. Coins hauts sans case. En changeant de forme, chaque joueur garde son poste, sur la case la plus proche.
 - Maximums provisoires (non validés) : DG 1, DD 1, milieu 4, AD 1, attaquant 3 (validés en exemple : 3 DC, 1 AG ; le gardien : 1).
 - **Écran de placement sur une page** (11/11) : plateau + banc en ronds dessous. Tout au glisser-déposer : sur une case libre, sur un joueur (échange, ou entrée d'un remplaçant), sur le banc (sortie). Plateau toujours visible ; choix hexagones / carrés en haut à droite. Plus de liste ni de boutons de poste.
-- **Écran de match sur une page** : coup d'envoi, pause, vitesse et zones au-dessus du terrain ; « qui a le ballon » dessous.
+- **Écran de match sur une page** : coup d'envoi, pause, vitesse, son et zones au-dessus du terrain ; score, possession et dernier événement dessous ; annonces sur le terrain et sons (Web Audio, `src/ui/son.ts`).
 
 Boucle de tournoi (transposition de Merge Tactics) :
 - Budget de mercato gagné à chaque match (l'équivalent de l'élixir) ; mercato de 3 joueurs, renouvelés après chaque achat ; deux copies identiques fusionnent automatiquement ; joueurs achetés sur le banc des remplaçants, revente possible.
@@ -179,7 +195,7 @@ Toujours ouvertes :
 - Moteur technique final ; dimensions du terrain ; coordonnées et tailles des rectangles ; liste finale des postes.
 - Comportement exact de chaque poste ; liste des attributs ; liste des consignes tactiques.
 - Temps de réaction et de perception, vitesse de recul de la ligne (réglables, à tester ; l'ancien délai unique de 0,5 s est remplacé par des réactions individuelles le 12/11).
-- Hors-jeu, fautes, touches, corners, coups francs ; nombre de remplaçants ; fatigue.
+- Hors-jeu, fautes, touches, corners, coups francs : en place dans le prototype (12/11), règles fines ouvertes (cartons, coups francs directs, centres sur coup franc). Nombre de remplaçants ; fatigue.
 - Poids chiffré de la qualité, de la tactique et du hasard.
 - Règle de nom de l'hybride ; interface et graphismes définitifs ; temps entre deux matchs.
 - **Nom définitif du jeu** et **modèle économique**.
@@ -190,7 +206,7 @@ Détail des anciens points dans `docs/historique-etat.md`. Encore actifs :
 - Matchs courts = beaucoup de hasard : le temps simulé par mi-temps est le curseur, à mesurer.
 - Nom « Foot Merge Tactic » trop proche de « Merge Tactics » : à changer avant toute publication.
 - Fusion « meilleure valeur de chaque statistique » entre postes opposés : quels postes pour l'hybride ?
-- Hors-jeu et coups de pied arrêtés : règles à décider (hors-jeu semble prévu).
+- Changements de camp encore trop fréquents (5,8 par minute contre 2 à 3) : à revoir avec les notes des joueurs.
 - Appariement ou plafond de niveau en tournoi (équité).
 
 ## Notes techniques (propositions)
@@ -225,7 +241,7 @@ Règles du dossier (§16), condensées :
 
 1. **Terrain et placement** : un rectangle par poste, sous-zones, plusieurs joueurs par poste, chevauchements, choix des joueurs qui jouent, 22 marqueurs. Pas encore de ballon.
 2. **Déplacements et transitions** : pas de téléportation, distances entre coéquipiers, évitement des collisions, mouvement progressif du bloc selon la possession.
-3. **Ballon et actions** : passes courtes et longues, contrôle, interception, duel, tir, gardien, changement de possession.
+3. **Ballon et actions** : passes courtes et longues, contrôle, interception, duel, tir, gardien, changement de possession. *(Fait le 12/11, avec une partie de l'étape 4 : pressing, contre-pressing, marquage, jeu sur les côtés.)*
 4. **Intelligence collective** : appels, démarquages, soutien, couverture, pressing, contre-pressing, largeur, profondeur, replacement, occupation de la surface.
 5. **Attributs et équilibrage** : un attribut ou un petit groupe à la fois, avec effet expliqué et tests comparatifs. Puis les bonus de styles et de nationalité.
 6. **Match complet** : montage accéléré à vitesse variable des temps forts, préparation et mi-temps.
@@ -241,11 +257,7 @@ Laboratoire de tests, construit en même temps que le moteur :
 
 Historique détaillé : `journal.md` (par jour) et `docs/historique-etat.md` (anciennes entrées).
 
-- Prototype 1 (web, `prototype/`) : plateau en hexagones validé, projection v4 (lignes, transitions, réactions individuelles), 12/11 : profondeur du placement mieux gardée en défense (influence 0,45 défense, 0,7 milieu et attaque).
-- **12/11 : mission 2, étape 1 : ballon réel** (`src/sim/ballon.ts`) : porté ou libre, conduite, passes, tirs, interception, tacle, gardien, touche, sortie de but, but, score. 77 tests verts, page republiée. **En attente : l'avis du concepteur sur le jeu.**
-- 12/11 (suite) : tir systématique dans la surface ; gardien à 16 m au plus en attaque ; pressing normal mesuré (1 presse, 1 couvre) ; contre-pressing 4 s (3 joueurs) ; passe sous pression moins précise. 79 tests verts.
-- 12/11 (suite) : **lot A** fait (passe dans l'espace, contres, dribble, protection du ballon, course au point d'interception). 7,6 changements de camp par minute, 72 % de passes réussies. 79 tests verts.
-- 12/11 (suite) : passes plus propres (81 %), attaquant seul qui tire. **Lot B** fait : hors-jeu, fautes (coup franc, penalty), corners, événements affichés. 83 tests verts.
-- 12/11 (suite) : engagement en passe, six mètres (coin de la surface de but, surface vide), gardien qui plonge, sons et annonces. **Lot D** fait : défense de la surface (marquage, recul rapide de la ligne), centres et ballons aériens, dégagements, construction, parades. 1,25 but par match de 3 min. 86 tests verts.
-- **Décision (12/11)** : on reste sur le moteur jusqu'à ce qu'il soit stable. Ensuite : tout mettre à jour (dépôt et projet claude.ai) et repartir dans une nouvelle conversation pour l'interface puis les notes des joueurs (lot C).
-- Règle de séance (concepteur, 12/11) : **économiser les tokens** : peu de lectures, peu de tests et de captures, le concepteur valide lui-même ; mettre à jour le projet claude.ai seulement aux grandes étapes ; réponses courtes.
+- **Prototype 1** (web, `prototype/`, 87 tests verts) : plateau en hexagones, projection v4 (lignes, transitions, réactions individuelles), **ballon réel** (passes, tirs, centres, dribbles, interceptions, contres, pressing et contre-pressing, gardien qui plonge, hors-jeu, fautes, penalty, corners, touches, six mètres, engagement), sons et annonces. Lien : https://claude.ai/artifact/B86yGS9jR47LwubdEiL5EN
+- **12/11 : moteur jugé satisfaisant pour ce stade** par le concepteur. **Prochaine conversation : l'interface, puis le concept des cartes et des notes des joueurs** (lot C : la réussite des passes, des tirs, des arrêts dépendra des notes).
+- Limites connues du moteur : encore trop de changements de camp ; presque pas de hors-jeu ; aucune qualité individuelle (tous les joueurs passent et tirent pareil) ; pas d'appels ni de démarquages organisés ; pas de consignes tactiques (pressing, contre, tiki-taka : choix tactiques futurs).
+- Règle de séance (concepteur, 12/11) : **économiser les tokens** : peu de lectures, peu de tests et de captures, le concepteur valide lui-même ; mettre à jour le projet claude.ai seulement aux grandes étapes ; réponses courtes ; une conversation par sujet.

@@ -400,3 +400,6 @@ Demande du concepteur : « une IHM aussi fun et belle que celle de la préparati
   - **couleurs d'équipe** dans la vue Pions : bleu (contour blanc) pour toi, rouge (contour foncé) pour l'adversaire, au lieu des couleurs de pays ;
   - **écartement à l'affichage** : deux pions à moins de 16 unités (environ 3 m) s'écartent à l'écran (3 passes de répulsion), sans toucher au moteur ; figurine du porteur ramenée à 34 px.
 - Remarque : le moteur change encore souvent de possession (environ 6 fois par minute contre 2 à 3 en vrai) ; limite connue, à traiter avec les notes des joueurs ou un réglage dédié.
+- (suite) « L'équipe adverse est reconnaissable mais pas la mienne : les points et maillots adverses sont rouges, moi ils devraient être bleus. » **Décision** : en match, ton équipe en bleu (pions et figurines), l'adversaire en rouge ; couleurs de pays seulement en préparation.
+  - `scripts/recolorer-equipe.py` : maillots des 18 bustes recolorés au bleu d'équipe (vert, bleu clair, bleu marine ; l'orange de l'Espagne seulement sous la tête, pour ne pas toucher les visages mats ni les cheveux roux) ; images dans `src/images/equipe-bleue/`. Vérifié image par image.
+  - Page : 1,08 Mo (images incluses). Tests : 100 verts ; vues Pions et Figurines vérifiées au format téléphone, aucune erreur.

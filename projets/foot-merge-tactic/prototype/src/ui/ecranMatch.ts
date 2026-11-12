@@ -13,6 +13,7 @@ import { MatchSim } from "../sim/simulation";
 import type { Equipe, Reglages } from "../sim/types";
 import { CHAMP_ROUGE, GARDIEN_ROUGE } from "./adversaires";
 import { BUSTES } from "./bustes";
+import { BUSTES_BLEUS } from "./equipeBleue";
 import { dessinerLignes, html, svg } from "./dom";
 import { PICTOS } from "./pictos";
 import { activer, basculerMuet, estMuet, jouer } from "./son";
@@ -342,7 +343,8 @@ export class EcranMatch {
       .sort(([a], [b]) => Number(tesTitulaires.has(a)) - Number(tesTitulaires.has(b)))
       .map(([, image]) => image);
     let rang = 0;
-    this.images_ = this.sim.joueurs.map((j) => (j.camp === 1 ? (j.poste.id === "G" ? GARDIEN_ROUGE : rouges[rang++ % rouges.length]!) : BUSTES[j.joueur.id]));
+    // Maillots d'équipe en match : bleu pour toi, rouge pour l'adversaire (12/11).
+    this.images_ = this.sim.joueurs.map((j) => (j.camp === 1 ? (j.poste.id === "G" ? GARDIEN_ROUGE : rouges[rang++ % rouges.length]!) : (BUSTES_BLEUS[j.joueur.id] ?? BUSTES[j.joueur.id])));
     this.pions = this.sim.joueurs.map((j, i) =>
       this.vue === "pions" ? this.pionRond(g, j.camp, j.joueur.id, j.joueur.nom) : this.pion(g, j.camp, j.joueur.id, j.joueur.nom, this.images_[i]),
     );

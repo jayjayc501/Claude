@@ -22,7 +22,10 @@ def est_maillot(deg, s, v, orange):
     # (plis clairs du maillot : moins saturés mais très lumineux, contrairement aux bras)
     return orange and 8 <= deg <= 45 and ((s > 0.72 and v > 0.25) or (s > 0.5 and v > 0.75))
 
-def bleuir(im, bas_tete):
+# Bandes jaunes (Lima, Mercier) : en blanc, sinon on voit surtout le jaune en petit.
+BANDES_JAUNES = {"BL": 0.5, "AM": 0.5}
+
+def bleuir(im, bas_tete, bas_bandes=None):
     im = im.convert("RGBA")
     px = im.load()
     for y in range(im.height):
@@ -31,6 +34,10 @@ def bleuir(im, bas_tete):
             if a == 0:
                 continue
             h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            if bas_bandes is not None and y > bas_bandes * im.height and 40 <= h * 360 <= 100 and s > 0.3 and v > 0.45:
+                g2 = int(min(255, 150 + v * 105))
+                px[x, y] = (g2, g2, min(255, g2 + 8), a)  # blanc légèrement bleuté
+                continue
             if est_maillot(h * 360, s, v, bas_tete is not None and y > bas_tete * im.height):
                 ns = min(1, 0.55 + s * 0.35)
                 nv = min(1, 0.25 + v * 0.7)
@@ -42,6 +49,6 @@ os.makedirs(SORTIE, exist_ok=True)
 n = 0
 for f in sorted(glob.glob(f"{SOURCE}/bust-*.png")):
     k = os.path.basename(f)[5:7]
-    bleuir(Image.open(f), BAS_TETE.get(k)).save(f"{SORTIE}/bleu-{k}.png", optimize=True)
+    bleuir(Image.open(f), BAS_TETE.get(k), BANDES_JAUNES.get(k)).save(f"{SORTIE}/bleu-{k}.png", optimize=True)
     n += 1
 print("fait :", n, "figurines")

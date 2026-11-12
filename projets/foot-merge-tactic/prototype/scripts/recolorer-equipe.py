@@ -7,7 +7,7 @@ import glob, os, sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from maillots import recolorer
+from maillots import normaliser, recolorer
 
 SOURCE = "../docs/maquette-interface/bustes"
 SORTIE = "src/images/equipe-bleue"
@@ -16,7 +16,11 @@ TEINTE_BLEU = 220 / 360
 ESPAGNE = {"IS", "RC", "PA", "AS", "DA"}  # maillots orange
 # Bas de la tête (fraction de la hauteur), d'après TETES (src/ui/bustes.ts) :
 # l'orange n'est recoloré qu'en dessous, pour ne pas toucher les visages mats.
-BAS_TETE = {"IS": 0.57, "RC": 0.71, "PA": 0.47, "AS": 0.5, "DA": 0.63}
+# IS : 0,64 (0,57 avant : le menton, peau mate très saturée, passait en bleu).
+BAS_TETE = {"IS": 0.64, "RC": 0.71, "PA": 0.47, "AS": 0.63, "DA": 0.63}
+# Le buste CB de la maquette a des traces vertes sur le visage (recoloriage
+# brésilien) : c'est le même personnage que IS, on part donc de IS (orange).
+SOURCE_DE = {"CB": "IS"}
 
 # Bandes jaunes (Lima, Mercier, Sanz) : passées au même bleu que le maillot.
 # Tous les maillots de l'équipe sont identiques (12/11, « pas avec ou sans bandes »).
@@ -38,6 +42,8 @@ os.makedirs(SORTIE, exist_ok=True)
 n = 0
 for f in sorted(glob.glob(f"{SOURCE}/bust-*.png")):
     k = os.path.basename(f)[5:7]
-    recolorer(Image.open(f), TEINTE_BLEU, 0.78, 0.56, est_maillot_de(BAS_TETE.get(k)), bande_de(BANDES_JAUNES.get(k))).save(f"{SORTIE}/bleu-{k}.png", optimize=True)
+    src = SOURCE_DE.get(k, k)
+    im = recolorer(Image.open(f"{SOURCE}/bust-{src}.png"), TEINTE_BLEU, 0.78, 0.56, est_maillot_de(BAS_TETE.get(src)), bande_de(BANDES_JAUNES.get(src)))
+    normaliser(im).save(f"{SORTIE}/bleu-{k}.png", optimize=True)
     n += 1
 print("fait :", n, "figurines")

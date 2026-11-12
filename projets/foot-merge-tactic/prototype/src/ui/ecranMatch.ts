@@ -30,9 +30,11 @@ const VUES: { id: Vue; nom: string }[] = [
   { id: "figurines", nom: "Figurines" },
 ];
 /** Largeur d'une figurine (unités SVG) ; repère de la maquette : 48 × 53, socle en 24,47. */
-const LARGEUR_FIG: Record<Vue, number> = { pions: 34, figurines: 26, action: 30 };
-/** Agrandissement du porteur. */
-const GRAND_PORTEUR: Record<Vue, number> = { pions: 1, figurines: 1.4, action: 1.2 };
+/** (12/11 : bustes ramenés à la même hauteur visible, un peu plus petits ; tailles relevées de 6 %.) */
+const LARGEUR_FIG: Record<Vue, number> = { pions: 36, figurines: 28, action: 32 };
+/** Agrandissement du porteur (vue Action : tous à la même taille, 12/11 ; le
+ *  porteur se repère à son halo et à son nom). */
+const GRAND_PORTEUR: Record<Vue, number> = { pions: 1, figurines: 1.4, action: 1 };
 /** Vue « Action » : un joueur passe en figurine à moins de ACTION_ENTREE_M du
  *  centre de l'action et redevient pion au-delà de ACTION_SORTIE_M, après
  *  ACTION_MIN_MS au moins (temps réel) dans son état. Le centre de l'action
@@ -801,10 +803,7 @@ export class EcranMatch {
     f.style.display = "";
     const a = fig.animate(
       versFigurine
-        ? [
-            { transform: "scale(0.8)", opacity: 0 },
-            { transform: "scale(1)", opacity: 1 },
-          ]
+        ? [{ opacity: 0 }, { opacity: 1 }]
         : [{ opacity: 1 }, { opacity: 0 }],
       { duration: ACTION_FONDU_MS, easing: "ease-out" },
     );

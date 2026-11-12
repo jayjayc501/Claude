@@ -29,3 +29,25 @@ def recolorer(im, teinte, saturation, luminosite, est_maillot, est_bande=lambda 
         rr, gg, bb = colorsys.hsv_to_rgb(teinte, saturation, nv)
         px[x, y] = (int(rr * 255), int(gg * 255), int(bb * 255), a)
     return im
+
+
+def normaliser(im, hauteur=0.85):
+    """Toutes les figurines à la même hauteur visible (12/11, « pourquoi ils n'ont
+    pas tous la même taille ? ») : les bustes de la maquette n'ont pas la même
+    échelle (85 à 99 % de l'image). On réduit les plus grands autour du bas du
+    socle (centre de l'image en largeur), sans rien couper."""
+    from PIL import Image
+    im = im.convert("RGBA")
+    W, H = im.size
+    boite = im.split()[3].point(lambda a: 255 if a > 40 else 0).getbbox()
+    if not boite:
+        return im
+    haut, bas = boite[1], boite[3]
+    h = (bas - haut) / H
+    if h <= hauteur:
+        return im
+    k = hauteur / h
+    petit = im.resize((max(1, round(W * k)), max(1, round(H * k))), Image.LANCZOS)
+    sortie = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    sortie.alpha_composite(petit, (round(W / 2 - W / 2 * k), round(bas - bas * k)))
+    return sortie

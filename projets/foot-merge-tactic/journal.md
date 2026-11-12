@@ -324,3 +324,4 @@ Demandes du concepteur : « ajouter la possibilité d'ajouter une tactique : Pre
 - (suite) « Presseur » renommé **Récupérateur**, pictogramme de main (choix du concepteur) ; code `REC` dans `preparation.json`. Liste de tactique : « Tactique » (13 px) et le nom choisi (14 px) à des tailles proches ; la liste native du téléphone est posée, invisible, sur ce texte.
 - (suite) Pictogramme du Récupérateur : bras plié musclé (poing en haut, biceps bombé) à la place de la main, à la demande du concepteur ; dessin choisi après plusieurs essais pour rester lisible en 17 px.
 - (suite) Poing du bras redessiné à la demande du concepteur (« pas un poing serré ») : doigts repliés visibles (bosses des phalanges, deux plis).
+- (suite) Pictogramme du Récupérateur : **poing fermé vu de face** (4 doigts repliés, pouce en travers), sans bras : le bras « n'était pas compréhensible » (concepteur).

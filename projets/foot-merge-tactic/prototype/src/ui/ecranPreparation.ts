@@ -53,12 +53,12 @@ const ETINCELLES =
   "M5 3 L6.4 6.6 L10 8 L6.4 9.4 L5 13 L3.6 9.4 L0 8 L3.6 6.6 Z M43 -1 L44.68 3.32 L49 5 L44.68 6.68 L43 11 L41.32 6.68 L37 5 L41.32 3.32 Z M2 26.5 L2.98 29.02 L5.5 30 L2.98 30.98 L2 33.5 L1.02 30.98 L-1.5 30 L1.02 29.02 Z M46 23 L47.12 25.88 L50 27 L47.12 28.12 L46 31 L44.88 28.12 L42 27 L44.88 25.88 Z M24 -11.5 L25.26 -8.26 L28.5 -7 L25.26 -5.74 L24 -2.5 L22.74 -5.74 L19.5 -7 L22.74 -8.26 Z";
 
 // Pictogrammes des styles (24 × 24, couleur du texte) : bouclier (Rempart),
-// bras plié musclé, poing serré (Récupérateur), ballon (Technicien), éclair (Rapide).
+// poing fermé (Récupérateur), ballon (Technicien), éclair (Rapide).
 const PICTO = (corps: string) =>
   `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${corps}</svg>`;
 const PICTOS: Record<string, string> = {
   REM: PICTO('<path d="M12 2.8 L19.5 5.8 V11 C19.5 15.6 16.4 19.3 12 21.2 C7.6 19.3 4.5 15.6 4.5 11 V5.8 Z"/>'),
-  REC: PICTO('<path d="M21.5 20 H8 C5.4 20 3.8 18.4 4 16 L4.8 10.4 C3.9 9.8 3.5 8.6 3.6 7.4 L3.8 4.6 C3.9 3.1 5 2.2 6.6 2.2 H9.6 C11.2 2.2 12.4 2.9 12.4 4.1 C12.4 4.9 11.9 5.3 11.4 5.4 C12.2 5.5 12.6 6.1 12.6 6.8 C12.6 7.6 12 8 11.4 8.1 C12.1 8.2 12.4 8.8 12.3 9.4 C12.2 10.2 11.4 10.6 10.2 10.6 L10.2 15.6 C11.4 11.6 14.4 10 17 10.6 C19 11 20 12.6 19.4 14.4 L21.5 15 Z"/><path d="M11.4 5.4 H8.4 M11.4 8.1 H8.4" stroke-width="1.5"/>'),
+  REC: PICTO('<rect x="4.6" y="5.2" width="3.6" height="8" rx="1.8"/><rect x="8.2" y="3.8" width="3.6" height="8.6" rx="1.8"/><rect x="11.8" y="4.2" width="3.6" height="8.2" rx="1.8"/><rect x="15.4" y="5.6" width="3.6" height="7" rx="1.8"/><path d="M4.6 11 C4.4 15 5.6 18.6 8.6 20.4 H15.6 C18 19.2 19.2 16.4 19 12.6"/><path d="M4.8 12.6 H12.2 C13.4 12.6 14.2 13.4 14.2 14.4 C14.2 15.4 13.4 16.2 12.2 16.2 H8.4"/>'),
   TEC: PICTO('<circle cx="12" cy="12" r="9"/><path d="M12 8.4 L15.2 10.7 L14 14.4 H10 L8.8 10.7 Z" fill="currentColor"/><path d="M12 8.4 V3 M15.2 10.7 L20.6 9.2 M14 14.4 L17.3 19.1 M10 14.4 L6.7 19.1 M8.8 10.7 L3.4 9.2" stroke-width="1.6"/>'),
   RAP: PICTO('<path d="M13.5 2.5 L5.5 13.5 H11.5 L10.5 21.5 L18.5 10.5 H12.5 Z" fill="currentColor" stroke-width="1.4"/>'),
 };

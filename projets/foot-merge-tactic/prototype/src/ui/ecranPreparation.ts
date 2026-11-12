@@ -310,8 +310,9 @@ export class EcranPreparation {
     this.rendreEntete(c);
     const milieu = html("div", { class: "prepa-milieu" }, c);
     this.rendreTraits(milieu);
-    this.rendrePlateau(html("div", { class: "prepa-terrain" }, milieu));
-    this.rendreTactique(c);
+    const terrain = html("div", { class: "prepa-terrain" }, milieu);
+    this.rendreTactique(terrain);
+    this.rendrePlateau(terrain);
     this.rendreBanc(c);
     this.rendreMercato(c);
   }
@@ -483,23 +484,17 @@ export class EcranPreparation {
     t.textContent = nom;
   }
 
+  /** Liste déroulante de la tactique d'équipe, au-dessus du terrain (une seule à la fois). */
   private rendreTactique(parent: HTMLElement): void {
     const d = this.prepa.d;
-    const p = html("div", { class: "prepa-tactique" }, parent);
-    html("span", { class: "prepa-etiquette" }, p, "Tactique d'équipe");
-    const choix = html("div", { class: "prepa-choix", role: "radiogroup", "aria-label": "Tactique d'équipe" }, p);
+    const l = html("label", { class: "prepa-tactique" }, parent);
+    html("span", { class: "prepa-etiquette" }, l, "Tactique");
+    const choix = html("select", { "aria-label": "Tactique d'équipe" }, l);
     for (const t of d.tactiques) {
-      const actif = t.code === this.prepa.etat.tactique;
-      const b = html(
-        "button",
-        { type: "button", class: `prepa-puce${actif ? " actif" : ""}`, role: "radio", "aria-checked": String(actif), title: `${t.nom} : ${t.aide}` },
-        choix,
-        t.court ?? t.nom,
-      );
-      b.addEventListener("click", () => {
-        if (!actif) this.afficherIssue(this.prepa.choisirTactique(t.code));
-      });
+      const o = html("option", { value: t.code }, choix, t.nom);
+      o.selected = t.code === this.prepa.etat.tactique;
     }
+    choix.addEventListener("change", () => this.afficherIssue(this.prepa.choisirTactique(choix.value)));
   }
 
   private rendreBanc(parent: HTMLElement): void {

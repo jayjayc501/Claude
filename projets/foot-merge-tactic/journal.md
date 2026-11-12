@@ -320,3 +320,4 @@ Demandes du concepteur : « ajouter la possibilité d'ajouter une tactique : Pre
 - Compteurs de styles : pictogrammes au lieu des codes (Rempart : bouclier ; Presseur : flèches qui se resserrent ; Technicien : ballon ; Rapide : éclair). Nom du style au survol et pour la lecture d'écran.
 - Titre « Prototype 1 » retiré au-dessus des onglets (place gagnée).
 - Tests : 7 verts pour l'écran (nouveau : tactique). Vérifié à 390 et 360 px de large, aucune erreur.
+- (suite) À la demande du concepteur, les 5 boutons de tactique deviennent une **liste déroulante au-dessus du terrain** (« Tactique : Équilibrée ▾ », liste native du téléphone, texte en 16 px pour éviter le zoom de l'iPhone).

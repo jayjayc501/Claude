@@ -395,3 +395,8 @@ Demande du concepteur : « une IHM aussi fun et belle que celle de la préparati
   - **Figurines** : toutes les figurines, plus petites (26 px), le porteur agrandi (×1,4) ;
   - **Caméra** : figurines de 30 px, fenêtre de 44 m de large qui suit le ballon en douceur (revient sur la décision « terrain entier visible » : pour essai seulement), annonces au centre de la vue.
 - Tests : 100 verts. Les trois vues vérifiées au format téléphone, aucune erreur.
+- (suite) Retour sur la vue Pions : « le joueur perd trop vite la balle, il apparaît et disparaît », « pas de séparation visuelle forte entre les 2 équipes », « les joueurs se montent les uns sur les autres ». Affichage seulement :
+  - **joueur en vedette** : le porteur, ou pendant une passe le dernier à avoir touché le ballon ; il ne change qu'après 0,7 s de jeu au moins. Mesure sur 20 s : la figurine disparaît 1 fois (avant : à chaque passe) et change de joueur 7 fois ;
+  - **couleurs d'équipe** dans la vue Pions : bleu (contour blanc) pour toi, rouge (contour foncé) pour l'adversaire, au lieu des couleurs de pays ;
+  - **écartement à l'affichage** : deux pions à moins de 16 unités (environ 3 m) s'écartent à l'écran (3 passes de répulsion), sans toucher au moteur ; figurine du porteur ramenée à 34 px.
+- Remarque : le moteur change encore souvent de possession (environ 6 fois par minute contre 2 à 3 en vrai) ; limite connue, à traiter avec les notes des joueurs ou un réglage dédié.

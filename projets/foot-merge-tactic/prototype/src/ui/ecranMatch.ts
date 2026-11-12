@@ -29,12 +29,17 @@ const VUES: { id: Vue; nom: string }[] = [
   { id: "camera", nom: "Caméra" },
 ];
 /** Largeur d'une figurine (unités SVG) ; repère de la maquette : 48 × 53, socle en 24,47. */
-const LARGEUR_FIG: Record<Vue, number> = { pions: 40, figurines: 26, camera: 30 };
+const LARGEUR_FIG: Record<Vue, number> = { pions: 34, figurines: 26, camera: 30 };
 /** Agrandissement du porteur. */
 const GRAND_PORTEUR: Record<Vue, number> = { pions: 1, figurines: 1.4, camera: 1.2 };
 /** Caméra : fenêtre de 44 m de large autour du ballon. */
 const ZOOM_CAMERA = 68 / 44;
 const RAYON_ROND = 7;
+const BLEU_NOUS = "#3563C0";
+/** Durée minimale (temps de jeu, s) pendant laquelle un joueur reste « en vedette » (porteur affiché). */
+const VEDETTE_MIN_S = 0.7;
+/** Écart minimal à l'écran entre deux pions ou figurines (unités SVG), selon la vue. */
+const ECART_AFFICHAGE: Record<Vue, number> = { pions: 2 * RAYON_ROND + 2, figurines: 18, camera: 20 };
 const CLE_VUE = "foot-merge-tactic.vue-match.v1";
 const COULEUR_EUX = "#C2413D";
 const BANDES = 12;
@@ -89,6 +94,9 @@ export class EcranMatch {
   private figPorteurImage: SVGImageElement | null = null;
   private figPorteurAnim: SVGGElement | null = null;
   private dernierPorteur: unknown = null;
+  /** Joueur mis en vedette (porteur, ou dernier à avoir touché le ballon pendant une passe). */
+  private vedette: import("../sim/simulation").JoueurSim | null = null;
+  private vedetteDepuis = -Infinity;
   private boutonsVue: HTMLButtonElement[] = [];
   private calquePions!: SVGGElement;
   private images = 0;
@@ -297,6 +305,8 @@ export class EcranMatch {
     this.k = LARGEUR_FIG[this.vue] / 48;
     this.camera = null;
     this.dernierPorteur = null;
+    this.vedette = null;
+    this.vedetteDepuis = -Infinity;
     const K = this.k;
     const defs = svg("defs", {}, s);
     const auras: [string, number][][] = [
@@ -386,8 +396,9 @@ export class EcranMatch {
   /** Pion rond (vue « pions ») : couleur du pays pour ton équipe, rouge pour l'adversaire. */
   private pionRond(parent: SVGGElement, camp: 0 | 1, id: string, nom: string): SVGGElement {
     const g = svg("g", { class: `match-rond${camp === 0 ? " nous" : " eux"}` }, parent);
-    const couleur = camp === 0 ? (this.habillage.infos(id)?.couleur ?? "#3563C0") : COULEUR_EUX;
-    svg("circle", { r: RAYON_ROND, fill: couleur }, g);
+    // Couleur d'équipe (bleu / rouge) : la séparation entre les deux équipes prime
+    // (12/11, « pas de séparation visuelle forte entre les 2 équipes »).
+    svg("circle", { r: RAYON_ROND, fill: camp === 0 ? BLEU_NOUS : COULEUR_EUX }, g);
     const titre = svg("title", {}, g);
     titre.textContent = nom;
     return g;
@@ -429,11 +440,44 @@ export class EcranMatch {
 
   private dessiner(): void {
     const sim = this.sim;
-    const porteur = sim.balle?.porteur ?? null;
+    // Vedette : le porteur, ou pendant une passe le dernier à avoir touché le
+    // ballon ; elle ne change qu'après un court délai (sinon la figurine
+    // apparaît et disparaît sans arrêt).
+    const touche = sim.balle?.porteur ?? sim.balle?.dernier ?? null;
+    if (touche !== this.vedette && (this.vedette === null || sim.temps - this.vedetteDepuis >= VEDETTE_MIN_S)) {
+      this.vedette = touche;
+      this.vedetteDepuis = sim.temps;
+    }
+    const porteur = sim.demarre ? this.vedette : null;
     const grand = GRAND_PORTEUR[this.vue];
+    // Positions à l'écran : les pions trop proches s'écartent un peu (affichage seulement, le moteur ne change pas).
+    const pos = sim.joueurs.map((j) => ({ x: this.X(j.pos.x), y: this.Y(j.pos.y) }));
+    const ecart = ECART_AFFICHAGE[this.vue];
+    for (let passe = 0; passe < 3; passe++) {
+      for (let a = 0; a < pos.length; a++) {
+        for (let b = a + 1; b < pos.length; b++) {
+          const pa = pos[a]!;
+          const pb = pos[b]!;
+          let dx = pb.x - pa.x;
+          let dy = pb.y - pa.y;
+          let d = Math.hypot(dx, dy);
+          if (d >= ecart) continue;
+          if (d < 1e-3) {
+            dx = 1;
+            dy = 0;
+            d = 1;
+          }
+          const pousse = (ecart - d) / 2;
+          pa.x -= (dx / d) * pousse;
+          pa.y -= (dy / d) * pousse;
+          pb.x += (dx / d) * pousse;
+          pb.y += (dy / d) * pousse;
+        }
+      }
+    }
     sim.joueurs.forEach((j, i) => {
       const e = j === porteur && grand !== 1 ? ` scale(${grand})` : "";
-      this.pions[i]!.setAttribute("transform", `translate(${this.X(j.pos.x).toFixed(1)} ${this.Y(j.pos.y).toFixed(1)})${e}`);
+      this.pions[i]!.setAttribute("transform", `translate(${pos[i]!.x.toFixed(1)} ${pos[i]!.y.toFixed(1)})${e}`);
     });
     if (this.figPorteur) {
       this.figPorteur.style.display = porteur ? "" : "none";
@@ -449,7 +493,8 @@ export class EcranMatch {
           void this.figPorteurAnim!.getBoundingClientRect();
           this.figPorteurAnim!.style.animation = "";
         }
-        this.figPorteur.setAttribute("transform", `translate(${this.X(porteur.pos.x).toFixed(1)} ${this.Y(porteur.pos.y).toFixed(1)})`);
+        const pp = pos[i]!;
+        this.figPorteur.setAttribute("transform", `translate(${pp.x.toFixed(1)} ${pp.y.toFixed(1)})`);
       }
     }
     this.dernierPorteur = porteur;
@@ -460,8 +505,9 @@ export class EcranMatch {
     }
     this.halo.style.display = porteur ? "" : "none";
     if (porteur) {
-      this.halo.setAttribute("cx", this.X(porteur.pos.x).toFixed(1));
-      this.halo.setAttribute("cy", this.Y(porteur.pos.y).toFixed(1));
+      const pp = pos[sim.joueurs.indexOf(porteur)]!;
+      this.halo.setAttribute("cx", pp.x.toFixed(1));
+      this.halo.setAttribute("cy", pp.y.toFixed(1));
       this.halo.setAttribute("class", `match-halo${porteur.camp === 0 ? "" : " eux"}`);
       const nom = porteur.joueur.nom;
       if (this.etiquetteTexte.textContent !== nom) {
@@ -471,7 +517,7 @@ export class EcranMatch {
         this.etiquetteFond.setAttribute("width", l.toFixed(1));
       }
       this.etiquette.setAttribute("class", `match-etiquette${porteur.camp === 0 ? "" : " eux"}`);
-      this.etiquette.setAttribute("transform", `translate(${this.X(porteur.pos.x).toFixed(1)} ${(this.Y(porteur.pos.y) - 48 * this.k * grand - 7).toFixed(1)})`);
+      this.etiquette.setAttribute("transform", `translate(${pp.x.toFixed(1)} ${(pp.y - 48 * this.k * grand - 7).toFixed(1)})`);
     }
     this.etiquette.style.display = porteur ? "" : "none";
     const enLAir = !!sim.balle?.enLAir;

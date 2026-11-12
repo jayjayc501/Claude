@@ -81,6 +81,7 @@ un plateau.
 - Pas de téléportation : les joueurs se déplacent progressivement.
 - Le rectangle est une zone de référence, pas une destination : le joueur bouge selon le ballon, ses coéquipiers, les adversaires, les espaces, ses consignes et ses qualités.
 - Plus tard, des **consignes d'équipe** (« volontés ») : plus défensive, plus offensive, jeu en contre, etc. Pas maintenant.
+- **Pressing, contre-pressing, jeu en contre, jeu de passes courtes (tiki-taka)… seront des choix tactiques** (12/11). Le moteur garde un réglage de base moyen ; les consignes le moduleront. La réussite des passes dépendra des notes des joueurs.
 
 ### Priorités immédiates (concepteur, 11/11)
 - Un moteur jouable ; pouvoir choisir les joueurs qui jouent et les placer ; un jeu équilibré ; un rendu intéressant.

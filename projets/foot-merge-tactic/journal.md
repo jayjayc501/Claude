@@ -277,3 +277,16 @@ Retours du concepteur : sur une touche, le joueur part avec le ballon au lieu de
 - Touche : passe (à la main, dans les pieds) vers le coéquipier le plus libre à moins de 22 m.
 - Remises en jeu (touche, six mètres, coup franc, corner, engagement) : le tireur s'arrête net, le ballon reste à sa place, pause de 0,8 à 1,4 s avant de jouer ; pas de tacle tant qu'il n'a pas joué.
 - Tests : 87 verts (nouveau : sur une touche, pause puis passe, le tireur ne part pas avec le ballon).
+
+## 12/11/2026 — Interface : maquette de l'écran de préparation
+
+**Ce qui a été fait** (moteur figé, aucun code modifié)
+- Recherche sur l'interface de Merge Tactics (Clash Royale) : plateau en hexagones, boutique de 3 cartes, élixir, banc, compteurs de traits, panneau des joueurs.
+- Maquette de l'écran de préparation sur claude.ai (canevas Design) : https://claude.ai/artifact/67QRVRz7Fd6f8YWD9gHPq4.
+  - V1 (mise de côté) : ronds de couleur par pays sur le plateau, jauge de fusion.
+  - V2 (retenue) : bustes de figurines en vinyle sur socle, posture selon le style, fusions en couleurs (bleu, or, violet avec étincelles).
+- Images de référence générées avec Kling (environ 14 crédits sur 50 autorisés), découpées et recolorées pour la maquette.
+
+**Décisions du concepteur** : voir `CLAUDE.md`, section « Interface (séance du 12/11) » : postes des joueurs (G, DC, DG/DD, MC, AG/AD, BU), hors poste refusé, gardien unique en double losange, banc de 5, une couleur par pays, Bronze/Argent/Or en pause, bustes avec postures, fusions bleu/or/violet.
+
+**Prochaine étape** : concept des cartes et des notes des joueurs, puis intégration de l'écran dans le prototype.

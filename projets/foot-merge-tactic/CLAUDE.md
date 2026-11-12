@@ -64,15 +64,15 @@ un plateau.
 
 ### Postes, rectangles et sous-zones
 - Postes classiques : G, DC, DD, DG, MDC, MC, MOC, MD, MG, AD, AG, AC (liste à finaliser).
-- Un joueur a 1 ou 2 postes naturels. Placé hors de son poste, il est moins efficace mais reste utilisable.
+- **Postes des joueurs (12/11)** : G, DC, DG/DD, MC, AG/AD, BU (buteur). Sur le terrain, MDC, MOC et MD/MG ne sont que des repères indicatifs. Un joueur peut aller sur toutes les cases de son poste (un MC sur tout le bloc du milieu). **Le placement hors poste est refusé par l'interface** (12/11 ; remplace « placé hors de son poste, il est moins efficace mais reste utilisable »). Ouvert : 1 ou 2 postes par joueur ; un DG peut-il jouer DD (et un AG, AD) ?
 - **Pour l'instant, une seule organisation** : chaque poste a **un seul rectangle de référence fixe** (position, largeur, profondeur). Les deux organisations offensive et défensive (§6 du dossier) sont en pause : trop compliquées et trop longues à régler.
 - Le rectangle n'est ni une case exclusive ni une barrière physique. Les rectangles ne bougent pas. **Les grandes zones (défense, milieu, attaque) ne se chevauchent pas, ou à peine** (le concepteur revient sur « plus chevauchants » : sinon on ne comprend plus rien).
-- **Chaque rectangle est découpé en sous-zones** (positions possibles) : G 2 (normal ou un peu avancé) ; DC 6 sur 2 lignes ; DD et DG 2 ou 3 (le concepteur hésite) ; **milieu central 9 sur 3 lignes** (MDC, MC, MOC) ; AD et AG 3 ; **attaquant 6 sur 2 lignes**.
+- **Chaque rectangle est découpé en sous-zones** (positions possibles) : G 1 (le gardien avancé est abandonné le 12/11) ; DC 6 sur 2 lignes ; DD et DG 2 ou 3 (le concepteur hésite) ; **milieu central 9 sur 3 lignes** (MDC, MC, MOC) ; AD et AG 3 ; **attaquant 6 sur 2 lignes**.
 - **Défenseurs centraux, milieu, attaque : 3 cases par ligne, et la case de l'axe est à cheval sur celle de gauche et celle de droite** (colonnes qui se chevauchent). Appliqué dans le prototype le 11/11, puis remplacé le même jour par la proposition de plateau unique (hexagones ou carrés, voir « Propositions »), à la demande du concepteur ; en hexagones, le « à cheval » vient des rangées décalées.
 - **Inspiration visuelle** (capture envoyée par le concepteur) : le plateau de Merge Tactics, un quadrillage d'hexagones clair, toujours visible, « grossier mais intuitif et visuel », avec un compteur d'unités placées et les compteurs de traits sur le côté.
 - **Plateau en hexagones de couleur** (11/11, choisi après comparaison avec une variante en carrés, gardée dans le prototype) : toujours visible, sans chevauchement, rangées de 5 et 4 cases en alternance, les rangées de 4 décalées d'une demi-case. Nombre de cases par poste en hexagones : voir « Propositions » (à valider).
 - **Les cases AG et AD sont des cases d'ailier**, à trois hauteurs (bas, milieu, haut) (11/11). Plus de « milieu de côté » ni de « milieu avancé » à part.
-- **Priorité au moteur** (11/11) : l'interface actuelle n'est qu'une base (les positions), loin de la vision finale du concepteur, qu'il décrira plus tard.
+- **Priorité au moteur** (11/11) : l'interface actuelle n'est qu'une base (les positions), loin de la vision finale du concepteur, qu'il décrira plus tard. 12/11 : vision en cours de définition, voir « Interface (séance du 12/11) ».
 - **Placement sur un demi-terrain** (idée du concepteur) : l'entraîneur place ses joueurs comme avant le coup d'envoi, dans son propre camp. Les **règles de projection** du moteur transforment ensuite chaque position en position de match, en attaque et en défense. La correspondance exacte (une petite table de règles) se règle ensemble en regardant le prototype.
 - L'entraîneur place chaque joueur dans une sous-zone ; le rectangle reste la zone de liberté dans laquelle le moteur fait bouger le joueur.
 - **Plusieurs joueurs peuvent occuper le même poste**, dans la limite d'un maximum par poste (exemple donné : 3 DC, 1 AG).
@@ -91,6 +91,18 @@ un plateau.
 - **Petite pause** avant chaque remise en jeu (touche, six mètres, coup franc, corner, engagement).
 - **Son et annonce** à chaque arrêt de jeu (faute, penalty, hors-jeu, corner, six mètres, touche, but avec le score) ; **pas d'annonce sur un arrêt du gardien** (le jeu continue). Sifflet d'un seul coup.
 - Le nombre de tirs ne gêne pas (match très court) ; il faut des arrêts du gardien et un jeu varié (côtés, centres, arrêts de jeu), pas seulement « on avance, on tire, on marque ».
+
+### Interface (séance du 12/11)
+Maquette de l'écran de préparation sur claude.ai : https://claude.ai/artifact/67QRVRz7Fd6f8YWD9gHPq4 (page « V2 figurines » ; la V1, avec des ronds de couleur, est gardée sur sa page « V1 (de côté) »). Inspirée de l'écran de Merge Tactics : en-tête avec chrono et classement du groupe (prochain adversaire en rouge), compteurs de pays et de styles à gauche, plateau au centre, banc, puis mercato.
+- **Une couleur par pays** sur le maillot des joueurs et dans les compteurs de pays (badge plein ; palier non atteint = fond grisé). Maquette : France bleu marine, Espagne orange, Brésil vert, Italie bleu clair. Compteurs de styles en gris anthracite.
+- **Banc de 5 places.**
+- **Plateau** : cases de couleur à 30 % d'opacité avec fin contour blanc, noms de poste à 30 %, terrain vert très clair (#c4dbcd).
+- **Gardien** : une seule case, en double losange (deux hexagones fusionnés), sous le DC central.
+- **Joueurs en bustes de figurines** (style 3D « jouet en vinyle », original), sans pieds, sur un socle. **Posture des bras différente selon le style** (rempart bras croisés, créateur qui montre la direction, combatif poing levé, technicien ballon sur le doigt, presseur penché en avant, rapide bras en course, finisseur qui se désigne). Nom affiché seulement au toucher.
+- **Fusions** : aura qui épouse la silhouette et anneau du socle, d'une couleur par niveau : 1 = bleu, 2 = or, 3 = violet avec étincelles. Plus d'étoiles ni de crans.
+- Écran compact, peu de noir (panneaux clairs).
+- [PROPOSITION, gardée dans la maquette] Mercato de 6 joueurs sur une rangée, budget dans le titre du mercato ; poste écrit sous le buste ; revente en glissant le joueur vers le mercato.
+- Les images de joueurs de la maquette viennent de Kling (environ 14 crédits) : ce sont des références, pas les visuels du jeu. Elles contiennent de petits logos et numéros à retirer.
 
 ### Priorités immédiates (concepteur, 11/11)
 - Un moteur jouable ; pouvoir choisir les joueurs qui jouent et les placer ; un jeu équilibré ; un rendu intéressant.
@@ -112,7 +124,7 @@ un plateau.
 - **Bonus de même nationalité**, cohérent avec la tradition de football du pays.
 
 ### Cartes, progression, fusions
-- Chaque **carte joueur a son propre niveau**, comme dans Clash Royale. La **carte change de couleur** quand elle évolue en dehors des matchs : Bronze, Argent, Or sont les couleurs du niveau. Tous les joueurs ne commencent pas au même niveau.
+- Chaque **carte joueur a son propre niveau**, comme dans Clash Royale. La **carte change de couleur** quand elle évolue en dehors des matchs : Bronze, Argent, Or sont les couleurs du niveau. Tous les joueurs ne commencent pas au même niveau. **En pause depuis le 12/11** : couleurs Bronze/Argent/Or retirées de l'interface, à revoir plus tard.
 - Fusions et évolutions **temporaires** : remises à zéro à chaque tournoi.
 - Fusion de 2 copies du même joueur : joueur amélioré, même identité. Un joueur déjà fusionné peut l'être à nouveau avec sa copie.
 - Fusion de 2 joueurs différents **de même nationalité** : joueur hybride, qui garde la nationalité commune.
@@ -135,7 +147,7 @@ Affichage du match :
 - Choisir des temps forts qui montrent la conséquence des choix tactiques (but encaissé en transition après un bloc trop haut, par exemple).
 
 Placement :
-- Le rôle de la case garde le sens des postes naturels (un MDC placé sur une case MOC joue hors poste).
+- (Remplacé le 12/11 : hors poste refusé ; MDC, MOC, MD/MG sont des repères dans les blocs MC et ailiers.)
 - Latéraux (DD, DG) : 3 cases en profondeur en attendant la décision (2 ou 3).
 - Un seul joueur par case.
 - Les données décrivent les postes (maximum de joueurs, ligne défensive) et chaque plateau rangée par rangée ; les rectangles des postes sont déduits des cases.
@@ -154,9 +166,9 @@ Placement :
   - règles : hors-jeu au départ de la passe, faute → coup franc (adversaires à 9,15 m) ou penalty, corner, six mètres, touche, but et engagement ;
   - repères mesurés (12 matchs de 3 min) : 1,25 but, 9 tirs, 4 arrêts, 2 fautes, 2 à 3 touches par match ; 77 % de passes réussies ; 5,8 changements de camp par minute (vrai football : 2 à 3).
 - **Plateau de placement** (hexagones validés le 11/11 ; carrés gardés en variante) : couleurs jaune gardien, bleu défense, violet milieu, rouge attaque ; couloirs des côtés plus clairs ; rôle écrit dans la case.
-  - **Hexagones (par défaut)** : G 2, DC 5 (3 + 2), DG 3, DD 3, milieu 8 (MDC 3, MC 2, MOC 3), ailiers 3 + 3, attaque 5 (2 + 3). **Nombre de cases à valider** : le découpage validé (DC 6, milieu 9, attaque 6) n'est exact qu'en carrés.
+  - **Hexagones (par défaut)** : G 1 (double losange, 12/11), DC 5 (3 + 2), DG 3, DD 3, milieu 8 (MDC 3, MC 2, MOC 3), ailiers 3 + 3, attaque 5 (2 + 3). **Nombre de cases à valider** : le découpage validé (DC 6, milieu 9, attaque 6) n'est exact qu'en carrés.
   - **Carrés** : 5 cases par rangée, exactement le découpage validé.
-  - Gardien : deux petites cases (normal, avancé) sous le plateau. Coins hauts sans case. En changeant de forme, chaque joueur garde son poste, sur la case la plus proche.
+  - Gardien : une case en double losange sous le DC central (12/11). Coins hauts sans case. En changeant de forme, chaque joueur garde son poste, sur la case la plus proche.
 - Maximums provisoires (non validés) : DG 1, DD 1, milieu 4, AD 1, attaquant 3 (validés en exemple : 3 DC, 1 AG ; le gardien : 1).
 - **Écran de placement sur une page** (11/11) : plateau + banc en ronds dessous. Tout au glisser-déposer : sur une case libre, sur un joueur (échange, ou entrée d'un remplaçant), sur le banc (sortie). Plateau toujours visible ; choix hexagones / carrés en haut à droite. Plus de liste ni de boutons de poste.
 - **Écran de match sur une page** : coup d'envoi, pause, vitesse, son et zones au-dessus du terrain ; score, possession et dernier événement dessous ; annonces sur le terrain et sons (Web Audio, `src/ui/son.ts`).
@@ -166,7 +178,7 @@ Boucle de tournoi (transposition de Merge Tactics) :
 - L'hybride reste une fusion volontaire, et la signature du jeu (Merge Tactics ne fusionne que des troupes identiques).
 - 11 joueurs dès le premier match : le mercato sert à remplacer et à fusionner, pas à compléter l'équipe.
 - Tactique réglée avant le tournoi, sans chrono ; en préparation et à la mi-temps, seulement des ajustements rapides (glisser un joueur sur un autre pour fusionner, sur une sous-zone pour le placer).
-- La couleur de la carte montre le niveau permanent ; des étoiles montrent les fusions temporaires du tournoi.
+- (12/11) Couleur de niveau en pause ; les fusions se voient par l'aura (bleu, or, violet avec étincelles), plus par des étoiles.
 
 Traits :
 - Les bonus modifient des comportements du moteur plutôt que d'ajouter des points de statistiques. Styles possibles : presseur, technicien, rapide, rempart, créateur, combatif, finisseur. Certains peuvent raccourcir le délai de transition.
@@ -199,6 +211,7 @@ Toujours ouvertes :
 - Poids chiffré de la qualité, de la tactique et du hasard.
 - Règle de nom de l'hybride ; interface et graphismes définitifs ; temps entre deux matchs.
 - **Nom définitif du jeu** et **modèle économique**.
+- **Interface (12/11)** : un DG peut-il jouer DD (et un AG, AD) ; 1 ou 2 postes par joueur ; nombre maximal de fusions (3 dans la maquette) ; taille du mercato (6 dans la maquette) ; production des visuels des joueurs (pièces assemblées, modèles 3D ou illustrateur) ; lisibilité des bustes sur un vrai téléphone ; figurines aussi pendant le match (plus tard).
 
 ## Points de vigilance (analyse Claude, non validés)
 
@@ -208,6 +221,7 @@ Détail des anciens points dans `docs/historique-etat.md`. Encore actifs :
 - Fusion « meilleure valeur de chaque statistique » entre postes opposés : quels postes pour l'hybride ?
 - Changements de camp encore trop fréquents (5,8 par minute contre 2 à 3) : à revoir avec les notes des joueurs.
 - Appariement ou plafond de niveau en tournoi (équité).
+- Visuels des joueurs : une image générée par joueur ne tiendra pas sur des centaines de joueurs (styles qui dérivent). Pour le jeu final, prévoir un jeu de pièces (corps, têtes, cheveux) avec maillot recoloré selon le pays, ou des modèles 3D, ou un illustrateur. Aucun logo, numéro ni maillot qui rappelle un vrai maillot.
 
 ## Notes techniques (propositions)
 
@@ -261,3 +275,4 @@ Historique détaillé : `journal.md` (par jour) et `docs/historique-etat.md` (an
 - **12/11 : moteur jugé satisfaisant pour ce stade** par le concepteur. **Prochaine conversation : l'interface, puis le concept des cartes et des notes des joueurs** (lot C : la réussite des passes, des tirs, des arrêts dépendra des notes).
 - Limites connues du moteur : encore trop de changements de camp ; presque pas de hors-jeu ; aucune qualité individuelle (tous les joueurs passent et tirent pareil) ; pas d'appels ni de démarquages organisés ; pas de consignes tactiques (pressing, contre, tiki-taka : choix tactiques futurs).
 - Règle de séance (concepteur, 12/11) : **économiser les tokens** : peu de lectures, peu de tests et de captures, le concepteur valide lui-même ; mettre à jour le projet claude.ai seulement aux grandes étapes ; réponses courtes ; une conversation par sujet.
+- **12/11 (interface)** : maquette de l'écran de préparation (bustes, couleurs par pays, fusions en couleurs) : https://claude.ai/artifact/67QRVRz7Fd6f8YWD9gHPq4. Décisions dans « Interface (séance du 12/11) ». Prochaine étape : concept des cartes et des notes (fiche joueur avec buste, pays, style, notes), puis intégrer l'écran dans le prototype.

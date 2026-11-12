@@ -53,12 +53,12 @@ const ETINCELLES =
   "M5 3 L6.4 6.6 L10 8 L6.4 9.4 L5 13 L3.6 9.4 L0 8 L3.6 6.6 Z M43 -1 L44.68 3.32 L49 5 L44.68 6.68 L43 11 L41.32 6.68 L37 5 L41.32 3.32 Z M2 26.5 L2.98 29.02 L5.5 30 L2.98 30.98 L2 33.5 L1.02 30.98 L-1.5 30 L1.02 29.02 Z M46 23 L47.12 25.88 L50 27 L47.12 28.12 L46 31 L44.88 28.12 L42 27 L44.88 25.88 Z M24 -11.5 L25.26 -8.26 L28.5 -7 L25.26 -5.74 L24 -2.5 L22.74 -5.74 L19.5 -7 L22.74 -8.26 Z";
 
 // Pictogrammes des styles (24 × 24, couleur du texte) : bouclier (Rempart),
-// main (Récupérateur), ballon (Technicien), éclair (Rapide).
+// bras plié musclé (Récupérateur), ballon (Technicien), éclair (Rapide).
 const PICTO = (corps: string) =>
   `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${corps}</svg>`;
 const PICTOS: Record<string, string> = {
   REM: PICTO('<path d="M12 2.8 L19.5 5.8 V11 C19.5 15.6 16.4 19.3 12 21.2 C7.6 19.3 4.5 15.6 4.5 11 V5.8 Z"/>'),
-  REC: PICTO('<path d="M8 12 V7.2 M11.2 11.2 V4.8 M14.4 11.2 V5.6 M17.6 12 V8.2" stroke-width="2.7"/><path d="M6.4 12.4 C5.4 10.9 3.4 11.2 3.7 12.9 L5.4 16.8 C6.6 19.6 8.7 21.2 11.6 21.2 H13.2 C16.6 21.2 18.9 18.8 18.9 15.2 V11.6 H6.4 Z" fill="currentColor" stroke-width="1.6"/>'),
+  REC: PICTO('<path d="M21.5 20 H8 C5.4 20 3.8 18.4 4 16 L5 10.2 C3.8 9.4 3.4 7.6 4 6 C4.8 3.9 7.6 3 9.8 3.6 C11.8 4.1 12.6 6.2 12 8.1 C11.7 9 11 9.7 10.2 10 L10.2 15.6 C11.4 11.6 14.4 10 17 10.6 C19 11 20 12.6 19.4 14.4 L21.5 15 Z"/><path d="M5 7.4 C6.8 8 8.8 8 10.4 7.2" stroke-width="1.5"/>'),
   TEC: PICTO('<circle cx="12" cy="12" r="9"/><path d="M12 8.4 L15.2 10.7 L14 14.4 H10 L8.8 10.7 Z" fill="currentColor"/><path d="M12 8.4 V3 M15.2 10.7 L20.6 9.2 M14 14.4 L17.3 19.1 M10 14.4 L6.7 19.1 M8.8 10.7 L3.4 9.2" stroke-width="1.6"/>'),
   RAP: PICTO('<path d="M13.5 2.5 L5.5 13.5 H11.5 L10.5 21.5 L18.5 10.5 H12.5 Z" fill="currentColor" stroke-width="1.4"/>'),
 };

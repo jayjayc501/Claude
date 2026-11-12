@@ -189,3 +189,16 @@ Demande du concepteur : « passons à un ballon touché par les joueurs ». Éta
 - Passe jouée sous pression (adversaire à moins de 4 m) : imprécision × 3.
 - Mesures (6 graines × 3 min) : récupérations dans les 5 s après une perte 42 % sans contre-pressing, 46 % avec ; 8 à 9 changements de camp par minute (encore trop : surtout des passes interceptées).
 - Tests : 79 verts (tir dans la surface ; contre-pressing puis un seul presseur).
+
+## 12/11/2026 (suite) — Lot A : jeu avec ballon
+
+Décision du concepteur : pressing, contre-pressing, contre, tiki-taka = choix tactiques futurs ; réussite des passes selon les notes. Découpage : lot A (jeu avec ballon), lot B (hors-jeu, fautes, corners), lot C (notes des joueurs).
+
+- Passe dans l'espace : 7 m devant le receveur, dans le sens du jeu, seulement s'il y arrive 0,5 s avant tout adversaire ; vitesse dosée pour arriver au point en même temps que lui.
+- Contre : un ballon à plus de 13 m/s sur un adversaire est contrôlé une fois sur deux, sinon dévié (35 % de la vitesse, ± 70°) ; au-delà de 20 m/s, toujours dévié.
+- Dribble : face à un adversaire à moins de 3,5 m, un joueur offensif tente une fois sur trois (défenseur : 4 fois moins) ; réussi une fois sur deux : l'adversaire est éliminé (ralenti 1,2 s), le porteur accélère ; raté : tacle ou ballon libre.
+- Pressé sans solution sûre : dégagement seulement dans ses 35 premiers mètres, sinon il protège le ballon (tacle 2,5 fois moins probable pendant 1,2 s).
+- Receveur et joueurs qui vont au ballon : ils visent le premier point de la trajectoire qu'ils peuvent atteindre (avant : un point au hasard de la trajectoire, le ballon passait derrière eux) ; ils peuvent approcher un adversaire à 1 m (2,5 m pour les autres).
+- Tacle : 2 m, 0,2 par seconde (avant 2,8 m, 0,5).
+- Mesures (6 graines × 3 min) : changements de camp 8,8 → 7,6 par minute ; passes réussies 67 → 72 % ; 30 dribbles dont la moitié réussis ; 18 contres. Le reste des pertes vient surtout des passes : à régler avec les notes (lot C).
+- Tests : 79 verts (deux seuils élargis : réussite des passes d'une équipe sur 3 min ≥ 40 %, presseurs au ballon ≤ 2).

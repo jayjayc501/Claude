@@ -30,6 +30,9 @@ export interface StatsBallon {
   interceptions: [number, number];
   tacles: [number, number];
   tirs: [number, number];
+  contres: number;
+  dribbles: [number, number];
+  dribblesReussis: [number, number];
   arrets: [number, number];
   sorties: number;
 }
@@ -53,6 +56,9 @@ export class BallonReel {
     interceptions: [0, 0],
     tacles: [0, 0],
     tirs: [0, 0],
+    contres: 0,
+    dribbles: [0, 0],
+    dribblesReussis: [0, 0],
     arrets: [0, 0],
     sorties: 0,
   };
@@ -61,6 +67,7 @@ export class BallonReel {
   /** Direction de conduite lissée : le ballon ne saute pas d'un côté à l'autre du joueur. */
   private dir: PointM = { x: 0, y: 1 };
   private decisionA = 0;
+  private protegeJusqua = 0;
   private arret: "?" | "oui" | "non" = "?";
   private rng: Aleatoire;
 
@@ -121,7 +128,8 @@ export class BallonReel {
     for (const o of this.sim.joueurs) {
       if (o.camp === p.camp || o.poste.id === "G") continue;
       if (dist(o.pos, p.pos) > t.rayonM) continue;
-      if (this.rng.suivant() < 1 - Math.exp(-t.parSeconde * dt)) {
+      const f = this.sim.temps < this.protegeJusqua ? this.sim.reglages.ballon.protection.facteurTacle : 1;
+      if (this.rng.suivant() < 1 - Math.exp(-t.parSeconde * f * dt)) {
         this.stats.tacles[o.camp]++;
         this.donner(o);
         return;
@@ -156,11 +164,23 @@ export class BallonReel {
       }
     }
 
-    // Passes : on note chaque partenaire (progression, espace, distance, voie libre).
-    let meilleur: JoueurSim | null = null;
+    // Dribble : face à un adversaire tout proche, un joueur offensif tente
+    // parfois de l'éliminer plutôt que de passer.
+    const db = r.dribble;
+    const devant = adverses.find((o) => o.poste.id !== "G" && dist(o.pos, p.pos) < db.distanceM && (o.pos.y - p.pos.y) * sens > -0.5);
+    const tente = p.poste.ligneDefense === "defense" ? db.probaTentative * 0.25 : p.poste.ligneDefense === "gardien" ? 0 : db.probaTentative;
+    if (devant && this.rng.suivant() < tente) {
+      this.dribbler(devant, sens);
+      return;
+    }
+
+    // Passes : on note chaque partenaire (progression, espace, distance, voie
+    // libre), au pied ou dans l'espace devant lui, dans le sens du jeu.
+    let meilleur: { q: JoueurSim; point: PointM | null } | null = null;
     let score = -Infinity;
     let fuite: JoueurSim | null = null;
     let avanceMax = -Infinity;
+    const libre = (a: PointM, b: PointM) => !adverses.some((o) => distSegment(o.pos, a, b) < r.voieLibreM);
     for (const q of s.joueurs) {
       if (q === p || q.camp !== p.camp) continue;
       if (q.poste.id === "G" && p.poste.id !== "G") continue;
@@ -171,21 +191,62 @@ export class BallonReel {
         avanceMax = avance;
         fuite = q;
       }
-      if (adverses.some((o) => distSegment(o.pos, p.pos, q.pos) < r.voieLibreM)) continue;
-      const ouvert = Math.min(8, Math.min(...adverses.map((o) => dist(o.pos, q.pos))));
-      const sc = avance * 0.5 + ouvert * 1.2 - d * 0.08 + this.rng.entre(-2, 2);
-      if (sc > score) {
-        score = sc;
-        meilleur = q;
+      const options: { point: PointM | null; vise: PointM }[] = [{ point: null, vise: q.pos }];
+      const esp = { x: q.pos.x, y: q.pos.y + sens * r.passeEspace.avanceM };
+      if (avance > 0 && esp.y > 2 && esp.y < L - 2) {
+        // L'espace est à lui s'il y arrive nettement avant tout adversaire.
+        const vCourse = s.reglages.mouvement.vitesseMaxMS;
+        const tLui = dist(q.pos, esp) / (vCourse * q.facteur);
+        const tEux = Math.min(...adverses.map((o) => dist(o.pos, esp) / (vCourse * o.facteur)));
+        if (tLui + r.passeEspace.avanceSurAdversaireS < tEux) options.push({ point: esp, vise: esp });
+      }
+      for (const o of options) {
+        if (!libre(p.pos, o.vise)) continue;
+        const ouvert = Math.min(8, Math.min(...adverses.map((a) => dist(a.pos, o.vise))));
+        const gain = (o.vise.y - p.pos.y) * sens;
+        const sc = gain * 0.5 + ouvert * 1.2 - dist(p.pos, o.vise) * 0.08 + this.rng.entre(-2, 2);
+        if (sc > score) {
+          score = sc;
+          meilleur = { q, point: o.point };
+        }
       }
     }
     const presse = pression < r.pressionM;
     if (meilleur && (p.poste.id === "G" || presse || score > r.seuilPasse)) {
-      this.passer(meilleur, presse);
-    } else if (presse && fuite) {
-      this.passer(fuite, presse); // dégagement
+      this.passer(meilleur.q, presse, meilleur.point);
+      return;
     }
-    // sinon il continue de conduire jusqu'à la prochaine décision
+    if (!presse) return; // rien d'ouvert : il continue de conduire
+
+    // Pressé sans solution sûre : dégagement dans son tiers, sinon il protège.
+    const deSonBut = sens === 1 ? p.pos.y : L - p.pos.y;
+    if (fuite && deSonBut < r.zoneDegagementM) {
+      this.passer(fuite, presse); // dégagement
+      return;
+    }
+    this.protegeJusqua = s.temps + r.protection.dureeS;
+  }
+
+  /** 1 contre 1 : réussi, l'adversaire est éliminé et le porteur accélère ;
+   *  raté, l'adversaire prend le ballon ou le ballon part libre. */
+  private dribbler(o: JoueurSim, sens: number): void {
+    const s = this.sim;
+    const db = s.reglages.ballon.dribble;
+    const p = this.porteur!;
+    this.stats.dribbles[p.camp]++;
+    if (this.rng.suivant() < db.probaReussite) {
+      this.stats.dribblesReussis[p.camp]++;
+      o.freineJusqua = s.temps + db.eliminationS;
+      p.sprintJusqua = Math.max(p.sprintJusqua, s.temps + db.eliminationS);
+      return;
+    }
+    if (this.rng.suivant() < 0.5) {
+      this.stats.tacles[o.camp]++;
+      this.donner(o);
+    } else {
+      const a = this.rng.entre(-Math.PI, Math.PI);
+      this.lancer(Math.cos(a) * 5, Math.sin(a) * 5 + sens * 2);
+    }
   }
 
   private lancer(vx: number, vy: number): void {
@@ -196,13 +257,19 @@ export class BallonReel {
     this.arret = "?";
   }
 
-  private passer(q: JoueurSim, presse = false): void {
+  private passer(q: JoueurSim, presse = false, point: PointM | null = null): void {
     const r = this.sim.reglages.ballon;
     const p = this.porteur!;
-    const d = dist(p.pos, q.pos);
-    const v = Math.min(r.vitessePasseMaxMS, r.vitessePasseMinMS + r.vitessePasseParMetre * d);
+    const d = dist(p.pos, point ?? q.pos);
+    let v = Math.min(r.vitessePasseMaxMS, r.vitessePasseMinMS + r.vitessePasseParMetre * d);
+    if (point) {
+      // Passe dans l'espace : dosée pour arriver au point quand le receveur y arrive.
+      const k = r.frottementParS;
+      const T = dist(q.pos, point) / (this.sim.reglages.mouvement.vitesseMaxMS * q.facteur) + 0.3;
+      v = Math.max(8, Math.min(r.vitessePasseMaxMS, (k * d) / (1 - Math.exp(-k * T))));
+    }
     const t = d / v;
-    const cible = { x: q.pos.x + q.vit.x * t * 0.8, y: q.pos.y + q.vit.y * t * 0.8 };
+    const cible = point ?? { x: q.pos.x + q.vit.x * t * 0.8, y: q.pos.y + q.vit.y * t * 0.8 };
     const dx = cible.x - this.sim.ballon.x;
     const dy = cible.y - this.sim.ballon.y;
     const n = Math.hypot(dx, dy) || 1;
@@ -272,7 +339,14 @@ export class BallonReel {
       const rayon = j === this.receveur ? r.rayonReceveurM : gardienAdverse ? r.rayonGardienM + 1.4 : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM;
       const d = dist(j.pos, s.ballon);
       if (d > rayon) continue;
-      if (vBalle > r.vitesseControleMaxMS && j !== this.receveur && j.poste.id !== "G") continue;
+      const adverseDuTireur = this.dernier !== null && j.camp !== this.dernier.camp && j.poste.id !== "G";
+      if (adverseDuTireur && vBalle > r.contre.vitesseMinMS && d <= r.rayonControleM) {
+        // Ballon rapide qui arrive sur un adversaire : contrôlé, ou dévié (contre).
+        if (vBalle > r.vitesseControleMaxMS || this.rng.suivant() > r.contre.probaControle) {
+          this.devier(j, vBalle);
+          return;
+        }
+      } else if (vBalle > r.vitesseControleMaxMS && j !== this.receveur && j.poste.id !== "G") continue;
       if (gardienAdverse) {
         if (this.arret === "?") this.arret = this.rng.suivant() < r.arretProba ? "oui" : "non";
         if (this.arret === "non") continue;
@@ -287,6 +361,18 @@ export class BallonReel {
     if (gagnant === this.receveur) this.stats.passesReussies[gagnant.camp]++;
     else if (this.dernier && gagnant.camp !== this.dernier.camp) this.stats.interceptions[gagnant.camp]++;
     this.donner(gagnant);
+  }
+
+  private devier(j: JoueurSim, v: number): void {
+    const c = this.sim.reglages.ballon.contre;
+    const a = Math.atan2(this.vit.y, this.vit.x) + ((this.rng.entre(-1, 1) * c.angleMaxDeg) * Math.PI) / 180;
+    const nv = v * c.perteVitesse;
+    this.stats.contres++;
+    this.vit = { x: Math.cos(a) * nv, y: Math.sin(a) * nv };
+    this.dernier = j;
+    this.dernierTemps = this.sim.temps;
+    this.receveur = null;
+    this.tirEnCours = false;
   }
 
   /** Le joueur prend le ballon aux pieds ; son équipe a la possession. */
@@ -318,6 +404,16 @@ export class BallonReel {
     };
   }
 
+  /** Premier point de la trajectoire du ballon que ce joueur peut atteindre à temps. */
+  private pointInterception(j: JoueurSim): PointM {
+    const vMax = this.sim.reglages.mouvement.vitesseMaxMS * j.facteur;
+    for (let t = 0; t <= 3; t += 1 / 15) {
+      const b = this.pointArrivee(t);
+      if (dist(j.pos, b) <= vMax * t + this.sim.reglages.ballon.rayonControleM) return b;
+    }
+    return this.pointArrivee(3);
+  }
+
   /** Ajuste les cibles de course dues au ballon : le porteur avance, le
    *  destinataire va au ballon, les plus proches des deux équipes le disputent. */
   surcharger(): void {
@@ -326,10 +422,12 @@ export class BallonReel {
     const W = s.donnees.largeurM;
     const L = s.donnees.longueurM;
     const vMax = s.reglages.mouvement.vitesseMaxMS;
+    for (const x of s.joueurs) x.auBallon = false;
 
     if (this.porteur) {
       const p = this.porteur;
       const sens = p.camp === 0 ? 1 : -1;
+      p.auBallon = true;
       if (p.poste.id === "G") p.cible = { ...p.pos };
       else
         p.cible = {
@@ -355,6 +453,7 @@ export class BallonReel {
           .slice(0, cp.joueurs)
           .forEach((j, i) => {
             j.cible = places[i] ?? places[0]!;
+            j.auBallon = true;
             j.sprintJusqua = Math.max(j.sprintJusqua, fin);
           });
         return;
@@ -366,6 +465,7 @@ export class BallonReel {
         .sort((a, b) => dist(a.pos, p.pos) - dist(b.pos, p.pos))
         .slice(0, 2);
       presseurs.forEach((j, i) => {
+        j.auBallon = i === 0;
         j.cible = i === 0 ? { ...s.ballon } : { x: s.ballon.x + (W / 2 - s.ballon.x) * 0.2, y: s.ballon.y + sens * 6 };
       });
       return;
@@ -381,10 +481,13 @@ export class BallonReel {
       if (this.receveur) nombre = camp === this.receveur.camp ? 0 : 2;
       else if (this.reserve && this.reserve.camp !== camp) nombre = 0;
       if (this.receveur && camp === this.receveur.camp) {
-        const t = dist(this.receveur.pos, s.ballon) / vMax;
-        this.receveur.cible = this.pointArrivee(Math.min(t, 2));
+        this.receveur.cible = this.pointInterception(this.receveur);
+        this.receveur.auBallon = true;
       }
-      for (const { j, t } of proches.slice(0, nombre)) j.cible = this.pointArrivee(Math.min(t, 2));
+      for (const { j } of proches.slice(0, nombre)) {
+        j.cible = this.pointInterception(j);
+        j.auBallon = true;
+      }
     }
   }
 }

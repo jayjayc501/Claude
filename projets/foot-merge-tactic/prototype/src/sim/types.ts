@@ -204,6 +204,16 @@ export interface Reglages {
     dribbleFacteur: number;
     tacle: { rayonM: number; parSeconde: number };
     reserveRepriseS: number;
+    /** Passe dans l'espace : devant le receveur, dans le sens du jeu. */
+    passeEspace: { avanceM: number; avanceSurAdversaireS: number };
+    /** Ballon rapide qui frôle un adversaire : contrôlé ou dévié (contre). */
+    contre: { vitesseMinMS: number; probaControle: number; perteVitesse: number; angleMaxDeg: number };
+    /** Dribble en 1 contre 1 face à un adversaire proche. */
+    dribble: { distanceM: number; probaTentative: number; probaReussite: number; eliminationS: number };
+    /** Porteur qui protège le ballon : tacle moins probable. */
+    protection: { dureeS: number; facteurTacle: number };
+    /** Dégagement seulement dans son tiers défensif (en mètres de son but). */
+    zoneDegagementM: number;
     /** Juste après une perte : les plus proches (dans rayonM) pressent pendant dureeS. */
     contrePressing: { dureeS: number; rayonM: number; joueurs: number };
   };

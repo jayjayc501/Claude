@@ -33,6 +33,10 @@ export interface JoueurSim {
   reagitA: number | null;
   /** Fin de sa course de transition (sprint de repli ou de projection). */
   sprintJusqua: number;
+  /** Éliminé par un dribble : très ralenti jusqu'à cet instant. */
+  freineJusqua: number;
+  /** Joue le ballon (porteur, receveur, presseur, joueur qui va au ballon) : peut approcher un adversaire. */
+  auBallon: boolean;
   /** Écart individuel de vitesse et d'accélération, en attendant l'attribut
    *  « vitesse » : deux joueurs ne courent jamais exactement pareil. */
   facteur: number;
@@ -102,6 +106,8 @@ export class MatchSim {
           phase: "defense",
           reagitA: null,
           sprintJusqua: 0,
+          freineJusqua: 0,
+          auBallon: false,
           facteur: 1 + this.rng.entre(-v, v),
           perceptionS: this.rng.entre(reglages.mouvement.perception.minS, reglages.mouvement.perception.maxS),
         });
@@ -366,7 +372,7 @@ export class MatchSim {
     const nouvelles: PointM[] = [];
     this.joueurs.forEach((j, i) => {
       // Course de transition (sprint) juste après la réaction, sinon course normale.
-      const conduit = this.balle?.porteur === j ? this.reglages.ballon.dribbleFacteur : 1;
+      const conduit = (this.balle?.porteur === j ? this.reglages.ballon.dribbleFacteur : 1) * (this.temps < j.freineJusqua ? 0.3 : 1);
       const vMax = (this.temps < j.sprintJusqua ? this.reglages.transition.sprint.vitesseMS : m.vitesseMaxMS) * j.facteur * conduit;
       // 1. Course : vers la cible, en freinant à l'approche, accélération limitée.
       const dx = j.cible.x - j.pos.x;
@@ -407,7 +413,7 @@ export class MatchSim {
         let cx = px + rvx * t;
         let cy = py + rvy * t;
         let c = Math.hypot(cx, cy);
-        const dMin = o.camp === j.camp ? m.distanceMinM : m.distanceMinAdversaireM;
+        const dMin = o.camp === j.camp ? m.distanceMinM : j.auBallon || o.auBallon ? 1 : m.distanceMinAdversaireM;
         if (c >= dMin) return;
         if (c < 1e-6) {
           const angle = (i - k) * 2.399963; // côté déterministe si les trajectoires se rejoignent exactement

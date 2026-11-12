@@ -244,5 +244,6 @@ Historique détaillé : `journal.md` (par jour) et `docs/historique-etat.md` (an
 - Prototype 1 (web, `prototype/`) : plateau en hexagones validé, projection v4 (lignes, transitions, réactions individuelles), 12/11 : profondeur du placement mieux gardée en défense (influence 0,45 défense, 0,7 milieu et attaque).
 - **12/11 : mission 2, étape 1 : ballon réel** (`src/sim/ballon.ts`) : porté ou libre, conduite, passes, tirs, interception, tacle, gardien, touche, sortie de but, but, score. 77 tests verts, page republiée. **En attente : l'avis du concepteur sur le jeu.**
 - 12/11 (suite) : tir systématique dans la surface ; gardien à 16 m au plus en attaque ; pressing normal mesuré (1 presse, 1 couvre) ; contre-pressing 4 s (3 joueurs) ; passe sous pression moins précise. 79 tests verts.
-- À régler : trop de changements de camp (passes interceptées), pas de hors-jeu ni de corner ; ensuite appels et démarquages, attributs.
+- 12/11 (suite) : **lot A** fait (passe dans l'espace, contres, dribble, protection du ballon, course au point d'interception). 7,6 changements de camp par minute, 72 % de passes réussies. 79 tests verts.
+- Suite décidée : **lot B** (hors-jeu, fautes et coups francs, penalty, corners), puis **lot C** (notes des joueurs : la réussite des passes en dépendra).
 - Règle de séance (concepteur, 12/11) : **économiser les tokens** : peu de lectures, peu de tests et de captures, le concepteur valide lui-même ; mettre à jour le projet claude.ai seulement aux grandes étapes ; réponses courtes.

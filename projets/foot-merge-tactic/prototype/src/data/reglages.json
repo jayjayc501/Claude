@@ -105,8 +105,13 @@
     "arretProba": 0.75,
     "dribbleAvanceM": 8,
     "dribbleFacteur": 0.9,
-    "tacle": { "rayonM": 2.8, "parSeconde": 0.5 },
+    "tacle": { "rayonM": 2, "parSeconde": 0.2 },
     "reserveRepriseS": 3,
+    "passeEspace": { "avanceM": 7, "avanceSurAdversaireS": 0.5 },
+    "contre": { "vitesseMinMS": 13, "probaControle": 0.5, "perteVitesse": 0.35, "angleMaxDeg": 70 },
+    "dribble": { "distanceM": 3.5, "probaTentative": 0.3, "probaReussite": 0.5, "eliminationS": 1.2 },
+    "protection": { "dureeS": 1.2, "facteurTacle": 0.4 },
+    "zoneDegagementM": 35,
     "contrePressing": { "dureeS": 4, "rayonM": 20, "joueurs": 3 }
   },
   "possessionSimulee": {

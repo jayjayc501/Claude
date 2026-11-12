@@ -101,6 +101,8 @@ Maquette de l'écran de préparation sur claude.ai : https://claude.ai/artifact/
 - **Joueurs en bustes de figurines** (style 3D « jouet en vinyle », original), sans pieds, sur un socle. **Posture des bras différente selon le style** (rempart bras croisés, créateur qui montre la direction, combatif poing levé, technicien ballon sur le doigt, presseur penché en avant, rapide bras en course, finisseur qui se désigne). Nom affiché seulement au toucher.
 - **Fusions** : aura qui épouse la silhouette et anneau du socle, d'une couleur par niveau : 1 = bleu, 2 = or, 3 = violet avec étincelles. Plus d'étoiles ni de crans.
 - Écran compact, peu de noir (panneaux clairs).
+- **Tactique d'équipe (12/11)** : liste déroulante au-dessus du terrain, **une seule tactique à la fois** : Équilibrée (par défaut, le réglage moyen du moteur), Pressing, Gegenpressing, Contre, Tiki-taka. **Écran seulement pour l'instant : aucun effet sur le moteur.**
+- **Styles en pictogrammes** dans les compteurs (12/11) : Rempart = bouclier, Presseur = flèches qui se resserrent, Technicien = ballon, Rapide = éclair.
 - [PROPOSITION, gardée dans la maquette] Mercato de 6 joueurs sur une rangée, budget dans le titre du mercato ; poste écrit sous le buste ; revente en glissant le joueur vers le mercato.
 - Les images de joueurs de la maquette viennent de Kling (environ 14 crédits) : ce sont des références, pas les visuels du jeu. Elles contiennent de petits logos et numéros à retirer.
 

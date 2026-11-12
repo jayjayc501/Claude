@@ -82,9 +82,10 @@ describe("tactiques et styles (proposition du 12/11)", () => {
   });
 
   test("réalisme (référence §3, le bloc) : ligne plus haute en Pressing, plus basse en Contre", () => {
-    const eq = mesurer(nous("EQU")).ligne;
-    const prs = mesurer(nous("PRS")).ligne;
-    const con = mesurer(nous("CON")).ligne;
+    // 8 matchs : sur 4, le hasard des engagements pèse trop (12/11).
+    const eq = mesurer(nous("EQU"), 8).ligne;
+    const prs = mesurer(nous("PRS"), 8).ligne;
+    const con = mesurer(nous("CON"), 8).ligne;
     expect(prs).toBeGreaterThan(eq + 2);
     expect(con).toBeLessThan(eq - 2);
   });

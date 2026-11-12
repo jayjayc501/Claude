@@ -213,17 +213,34 @@ describe("règles de projection", () => {
     expect(projeter(ac.cases[4]!.centre, ac, "attaque", { x: 0.5, y: 0.78 }, reglages, L).y * L).toBeGreaterThan(85);
   });
 
-  test("avec le ballon, l'ordre de profondeur du placement est gardé (ce qui est placé haut joue haut)", () => {
+  test("avec le ballon, l'ordre de profondeur du placement est gardé (ce qui est placé haut joue haut), hors surnombre", () => {
     const { effectif } = chargerEquipes();
     const champ = effectif.composition.filter((p) => p.poste !== "G");
+    // Le surnombre côté ballon (12/11) fait monter latéral et milieux : on vérifie la règle de base sans lui.
+    const sansSurnombre = structuredClone(reglages);
+    sansSurnombre.projection.attaque.surnombre.distanceM = 0;
     for (const by of [0.2, 0.5, 0.8]) {
       const ballon = { x: 0.5, y: by };
       const pts = champ.map((pl) => {
         const c = donnees.cellule(pl.poste, pl.cellule);
-        return { base: c.centre.y, y: projeter(c.centre, donnees.poste(pl.poste), "attaque", ballon, reglages, L).y };
+        return { base: c.centre.y, y: projeter(c.centre, donnees.poste(pl.poste), "attaque", ballon, sansSurnombre, L).y };
       });
       for (const a of pts) for (const b of pts) if (a.base < b.base - 1e-9) expect(a.y).toBeLessThanOrEqual(b.y + 1e-9);
     }
+  });
+
+  test("surnombre côté ballon (12/11) : le latéral du côté du ballon monte, l'opposé et les centraux restent", () => {
+    const poste = (id: string) => donnees.poste(id);
+    const cas = (id: string, i: number, ballon: { x: number; y: number }) => projeter(donnees.cellule(id, i).centre, poste(id), "attaque", ballon, reglages, L);
+    const ballonDroite = { x: 0.85, y: 0.85 };
+    const ballonGauche = { x: 0.15, y: 0.85 };
+    // DD monte quand le ballon est à droite, pas quand il est à gauche ; et inversement pour DG.
+    expect((cas("DD", 1, ballonDroite).y - cas("DD", 1, ballonGauche).y) * L).toBeGreaterThan(3);
+    expect((cas("DG", 1, ballonGauche).y - cas("DG", 1, ballonDroite).y) * L).toBeGreaterThan(3);
+    // Les défenseurs centraux ne bougent pas en profondeur selon le côté du ballon.
+    expect(cas("DC", 0, ballonDroite).y).toBeCloseTo(cas("DC", 0, ballonGauche).y, 6);
+    // Ballon dans notre camp : pas de surnombre.
+    expect(cas("DD", 1, { x: 0.85, y: 0.3 }).y).toBeCloseTo(cas("DD", 1, { x: 0.15, y: 0.3 }).y, 6);
   });
 
   test("la case la plus basse donne la ligne arrière, la plus haute la ligne avant", () => {
@@ -314,8 +331,11 @@ describe("simulation", () => {
   test("les cibles ne changent pas toutes au même instant (bascule et ballon qui part)", () => {
     const etalementsBascule: number[] = [];
     const etalementsBallon: number[] = [];
+    // Sans la respiration (12/11), qui fait bouger les cibles en continu : on mesure ici le retard de perception.
+    const sansRespiration = structuredClone(reglages);
+    sansRespiration.mouvement.respiration.amplitudeM = 0;
     for (const graine of [1, 2, 3, 4, 5, 6]) {
-      const m = nouveauMatch(graine);
+      const m = new MatchSim(donnees, sansRespiration, [chargerEquipes().effectif, chargerEquipes().adversaire], graine);
       m.demarrer();
       m.definirMode("auto");
       const dt = reglages.pasDeTempsS;

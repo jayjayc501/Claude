@@ -36,7 +36,9 @@
     },
     "attaque": {
       "ecartement": 1.2,
-      "glissementLateral": 0.15,
+      "glissementLateral": 0.35,
+      "glissementCoteOppose": 0.3,
+      "surnombre": { "distanceM": 12, "ballonDebut": 0.4, "ballonPlein": 0.75, "proximite": 0.3 },
       "distanceDefenseBallonM": 15,
       "ligneArriereMinM": 15,
       "ligneArriereMaxM": 55,
@@ -77,6 +79,7 @@
     "forceSeparation": 8,
     "distanceMinAdversaireM": 2.5,
     "variationIndividuelle": 0.06,
+    "respiration": { "amplitudeM": 2, "periodeMinS": 4, "periodeMaxS": 8 },
     "perception": {
       "minS": 0.1,
       "maxS": 0.3,

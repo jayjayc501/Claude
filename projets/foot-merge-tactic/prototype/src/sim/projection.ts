@@ -108,7 +108,12 @@ function projeterAttaque(
 ): PointNorm {
   const a = reglages.projection.attaque;
   const suivi = poste.suiviBallon ?? 1;
-  const x = 0.5 + (base.x - 0.5) * a.ecartement + (ballon.x - 0.5) * a.glissementLateral * suivi;
+  // Coulissement vers le côté du ballon (12/11 : « il faut coulisser ») ; les
+  // joueurs de côté du côté opposé gardent la largeur (changement d'aile possible).
+  const cote = poste.id === "DG" || poste.id === "DD" || poste.id === "AG" || poste.id === "AD";
+  const oppose = cote && (base.x - 0.5) * (ballon.x - 0.5) < 0;
+  const glisse = a.glissementLateral * (oppose ? a.glissementCoteOppose : 1);
+  const x = 0.5 + (base.x - 0.5) * a.ecartement + (ballon.x - 0.5) * glisse * suivi;
   const { arriereM, avantM } = lignesAttaqueM(ballon, reglages, longueurM, tenues.ligneAdverseM);
 
   if (poste.ligneDefense === "gardien") {
@@ -121,7 +126,22 @@ function projeterAttaque(
 
   const p = poste.profondeurPlateau;
   const t = borner((base.y - p.basY) / (p.hautY - p.basY), 0, 1);
-  return { x, y: (arriereM + t * (avantM - arriereM)) / longueurM };
+  let yM = arriereM + t * (avantM - arriereM);
+  // Surnombre côté ballon (12/11, « apporter du surnombre, DG/DD et MDC/MC/MOC,
+  // encore plus s'ils sont hauts ») : le latéral et les milieux proches du
+  // ballon montent, d'autant plus que le ballon est haut et qu'ils sont placés
+  // haut. Les défenseurs centraux et le latéral opposé restent en couverture.
+  if (poste.id === "DG" || poste.id === "DD" || poste.id === "MC") {
+    const s = a.surnombre;
+    const proche = borner(1 - Math.abs(x - ballon.x) / s.proximite, 0, 1);
+    const haut = borner((ballon.y - s.ballonDebut) / (s.ballonPlein - s.ballonDebut), 0, 1);
+    // Placé bas : il vient en soutien 6 m derrière le ballon (défense de
+    // couverture, au moins 4 joueurs derrière lui) ; placé haut : jusqu'à la ligne avant.
+    const ballonM = ballon.y * longueurM;
+    const plafond = Math.max(yM, t < 0.5 ? ballonM - 6 : ballonM - 6 + (t - 0.5) * 2 * (avantM - 2 - (ballonM - 6)));
+    yM = Math.min(plafond, yM + s.distanceM * proche * haut * (0.5 + 0.5 * t));
+  }
+  return { x, y: yM / longueurM };
 }
 
 /** Position de match d'un point du demi-terrain (repère de l'équipe). */

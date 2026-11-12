@@ -380,6 +380,21 @@ export class MatchSim {
       const ballonRepere = this.versRepere(j.camp, vu.ballon);
       const p = projeter(j.cellule.centre, j.poste, j.phase, ballonRepere, this.reg(j.camp), this.donnees.longueurM, this.lignesTenues(j.camp, vu.lignesDef));
       j.cible = this.versAbsolu(j.camp, p);
+      // Respiration (12/11, « encore de la robotisation ») : en attaque, chacun
+      // bouge un peu autour de sa place, à son propre rythme (fonction du temps
+      // et de constantes du joueur : rejouable, sans dépendre des autres).
+      const rs = this.reg(j.camp).mouvement.respiration;
+      // Pas pendant une transition : là, on court droit vers sa place.
+      if (j.phase === "attaque" && j.poste.id !== "G" && rs.amplitudeM > 0 && j.reagitA === null && this.temps >= j.sprintJusqua) {
+        const periode = rs.periodeMinS + (rs.periodeMaxS - rs.periodeMinS) * ((j.perceptionS * 97.13) % 1);
+        const w = (2 * Math.PI) / periode;
+        const phase = j.facteur * 61.7;
+        j.cible = {
+          x: j.cible.x + rs.amplitudeM * Math.sin(this.temps * w + phase),
+          // Surtout sur le côté : en profondeur, la ligne du hors-jeu et le soutien derrière le ballon priment.
+          y: j.cible.y + rs.amplitudeM * 0.25 * Math.sin(this.temps * w * 0.73 + phase * 1.3),
+        };
+      }
     }
     for (const camp of [0, 1] as const) this.espacerLignes(camp);
     this.balle?.surcharger();

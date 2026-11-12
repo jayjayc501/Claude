@@ -147,6 +147,11 @@ export interface Reglages {
     attaque: {
       ecartement: number;
       glissementLateral: number;
+      /** Part du glissement pour les joueurs de côté du côté opposé au ballon (ils gardent la largeur). */
+      glissementCoteOppose: number;
+      /** Surnombre côté ballon : latéraux et milieux montent de distanceM au plus, selon leur proximité
+       *  latérale du ballon, la hauteur du ballon (de ballonDebut à ballonPlein) et la hauteur de leur placement. */
+      surnombre: { distanceM: number; ballonDebut: number; ballonPlein: number; proximite: number };
       /** La ligne arrière se tient à cette distance derrière le ballon… */
       distanceDefenseBallonM: number;
       /** … sans descendre sous ce minimum ni monter au-dessus de ce maximum (m depuis son but). */
@@ -179,6 +184,8 @@ export interface Reglages {
     forceSeparation: number;
     /** Écart individuel de vitesse et d'accélération (± cette fraction). */
     variationIndividuelle: number;
+    /** Petits mouvements de chaque joueur de l'équipe qui attaque autour de sa place (moins « robot »). */
+    respiration: { amplitudeM: number; periodeMinS: number; periodeMaxS: number };
     /** Retard avec lequel chacun voit le ballon bouger : une part propre au
      *  joueur (entre minS et maxS) plus parMetreS par mètre qui le sépare du ballon. */
     perception: { minS: number; maxS: number; parMetreS: number };

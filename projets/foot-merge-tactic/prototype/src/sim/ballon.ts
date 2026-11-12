@@ -55,6 +55,8 @@ export class BallonReel {
   dernier: JoueurSim | null = null;
   /** Remise en jeu : seule cette équipe peut prendre le ballon jusqu'à cet instant. */
   reserve: { camp: Camp; jusqua: number } | null = null;
+  /** Partenaire de l'engagement et sa place à côté du ballon. */
+  private placePartenaire: { joueur: JoueurSim; point: PointM; depuis: number } | null = null;
   /** Dernière perte de balle en jeu (pas sur une remise en jeu) : contre-pressing. */
   perte: { camp: Camp; a: number } | null = null;
   readonly stats: StatsBallon = {
@@ -175,6 +177,26 @@ export class BallonReel {
     }
   }
 
+  /** Coup d'envoi : les adversaires restent dans leur moitié, hors du rond central. */
+  private eloignerEngagement(camp: Camp): void {
+    const s = this.sim;
+    const b = s.ballon;
+    const L = s.donnees.longueurM;
+    const sens = camp === 0 ? 1 : -1; // côté de la moitié adverse
+    for (const o of s.joueurs) {
+      if (o.camp === camp) continue;
+      let c = { x: o.cible.x, y: sens > 0 ? Math.max(o.cible.y, L / 2 + 0.5) : Math.min(o.cible.y, L / 2 - 0.5) };
+      const d = dist(c, b);
+      if (d < 9.5) {
+        const ux = d > 0.1 ? (c.x - b.x) / d : 0;
+        const uy = Math.max(0.3, Math.abs(d > 0.1 ? (c.y - b.y) / d : 1)) * sens;
+        const n = Math.hypot(ux, uy);
+        c = { x: b.x + (ux / n) * 9.5, y: b.y + (uy / n) * 9.5 };
+      }
+      o.cible = c;
+    }
+  }
+
   /** Joueur qui engage : le joueur de champ de l'équipe le plus proche du centre. */
   private engageur(): JoueurSim {
     const s = this.sim;
@@ -184,14 +206,39 @@ export class BallonReel {
       .reduce((a, b) => (dist(a.depart, s.ballon) <= dist(b.depart, s.ballon) ? a : b));
   }
 
+  /** Coéquipier qui se place à côté du ballon pour l'engagement (12/11 :
+   *  « les engagements sont nuls : une passe en arrière à personne »). */
+  private partenaire(camp: Camp, kicker: JoueurSim): JoueurSim | undefined {
+    const s = this.sim;
+    const centre = { x: s.donnees.largeurM / 2, y: s.donnees.longueurM / 2 };
+    return s.joueurs
+      .filter((j) => j.camp === camp && j !== kicker && j.poste.id !== "G")
+      .sort((a, b) => dist(a.depart, centre) - dist(b.depart, centre))[0];
+  }
+
+  /** Place du partenaire : 4 m à côté du ballon, un pas dans son camp. */
+  private placerPartenaire(camp: Camp, kicker: JoueurSim): void {
+    const s = this.sim;
+    const q = this.partenaire(camp, kicker);
+    if (!q) return;
+    const W = s.donnees.largeurM;
+    const L = s.donnees.longueurM;
+    const cote = q.depart.x < W / 2 ? -1 : 1;
+    q.cible = { x: W / 2 + cote * 4, y: L / 2 + (camp === 0 ? -1.5 : 1.5) };
+    q.auBallon = true;
+    const depuis = this.placePartenaire?.joueur === q ? this.placePartenaire.depuis : s.temps;
+    this.placePartenaire = { joueur: q, point: { ...q.cible }, depuis };
+  }
+
   pas(dt: number): void {
     if (this.engagement) {
       const s = this.sim;
       const L = s.donnees.longueurM;
       const kicker = this.engageur();
+      const partenaire = this.partenaire(this.engagement.camp, kicker);
       const enPlace =
         dist(kicker.pos, s.ballon) < 1.5 &&
-        s.joueurs.every((j) => j === kicker || ((j.camp === 0 ? j.pos.y <= L / 2 + 0.5 : j.pos.y >= L / 2 - 0.5) && dist(j.pos, j.depart) < 3));
+        s.joueurs.every((j) => j === kicker || j === partenaire || ((j.camp === 0 ? j.pos.y <= L / 2 + 0.5 : j.pos.y >= L / 2 - 0.5) && dist(j.pos, j.depart) < 3));
       if ((enPlace && s.temps - this.engagement.depuis > 2) || s.temps - this.engagement.depuis > 10) {
         const camp = this.engagement.camp;
         this.engagement = null;
@@ -319,17 +366,33 @@ export class BallonReel {
       }
       this.arrete = null;
     }
+    if (this.arrete === "engagement" && dist(p.pos, { x: s.donnees.largeurM / 2, y: s.donnees.longueurM / 2 }) > 4) {
+      this.arrete = null; // loin du point central : ce n'est plus un engagement
+      this.placePartenaire = null;
+    }
     if (this.arrete === "engagement") {
-      // Engagement : passe à un coéquipier proche, à côté ou en retrait.
+      // Engagement : on attend que le partenaire soit à côté du ballon et les
+      // adversaires hors du rond (6 s au plus), puis passe au partenaire ou en retrait.
+      const pp = this.placePartenaire?.joueur.camp === p.camp ? this.placePartenaire : null;
+      const rondOccupe = adverses.some((o) => dist(o.pos, p.pos) < 9);
+      if (pp && (dist(pp.joueur.pos, pp.point) > 1.5 || rondOccupe) && s.temps - pp.depuis < 6) {
+        this.decisionA = s.temps + 0.2;
+        return;
+      }
       this.arrete = null;
-      const options = s.joueurs
-        .filter((q) => q !== p && q.camp === p.camp && q.poste.id !== "G" && (q.pos.y - p.pos.y) * sens < 1)
-        .map((q) => ({ q, d: dist(p.pos, q.pos) }))
-        .filter((o) => o.d > 5 && o.d < 28)
-        .sort((a, b) => a.d - b.d);
-      const choix = options[Math.min(options.length - 1, this.rng.entier(3))];
+      this.placePartenaire = null;
+      // Le plus souvent au partenaire placé à côté, sinon à un milieu en retrait.
+      let choix: JoueurSim | undefined = pp && dist(pp.joueur.pos, p.pos) < 8 && this.rng.suivant() < 0.85 ? pp.joueur : undefined;
+      if (!choix) {
+        const options = s.joueurs
+          .filter((q) => q !== p && q.camp === p.camp && q.poste.id !== "G")
+          .map((q) => ({ q, d: dist(p.pos, q.pos), recul: (p.pos.y - q.pos.y) * sens }))
+          .filter((o) => o.d > 2 && o.d < 28 && o.recul > 1)
+          .sort((a, b) => a.d - b.d);
+        choix = options[0]?.q;
+      }
       if (choix) {
-        this.passer(choix.q, false, null, false); // dans ses pieds
+        this.passer(choix, false, null, false); // dans ses pieds
         return;
       }
     }
@@ -836,6 +899,8 @@ export class BallonReel {
       for (const j of s.joueurs) j.cible = { ...j.depart };
       const kicker = this.engageur();
       kicker.cible = { x: s.ballon.x, y: s.ballon.y - (kicker.camp === 0 ? 0.8 : -0.8) };
+      this.placerPartenaire(this.engagement.camp, kicker);
+      this.eloignerEngagement(this.engagement.camp); // adversaires dans leur moitié, hors du rond
       return;
     }
     if (this.tirEnCours && this.plongeon) {
@@ -847,6 +912,11 @@ export class BallonReel {
       const p = this.porteur;
       const sens = p.camp === 0 ? 1 : -1;
       p.auBallon = true;
+      // Un engagement se joue au point central : loin du centre, ce n'en est plus un.
+      if (this.arrete === "engagement" && dist(p.pos, { x: W / 2, y: L / 2 }) > 4) {
+        this.arrete = null;
+        this.placePartenaire = null;
+      }
       if (p.poste.id === "G" || this.arrete) p.cible = { ...p.pos }; // remise en jeu : il attend sur place
       else {
         const butAdv = { x: W / 2, y: sens === 1 ? L : 0 };
@@ -856,7 +926,11 @@ export class BallonReel {
             ? { x: p.pos.x + ((butAdv.x - p.pos.x) / dBut) * r.dribbleAvanceM, y: p.pos.y + ((butAdv.y - p.pos.y) / dBut) * r.dribbleAvanceM }
             : { x: p.pos.x + (W / 2 - p.pos.x) * 0.2, y: Math.min(L - 3, Math.max(3, p.pos.y + sens * r.dribbleAvanceM)) };
       }
-      if (this.arrete === "engagement") return; // adversaires à 9,15 m tant que l'engagement n'est pas joué
+      if (this.arrete === "engagement") {
+        this.placerPartenaire(p.camp, p); // un coéquipier à côté pour recevoir l'engagement
+        this.eloignerEngagement(p.camp); // adversaires hors du rond (9,15 m) tant que l'engagement n'est pas joué
+        return;
+      }
       if (this.arrete === "sixMetres") {
         this.viderSurface(p.camp);
         return;
@@ -927,6 +1001,7 @@ export class BallonReel {
       else if (this.reserve && this.reserve.camp !== camp) {
         nombre = 0;
         if (this.arrete === "coupFranc") this.eloigner(this.reserve.camp);
+        if (this.arrete === "engagement") this.eloignerEngagement(this.reserve.camp);
       }
       else if (this.reserve && this.tireur) {
         nombre = 0;
@@ -942,6 +1017,8 @@ export class BallonReel {
         j.cible = this.pointInterception(j);
         j.auBallon = true;
       }
+      // Coup d'envoi : pendant que l'un va au ballon, un coéquipier se place à côté.
+      if (this.arrete === "engagement" && this.reserve?.camp === camp && proches[0]) this.placerPartenaire(camp, proches[0].j);
     }
   }
 }

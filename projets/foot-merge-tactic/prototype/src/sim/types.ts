@@ -263,7 +263,7 @@ export interface Reglages {
     /** Seul face au but : tire à cette distance. */
     seulTirM: number;
     /** Visée (m de l'axe du but), erreur, arrêt du gardien selon l'écart au point de passage. */
-    tir: { viseMinM: number; viseMaxM: number; erreurBaseM: number; erreurParMetre: number; erreurPenaltyM: number; arretMax: number; arretMin: number; arretParMetre: number; plongeonVitesseMS: number; plongeonDureeS: number; rayonPlongeonM: number; arretParMetreDistance: number; paradeProba: number };
+    tir: { contreProba: number; viseMinM: number; viseMaxM: number; erreurBaseM: number; erreurParMetre: number; erreurPenaltyM: number; arretMax: number; arretMin: number; arretParMetre: number; plongeonVitesseMS: number; plongeonDureeS: number; rayonPlongeonM: number; arretParMetreDistance: number; paradeProba: number };
     /** Surface de réparation : on y tire toujours. */
     surface: { profondeurM: number; demiLargeurM: number };
     arretProba: number;
@@ -286,6 +286,8 @@ export interface Reglages {
     horsJeuToleranceM: number;
     /** Pause du tireur avant une remise en jeu (touche, six mètres, coup franc, corner, engagement). */
     pauseArretS: { min: number; max: number };
+    /** Après un but : temps minimal avant l'engagement (l'annonce a le temps de disparaître). */
+    attenteButS: number;
     centre: { zoneProfondeurM: number; ecartAxeM: number; proba: number; dureeS: number; erreurDeg: number; partEnLAir: number };
     degagement: { zoneM: number; longueurMinM: number; longueurMaxM: number; dureeS: number; erreurDeg: number };
     /** Construction : avant bouché (adversaire dans un cône de boucheM) → seuil

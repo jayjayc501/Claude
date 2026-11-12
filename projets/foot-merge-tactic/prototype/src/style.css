@@ -386,3 +386,49 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-panneau-stats .eux { font-size: 14px; font-weight: 800; color: #C2413D; }
 .match-panneau-aide { margin: 0; font-size: 12px; color: #4A5A50; text-align: center; }
 .match-panneau-carte .match-jouer { flex: none; }
+
+/* --- Fiche joueur (12/11, « à la Clash Royale ») ------------------------- */
+.fiche-voile { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(10, 22, 16, 0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); animation: fiche-fondu 0.18s ease-out; }
+.fiche-voile.sortie { animation: fiche-fondu 0.16s ease-in reverse forwards; }
+.fiche { position: relative; width: min(340px, 100%); background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 22px 60px rgba(0, 0, 0, 0.38), 0 0 0 3px rgba(255, 255, 255, 0.7); animation: fiche-entree 0.32s cubic-bezier(0.2, 1.35, 0.4, 1); font-family: inherit; color: #16201A; }
+.fiche-tete { position: relative; height: 140px; padding: 16px 150px 0 18px; color: #fff; overflow: hidden;
+  background:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.07) 0 10px, rgba(255, 255, 255, 0) 10px 22px),
+    radial-gradient(120% 140% at 85% 0%, color-mix(in srgb, var(--pays) 55%, #fff) 0%, var(--pays) 55%, color-mix(in srgb, var(--pays) 75%, #000) 100%); }
+.fiche-filigrane { position: absolute; left: -6px; bottom: -22px; font-size: 92px; font-weight: 900; letter-spacing: -2px; color: rgba(255, 255, 255, 0.1); line-height: 1; pointer-events: none; }
+.fiche-pays { position: relative; display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.85; }
+.fiche-nom { position: relative; margin: 2px 0 8px; font-size: 27px; font-weight: 900; line-height: 1.05; letter-spacing: -0.01em; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); overflow-wrap: anywhere; }
+.fiche-puces { position: relative; display: flex; flex-wrap: wrap; gap: 5px; }
+.fiche-puce { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px 3px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; background: rgba(255, 255, 255, 0.22); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35); white-space: nowrap; }
+.fiche-puce svg { width: 14px; height: 14px; }
+.fiche-puce.terne { opacity: 0.75; }
+.fiche-puce.fusion { background: color-mix(in srgb, var(--aura) 40%, transparent); box-shadow: inset 0 0 0 1.5px var(--aura); }
+.fiche-buste { position: absolute; right: 30px; top: 24px; width: 132px; height: 136px; z-index: 2; pointer-events: none; }
+.fiche-buste img { position: absolute; left: 0; bottom: 6px; width: 132px; height: 132px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25)); animation: fiche-buste 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) 0.05s both; }
+.fiche-socle { position: absolute; left: 20px; right: 20px; bottom: 0; height: 20px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0)); }
+.fiche-fermer { position: absolute; top: 10px; right: 10px; z-index: 3; width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.28); color: #fff; font-size: 15px; font-weight: 800; line-height: 32px; cursor: pointer; }
+.fiche-corps { padding: 14px 12px 12px; display: grid; gap: 8px; background: linear-gradient(#F3F6F2, #fff 40%); }
+.fiche-note { display: grid; grid-template-columns: 40px 1fr 50px; align-items: center; gap: 10px; padding: 9px 10px 9px 9px; border-radius: 16px; background: #fff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), inset 0 0 0 1px rgba(0, 0, 0, 0.06); animation: fiche-ligne 0.35s ease-out both; animation-delay: calc(0.08s + var(--i) * 0.05s); }
+.fiche-icone { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: linear-gradient(160deg, color-mix(in srgb, var(--note) 70%, #fff), var(--note)); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.16), 0 2px 4px color-mix(in srgb, var(--note) 40%, transparent); }
+.fiche-detail { min-width: 0; display: grid; gap: 3px; }
+.fiche-libelle { font-size: 12px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #2C3A31; }
+.fiche-sous { display: grid; grid-template-columns: 74px 1fr 20px; align-items: center; gap: 6px; font-size: 11px; color: #5D6B62; }
+.fiche-sous-nom { white-space: nowrap; }
+.fiche-sous-valeur { text-align: right; font-weight: 800; color: #2C3A31; font-variant-numeric: tabular-nums; }
+.fiche-barre { height: 7px; border-radius: 4px; background: #E3E9E4; overflow: hidden; }
+.fiche-barre i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, color-mix(in srgb, var(--note) 65%, #fff), var(--note)); transform-origin: left; animation: fiche-barre 0.6s cubic-bezier(0.3, 0.9, 0.3, 1) both; animation-delay: calc(0.2s + var(--i) * 0.06s); }
+.fiche-valeur { justify-self: end; min-width: 46px; height: 38px; padding: 0 6px; border-radius: 12px; display: grid; place-items: center; font-size: 24px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.16); }
+.fiche-valeur.elite { background: linear-gradient(160deg, #C58BFF, #7A2FE0); }
+.fiche-valeur.bon { background: linear-gradient(160deg, #4FCB7E, #1F9A55); }
+.fiche-valeur.moyen { background: linear-gradient(160deg, #FFD15C, #E3A11B); color: #4A3300; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45); }
+.fiche-valeur.faible { background: linear-gradient(160deg, #F08A6B, #D5543A); }
+.fiche-vide { display: grid; gap: 4px; padding: 22px 16px; border-radius: 16px; text-align: center; border: 2px dashed #CAD4CD; color: #5D6B62; font-size: 13px; }
+.fiche-vide strong { color: #2C3A31; font-size: 15px; }
+@keyframes fiche-fondu { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fiche-entree { from { transform: translateY(18px) scale(0.92); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fiche-buste { from { transform: translateY(14px) scale(0.85); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fiche-ligne { from { transform: translateX(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fiche-barre { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .fiche, .fiche-voile, .fiche-note, .fiche-buste img, .fiche-barre i { animation: none; } }
+/* Bouton « i » des cartes du mercato : voir la fiche avant d'acheter. */
+.prepa-info { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 900; font-style: italic; font-family: Georgia, serif; color: #fff; background: #2F7FE0; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); z-index: 2; }

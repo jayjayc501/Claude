@@ -48,9 +48,14 @@ export interface JoueurSim {
   facteur: number;
   /** Sous-notes du joueur (référence 65 quand elles manquent). */
   notes: Notes;
-  /** Vitesse et accélération : écart individuel × notes de pointe et d'accélération. */
+  /** Vitesse et accélération : écart individuel × notes de pointe et d'accélération × (1 − fatigue). */
   vitesseF: number;
   accelF: number;
+  /** Les mêmes, joueur reposé. */
+  vitesseRepos: number;
+  accelRepos: number;
+  /** Perte de vitesse due à la fatigue (0 : frais), selon son endurance. */
+  fatigue: number;
   /** Part fixe de son temps de perception du ballon (secondes). */
   perceptionS: number;
   /** Effet individuel de son style (vitesse, pressing, tacle…) ; neutre sans style. */
@@ -154,6 +159,9 @@ export class MatchSim {
           notes,
           vitesseF: facteur * (1 + (notes.pointe - pn.reference) * pn.vitesse.pointeParPoint),
           accelF: facteur * (1 + (notes.acceleration - pn.reference) * pn.vitesse.accelerationParPoint),
+          vitesseRepos: facteur * (1 + (notes.pointe - pn.reference) * pn.vitesse.pointeParPoint),
+          accelRepos: facteur * (1 + (notes.acceleration - pn.reference) * pn.vitesse.accelerationParPoint),
+          fatigue: 0,
           perceptionS,
           effet: effetJoueur(joueur, this.influences, this.options),
           ciblePrec: { ...pos },
@@ -249,7 +257,36 @@ export class MatchSim {
     this.historique.push({ ballon: { ...this.ballon }, formes: [{ ...this.formes[0] }, { ...this.formes[1] }], lignesDef: [...this.lignesDef] });
     if (this.historique.length > Math.ceil(1 / dt)) this.historique.shift();
     this.calculerCibles();
+    this.fatiguer();
     this.deplacerJoueurs(dt);
+  }
+
+  /** Début de la période en cours (temps simulé) : la fatigue « d'affilée » repart de là. */
+  debutPeriode = 0;
+
+  /** Nouvelle période (2e mi-temps) : on récupère la fatigue d'affilée, pas celle du match. */
+  commencerPeriode(): void {
+    this.debutPeriode = this.temps;
+  }
+
+  /** Minutes de match jouées (au total, et depuis le début de la période). */
+  minutesJouees(): { total: number; affilee: number } {
+    const k = PARAMETRES_NOTES.endurance.minutesParSeconde;
+    return { total: this.temps * k, affilee: (this.temps - this.debutPeriode) * k };
+  }
+
+  /** Fatigue (12/11, demande du concepteur) : au-delà de 30 minutes d'affilée et de
+   *  60 minutes au total, chacun perd peu à peu de la vitesse et de l'accélération,
+   *  d'autant plus vite que son endurance est faible. Chiffres : data/notes.json. */
+  private fatiguer(): void {
+    const e = PARAMETRES_NOTES.endurance;
+    const m = this.minutesJouees();
+    const au_dela = Math.max(0, m.affilee - e.seuilAffileeMin) + Math.max(0, m.total - e.seuilTotalMin);
+    for (const j of this.joueurs) {
+      j.fatigue = au_dela > 0 ? Math.min(e.perteMax, au_dela * e.perteParMinute * Math.exp(-(j.notes.endurance - PARAMETRES_NOTES.reference) * e.parPoint)) : 0;
+      j.vitesseF = j.vitesseRepos * (1 - j.fatigue);
+      j.accelF = j.accelRepos * (1 - j.fatigue);
+    }
   }
 
   private programmerChangement(): void {

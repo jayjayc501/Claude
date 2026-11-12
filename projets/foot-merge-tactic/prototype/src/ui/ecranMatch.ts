@@ -58,6 +58,9 @@ const ECART_AFFICHAGE: Record<Vue, number> = { pions: 2 * RAYON_ROND + 2, figuri
 const CLE_VUE = "foot-merge-tactic.vue-match.v2";
 /** Une mi-temps : 180 s de jeu simulé, soit environ 51 s à l'écran en vitesse ×3,5 (12/11). */
 const DUREE_MI_TEMPS_S = 180;
+/** Durée des annonces, en secondes de jeu simulé (≈ 0,7 s et 1,6 s à l'écran en ×3,5). */
+const ANNONCE_S = 2.5;
+const ANNONCE_BUT_S = 5.5;
 const VITESSE_PAR_DEFAUT = 3.5;
 const COULEUR_EUX = "#C2413D";
 const BANDES = 12;
@@ -668,12 +671,14 @@ export class EcranMatch {
         this.annonce.style.animation = "none";
         void this.annonce.getBoundingClientRect();
         this.annonce.style.animation = "";
-        this.annonceDepuis = performance.now();
-        this.annonceDuree = but ? 2500 : 1400;
+        // Durée en temps de jeu : l'annonce disparaît avant la reprise (pause de 3,2 s au moins,
+        // 7 s après un but), quelle que soit la vitesse d'affichage (12/11).
+        this.annonceDepuis = sim.temps;
+        this.annonceDuree = but ? ANNONCE_BUT_S : ANNONCE_S;
         if (but) this.confettis();
       }
     }
-    this.annonce.style.display = performance.now() - this.annonceDepuis < this.annonceDuree ? "" : "none";
+    this.annonce.style.display = sim.temps - this.annonceDepuis < this.annonceDuree ? "" : "none";
 
     // Tableau de score.
     const score = `${sim.score[0]} – ${sim.score[1]}`;
@@ -715,6 +720,7 @@ export class EcranMatch {
     this.arret = null;
     this.periode = 2;
     this.debutPeriode = this.sim.temps;
+    this.sim.commencerPeriode();
     this.enPause = false;
     this.sim.balle?.coupDEnvoi(1, "2e mi-temps");
   }

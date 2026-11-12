@@ -33,11 +33,12 @@ export const NOMS_SOUS_NOTES: Record<keyof Notes, string> = {
 export interface ParametresNotes {
   reference: number;
   echelle: number;
-  vitesse: { pointeParPoint: number; accelerationParPoint: number };
+  vitesse: { pointeParPoint: number; accelerationParPoint: number; choixPasseParPoint: number; appelParPoint: number };
   technique: { imprecisionPasseParPoint: number; interceptionParPoint: number };
   tir: { erreurParPoint: number; puissanceParPoint: number; poidsPuissanceArret: number };
   physique: { tacleParPoint: number; fautesParPoint: number; porteeParPoint: number };
   unContreUn: { poidsVitesse: number; poidsTentative: number };
+  endurance: { minutesParSeconde: number; seuilAffileeMin: number; seuilTotalMin: number; perteParMinute: number; parPoint: number; perteMax: number };
 }
 
 export const PARAMETRES_NOTES = brut as unknown as ParametresNotes;

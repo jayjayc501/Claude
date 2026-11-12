@@ -344,7 +344,7 @@ describe("ballon réel : réalisme du jeu (référence football §9.4)", () => {
       for (const camp of [0, 1] as const) {
         const s = m.balle!.stats;
         expect(s.passes[camp] / MINUTES).toBeGreaterThan(4);
-        expect(s.passes[camp] / MINUTES).toBeLessThan(16);
+        expect(s.passes[camp] / MINUTES).toBeLessThan(18); // 16 avant le 12/11 au soir (plus de passes vers la surface)
         const taux = s.passesReussies[camp] / s.passes[camp];
         expect(taux).toBeGreaterThan(0.4); // une équipe sur 3 min : peu de passes, forte variance
         expect(taux).toBeLessThan(0.97);

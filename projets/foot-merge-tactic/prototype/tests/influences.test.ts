@@ -98,7 +98,7 @@ describe("tactiques et styles (proposition du 12/11)", () => {
   })();
   function signature(tactique: string) {
     let gain = 0, passes = 0, longues = 0, passesAdv = 0, reussiesAdv = 0, hautes = 0, rapides = 0, pertes = 0, ligne = 0, nLigne = 0;
-    for (let g = 1; g <= 12; g++) {
+    for (let g = 1; g <= 24; g++) { // 24 matchs (12 avant le 12/11 au soir : trop peu après le réglage des buts)
       const sim = new MatchSim(donnees, reglages, [nous(tactique), { ...adversaire, tactique: "EQU" }], g, true);
       sim.definirOptions({ tactiques: true, styles: false });
       sim.demarrer();

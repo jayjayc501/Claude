@@ -507,3 +507,37 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 **À juger par le concepteur** : est-ce que la différence se voit en regardant un match ; écart souhaité entre une équipe à 75 et une à 65 ; place du hasard (beaucoup de 0-0 sur 3 minutes de jeu).
 
 **Ouvert** : les 4 caractéristiques du gardien ; effet de l'endurance ; points donnés par un niveau de carte et par une fusion ; note globale selon le poste (proposée, pas codée) ; styles qui gardent leurs bonus de précision et de vitesse (proposé de les retirer, pas encore décidé).
+
+## 12/11/2026 (nuit) — Buts, pauses, vitesse, fatigue et fiche joueur
+
+**Demandes du concepteur** : pas assez de buts ; le jeu reprend avant que l'annonce (touche, coup franc…) disparaisse ; « la vitesse d'un joueur, c'est super important » ; l'endurance fait ralentir les joueurs au bout de 30 minutes d'affilée et de 60 minutes au total ; une fiche joueur « à la Clash Royale », jolie, avec le détail.
+
+**Ce qui a été fait** (chiffres en PROPOSITION)
+- **Pauses** : pause avant une remise en jeu 3,2 à 3,8 s de jeu (0,8 à 1,4 avant), 7 s au moins entre un but et l'engagement (`attenteButS`). Les annonces durent maintenant en temps de jeu (2,5 s, 5,5 s pour un but) : elles disparaissent avant la reprise, quelle que soit la vitesse d'affichage.
+- **Fatigue** (`simulation.ts`, chiffres dans `notes.json` → `endurance`) : au-delà de 30 minutes d'affilée (la mi-temps en cours) et de 60 minutes au total, perte de vitesse et d'accélération de 0,2 % par minute de dépassement (les deux s'ajoutent), × exp(−(endurance − 65) × 0,04), au plus 25 %. Fin de match : endurance 40 → −24 %, 65 → −9 %, 90 → −3 %. La mi-temps efface la fatigue « d'affilée ». 45 minutes = 180 s simulées.
+- **Vitesse** : pointe ± 0,8 % par point (90 → 9,6 m/s en sprint, 40 → 6,4), accélération ± 1,2 % ; en 1 contre 1, l'accélération compte pour 0,8 (0,5 avant). Le moteur **cherche les duels de vitesse** : passe vers l'avant plus tentante vers un coéquipier plus rapide que son adversaire direct, appel en profondeur donné au plus rapide face à son défenseur.
+- **Buts** : 41 % des tirs étaient contrés. Un défenseur sur la trajectoire ne touche plus le tir qu'une fois sur deux (`tir.contreProba`) ; tirs plus précis (erreur 1,2 m + 0,11 m par mètre, au lieu de 2,2 + 0,16) ; gardien un peu moins fort (arrêt 0,65 au plus, 0,2 au moins, au lieu de 0,9 et 0,3) ; un peu plus de tirs de loin et de passes dans la surface.
+  - Avant : 0,9 but, 8,4 tirs par match (deux mi-temps), 10 % de conversion, 41 % de tirs contrés. Après : **2,4 buts**, 8,1 tirs, 29 % de conversion ; tirs : 32 % but, 24 % arrêt, 24 % à côté, 20 % contré (60 matchs à 65 partout).
+- **Fiche joueur** (`src/ui/fiche.ts`) : toucher un joueur (terrain ou banc) ouvre sa fiche ; au mercato, un petit « i » sur chaque carte. En-tête aux couleurs du pays (nom, poste, style, fusion), buste qui déborde, 4 notes avec leur pictogramme et leur couleur, valeur dans une pastille (violet 80+, vert 70+, jaune 60+, rouge dessous), 2 sous-notes en barres animées. Gardien : « ses 4 notes arrivent bientôt ».
+- Mesures : `scripts/mesurer-notes.ts` joue maintenant des matchs complets (deux mi-temps, fatigue comprise).
+
+**Mesures** (80 matchs complets par ligne contre une équipe à 65, Équilibrée, styles coupés)
+
+| Notre équipe | V / N / D | Buts | Tirs | Passes réussies |
+|---|---|---|---|---|
+| Sans notes (65) | 29 / 26 / 45 % | 1,0 – 1,4 | 3,7 – 4,1 | 83 % |
+| 60 partout | 9 / 33 / 59 % | 0,6 – 1,6 | 2,8 – 5,3 | 80 % |
+| 70 partout | 61 / 16 / 23 % | 1,8 – 0,9 | 4,8 – 3,3 | 83 % |
+| 75 partout | 76 / 18 / 6 % | 2,7 – 0,8 | 5,7 – 2,7 | 86 % |
+| 80 partout | 90 / 4 / 6 % | 3,4 – 0,7 | 6,9 – 2,5 | 87 % |
+| Vitesse 80 seule | 63 / 19 / 19 % | 1,6 – 0,7 | 5,3 – 2,8 | 84 % |
+| Technique 80 seule | 40 / 31 / 29 % | 1,3 – 1,1 | 5,1 – 3,9 | 86 % |
+| Tir 80 seule | 46 / 25 / 29 % | 1,7 – 1,3 | 3,5 – 4,5 | 82 % |
+| Duel 80 seule | 43 / 30 / 28 % | 1,5 – 1,2 | 4,2 – 3,8 | 83 % |
+
+- Avec plus de buts, les notes pèsent beaucoup plus sur le résultat. La Vitesse est désormais la note la plus décisive (63 % de victoires à 80 contre 29 %).
+- Ailier star (90 en Vitesse contre un latéral à 55) : 10,4 ballons dans le camp adverse au lieu de 8,3, 5 dribbles par match (4,1 réussis) au lieu de 2 (1,2), 9,6 m/s de pointe.
+- « Sans notes » n'est pas à 50 % : les deux compositions de test ne sont pas symétriques.
+- **Point de vigilance** : à 80 contre 65, 90 % de victoires. Si c'est trop, on réduit l'échelle (15 → 20) sans toucher au reste.
+
+**Tests** : 113 verts. Nouveau : fatigue (rien avant 30 min ; à la 89e, endurance 40 bien plus fatiguée qu'endurance 90). Modifiés : les signatures des tactiques sont mesurées sur 24 matchs au lieu de 12 (le Gegenpressing tombait à +4 points au lieu de +5 sur 12 matchs, du bruit) ; passes par minute < 18 au lieu de 16 (plus de passes vers la surface).

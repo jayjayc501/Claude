@@ -19,6 +19,7 @@ import { CORPS_PICTOS, PICTOS } from "./pictos";
 import { html, svg } from "./dom";
 import { type Action, type Issue, Preparation, libellePoste } from "./preparation";
 import { notesAffichees } from "../sim/notes";
+import { ouvrirFiche } from "./fiche";
 
 // Plateau : x de 0 à 1 sur W, y de 0,5 (ligne médiane, en haut) à 0 (but, en bas) sur H.
 // H = 1,5 W donne des hexagones presque réguliers ; MH laisse dépasser les bustes du haut.
@@ -276,10 +277,27 @@ export class EcranPreparation {
     this.glisse = null;
     if (ev.type === "pointercancel") return this.rendre();
     if (!gl.actif) {
-      this.choisi = this.choisi === gl.id ? null : gl.id;
-      return this.rendre();
+      // Toucher sans glisser : la fiche du joueur (12/11).
+      this.choisi = null;
+      this.rendre();
+      return this.ouvrirFiche(gl.id);
     }
     this.afficherIssue(this.prepa.appliquer(gl.action));
+  }
+
+  /** Fiche du joueur, façon Clash Royale (fiche.ts). */
+  private ouvrirFiche(id: string): void {
+    const f = this.prepa.fiche(id);
+    const pays = this.prepa.d.deck.find((p) => p.code === f.pays) ?? { code: f.pays, nom: f.pays, couleur: "#3A4A40" };
+    ouvrirFiche({
+      id,
+      nom: f.nom,
+      pays,
+      poste: f.poste,
+      style: f.style ? { code: f.style, nom: this.prepa.d.styles[f.style] ?? f.style } : null,
+      notes: f.notes ?? null,
+      fusions: this.prepa.membre(id)?.fusions ?? 0,
+    });
   }
 
   private afficherIssue(r: Issue): void {
@@ -584,6 +602,12 @@ export class EcranPreparation {
       html("span", { class: "prepa-poste" }, k, libellePoste(f.poste));
       html("span", { class: "prepa-prix" }, k, String(f.prix));
       if (fusion) html("span", { class: "prepa-fusion" }, k, "Fusion");
+      // Petit « i » : voir la fiche avant d'acheter.
+      const info = html("span", { class: "prepa-info", role: "button", "aria-label": `Fiche de ${f.nom}` }, k, "i");
+      info.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        this.ouvrirFiche(id);
+      });
       k.addEventListener("click", () => this.afficherIssue(this.prepa.acheter(i)));
     });
   }

@@ -3,6 +3,7 @@
 // l'adversaire n'a pas de notes (65 partout). Tactiques Équilibrées, styles
 // coupés. Puis un test « une star » : notre ailier gauche à 90 en Vitesse face
 // à leur latéral droit à 55, le reste à 65.
+// Matchs complets : deux mi-temps de 180 s (fatigue comprise), comme dans le prototype.
 // Lancer : bun run scripts/mesurer-notes.ts [graines] [secondes]
 
 import { chargerDonnees, chargerEquipes, chargerReglages } from "../src/sim/chargement";
@@ -10,7 +11,8 @@ import { MatchSim } from "../src/sim/simulation";
 import type { Equipe, Notes } from "../src/sim/types";
 
 const GRAINES = Number(process.argv[2] ?? 60);
-const DUREE_S = Number(process.argv[3] ?? 180);
+const DUREE_S = Number(process.argv[3] ?? 360); // un match : deux mi-temps de 180 s
+const MI_TEMPS_S = 180;
 
 const donnees = chargerDonnees("hexagones");
 const reglages = chargerReglages();
@@ -63,7 +65,13 @@ function jouer(nous: Equipe, eux: Equipe, graine: number, ailier: string | null)
   let tirsAvant = 0;
   let dribblesAilier = 0;
   let dribblesReussisAilier = 0;
+  let deuxieme = false;
   for (let t = 0; t < DUREE_S; t += dt) {
+    if (!deuxieme && sim.temps >= MI_TEMPS_S) {
+      deuxieme = true;
+      sim.commencerPeriode();
+      b.coupDEnvoi(1, "2e mi-temps");
+    }
     const pAvant = b.porteur?.joueur.id ?? null;
     const [dA, rA] = [b.stats.dribbles[0], b.stats.dribblesReussis[0]];
     sim.pas();

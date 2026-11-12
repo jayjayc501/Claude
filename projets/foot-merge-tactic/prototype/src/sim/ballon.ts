@@ -129,7 +129,9 @@ export class BallonReel {
   /** Dernier événement de jeu, pour l'affichage (« Corner », « Hors-jeu »…). */
   evenement: { texte: string; a: number } | null = null;
   /** Après un but : chacun regagne son camp avant l'engagement. */
-  engagement: { camp: Camp; depuis: number } | null = null;
+  engagement: { camp: Camp; depuis: number; minS: number } | null = null;
+  /** Défenseurs que le tir en cours a déjà passés sans les toucher. */
+  private tirEvite = new Set<JoueurSim>();
   /** Joueur désigné pour la remise en jeu (le gardien sur un six mètres). */
   private tireur: JoueurSim | null = null;
   private arret: "?" | "oui" | "non" = "?";
@@ -171,7 +173,8 @@ export class BallonReel {
     const s = this.sim;
     this.remettre({ x: s.donnees.largeurM / 2, y: s.donnees.longueurM / 2 }, camp, null, texte);
     this.reserve = null;
-    this.engagement = { camp, depuis: s.temps };
+    // Après un but, on laisse le temps à l'annonce (et à la joie) avant de réengager.
+    this.engagement = { camp, depuis: s.temps, minS: texte === "But !" ? s.reglages.ballon.attenteButS : 2 };
   }
 
   /** Le point est-il dans la surface de réparation que défend ce camp ? */
@@ -268,7 +271,7 @@ export class BallonReel {
       const enPlace =
         dist(kicker.pos, s.ballon) < 1.5 &&
         s.joueurs.every((j) => j === kicker || j === partenaire || ((j.camp === 0 ? j.pos.y <= L / 2 + 0.5 : j.pos.y >= L / 2 - 0.5) && dist(j.pos, j.depart) < 3));
-      if ((enPlace && s.temps - this.engagement.depuis > 2) || s.temps - this.engagement.depuis > 10) {
+      if ((enPlace && s.temps - this.engagement.depuis > this.engagement.minS) || s.temps - this.engagement.depuis > 10) {
         const camp = this.engagement.camp;
         this.engagement = null;
         this.remettre({ ...s.ballon }, camp, "engagement", "Engagement");
@@ -564,7 +567,9 @@ export class BallonReel {
         if (versSurface && (ouvert < r.construction.surfaceOuvertM || adverses.some((a) => distSegment(a.pos, p.pos, o.vise) < r.voieLibreM * r.construction.surfaceVoieFacteur))) continue;
         const gain = (o.vise.y - p.pos.y) * sens;
         const large = Math.abs(o.vise.x - W / 2) > r.construction.largeurM && (o.vise.y - L / 2) * sens > -10 ? r.construction.bonusLargeur : 0;
-        const sc = gain * poidsProgression + ouvert * r.poidsEspace - dist(p.pos, o.vise) * 0.08 + large - (versSurface ? r.construction.surfaceMalus : 0) + this.rng.entre(-2, 2);
+        // Notes : on cherche le coéquipier plus rapide que son adversaire direct (passe vers l'avant).
+        const vitesse = gain > 0 ? this.avantageVitesse(q, o.vise, adverses) * PN.vitesse.choixPasseParPoint : 0;
+        const sc = gain * poidsProgression + ouvert * r.poidsEspace - dist(p.pos, o.vise) * 0.08 + large - (versSurface ? r.construction.surfaceMalus : 0) + vitesse + this.rng.entre(-2, 2);
         if (sc > score) {
           score = sc;
           meilleur = { q, point: o.point };
@@ -761,6 +766,7 @@ export class BallonReel {
     this.stats.tirs[p.camp]++;
     this.lancer((dx / n) * vTir, (dy / n) * vTir);
     this.tirEnCours = true;
+    this.tirEvite.clear();
     this.tirPenalty = penalty;
     this.plongeon = null;
     if (!gardien) return;
@@ -840,6 +846,15 @@ export class BallonReel {
       if (d > rayon) continue;
       const adverseDuTireur = this.dernier !== null && j.camp !== this.dernier.camp && j.poste.id !== "G";
       if (adverseDuTireur && !this.tirPenalty && vBalle > r.contre.vitesseMinMS && d <= r.rayonControleM * portee) {
+        // Tir (12/11, « pas assez de buts » : 41 % des tirs étaient contrés) : un défenseur
+        // sur la trajectoire ne touche le ballon qu'une fois sur deux ; sinon le tir passe.
+        if (this.tirEnCours) {
+          if (this.tirEvite.has(j)) continue;
+          if (this.rng.suivant() > r.tir.contreProba) {
+            this.tirEvite.add(j);
+            continue;
+          }
+        }
         // Ballon rapide qui arrive sur un adversaire : contrôlé, ou dévié (contre).
         if (vBalle > r.vitesseControleMaxMS || this.rng.suivant() > r.contre.probaControle) {
           this.devier(j, vBalle);
@@ -905,6 +920,13 @@ export class BallonReel {
    *  plus une part de l'écart d'accélération (la vitesse fait passer). */
   private avantage1c1(p: JoueurSim, o: JoueurSim): number {
     return p.notes.dribble - o.notes.duel + PN.unContreUn.poidsVitesse * (p.notes.acceleration - o.notes.acceleration);
+  }
+
+  /** Avance de vitesse de pointe (points de notes, 0 au mieux) d'un joueur sur l'adversaire le plus proche d'un point. */
+  private avantageVitesse(q: JoueurSim, point: PointM, adverses: JoueurSim[]): number {
+    let o: JoueurSim | null = null;
+    for (const a of adverses) if (a.poste.id !== "G" && (!o || dist(a.pos, point) < dist(o.pos, point))) o = a;
+    return o ? Math.max(0, q.notes.pointe - o.notes.pointe) : 0;
   }
 
   /** Note de passe : multiplicateur de l'imprécision (1 à la référence). */
@@ -1052,8 +1074,9 @@ export class BallonReel {
         const ecart = avantDernier - prof(q.pos.y);
         return ecart >= ap.ecartMinM && ecart <= ap.ecartMaxM && prof(q.pos.y) - prof(p.pos.y) >= ap.avanceBallonM;
       });
-      // Le plus libre (le plus loin de son adversaire le plus proche).
-      const libreDe = (q: JoueurSim) => Math.min(...adverses.map((o) => dist(o.pos, q.pos)));
+      // Le plus libre (le plus loin de son adversaire le plus proche), et le plus
+      // rapide face à son adversaire (notes, 12/11 : « la vitesse, c'est super important »).
+      const libreDe = (q: JoueurSim) => Math.min(...adverses.map((o) => dist(o.pos, q.pos))) + this.avantageVitesse(q, q.pos, adverses) * PN.vitesse.appelParPoint;
       const q = candidats.sort((a, b) => libreDe(b) - libreDe(a))[0];
       if (q) {
         const yBut = sens === 1 ? L : 0;

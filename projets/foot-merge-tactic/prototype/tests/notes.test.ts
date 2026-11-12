@@ -72,4 +72,25 @@ describe("Notes des joueurs", () => {
     expect(reussies[0]! / passes[0]!).toBeGreaterThan(reussies[1]! / passes[1]!);
     expect(tirs[1]!).toBeGreaterThan(0); // l'adversaire existe encore
   });
+
+  test("fatigue : rien avant 30 minutes, puis on ralentit, d'autant plus que l'endurance est faible", () => {
+    const sim = new MatchSim(donnees, reglages, [avecNotes(effectif, { endurance: 40 }), avecNotes(adversaire, { endurance: 90 })], 5, true);
+    sim.demarrer();
+    const k = 1 / PARAMETRES_NOTES.endurance.minutesParSeconde; // secondes simulées par minute de match
+    sim.temps = 25 * k;
+    sim.pas();
+    expect(sim.joueurs.every((j) => j.fatigue === 0)).toBe(true);
+    // 89e minute, en 2e mi-temps (commencée à la 45e).
+    sim.temps = 45 * k;
+    sim.commencerPeriode();
+    sim.temps = 89 * k;
+    sim.pas();
+    const champ = sim.joueurs.filter((j) => j.poste.id !== "G");
+    const faible = champ.filter((j) => j.camp === 0)[0]!;
+    const forte = champ.filter((j) => j.camp === 1)[0]!;
+    expect(faible.fatigue).toBeGreaterThan(0.15);
+    expect(forte.fatigue).toBeGreaterThan(0);
+    expect(forte.fatigue).toBeLessThan(0.05);
+    expect(faible.vitesseF).toBeCloseTo(faible.vitesseRepos * (1 - faible.fatigue), 9);
+  });
 });

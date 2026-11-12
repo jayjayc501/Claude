@@ -39,6 +39,8 @@ export interface JoueurSim {
   auBallon: boolean;
   /** Position de coup d'envoi (sa case du plateau, dans son camp). */
   depart: PointM;
+  /** Plongeon du gardien : très rapide, sans limite d'accélération, jusqu'à cet instant. */
+  plongeJusqua: number;
   /** Écart individuel de vitesse et d'accélération, en attendant l'attribut
    *  « vitesse » : deux joueurs ne courent jamais exactement pareil. */
   facteur: number;
@@ -111,6 +113,7 @@ export class MatchSim {
           freineJusqua: 0,
           auBallon: false,
           depart: { ...pos },
+          plongeJusqua: 0,
           facteur: 1 + this.rng.entre(-v, v),
           perceptionS: this.rng.entre(reglages.mouvement.perception.minS, reglages.mouvement.perception.maxS),
         });
@@ -376,7 +379,10 @@ export class MatchSim {
     this.joueurs.forEach((j, i) => {
       // Course de transition (sprint) juste après la réaction, sinon course normale.
       const conduit = (this.balle?.porteur === j ? this.reglages.ballon.dribbleFacteur : 1) * (this.temps < j.freineJusqua ? 0.3 : 1);
-      const vMax = (this.temps < j.sprintJusqua ? this.reglages.transition.sprint.vitesseMS : m.vitesseMaxMS) * j.facteur * conduit;
+      const plonge = this.temps < j.plongeJusqua;
+      const vMax = plonge
+        ? this.reglages.ballon.tir.plongeonVitesseMS
+        : (this.temps < j.sprintJusqua ? this.reglages.transition.sprint.vitesseMS : m.vitesseMaxMS) * j.facteur * conduit;
       // 1. Course : vers la cible, en freinant à l'approche, accélération limitée.
       const dx = j.cible.x - j.pos.x;
       const dy = j.cible.y - j.pos.y;
@@ -391,7 +397,7 @@ export class MatchSim {
       let ax = vx - j.vit.x;
       let ay = vy - j.vit.y;
       const a = Math.hypot(ax, ay);
-      const aMax = m.accelerationMS2 * j.facteur * dt;
+      const aMax = m.accelerationMS2 * j.facteur * dt * (plonge ? 10 : 1);
       if (a > aMax) {
         ax = (ax / a) * aMax;
         ay = (ay / a) * aMax;

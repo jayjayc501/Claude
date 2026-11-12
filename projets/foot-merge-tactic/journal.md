@@ -238,3 +238,12 @@ Retours du concepteur : à l'engagement le joueur part tout droit au lieu de pas
 - Tir : vise le côté opposé au gardien (1,5 à 3,4 m de l'axe), erreur 1,5 m + 0,12 m par mètre de distance (penalty 0,8 m). Le gardien plonge vers le point de passage du ballon ; arrêt 90 % si le tir arrive sur lui, 25 % de moins par mètre d'écart, 15 % au moins ; tir hors cadre jamais arrêté.
 - Mesures (6 graines × 3 min) : 61 tirs, 30 arrêts, 9 buts ; 75 % de passes réussies ; 6,4 changements de camp par minute.
 - Tests : 85 verts (nouveau : passe d'engagement à côté ou en retrait ; test de bascule jugé sur une possession gardée 2,5 s).
+
+## 12/11/2026 (suite) — Gardien qui plonge, six mètres, sons et annonces
+
+Retours du concepteur : le gardien n'arrête rien et ne bouge pas vite ; sur six mètres, pas d'adversaire dans la surface ; ajouter un son et un affichage pour les événements.
+- Plongeon : sur un tir, le gardien part vers le point de passage à 9 m/s, sans limite d'accélération, pendant 0,8 s ; il ne prend le ballon qu'à 1,6 m (avant : 3 m sans bouger, d'où l'impression qu'il ne faisait rien). Mesure : 31 arrêts pour 63 tirs, 10 buts (6 graines × 3 min).
+- Six mètres : les adversaires sortent de la surface (cibles repoussées au bord + 1,5 m), pas de pressing ni de tacle ; le gardien attend qu'elle soit vide (5 s au plus).
+- Sons (`src/ui/son.ts`, Web Audio, aucun fichier) : sifflet (faute, hors-jeu, engagement ; double pour le penalty), clameur (but, plus courte sur un arrêt), petit « toc » (corner, touche, six mètres). Bouton « Son / Muet ».
+- Annonces sur le terrain : bandeau 1,4 s (But : rouge, plus grand, 2,5 s), en temps réel quelle que soit la vitesse.
+- Tests : 85 verts ; page vérifiée dans le navigateur (annonces affichées, aucune erreur).

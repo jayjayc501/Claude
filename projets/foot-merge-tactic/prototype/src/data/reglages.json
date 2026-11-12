@@ -102,7 +102,7 @@
     "vitesseTirMS": 26,
     "tirDistanceM": 22,
     "seulTirM": 18,
-    "tir": { "viseMinM": 1.5, "viseMaxM": 3.4, "erreurBaseM": 1.5, "erreurParMetre": 0.12, "erreurPenaltyM": 0.8, "arretMax": 0.9, "arretMin": 0.15, "arretParMetre": 0.25 },
+    "tir": { "viseMinM": 1.5, "viseMaxM": 3.4, "erreurBaseM": 1.5, "erreurParMetre": 0.12, "erreurPenaltyM": 0.8, "arretMax": 0.9, "arretMin": 0.15, "arretParMetre": 0.25, "plongeonVitesseMS": 9, "plongeonDureeS": 0.8, "rayonPlongeonM": 1.6 },
     "surface": { "profondeurM": 16.5, "demiLargeurM": 20.15 },
     "arretProba": 0.75,
     "dribbleAvanceM": 8,

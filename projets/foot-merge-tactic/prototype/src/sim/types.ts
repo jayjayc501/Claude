@@ -200,7 +200,7 @@ export interface Reglages {
     /** Seul face au but : tire à cette distance. */
     seulTirM: number;
     /** Visée (m de l'axe du but), erreur, arrêt du gardien selon l'écart au point de passage. */
-    tir: { viseMinM: number; viseMaxM: number; erreurBaseM: number; erreurParMetre: number; erreurPenaltyM: number; arretMax: number; arretMin: number; arretParMetre: number };
+    tir: { viseMinM: number; viseMaxM: number; erreurBaseM: number; erreurParMetre: number; erreurPenaltyM: number; arretMax: number; arretMin: number; arretParMetre: number; plongeonVitesseMS: number; plongeonDureeS: number; rayonPlongeonM: number };
     /** Surface de réparation : on y tire toujours. */
     surface: { profondeurM: number; demiLargeurM: number };
     arretProba: number;

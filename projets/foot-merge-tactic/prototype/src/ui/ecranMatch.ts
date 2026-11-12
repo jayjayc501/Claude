@@ -7,6 +7,7 @@ import { projeterRect } from "../sim/projection";
 import { MatchSim, type ModePossession } from "../sim/simulation";
 import type { Equipe, Reglages } from "../sim/types";
 import { dessinerLignes, html, svg } from "./dom";
+import { activer, basculerMuet, estMuet, jouer } from "./son";
 
 const ECHELLE = 5; // unités SVG par mètre
 const MARGE = 10;
@@ -27,6 +28,13 @@ export class EcranMatch {
   private ballon!: SVGCircleElement;
   private calqueZones!: SVGGElement;
   private statut!: HTMLElement;
+  /** Annonce sur le terrain (But, Faute, Corner…) et son instant d'apparition. */
+  private annonce!: SVGGElement;
+  private annonceTexte!: SVGTextElement;
+  private annonceFond!: SVGRectElement;
+  private annonceDepuis = -Infinity;
+  private annonceDuree = 0;
+  private dernierEvenement = -1;
   private boutonDepart!: HTMLButtonElement;
   private boutonPause!: HTMLButtonElement;
   private boutonZones!: HTMLButtonElement;
@@ -71,6 +79,7 @@ export class EcranMatch {
     const c1 = html("div", { class: "commandes" }, r);
     this.boutonDepart = html("button", { type: "button", class: "bouton bouton-principal" }, c1, "Coup d'envoi");
     this.boutonDepart.addEventListener("click", () => {
+      activer(); // le son ne peut démarrer qu'après un geste
       if (!this.sim.demarre) {
         this.sim.demarrer();
         this.enPause = false;
@@ -91,6 +100,12 @@ export class EcranMatch {
       this.vitesse = vitesses[(vitesses.indexOf(this.vitesse) + 1) % vitesses.length]!;
       boutonVitesse.textContent = `×${this.vitesse}`;
     });
+    const boutonSon = html("button", { type: "button", class: "bouton bouton-court", "aria-label": "Son" }, c1, "Son");
+    boutonSon.addEventListener("click", () => {
+      activer();
+      boutonSon.textContent = basculerMuet() ? "Muet" : "Son";
+    });
+    if (estMuet()) boutonSon.textContent = "Muet";
     this.boutonZones = html("button", { type: "button", class: "bouton bouton-court" }, c1, "Zones");
     this.boutonZones.addEventListener("click", () => {
       this.zonesVisibles = !this.zonesVisibles;
@@ -112,6 +127,11 @@ export class EcranMatch {
       svg("circle", { r: 6, class: j.camp === 0 ? "pion pion-nous" : "pion pion-eux" }, g),
     );
     this.ballon = svg("circle", { r: 3.2, class: "ballon" }, s);
+    const cx = (68 * ECHELLE) / 2 + MARGE;
+    const cy = (105 * ECHELLE) / 2 + MARGE;
+    this.annonce = svg("g", { class: "annonce", style: "display:none" }, s);
+    this.annonceFond = svg("rect", { x: cx - 90, y: cy - 24, width: 180, height: 48, rx: 12 }, this.annonce);
+    this.annonceTexte = svg("text", { x: cx, y: cy, "text-anchor": "middle", "dominant-baseline": "central" }, this.annonce);
 
     const legende = html("div", { class: "legende" }, r);
     html("span", { class: "rond rond-nous" }, legende);
@@ -189,6 +209,28 @@ export class EcranMatch {
         }, this.calqueZones);
       }
     }
+
+    // Événement de jeu : son + annonce sur le terrain.
+    const ev = sim.balle?.evenement;
+    if (ev && ev.a !== this.dernierEvenement) {
+      this.dernierEvenement = ev.a;
+      jouer(ev.texte);
+      const libelles: Record<string, string> = { "But !": "BUT !", Arrêt: "Arrêt !", Penalty: "Penalty !" };
+      if (ev.texte !== "Engagement") {
+        const mot = libelles[ev.texte] ?? ev.texte;
+        const but = ev.texte === "But !";
+        this.annonceTexte.textContent = mot;
+        this.annonce.setAttribute("class", but ? "annonce annonce-but" : "annonce");
+        const largeur = Math.max(120, mot.length * (but ? 26 : 17) + 40);
+        const cx = (68 * ECHELLE) / 2 + MARGE;
+        this.annonceFond.setAttribute("x", (cx - largeur / 2).toFixed(0));
+        this.annonceFond.setAttribute("width", largeur.toFixed(0));
+        this.annonceDepuis = performance.now();
+        this.annonceDuree = but ? 2500 : 1400;
+      }
+    }
+    const visible = performance.now() - this.annonceDepuis < this.annonceDuree;
+    this.annonce.style.display = visible ? "" : "none";
 
     let texte: string;
     if (!sim.demarre) texte = "Positions au coup d'envoi. Touchez « Coup d'envoi » pour lancer.";

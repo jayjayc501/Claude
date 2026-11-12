@@ -77,7 +77,7 @@ export class BallonReel {
   private decisionA = 0;
   private protegeJusqua = 0;
   /** Coup de pied arrêté en attente : le premier joueur de l'équipe qui prend le ballon le joue. */
-  private arrete: "corner" | "penalty" | "engagement" | null = null;
+  private arrete: "corner" | "penalty" | "engagement" | "sixMetres" | null = null;
   /** Plongeon du gardien sur le tir en cours. */
   private plongeon: { gardien: JoueurSim; point: PointM } | null = null;
   /** Le receveur de la passe en cours était hors-jeu au départ de la passe. */
@@ -97,7 +97,7 @@ export class BallonReel {
   }
 
   /** Coup d'envoi (ou remise au centre) : le ballon est posé, l'équipe va le chercher. */
-  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | "engagement" | null = null, texte?: string, tireur: JoueurSim | null = null): void {
+  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | "engagement" | "sixMetres" | null = null, texte?: string, tireur: JoueurSim | null = null): void {
     const s = this.sim;
     this.tireur = tireur;
     this.arrete = arrete;
@@ -123,6 +123,25 @@ export class BallonReel {
     this.remettre({ x: s.donnees.largeurM / 2, y: s.donnees.longueurM / 2 }, camp, null, texte);
     this.reserve = null;
     this.engagement = { camp, depuis: s.temps };
+  }
+
+  /** Le point est-il dans la surface de réparation que défend ce camp ? */
+  private dansSurface(pt: PointM, campDefenseur: Camp): boolean {
+    const r = this.sim.reglages.ballon;
+    const W = this.sim.donnees.largeurM;
+    const L = this.sim.donnees.longueurM;
+    const deSonBut = campDefenseur === 0 ? pt.y : L - pt.y;
+    return deSonBut <= r.surface.profondeurM && Math.abs(pt.x - W / 2) <= r.surface.demiLargeurM;
+  }
+
+  /** Six mètres : les adversaires sortent de la surface. */
+  private viderSurface(camp: Camp): void {
+    const L = this.sim.donnees.longueurM;
+    const bord = this.sim.reglages.ballon.surface.profondeurM + 1.5;
+    for (const o of this.sim.joueurs) {
+      if (o.camp === camp) continue;
+      if (this.dansSurface(o.cible, camp)) o.cible = { x: o.cible.x, y: camp === 0 ? bord : L - bord };
+    }
   }
 
   /** Joueur qui engage : le joueur de champ de l'équipe le plus proche du centre. */
@@ -151,7 +170,7 @@ export class BallonReel {
     }
     if (this.porteur) {
       this.conduire();
-      if (this.arrete !== "engagement") this.tacler(dt); // à l'engagement, l'adversaire reste à distance
+      if (this.arrete !== "engagement" && this.arrete !== "sixMetres") this.tacler(dt); // adversaires à distance
       if (this.porteur && this.sim.temps >= this.decisionA) this.decider();
     } else {
       this.rouler(dt);
@@ -231,6 +250,15 @@ export class BallonReel {
     const pression = Math.min(...adverses.filter((o) => (o.pos.y - p.pos.y) * sens > -1.5).map((o) => dist(o.pos, p.pos)));
     this.decisionA = s.temps + this.rng.entre(r.decisionS.min, r.decisionS.max);
 
+    if (this.arrete === "sixMetres") {
+      // Six mètres : on attend que les adversaires soient sortis de la surface (5 s au plus).
+      const encore = adverses.some((o) => this.dansSurface(o.pos, p.camp));
+      if (encore && this.evenement && s.temps - this.evenement.a < 5) {
+        this.decisionA = s.temps + 0.2;
+        return;
+      }
+      this.arrete = null;
+    }
     if (this.arrete === "engagement") {
       // Engagement : passe à un coéquipier proche, à côté ou en retrait.
       this.arrete = null;
@@ -453,7 +481,7 @@ export class BallonReel {
     const proba = penalty ? r.fautes.arretPenaltyProba : Math.max(t.arretMin, Math.min(t.arretMax, t.arretMax - t.arretParMetre * Math.max(0, ecart - 0.5)));
     this.arret = Math.abs(cible.x - but.x) > DEMI_BUT_M ? "non" : this.rng.suivant() < proba ? "oui" : "non";
     this.plongeon = { gardien, point };
-    gardien.sprintJusqua = Math.max(gardien.sprintJusqua, s.temps + 1);
+    gardien.plongeJusqua = s.temps + t.plongeonDureeS;
   }
 
   // --- Ballon libre -------------------------------------------------------
@@ -483,7 +511,7 @@ export class BallonReel {
           // Six mètres : au coin de la surface de but, du côté de la sortie, joué par le gardien.
           const camp: Camp = marqueur === 0 ? 1 : 0;
           const gardien = s.joueurs.find((j) => j.camp === camp && j.poste.id === "G") ?? null;
-          this.remettre({ x: x < W / 2 ? W / 2 - 9.16 : W / 2 + 9.16, y: y >= L ? L - 5.5 : 5.5 }, camp, null, "Six mètres", gardien);
+          this.remettre({ x: x < W / 2 ? W / 2 - 9.16 : W / 2 + 9.16, y: y >= L ? L - 5.5 : 5.5 }, camp, "sixMetres", "Six mètres", gardien);
         }
       }
       return;
@@ -507,7 +535,7 @@ export class BallonReel {
       if (this.reserve && s.temps < this.reserve.jusqua && j.camp !== this.reserve.camp) continue;
       if (j === this.dernier && s.temps - this.dernierTemps < r.recontactS) continue;
       const gardienAdverse = j.poste.id === "G" && this.tirEnCours && this.dernier !== null && j.camp !== this.dernier.camp;
-      const rayon = j === this.receveur ? r.rayonReceveurM : gardienAdverse ? r.rayonGardienM + 0.8 : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM;
+      const rayon = j === this.receveur ? r.rayonReceveurM : gardienAdverse ? r.tir.rayonPlongeonM : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM;
       const d = dist(j.pos, s.ballon);
       if (d > rayon) continue;
       const adverseDuTireur = this.dernier !== null && j.camp !== this.dernier.camp && j.poste.id !== "G";
@@ -534,7 +562,10 @@ export class BallonReel {
       this.remettre({ ...gagnant.pos }, adv, null, "Hors-jeu");
       return;
     }
-    if (this.tirEnCours && gagnant.poste.id === "G") this.stats.arrets[gagnant.camp]++;
+    if (this.tirEnCours && gagnant.poste.id === "G") {
+      this.stats.arrets[gagnant.camp]++;
+      this.evenement = { texte: "Arrêt", a: s.temps };
+    }
     if (gagnant === this.receveur) this.stats.passesReussies[gagnant.camp]++;
     else if (this.dernier && gagnant.camp !== this.dernier.camp) this.stats.interceptions[gagnant.camp]++;
     this.donner(gagnant);
@@ -636,6 +667,10 @@ export class BallonReel {
             : { x: p.pos.x + (W / 2 - p.pos.x) * 0.2, y: Math.min(L - 3, Math.max(3, p.pos.y + sens * r.dribbleAvanceM)) };
       }
       if (this.arrete === "engagement") return; // adversaires à 9,15 m tant que l'engagement n'est pas joué
+      if (this.arrete === "sixMetres") {
+        this.viderSurface(p.camp);
+        return;
+      }
       const cp = r.contrePressing;
       const contre = this.perte !== null && this.perte.camp !== p.camp && s.temps - this.perte.a < cp.dureeS;
       if (contre) {
@@ -684,6 +719,7 @@ export class BallonReel {
       else if (this.reserve && this.reserve.camp !== camp) nombre = 0;
       else if (this.reserve && this.tireur) {
         nombre = 0;
+        if (this.arrete === "sixMetres") this.viderSurface(this.tireur.camp);
         this.tireur.cible = { ...s.ballon };
         this.tireur.auBallon = true;
       }

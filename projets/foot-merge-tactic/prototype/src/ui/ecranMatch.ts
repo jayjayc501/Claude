@@ -215,8 +215,8 @@ export class EcranMatch {
     if (ev && ev.a !== this.dernierEvenement) {
       this.dernierEvenement = ev.a;
       jouer(ev.texte);
-      const libelles: Record<string, string> = { "But !": "BUT !", Arrêt: "Arrêt !", Penalty: "Penalty !" };
-      if (ev.texte !== "Engagement") {
+      const libelles: Record<string, string> = { "But !": `BUT !  ${sim.score[0]} – ${sim.score[1]}`, Penalty: "Penalty !" };
+      if (ev.texte !== "Engagement" && ev.texte !== "Arrêt") { // un arrêt n'arrête pas le jeu : pas d'annonce
         const mot = libelles[ev.texte] ?? ev.texte;
         const but = ev.texte === "But !";
         this.annonceTexte.textContent = mot;

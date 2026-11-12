@@ -30,24 +30,44 @@ function enveloppe(g: GainNode, debut: number, duree: number, volume: number): v
   g.gain.exponentialRampToValueAtTime(0.0001, debut + duree);
 }
 
-/** Coup de sifflet : son aigu avec un léger roulement. */
-function sifflet(debut: number, duree: number, volume = 0.18): void {
+/** Coup de sifflet d'arbitre : note aiguë stable, souffle et léger
+ *  roulement de la bille (modulation d'amplitude rapide et peu profonde). */
+function sifflet(debut: number, duree: number, volume = 0.16): void {
   const c = ctx!;
   const o = c.createOscillator();
-  const lfo = c.createOscillator();
-  const prof = c.createGain();
-  const g = c.createGain();
   o.type = "sine";
-  o.frequency.value = 2900;
-  lfo.frequency.value = 32;
-  prof.gain.value = 140;
-  lfo.connect(prof).connect(o.frequency);
-  o.connect(g).connect(c.destination);
+  o.frequency.setValueAtTime(3300, debut);
+  o.frequency.linearRampToValueAtTime(3200, debut + duree);
+  const roulement = c.createOscillator();
+  roulement.frequency.value = 55;
+  const profondeur = c.createGain();
+  profondeur.gain.value = 0.25;
+  const am = c.createGain();
+  am.gain.value = 0.75;
+  roulement.connect(profondeur).connect(am.gain);
+  // souffle : bruit filtré autour de la note
+  const n = Math.floor(c.sampleRate * duree);
+  const buf = c.createBuffer(1, n, c.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  const bruit = c.createBufferSource();
+  bruit.buffer = buf;
+  const filtre = c.createBiquadFilter();
+  filtre.type = "bandpass";
+  filtre.frequency.value = 3250;
+  filtre.Q.value = 3;
+  const gBruit = c.createGain();
+  gBruit.gain.value = 0.35;
+  const g = c.createGain();
+  o.connect(am);
+  bruit.connect(filtre).connect(gBruit).connect(am);
+  am.connect(g).connect(c.destination);
   enveloppe(g, debut, duree, volume);
   o.start(debut);
-  lfo.start(debut);
+  roulement.start(debut);
+  bruit.start(debut);
   o.stop(debut + duree);
-  lfo.stop(debut + duree);
+  roulement.stop(debut + duree);
 }
 
 /** Petit « toc » discret (touche, corner, six mètres). */
@@ -99,8 +119,7 @@ export function jouer(evenement: string): void {
       sifflet(t, 0.35);
       break;
     case "Penalty":
-      sifflet(t, 0.18);
-      sifflet(t + 0.25, 0.5);
+      sifflet(t, 0.6);
       foule(t, 1.2, 0.2, 600);
       break;
     case "Engagement":

@@ -247,3 +247,11 @@ Retours du concepteur : le gardien n'arrête rien et ne bouge pas vite ; sur six
 - Sons (`src/ui/son.ts`, Web Audio, aucun fichier) : sifflet (faute, hors-jeu, engagement ; double pour le penalty), clameur (but, plus courte sur un arrêt), petit « toc » (corner, touche, six mètres). Bouton « Son / Muet ».
 - Annonces sur le terrain : bandeau 1,4 s (But : rouge, plus grand, 2,5 s), en temps réel quelle que soit la vitesse.
 - Tests : 85 verts ; page vérifiée dans le navigateur (annonces affichées, aucune erreur).
+
+## 12/11/2026 (suite) — Annonces et sifflet
+
+Retours du concepteur : pas d'annonce sur un arrêt (le jeu continue) ; le score sur l'annonce d'un but ; sifflet « double » et qui ressemble à un oiseau.
+- Plus d'annonce sur un arrêt (le son de la foule reste) ; but : « BUT ! 1 – 0 ».
+- Sifflet refait : note stable vers 3,2 kHz, souffle, léger roulement (avant : trille en modulation de fréquence, d'où l'effet oiseau). Penalty : un seul coup long (avant : deux coups, probable origine du « double sifflet »).
+- Coup franc : les adversaires se tiennent à 9,15 m et ne taclent pas avant que le tireur ait joué. Mesure : aucune faute à moins de 4 s d'une autre, avant comme après (8 graines × 3 min).
+- Tests : 85 verts ; page vérifiée dans le navigateur.

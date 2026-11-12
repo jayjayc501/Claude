@@ -77,7 +77,7 @@ export class BallonReel {
   private decisionA = 0;
   private protegeJusqua = 0;
   /** Coup de pied arrêté en attente : le premier joueur de l'équipe qui prend le ballon le joue. */
-  private arrete: "corner" | "penalty" | "engagement" | "sixMetres" | null = null;
+  private arrete: "corner" | "penalty" | "engagement" | "sixMetres" | "coupFranc" | null = null;
   /** Plongeon du gardien sur le tir en cours. */
   private plongeon: { gardien: JoueurSim; point: PointM } | null = null;
   /** Le receveur de la passe en cours était hors-jeu au départ de la passe. */
@@ -97,7 +97,7 @@ export class BallonReel {
   }
 
   /** Coup d'envoi (ou remise au centre) : le ballon est posé, l'équipe va le chercher. */
-  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | "engagement" | "sixMetres" | null = null, texte?: string, tireur: JoueurSim | null = null): void {
+  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | "engagement" | "sixMetres" | "coupFranc" | null = null, texte?: string, tireur: JoueurSim | null = null): void {
     const s = this.sim;
     this.tireur = tireur;
     this.arrete = arrete;
@@ -144,6 +144,19 @@ export class BallonReel {
     }
   }
 
+  /** Coup franc : les adversaires se tiennent à 9,15 m du ballon. */
+  private eloigner(camp: Camp): void {
+    const b = this.sim.ballon;
+    for (const o of this.sim.joueurs) {
+      if (o.camp === camp) continue;
+      const d = dist(o.cible, b);
+      if (d >= 9.5) continue;
+      const ux = d > 0.1 ? (o.cible.x - b.x) / d : 0;
+      const uy = d > 0.1 ? (o.cible.y - b.y) / d : camp === 0 ? 1 : -1;
+      o.cible = { x: b.x + ux * 9.5, y: b.y + uy * 9.5 };
+    }
+  }
+
   /** Joueur qui engage : le joueur de champ de l'équipe le plus proche du centre. */
   private engageur(): JoueurSim {
     const s = this.sim;
@@ -170,7 +183,7 @@ export class BallonReel {
     }
     if (this.porteur) {
       this.conduire();
-      if (this.arrete !== "engagement" && this.arrete !== "sixMetres") this.tacler(dt); // adversaires à distance
+      if (!this.arrete || this.arrete === "corner") this.tacler(dt); // engagement, six mètres, coup franc : adversaires à distance
       if (this.porteur && this.sim.temps >= this.decisionA) this.decider();
     } else {
       this.rouler(dt);
@@ -234,7 +247,7 @@ export class BallonReel {
       this.remettre({ x: W / 2, y: o.camp === 0 ? 11 : L - 11 }, p.camp, "penalty", "Penalty");
       return;
     }
-    this.remettre({ x: Math.min(W - 1, Math.max(1, p.pos.x)), y: p.pos.y }, p.camp, null, "Faute");
+    this.remettre({ x: Math.min(W - 1, Math.max(1, p.pos.x)), y: p.pos.y }, p.camp, "coupFranc", "Faute");
   }
 
   private decider(): void {
@@ -250,6 +263,7 @@ export class BallonReel {
     const pression = Math.min(...adverses.filter((o) => (o.pos.y - p.pos.y) * sens > -1.5).map((o) => dist(o.pos, p.pos)));
     this.decisionA = s.temps + this.rng.entre(r.decisionS.min, r.decisionS.max);
 
+    if (this.arrete === "coupFranc") this.arrete = null; // le tireur joue normalement (passe, tir à portée)
     if (this.arrete === "sixMetres") {
       // Six mètres : on attend que les adversaires soient sortis de la surface (5 s au plus).
       const encore = adverses.some((o) => this.dansSurface(o.pos, p.camp));
@@ -671,6 +685,10 @@ export class BallonReel {
         this.viderSurface(p.camp);
         return;
       }
+      if (this.arrete === "coupFranc") {
+        this.eloigner(p.camp);
+        return;
+      }
       const cp = r.contrePressing;
       const contre = this.perte !== null && this.perte.camp !== p.camp && s.temps - this.perte.a < cp.dureeS;
       if (contre) {
@@ -716,7 +734,10 @@ export class BallonReel {
         .sort((a, b) => a.t - b.t);
       let nombre = 1;
       if (this.receveur) nombre = camp === this.receveur.camp ? 0 : 2;
-      else if (this.reserve && this.reserve.camp !== camp) nombre = 0;
+      else if (this.reserve && this.reserve.camp !== camp) {
+        nombre = 0;
+        if (this.arrete === "coupFranc") this.eloigner(this.reserve.camp);
+      }
       else if (this.reserve && this.tireur) {
         nombre = 0;
         if (this.arrete === "sixMetres") this.viderSurface(this.tireur.camp);

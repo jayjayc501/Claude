@@ -19,9 +19,23 @@ import { activer, basculerMuet, estMuet, jouer } from "./son";
 
 const ECHELLE = 5; // unités SVG par mètre
 const MARGE = 6;
-/** Largeur d'une figurine sur le terrain (unités SVG ≈ pixels) ; repère de la maquette : 48 × 53, socle en 24,47. */
-const LARGEUR_FIG = 36;
-const K = LARGEUR_FIG / 48;
+/** Trois rendus à comparer (12/11, « c'est quand même un sacré bordel » avec 22 figurines) :
+ *  pions ronds et seul le porteur en figurine ; toutes les figurines en petit ;
+ *  figurines plus grandes avec une caméra qui suit le ballon. */
+type Vue = "pions" | "figurines" | "camera";
+const VUES: { id: Vue; nom: string }[] = [
+  { id: "pions", nom: "Pions" },
+  { id: "figurines", nom: "Figurines" },
+  { id: "camera", nom: "Caméra" },
+];
+/** Largeur d'une figurine (unités SVG) ; repère de la maquette : 48 × 53, socle en 24,47. */
+const LARGEUR_FIG: Record<Vue, number> = { pions: 40, figurines: 26, camera: 30 };
+/** Agrandissement du porteur. */
+const GRAND_PORTEUR: Record<Vue, number> = { pions: 1, figurines: 1.4, camera: 1.2 };
+/** Caméra : fenêtre de 44 m de large autour du ballon. */
+const ZOOM_CAMERA = 68 / 44;
+const RAYON_ROND = 7;
+const CLE_VUE = "foot-merge-tactic.vue-match.v1";
 const COULEUR_EUX = "#C2413D";
 const BANDES = 12;
 
@@ -57,6 +71,25 @@ export class EcranMatch {
   private tactiquesForcees: [string | null, string | null] = [null, null];
 
   private pions: SVGGElement[] = [];
+  private vue: Vue = (() => {
+    try {
+      const v = localStorage.getItem(CLE_VUE);
+      return v === "figurines" || v === "camera" ? v : "pions";
+    } catch {
+      return "pions";
+    }
+  })();
+  /** Échelle des figurines : LARGEUR_FIG / 48. */
+  private k = LARGEUR_FIG.pions / 48;
+  private svgTerrain!: SVGSVGElement;
+  private camera: { x: number; y: number } | null = null;
+  private annonceCadre!: SVGGElement;
+  private images_: (string | undefined)[] = [];
+  private figPorteur: SVGGElement | null = null;
+  private figPorteurImage: SVGImageElement | null = null;
+  private figPorteurAnim: SVGGElement | null = null;
+  private dernierPorteur: unknown = null;
+  private boutonsVue: HTMLButtonElement[] = [];
   private calquePions!: SVGGElement;
   private images = 0;
   private halo!: SVGEllipseElement;
@@ -175,6 +208,25 @@ export class EcranMatch {
       this.dessiner();
     });
 
+    const vues = html("div", { class: "match-vues", role: "group", "aria-label": "Rendu du terrain" }, r);
+    html("span", { class: "match-vues-titre" }, vues, "Vue");
+    this.boutonsVue = VUES.map((v) => {
+      const b = html("button", { type: "button", class: "match-vue" }, vues, v.nom);
+      b.addEventListener("click", () => {
+        if (this.vue === v.id) return;
+        this.vue = v.id;
+        try {
+          localStorage.setItem(CLE_VUE, v.id);
+        } catch {
+          // stockage indisponible : sans conséquence
+        }
+        this.construireTerrain();
+        this.majCommandes();
+        this.dessiner();
+      });
+      return b;
+    });
+
     this.statut = html("p", { class: "match-statut", role: "status" }, r);
 
     // Terrain.
@@ -241,6 +293,11 @@ export class EcranMatch {
       "aria-label": "Terrain de match",
     });
     this.terrain.replaceChildren(s);
+    this.svgTerrain = s;
+    this.k = LARGEUR_FIG[this.vue] / 48;
+    this.camera = null;
+    this.dernierPorteur = null;
+    const K = this.k;
     const defs = svg("defs", {}, s);
     const auras: [string, number][][] = [
       [],
@@ -275,10 +332,18 @@ export class EcranMatch {
       .sort(([a], [b]) => Number(tesTitulaires.has(a)) - Number(tesTitulaires.has(b)))
       .map(([, image]) => image);
     let rang = 0;
-    this.pions = this.sim.joueurs.map((j) => {
-      const image = j.camp === 1 ? (j.poste.id === "G" ? GARDIEN_ROUGE : rouges[rang++ % rouges.length]!) : undefined;
-      return this.pion(g, j.camp, j.joueur.id, j.joueur.nom, image);
-    });
+    this.images_ = this.sim.joueurs.map((j) => (j.camp === 1 ? (j.poste.id === "G" ? GARDIEN_ROUGE : rouges[rang++ % rouges.length]!) : BUSTES[j.joueur.id]));
+    this.pions = this.sim.joueurs.map((j, i) =>
+      this.vue === "pions" ? this.pionRond(g, j.camp, j.joueur.id, j.joueur.nom) : this.pion(g, j.camp, j.joueur.id, j.joueur.nom, this.images_[i]),
+    );
+    // Vue « pions » : le porteur surgit en figurine sur un socle doré.
+    this.figPorteur = null;
+    if (this.vue === "pions") {
+      this.figPorteur = svg("g", { style: "display:none", class: "match-pion" }, s);
+      this.figPorteurAnim = svg("g", { class: "match-surgit" }, this.figPorteur);
+      svg("ellipse", { cx: 0, cy: 0, rx: 17 * K, ry: 5 * K, class: "match-ombre-pion" }, this.figPorteurAnim);
+      this.figPorteurImage = svg("image", { x: -24 * K, y: -48 * K, width: 48 * K, height: 49 * K }, this.figPorteurAnim);
+    }
     this.ballon = svg("circle", { r: 3.4, class: "match-ballon" }, s);
     this.etiquette = svg("g", { class: "match-etiquette", style: "display:none" }, s);
     this.etiquetteFond = svg("rect", { y: -9, height: 15, rx: 7.5 }, this.etiquette);
@@ -286,7 +351,8 @@ export class EcranMatch {
 
     const cx = W / 2;
     const cy = H / 2;
-    this.annonce = svg("g", { class: "match-annonce", style: "display:none" }, s);
+    this.annonceCadre = svg("g", {}, s);
+    this.annonce = svg("g", { class: "match-annonce", style: "display:none" }, this.annonceCadre);
     this.annonceFond = svg("rect", { x: cx - 90, y: cy - 26, width: 180, height: 52, rx: 26 }, this.annonce);
     this.annonceTexte = svg("text", { x: cx, y: cy + 1, "text-anchor": "middle", "dominant-baseline": "central" }, this.annonce);
   }
@@ -294,11 +360,11 @@ export class EcranMatch {
   /** Figurine d'un joueur, posée sur son socle à sa position : le buste de
    *  la carte (votre équipe, avec l'aura de fusion) ou un buste en maillot
    *  rouge (adversaire). Le socle a la couleur de l'équipe. */
-  private pion(parent: SVGGElement, camp: 0 | 1, id: string, nom: string, imageAdverse?: string): SVGGElement {
+  private pion(parent: SVGGElement, camp: 0 | 1, id: string, nom: string, image?: string): SVGGElement {
+    const K = this.k;
     const g = svg("g", { class: `match-pion${camp === 0 ? " nous" : " eux"}` }, parent);
     svg("ellipse", { cx: 0, cy: 0, rx: 17 * K, ry: 5 * K, class: "match-ombre-pion" }, g);
     svg("ellipse", { cx: 0, cy: 0, rx: 17 * K, ry: 5 * K, class: "match-socle" }, g);
-    const image = camp === 0 ? BUSTES[id] : imageAdverse;
     const fusions = camp === 0 ? (this.habillage.infos(id)?.fusions ?? 0) : 0;
     if (image) {
       svg("image", {
@@ -317,11 +383,27 @@ export class EcranMatch {
     return g;
   }
 
+  /** Pion rond (vue « pions ») : couleur du pays pour ton équipe, rouge pour l'adversaire. */
+  private pionRond(parent: SVGGElement, camp: 0 | 1, id: string, nom: string): SVGGElement {
+    const g = svg("g", { class: `match-rond${camp === 0 ? " nous" : " eux"}` }, parent);
+    const couleur = camp === 0 ? (this.habillage.infos(id)?.couleur ?? "#3563C0") : COULEUR_EUX;
+    svg("circle", { r: RAYON_ROND, fill: couleur }, g);
+    const titre = svg("title", {}, g);
+    titre.textContent = nom;
+    return g;
+  }
+
   private majCommandes(): void {
     const enJeu = this.sim.demarre && !this.enPause;
     this.boutonJouer.textContent = !this.sim.demarre ? "▶ Coup d'envoi" : enJeu ? "❚❚ Pause" : "▶ Reprendre";
     this.boutonJouer.classList.toggle("en-jeu", enJeu);
     this.boutonZones.classList.toggle("actif", this.zonesVisibles);
+    VUES.forEach((v, i) => {
+      const b = this.boutonsVue[i];
+      if (!b) return;
+      b.classList.toggle("actif", v.id === this.vue);
+      b.setAttribute("aria-pressed", String(v.id === this.vue));
+    });
     this.boutonZones.setAttribute("aria-pressed", String(this.zonesVisibles));
   }
 
@@ -347,15 +429,35 @@ export class EcranMatch {
 
   private dessiner(): void {
     const sim = this.sim;
+    const porteur = sim.balle?.porteur ?? null;
+    const grand = GRAND_PORTEUR[this.vue];
     sim.joueurs.forEach((j, i) => {
-      this.pions[i]!.setAttribute("transform", `translate(${this.X(j.pos.x).toFixed(1)} ${this.Y(j.pos.y).toFixed(1)})`);
+      const e = j === porteur && grand !== 1 ? ` scale(${grand})` : "";
+      this.pions[i]!.setAttribute("transform", `translate(${this.X(j.pos.x).toFixed(1)} ${this.Y(j.pos.y).toFixed(1)})${e}`);
     });
+    if (this.figPorteur) {
+      this.figPorteur.style.display = porteur ? "" : "none";
+      if (porteur) {
+        const i = sim.joueurs.indexOf(porteur);
+        if (porteur !== this.dernierPorteur) {
+          // Nouveau porteur : sa figurine surgit.
+          this.figPorteurImage!.setAttribute("href", this.images_[i] ?? "");
+          const f = porteur.camp === 0 ? (this.habillage.infos(porteur.joueur.id)?.fusions ?? 0) : 0;
+          if (f) this.figPorteurImage!.setAttribute("filter", `url(#match-aura-${Math.min(3, f)})`);
+          else this.figPorteurImage!.removeAttribute("filter");
+          this.figPorteurAnim!.style.animation = "none";
+          void this.figPorteurAnim!.getBoundingClientRect();
+          this.figPorteurAnim!.style.animation = "";
+        }
+        this.figPorteur.setAttribute("transform", `translate(${this.X(porteur.pos.x).toFixed(1)} ${this.Y(porteur.pos.y).toFixed(1)})`);
+      }
+    }
+    this.dernierPorteur = porteur;
     // Ceux du bas de l'écran passent devant ceux du haut (comme des figurines posées sur le terrain).
     if (this.images++ % 10 === 0) {
       const ordre = sim.joueurs.map((j, i) => ({ y: this.Y(j.pos.y), p: this.pions[i]! })).sort((a, b) => a.y - b.y);
       for (const { p } of ordre) this.calquePions.appendChild(p);
     }
-    const porteur = sim.balle?.porteur;
     this.halo.style.display = porteur ? "" : "none";
     if (porteur) {
       this.halo.setAttribute("cx", this.X(porteur.pos.x).toFixed(1));
@@ -369,7 +471,7 @@ export class EcranMatch {
         this.etiquetteFond.setAttribute("width", l.toFixed(1));
       }
       this.etiquette.setAttribute("class", `match-etiquette${porteur.camp === 0 ? "" : " eux"}`);
-      this.etiquette.setAttribute("transform", `translate(${this.X(porteur.pos.x).toFixed(1)} ${(this.Y(porteur.pos.y) - 48 * K - 7).toFixed(1)})`);
+      this.etiquette.setAttribute("transform", `translate(${this.X(porteur.pos.x).toFixed(1)} ${(this.Y(porteur.pos.y) - 48 * this.k * grand - 7).toFixed(1)})`);
     }
     this.etiquette.style.display = porteur ? "" : "none";
     const enLAir = !!sim.balle?.enLAir;
@@ -382,6 +484,8 @@ export class EcranMatch {
     this.ombreBallon.setAttribute("cy", (by + 2.5).toFixed(1));
     this.ballon.style.display = sim.demarre ? "" : "none";
     this.ombreBallon.style.display = sim.demarre ? "" : "none";
+
+    this.suivreCamera();
 
     this.calqueZones.replaceChildren();
     if (this.zonesVisibles) {
@@ -440,6 +544,29 @@ export class EcranMatch {
     }
     if (this.statut.textContent !== texte) this.statut.textContent = texte;
     this.majBord();
+  }
+
+  /** Vue « caméra » : la fenêtre suit le ballon en douceur, sans sortir du terrain. */
+  private suivreCamera(): void {
+    const W = 68 * ECHELLE + 2 * MARGE;
+    const H = 105 * ECHELLE + 2 * MARGE;
+    if (this.vue !== "camera") {
+      this.annonceCadre.removeAttribute("transform");
+      return;
+    }
+    const vw = W / ZOOM_CAMERA;
+    const vh = H / ZOOM_CAMERA;
+    const cible = { x: this.X(this.sim.ballon.x), y: this.Y(this.sim.ballon.y) };
+    if (!this.camera) this.camera = { ...cible };
+    else {
+      this.camera.x += (cible.x - this.camera.x) * 0.08;
+      this.camera.y += (cible.y - this.camera.y) * 0.08;
+    }
+    const x0 = Math.min(W - vw, Math.max(0, this.camera.x - vw / 2));
+    const y0 = Math.min(H - vh, Math.max(0, this.camera.y - vh / 2));
+    this.svgTerrain.setAttribute("viewBox", `${x0.toFixed(1)} ${y0.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`);
+    // Les annonces restent au centre de ce qu'on voit.
+    this.annonceCadre.setAttribute("transform", `translate(${(x0 + vw / 2 - W / 2).toFixed(1)} ${(y0 + vh / 2 - H / 2).toFixed(1)})`);
   }
 
   /** Pluie de confettis sur le terrain (but). */

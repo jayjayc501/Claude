@@ -390,3 +390,8 @@ Demande du concepteur : « une IHM aussi fun et belle que celle de la préparati
 - (suite) « Le cercle avec les têtes n'est pas terrible » : pastilles abandonnées. **Les joueurs sont des figurines sur leur socle**, comme sur l'écran de préparation (36 px de large, socle blanc pour toi, rouge pour l'adversaire, ombre, aura de fusion bleue, or ou violette, porteur sur un socle doré avec son nom ; ceux du bas passent devant).
 - Adversaires : bustes de la maquette **recolorés en maillot rouge et retournés** (`scripts/recolorer-adversaires.py`, images dans `src/images/adversaires/`) ; on prend d'abord ceux qui ne sont pas sur ton terrain. Avec 18 images seulement, quelques adversaires restent des copies de tes joueurs : il faudra des figurines propres à l'adversaire.
 - Page : 732 Ko (images incluses). Tests : 100 verts. Vérifié au format téléphone, aucune erreur.
+- (suite) « C'est quand même un sacré bordel » avec 22 figurines : le concepteur veut tester trois rendus. Sélecteur **Vue : Pions · Figurines · Caméra** sur l'écran du match (gardé au rechargement, changeable en plein match) :
+  - **Pions** (par défaut) : ronds nets, couleur du pays pour ton équipe (contour blanc), rouge pour l'adversaire (contour rouge foncé) ; **seul le porteur surgit en figurine** (40 px) sur un socle doré, avec son nom ;
+  - **Figurines** : toutes les figurines, plus petites (26 px), le porteur agrandi (×1,4) ;
+  - **Caméra** : figurines de 30 px, fenêtre de 44 m de large qui suit le ballon en douceur (revient sur la décision « terrain entier visible » : pour essai seulement), annonces au centre de la vue.
+- Tests : 100 verts. Les trois vues vérifiées au format téléphone, aucune erreur.

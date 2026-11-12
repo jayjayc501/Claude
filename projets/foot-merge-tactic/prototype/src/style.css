@@ -353,3 +353,12 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-palier-picto { width: 20px; height: 20px; border-radius: 50%; background: #fff; color: #2B2F36; display: flex; align-items: center; justify-content: center; }
 .match-palier-picto svg { width: 13px; height: 13px; }
 .match-note { margin: 0 4px; font-size: 11px; color: #6B776F; }
+.match-vues { display: flex; align-items: center; gap: 4px; background: #fff; border-radius: 999px; padding: 3px; }
+.match-vues-titre { font-size: 11px; font-weight: 700; color: #4A5A50; text-transform: uppercase; letter-spacing: 0.05em; padding: 0 6px 0 8px; }
+.match-vue { flex: 1; font: inherit; font-size: 13px; font-weight: 700; color: #4A5A50; background: transparent; border: none; border-radius: 999px; min-height: 32px; cursor: pointer; }
+.match-vue.actif { color: #fff; background: #2B2F36; }
+.match-rond.nous circle { stroke: #fff; stroke-width: 2.2; }
+.match-rond.eux circle { stroke: #6E1A17; stroke-width: 2.2; }
+.match-rond { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)); }
+.match-surgit { animation: match-surgit 0.3s cubic-bezier(0.2, 1.5, 0.4, 1); transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes match-surgit { from { transform: scale(0.3); opacity: 0.2; } to { transform: scale(1); opacity: 1; } }

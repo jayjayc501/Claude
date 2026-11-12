@@ -34,11 +34,17 @@ const LARGEUR_FIG: Record<Vue, number> = { pions: 34, figurines: 26, action: 30 
 /** Agrandissement du porteur. */
 const GRAND_PORTEUR: Record<Vue, number> = { pions: 1, figurines: 1.4, action: 1.2 };
 /** Vue « Action » : un joueur passe en figurine à moins de ACTION_ENTREE_M du
- *  ballon et redevient pion au-delà de ACTION_SORTIE_M (pas de clignotement),
- *  après ACTION_MIN_S au moins dans son état. */
-const ACTION_ENTREE_M = 13;
-const ACTION_SORTIE_M = 18;
-const ACTION_MIN_S = 0.8;
+ *  centre de l'action et redevient pion au-delà de ACTION_SORTIE_M, après
+ *  ACTION_MIN_MS au moins (temps réel) dans son état. Le centre de l'action
+ *  suit le ballon à ACTION_SUIVI_MS au plus (une passe ne vide pas la zone
+ *  d'un coup). Fondu de ACTION_FONDU_MS à chaque changement. 12/11, « le mode
+ *  action scintille » : seuils de 13/18 m, 0,8 s de jeu (0,2 s à l'écran en
+ *  ×3,5) et zone collée au ballon donnaient 7 changements par seconde. */
+const ACTION_ENTREE_M = 12;
+const ACTION_SORTIE_M = 21;
+const ACTION_MIN_MS = 1600;
+const ACTION_SUIVI_MS = 10;
+const ACTION_FONDU_MS = 260;
 const RAYON_ROND = 7;
 /** Rayon du ballon à l'écran (unités SVG) ; plus gros que nature pour rester lisible. */
 const RAYON_BALLON = 5;
@@ -108,6 +114,9 @@ export class EcranMatch {
   private figsAction: SVGGElement[] = [];
   private enAction: boolean[] = [];
   private actionDepuis: number[] = [];
+  private fonduAction: (Animation | null)[] = [];
+  private centreAction: { x: number; y: number } | null = null;
+  private tempsAction = 0;
   /** Ballon : groupe, motif qui tourne quand il roule, traînée, angle et dernière position. */
   private ballonMotif!: SVGGElement;
   private trainee!: SVGPathElement;
@@ -125,6 +134,8 @@ export class EcranMatch {
   private boutonsVue: HTMLButtonElement[] = [];
   private calquePions!: SVGGElement;
   private calqueFigs: SVGGElement | null = null;
+  /** Dernier ordre de profondeur appliqué (indices des joueurs). */
+  private ordreProfondeur = "";
   private images = 0;
   private halo!: SVGEllipseElement;
   private etiquette!: SVGGElement;
@@ -399,15 +410,18 @@ export class EcranMatch {
     // Vue « Action » : une figurine par joueur, au-dessus des pions, montrée près du ballon.
     this.figsAction = [];
     this.calqueFigs = null;
+    this.ordreProfondeur = "";
     this.enAction = this.sim.joueurs.map(() => false);
     this.actionDepuis = this.sim.joueurs.map(() => -Infinity);
+    this.fonduAction = this.sim.joueurs.map(() => null);
+    this.centreAction = null;
     if (this.vue === "action") {
       const gf = svg("g", {}, s);
       this.calqueFigs = gf;
       this.figsAction = this.sim.joueurs.map((j, i) => {
         // Groupe extérieur : position ; intérieur (la figurine) : animation d'apparition.
         const f = svg("g", { style: "display:none" }, gf);
-        this.pion(f, j.camp, j.joueur.id, j.joueur.nom, this.images_[i]);
+        this.pion(f, j.camp, j.joueur.id, j.joueur.nom, this.images_[i]).classList.add("match-fig-action");
         return f;
       });
     }
@@ -589,10 +603,15 @@ export class EcranMatch {
     }
     this.dernierPorteur = porteur;
     // Ceux du bas de l'écran passent devant ceux du haut (comme des figurines posées sur le terrain).
+    // On ne déplace les nœuds que si l'ordre a changé.
     if (this.images++ % 10 === 0) {
-      const ordre = sim.joueurs.map((j, i) => ({ y: this.Y(j.pos.y), i })).sort((a, b) => a.y - b.y);
-      for (const { i } of ordre) this.calquePions.appendChild(this.pions[i]!);
-      if (this.calqueFigs) for (const { i } of ordre) this.calqueFigs.appendChild(this.figsAction[i]!);
+      const ordre = sim.joueurs.map((j, i) => ({ y: this.Y(j.pos.y), i })).sort((a, b) => a.y - b.y).map((o) => o.i);
+      const cle = ordre.join(",");
+      if (cle !== this.ordreProfondeur) {
+        this.ordreProfondeur = cle;
+        for (const i of ordre) this.calquePions.appendChild(this.pions[i]!);
+        if (this.calqueFigs) for (const i of ordre) this.calqueFigs.appendChild(this.figsAction[i]!);
+      }
     }
     this.halo.style.display = porteur ? "" : "none";
     if (porteur) {
@@ -743,28 +762,58 @@ export class EcranMatch {
    *  durée minimale : un joueur ne clignote pas d'un état à l'autre. */
   private dessinerAction(pos: { x: number; y: number }[], porteur: import("../sim/simulation").JoueurSim | null, grand: number): void {
     const sim = this.sim;
+    const maintenant = performance.now();
+    // Centre de l'action : suit le ballon à vitesse limitée (temps de jeu).
+    const dtJeu = Math.max(0, sim.temps - this.tempsAction);
+    this.tempsAction = sim.temps;
+    if (!this.centreAction || dtJeu > 2 || sim.balle?.arretDeJeu) this.centreAction = { ...sim.ballon };
+    else {
+      const dx = sim.ballon.x - this.centreAction.x;
+      const dy = sim.ballon.y - this.centreAction.y;
+      const d = Math.hypot(dx, dy);
+      const pas = ACTION_SUIVI_MS * dtJeu;
+      this.centreAction = d <= pas ? { ...sim.ballon } : { x: this.centreAction.x + (dx / d) * pas, y: this.centreAction.y + (dy / d) * pas };
+    }
+    const c = this.centreAction;
     sim.joueurs.forEach((j, i) => {
-      const d = Math.hypot(j.pos.x - sim.ballon.x, j.pos.y - sim.ballon.y);
+      const d = Math.hypot(j.pos.x - c.x, j.pos.y - c.y);
       const voulu = sim.demarre && (j === porteur || (this.enAction[i] ? d < ACTION_SORTIE_M : d < ACTION_ENTREE_M));
-      if (voulu !== this.enAction[i] && (j === porteur || sim.temps - this.actionDepuis[i]! >= ACTION_MIN_S || !sim.demarre)) {
+      if (voulu !== this.enAction[i] && (j === porteur || maintenant - this.actionDepuis[i]! >= ACTION_MIN_MS || !sim.demarre)) {
         this.enAction[i] = voulu;
-        this.actionDepuis[i] = sim.temps;
-        const f = this.figsAction[i]!;
-        f.style.display = voulu ? "" : "none";
-        this.pions[i]!.style.display = voulu ? "none" : "";
-        if (voulu) {
-          // La figurine surgit de son pion.
-          const fig = f.firstElementChild as SVGGElement;
-          fig.classList.remove("match-surgit");
-          void fig.getBoundingClientRect();
-          fig.classList.add("match-surgit");
-        }
+        this.actionDepuis[i] = maintenant;
+        this.fondre(i, voulu);
       }
       if (this.enAction[i]) {
         const e = j === porteur ? ` scale(${grand})` : "";
         this.figsAction[i]!.setAttribute("transform", `translate(${pos[i]!.x.toFixed(1)} ${pos[i]!.y.toFixed(1)})${e}`);
       }
     });
+  }
+
+  /** Fondu entre le pion et la figurine d'un joueur (vue « Action ») :
+   *  animation par script, qui survit au tri de profondeur (une animation CSS
+   *  repartait de zéro à chaque déplacement du nœud et faisait scintiller). */
+  private fondre(i: number, versFigurine: boolean): void {
+    const f = this.figsAction[i]!;
+    const pion = this.pions[i]!;
+    const fig = f.firstElementChild as SVGGElement;
+    this.fonduAction[i]?.cancel();
+    f.style.display = "";
+    const a = fig.animate(
+      versFigurine
+        ? [
+            { transform: "scale(0.8)", opacity: 0 },
+            { transform: "scale(1)", opacity: 1 },
+          ]
+        : [{ opacity: 1 }, { opacity: 0 }],
+      { duration: ACTION_FONDU_MS, easing: "ease-out" },
+    );
+    if (versFigurine) pion.style.display = "none";
+    else pion.style.display = "";
+    a.onfinish = () => {
+      if (!this.enAction[i]) f.style.display = "none";
+    };
+    this.fonduAction[i] = a;
   }
 
   /** Ballon : au sol il roule (le motif tourne), en l'air il monte au-dessus

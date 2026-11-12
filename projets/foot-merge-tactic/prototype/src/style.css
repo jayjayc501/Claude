@@ -368,6 +368,7 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-rond.eux circle { stroke: #6E1A17; stroke-width: 2.2; }
 .match-rond { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)); }
 .match-surgit { animation: match-surgit 0.3s cubic-bezier(0.2, 1.5, 0.4, 1); transform-box: fill-box; transform-origin: 50% 100%; }
+.match-fig-action { transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes match-surgit { from { transform: scale(0.3); opacity: 0.2; } to { transform: scale(1); opacity: 1; } }
 .match-panneau { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(22, 32, 26, 0.35); border-radius: 14px; padding: 12px; z-index: 5; }
 .match-panneau-carte { width: 100%; max-width: 330px; background: #fff; border-radius: 16px; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); animation: match-pop 0.4s cubic-bezier(0.2, 1.5, 0.4, 1); }

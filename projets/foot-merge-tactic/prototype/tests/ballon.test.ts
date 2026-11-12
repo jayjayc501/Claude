@@ -32,7 +32,7 @@ describe("ballon réel : cohérence physique", () => {
         const porteur = m.balle!.porteur;
         const saut = Math.hypot(b.x - avant.x, b.y - avant.y);
         // un coup de pied ne dépasse pas la vitesse du tir ; un remise en jeu repose le ballon ailleurs
-        if (!porteur && !m.balle!.reserve) expect(saut).toBeLessThanOrEqual((reglages.ballon.vitesseTirMS + 1) / 30);
+        if (!porteur && !m.balle!.reserve && !m.balle!.engagement) expect(saut).toBeLessThanOrEqual((reglages.ballon.vitesseTirMS + 1) / 30);
         if (porteur) {
           expect(m.possession).toBe(porteur.camp);
           if (Math.hypot(porteur.pos.x - b.x, porteur.pos.y - b.y) > 1.5) ecartPorteur++;
@@ -67,13 +67,15 @@ describe("ballon réel : cohérence physique", () => {
     expect(m.ballon.y).toBeCloseTo(L / 2, 5); // remise au centre
     expect(m.possession).toBe(1);
 
+    b.engagement = null; // on saute le retour au camp
     m.ballon = { x: W / 2 + 10, y: 0.2 };
     b.porteur = null;
     b.reserve = null;
     b.vit = { x: 0, y: -20 };
     m.pas();
     expect(m.score).toEqual([1, 0]);
-    expect(m.ballon.y).toBeCloseTo(5.5, 5); // sortie de but du camp 0
+    expect(m.ballon.y).toBeCloseTo(5.5, 5); // six mètres du camp 0, au coin de la surface de but
+    expect(m.ballon.x).toBeCloseTo(W / 2 + 9.16, 5);
     expect(m.possession).toBe(0);
   });
 });
@@ -157,6 +159,28 @@ describe("ballon réel : arrêts de jeu (lot B)", () => {
   });
 });
 
+describe("ballon réel : engagement après un but", () => {
+  test("chacun regagne son camp avant l'engagement", () => {
+    const m = match(6);
+    for (let i = 0; i < 30; i++) m.pas();
+    const b = m.balle!;
+    b.porteur = null;
+    b.reserve = null;
+    for (const j of m.joueurs) j.pos = { x: j.pos.x, y: j.camp === 0 ? L - 20 : 20 }; // tout le monde dans le camp adverse
+    m.ballon = { x: W / 2, y: L - 0.2 };
+    b.vit = { x: 0, y: 20 };
+    m.pas();
+    expect(m.score[0]).toBe(1);
+    expect(b.engagement).not.toBeNull();
+    while (b.engagement) {
+      expect(b.porteur).toBeNull();
+      expect(m.ballon).toEqual({ x: W / 2, y: L / 2 });
+      m.pas();
+    }
+    for (const j of m.joueurs) expect(j.camp === 0 ? j.pos.y <= L / 2 + 0.5 : j.pos.y >= L / 2 - 0.5).toBe(true);
+  });
+});
+
 describe("ballon réel : seul face au but", () => {
   test("un attaquant seul devant le but fonce et tire, sans passe en retrait", () => {
     for (const camp of [0, 1] as const) {
@@ -228,7 +252,7 @@ describe("ballon réel : réalisme du jeu (référence football §9.4)", () => {
         changements++;
         derniere = m.possession;
       }
-      if (m.balle!.porteur) libre = 0;
+      if (m.balle!.porteur || m.balle!.engagement) libre = 0;
       else if (m.temps > 15) {
         libre += 1 / 30;
         libreMax = Math.max(libreMax, libre);

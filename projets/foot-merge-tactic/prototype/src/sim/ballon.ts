@@ -83,6 +83,10 @@ export class BallonReel {
   private tirPenalty = false;
   /** Dernier événement de jeu, pour l'affichage (« Corner », « Hors-jeu »…). */
   evenement: { texte: string; a: number } | null = null;
+  /** Après un but : chacun regagne son camp avant l'engagement. */
+  engagement: { camp: Camp; depuis: number } | null = null;
+  /** Joueur désigné pour la remise en jeu (le gardien sur un six mètres). */
+  private tireur: JoueurSim | null = null;
   private arret: "?" | "oui" | "non" = "?";
   private rng: Aleatoire;
 
@@ -91,8 +95,9 @@ export class BallonReel {
   }
 
   /** Coup d'envoi (ou remise au centre) : le ballon est posé, l'équipe va le chercher. */
-  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | null = null, texte?: string): void {
+  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | null = null, texte?: string, tireur: JoueurSim | null = null): void {
     const s = this.sim;
+    this.tireur = tireur;
     this.arrete = arrete;
     this.horsJeu = false;
     this.tirPenalty = false;
@@ -108,7 +113,27 @@ export class BallonReel {
     s.prendrePossession(camp);
   }
 
+  /** But : ballon au centre, les deux équipes regagnent leur camp ; l'engagement
+   *  a lieu quand tout le monde y est (10 s au plus). */
+  private preparerEngagement(camp: Camp, texte: string): void {
+    const s = this.sim;
+    this.remettre({ x: s.donnees.largeurM / 2, y: s.donnees.longueurM / 2 }, camp, null, texte);
+    this.reserve = null;
+    this.engagement = { camp, depuis: s.temps };
+  }
+
   pas(dt: number): void {
+    if (this.engagement) {
+      const s = this.sim;
+      const L = s.donnees.longueurM;
+      const enPlace = s.joueurs.every((j) => (j.camp === 0 ? j.pos.y <= L / 2 + 0.5 : j.pos.y >= L / 2 - 0.5) && dist(j.pos, j.depart) < 3);
+      if ((enPlace && s.temps - this.engagement.depuis > 2) || s.temps - this.engagement.depuis > 10) {
+        const camp = this.engagement.camp;
+        this.engagement = null;
+        this.remettre({ ...s.ballon }, camp, null, "Engagement");
+      }
+      return;
+    }
     if (this.porteur) {
       this.conduire();
       this.tacler(dt);
@@ -398,14 +423,19 @@ export class BallonReel {
       const marqueur: Camp = y >= L ? 0 : 1;
       if (Math.abs(x - W / 2) <= DEMI_BUT_M) {
         s.score[marqueur]++;
-        this.remettre({ x: W / 2, y: L / 2 }, marqueur === 0 ? 1 : 0, null, "But !");
+        this.preparerEngagement(marqueur === 0 ? 1 : 0, "But !");
       } else {
         this.stats.sorties++;
         if (this.dernier && this.dernier.camp !== marqueur) {
           // dernier touché par un défenseur : corner
           this.stats.corners[marqueur]++;
           this.remettre({ x: x < W / 2 ? 0.5 : W - 0.5, y: y >= L ? L - 0.5 : 0.5 }, marqueur, "corner", "Corner");
-        } else this.remettre({ x: W / 2, y: y >= L ? L - 5.5 : 5.5 }, marqueur === 0 ? 1 : 0, null, "Sortie de but");
+        } else {
+          // Six mètres : au coin de la surface de but, du côté de la sortie, joué par le gardien.
+          const camp: Camp = marqueur === 0 ? 1 : 0;
+          const gardien = s.joueurs.find((j) => j.camp === camp && j.poste.id === "G") ?? null;
+          this.remettre({ x: x < W / 2 ? W / 2 - 9.16 : W / 2 + 9.16, y: y >= L ? L - 5.5 : 5.5 }, camp, null, "Six mètres", gardien);
+        }
       }
       return;
     }
@@ -481,6 +511,7 @@ export class BallonReel {
     const avant = this.sim.possession;
     if (j.camp !== avant) this.perte = { camp: avant, a: this.sim.temps };
     this.porteur = j;
+    this.tireur = null;
     this.receveur = null;
     this.tirEnCours = false;
     this.tirPenalty = false;
@@ -529,6 +560,10 @@ export class BallonReel {
     const L = s.donnees.longueurM;
     const vMax = s.reglages.mouvement.vitesseMaxMS;
     for (const x of s.joueurs) x.auBallon = false;
+    if (this.engagement) {
+      for (const j of s.joueurs) j.cible = { ...j.depart };
+      return;
+    }
 
     if (this.porteur) {
       const p = this.porteur;
@@ -589,6 +624,11 @@ export class BallonReel {
       let nombre = 1;
       if (this.receveur) nombre = camp === this.receveur.camp ? 0 : 2;
       else if (this.reserve && this.reserve.camp !== camp) nombre = 0;
+      else if (this.reserve && this.tireur) {
+        nombre = 0;
+        this.tireur.cible = { ...s.ballon };
+        this.tireur.auBallon = true;
+      }
       if (this.receveur && camp === this.receveur.camp) {
         this.receveur.cible = this.pointInterception(this.receveur);
         this.receveur.auBallon = true;

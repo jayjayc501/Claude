@@ -37,6 +37,8 @@ export interface JoueurSim {
   freineJusqua: number;
   /** Joue le ballon (porteur, receveur, presseur, joueur qui va au ballon) : peut approcher un adversaire. */
   auBallon: boolean;
+  /** Position de coup d'envoi (sa case du plateau, dans son camp). */
+  depart: PointM;
   /** Écart individuel de vitesse et d'accélération, en attendant l'attribut
    *  « vitesse » : deux joueurs ne courent jamais exactement pareil. */
   facteur: number;
@@ -108,6 +110,7 @@ export class MatchSim {
           sprintJusqua: 0,
           freineJusqua: 0,
           auBallon: false,
+          depart: { ...pos },
           facteur: 1 + this.rng.entre(-v, v),
           perceptionS: this.rng.entre(reglages.mouvement.perception.minS, reglages.mouvement.perception.maxS),
         });

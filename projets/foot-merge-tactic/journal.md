@@ -222,3 +222,10 @@ Retours du concepteur : « beaucoup de passes très approximatives » (passes en
 - Affichage : l'événement (But, Corner, Faute, Penalty, Hors-jeu, Touche, Sortie de but) s'affiche 2,5 s sous le terrain.
 - Mesures (6 graines × 3 min) : 8 fautes, 1 à 3 corners, 1 hors-jeu, 76 % de passes réussies, 7,1 changements de camp par minute ; tirs 1,5 par équipe et par minute (trop : la règle « dans la surface on tire » joue à plein).
 - Tests : 83 verts (corner, hors-jeu, penalty) ; seuil des tirs relevé à 2 par équipe et par minute.
+
+## 12/11/2026 (suite) — Engagement et six mètres
+
+Retours du concepteur : engagement donné alors que les joueurs sont encore sur tout le terrain ; six mètres joué n'importe où.
+- Après un but : ballon au centre, personne ne peut le toucher ; chaque joueur regagne sa case de coup d'envoi (son camp) ; engagement quand tout le monde y est (2 s au moins, 10 s au plus).
+- Six mètres : au coin de la surface de but (9,16 m de l'axe, 5,5 m de la ligne), du côté de la sortie, joué par le gardien.
+- Tests : 84 verts (nouveau : chacun regagne son camp avant l'engagement).

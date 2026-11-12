@@ -83,7 +83,7 @@ export class BallonReel {
   private decisionA = 0;
   private protegeJusqua = 0;
   /** Coup de pied arrêté en attente : le premier joueur de l'équipe qui prend le ballon le joue. */
-  private arrete: "corner" | "penalty" | "engagement" | "sixMetres" | "coupFranc" | null = null;
+  private arrete: "corner" | "penalty" | "engagement" | "sixMetres" | "coupFranc" | "touche" | null = null;
   /** Plongeon du gardien sur le tir en cours. */
   private plongeon: { gardien: JoueurSim; point: PointM } | null = null;
   /** Ballon aérien (centre, dégagement) : personne ne le touche avant cet instant. */
@@ -109,7 +109,7 @@ export class BallonReel {
   }
 
   /** Coup d'envoi (ou remise au centre) : le ballon est posé, l'équipe va le chercher. */
-  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | "engagement" | "sixMetres" | "coupFranc" | null = null, texte?: string, tireur: JoueurSim | null = null): void {
+  remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | "engagement" | "sixMetres" | "coupFranc" | "touche" | null = null, texte?: string, tireur: JoueurSim | null = null): void {
     const s = this.sim;
     this.tireur = tireur;
     this.arrete = arrete;
@@ -195,7 +195,7 @@ export class BallonReel {
     }
     if (this.porteur) {
       this.conduire();
-      if (!this.arrete || this.arrete === "corner") this.tacler(dt); // engagement, six mètres, coup franc : adversaires à distance
+      if (!this.arrete) this.tacler(dt); // remise en jeu pas encore jouée : adversaires à distance
       if (this.porteur && this.sim.temps >= this.decisionA) this.decider();
     } else {
       this.rouler(dt);
@@ -275,6 +275,27 @@ export class BallonReel {
     const pression = Math.min(...adverses.filter((o) => (o.pos.y - p.pos.y) * sens > -1.5).map((o) => dist(o.pos, p.pos)));
     this.decisionA = s.temps + this.rng.entre(r.decisionS.min, r.decisionS.max);
 
+    if (this.arrete === "touche") {
+      // Touche : passe (à la main) vers le coéquipier le plus libre, à moins de 22 m.
+      this.arrete = null;
+      let choix: JoueurSim | null = null;
+      let mieux = -Infinity;
+      for (const q of s.joueurs) {
+        if (q === p || q.camp !== p.camp || q.poste.id === "G") continue;
+        const d = dist(p.pos, q.pos);
+        if (d < 4 || d > 22) continue;
+        const ouvert = Math.min(8, Math.min(...adverses.map((a) => dist(a.pos, q.pos))));
+        const sc = ouvert - d * 0.1 + this.rng.entre(-1.5, 1.5);
+        if (sc > mieux) {
+          mieux = sc;
+          choix = q;
+        }
+      }
+      if (choix) {
+        this.passer(choix, false, null, false);
+        return;
+      }
+    }
     if (this.arrete === "coupFranc") this.arrete = null; // le tireur joue normalement (passe, tir à portée)
     if (this.arrete === "sixMetres") {
       // Six mètres : on attend que les adversaires soient sortis de la surface (5 s au plus).
@@ -607,7 +628,7 @@ export class BallonReel {
       this.stats.sorties++;
       const camp: Camp = this.dernier ? (this.dernier.camp === 0 ? 1 : 0) : s.possession;
       this.stats.touches++;
-      this.remettre({ x: x <= 0 ? 0.5 : W - 0.5, y }, camp, null, "Touche");
+      this.remettre({ x: x <= 0 ? 0.5 : W - 0.5, y }, camp, "touche", "Touche");
       return;
     }
     s.ballon = { x, y };
@@ -704,7 +725,8 @@ export class BallonReel {
     this.decisionA = this.sim.temps + this.rng.entre(r.premiereDecisionS.min, r.premiereDecisionS.max);
     const L = this.sim.donnees.longueurM;
     const versBut = j.camp === 0 ? L - j.pos.y : j.pos.y;
-    if (this.arrete === "engagement") this.decisionA = this.sim.temps + 0.3;
+    // Remise en jeu : petite pause avant de jouer (le tireur se place).
+    if (this.arrete) this.decisionA = this.sim.temps + this.rng.entre(r.pauseArretS.min, r.pauseArretS.max);
     if (!this.arrete && j.poste.id !== "G" && versBut <= r.surface.profondeurM && Math.abs(j.pos.x - this.sim.donnees.largeurM / 2) <= r.surface.demiLargeurM)
       this.decisionA = this.sim.temps + 0.1; // dans la surface adverse : reprise immédiate
     this.sim.prendrePossession(j.camp);
@@ -787,7 +809,7 @@ export class BallonReel {
       const p = this.porteur;
       const sens = p.camp === 0 ? 1 : -1;
       p.auBallon = true;
-      if (p.poste.id === "G") p.cible = { ...p.pos };
+      if (p.poste.id === "G" || this.arrete) p.cible = { ...p.pos }; // remise en jeu : il attend sur place
       else {
         const butAdv = { x: W / 2, y: sens === 1 ? L : 0 };
         const dBut = dist(p.pos, butAdv);

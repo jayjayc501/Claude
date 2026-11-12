@@ -270,3 +270,10 @@ Diagnostic mesuré : 75 % des tirs se faisaient sans aucun défenseur entre le t
 - Tirs : tirs de loin moins fréquents ; erreur 2,2 m + 0,16 m par mètre ; gardien meilleur de loin (+2 % par mètre au-delà de 11 m), arrêt 30 % au moins ; parade 4 fois sur 10 : ballon repoussé de côté, souvent en corner.
 - Mesures (12 matchs de 3 min) : 107 tirs, 50 arrêts, 15 buts (1,25 par match, contre 1,7) ; 21 fautes, 9 corners, 29 touches, 16 centres, 7 dégagements, 30 contres ; 77 % de passes réussies ; 5,8 changements de camp par minute. Tirs sans défenseur entre le tireur et le but : 35 % (75 % avant).
 - Tests : 86 verts (nouveau : moins de la moitié des tirs sans défenseur entre le tireur et le but ; deux tests adaptés au recul rapide et au ballon aérien à 30 m/s).
+
+## 12/11/2026 (suite) — Touche en passe, pause aux remises en jeu
+
+Retours du concepteur : sur une touche, le joueur part avec le ballon au lieu de faire une passe ; il faudrait de petites pauses aux six mètres, touches, engagements, coups francs.
+- Touche : passe (à la main, dans les pieds) vers le coéquipier le plus libre à moins de 22 m.
+- Remises en jeu (touche, six mètres, coup franc, corner, engagement) : le tireur s'arrête sur place 0,8 à 1,4 s avant de jouer ; pas de tacle tant qu'il n'a pas joué.
+- Tests : 87 verts (nouveau : sur une touche, pause puis passe, le tireur ne part pas avec le ballon).

@@ -224,6 +224,8 @@ export interface Reglages {
     /** Faute sur un duel gagné : coup franc, penalty dans la surface. */
     fautes: { proba: number; arretPenaltyProba: number };
     horsJeuToleranceM: number;
+    /** Pause du tireur avant une remise en jeu (touche, six mètres, coup franc, corner, engagement). */
+    pauseArretS: { min: number; max: number };
     centre: { zoneProfondeurM: number; ecartAxeM: number; proba: number; dureeS: number; erreurDeg: number; partEnLAir: number };
     degagement: { zoneM: number; longueurMinM: number; longueurMaxM: number; dureeS: number; erreurDeg: number };
     construction: { boucheM: number; baisseSeuil: number; largeurM: number; bonusLargeur: number };

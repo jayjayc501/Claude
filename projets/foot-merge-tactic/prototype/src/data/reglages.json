@@ -118,6 +118,7 @@
     "zoneDegagementM": 35,
     "fautes": { "proba": 0.4, "arretPenaltyProba": 0.22 },
     "horsJeuToleranceM": 0.5,
+    "pauseArretS": { "min": 0.8, "max": 1.4 },
     "centre": { "zoneProfondeurM": 28, "ecartAxeM": 12, "proba": 0.55, "dureeS": 1.1, "erreurDeg": 6, "partEnLAir": 0.8 },
     "degagement": { "zoneM": 22, "longueurMinM": 28, "longueurMaxM": 45, "dureeS": 1.6, "erreurDeg": 12 },
     "construction": { "boucheM": 7, "baisseSeuil": 7, "largeurM": 18, "bonusLargeur": 2 },

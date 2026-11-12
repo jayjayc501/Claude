@@ -219,6 +219,43 @@ describe("ballon réel : défense de la surface (lot D)", () => {
   });
 });
 
+describe("ballon réel : touche", () => {
+  test("sur une touche, le joueur marque une pause puis fait une passe, sans partir avec le ballon", () => {
+    let vues = 0;
+    for (const g of GRAINES) {
+      const m = match(g);
+      const b = m.balle!;
+      let attente = false;
+      let tireur: (typeof m.joueurs)[number] | null = null;
+      let depuis = 0;
+      let depart = { x: 0, y: 0 };
+      for (let i = 0; i < 180 * 30; i++) {
+        const passes = b.stats.passes[0] + b.stats.passes[1];
+        m.pas();
+        if (b.evenement?.texte === "Touche" && m.temps - b.evenement.a < 0.05 && !attente) attente = true;
+        if (attente && !tireur && b.porteur) {
+          tireur = b.porteur;
+          depuis = m.temps;
+          depart = { ...tireur.pos };
+        }
+        if (tireur) {
+          if (b.stats.passes[0] + b.stats.passes[1] > passes) {
+            expect(m.temps - depuis).toBeGreaterThan(0.6); // petite pause
+            expect(Math.hypot(tireur.pos.x - depart.x, tireur.pos.y - depart.y)).toBeLessThan(3); // il freine en arrivant, mais ne part pas avec le ballon (en conduite : 6 m en 1 s)
+            vues++;
+            attente = false;
+            tireur = null;
+          } else if (b.porteur !== tireur) {
+            attente = false;
+            tireur = null;
+          }
+        }
+      }
+    }
+    expect(vues).toBeGreaterThan(2);
+  });
+});
+
 describe("ballon réel : seul face au but", () => {
   test("un attaquant seul devant le but fonce et tire, sans passe en retrait", () => {
     for (const camp of [0, 1] as const) {

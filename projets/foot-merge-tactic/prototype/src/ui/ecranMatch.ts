@@ -42,9 +42,9 @@ const VEDETTE_MIN_S = 0.7;
 /** Écart minimal à l'écran entre deux pions ou figurines (unités SVG), selon la vue. */
 const ECART_AFFICHAGE: Record<Vue, number> = { pions: 2 * RAYON_ROND + 2, figurines: 18, camera: 20 };
 const CLE_VUE = "foot-merge-tactic.vue-match.v1";
-/** Une mi-temps : 180 s de jeu simulé, soit 60 s à l'écran en vitesse ×3 (12/11). */
+/** Une mi-temps : 180 s de jeu simulé, soit 45 s à l'écran en vitesse ×4 (12/11). */
 const DUREE_MI_TEMPS_S = 180;
-const VITESSE_PAR_DEFAUT = 3;
+const VITESSE_PAR_DEFAUT = 4;
 const COULEUR_EUX = "#C2413D";
 const BANDES = 12;
 
@@ -617,7 +617,7 @@ export class EcranMatch {
     this.barreNous.style.width = `${total > 0 ? (100 * sim.tempsPossession[0]) / total : 50}%`;
 
     let texte: string;
-    if (!sim.demarre) texte = "Positions au coup d'envoi. Une mi-temps dure 60 s en vitesse ×3.";
+    if (!sim.demarre) texte = "Positions au coup d'envoi. Une mi-temps dure 45 s en vitesse ×4.";
     else if (this.arret) texte = this.arret === "fin" ? "Fin du match." : "Mi-temps : change ta tactique si tu veux, puis lance la 2e mi-temps.";
     else {
       const qui = sim.possession === 0 ? "Tu as le ballon" : `${this.habillage.nomEux} a le ballon`;

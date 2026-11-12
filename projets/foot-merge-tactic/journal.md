@@ -413,3 +413,4 @@ Demande du concepteur : « un timer de 60 s en vitesse ×3 pour faire une mi-tem
 - Mi-temps : un coup de sifflet long, panneau sur le terrain : score, possession, tirs (cadrés = buts + arrêts du gardien adverse), passes réussies et pourcentage, tacles gagnés, fautes, corners, hors-jeu, arrêts. Tactique modifiable avant de reprendre. Bouton « 2e mi-temps » : l'adversaire engage, chacun regagne sa place (`BallonReel.coupDEnvoi`, même mécanisme qu'après un but).
 - Fin du match : même panneau avec les totaux et le score à la mi-temps ; bouton « Nouveau match ».
 - Tests : 101 verts (nouveau : coup d'envoi de la 2e mi-temps). Match complet vérifié dans le navigateur (horloge accélérée) : mi-temps à 61 s, 2e mi-temps, fin ; aucune erreur.
+- (suite) « Fais 45 s et en ×4 » : vitesse ×4 par défaut ; la mi-temps reste de 180 s de jeu simulé, soit 45 s à l'écran.

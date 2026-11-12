@@ -302,8 +302,9 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-lignes .lignes { stroke: #fff; stroke-opacity: 0.8; stroke-width: 1.6; }
 .match-lignes .lignes .point, .match-lignes .lignes .but { fill: #fff; }
 .match-ombre-pion { fill: rgba(0, 0, 0, 0.32); }
-.match-socle { fill: none; stroke-width: 2.2; }
-.match-pion.nous .match-socle { stroke: #fff; }
+/* Socle aux couleurs de l'équipe, comme le maillot (concepteur, 12/11). */
+.match-socle { fill: none; stroke-width: 2.6; }
+.match-pion.nous .match-socle { stroke: #3563C0; }
 .match-pion.eux .match-socle { stroke: #C2413D; }
 .match-halo { fill: rgba(255, 196, 0, 0.45); stroke: #FFC400; stroke-width: 3; animation: match-halo 0.9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
 .match-halo.eux { fill: rgba(255, 255, 255, 0.2); stroke: #fff; }

@@ -448,22 +448,23 @@ export class BallonReel {
         this.tirer(but);
         return;
       }
-      if (dBut < r.tirDistanceM && Math.abs(p.pos.x - W / 2) < dBut * 0.8 && this.rng.suivant() < 0.04 + 0.2 * (1 - dBut / r.tirDistanceM)) {
+      if (dBut < r.tirDistanceM && Math.abs(p.pos.x - W / 2) < dBut * 0.8 && this.rng.suivant() < r.tirLoin.probaBase + r.tirLoin.probaMax * (1 - dBut / r.tirDistanceM)) {
         this.tirer(but);
         return;
       }
     }
 
-    // Champ libre devant lui (aucun joueur de champ adverse dans un cône vers
-    // le but) et pas pressé : il fonce vers le but et tire à portée, sans
-    // passe en retrait.
+    // Seul devant le but (aucun joueur de champ adverse entre lui et le but,
+    // 12/11 : avant, un cône de 18 m suffisait et on fonçait de trop loin) et
+    // pas pressé : il fonce vers le but et tire à portée, sans passe en retrait.
     const libreDevant = !adverses.some((o) => {
       if (o.poste.id === "G") return false;
       const avant = (o.pos.y - p.pos.y) * sens;
-      return avant > 0.5 && avant < 18 && Math.abs(o.pos.x - p.pos.x) < 3 + avant * 0.6;
+      return avant > 0.5 && avant < dBut && Math.abs(o.pos.x - p.pos.x) < 4 + avant * 0.3;
     });
     if (p.poste.id !== "G" && libreDevant && pression >= r.pressionM) {
       if (dBut < r.seulTirM) this.tirer(but);
+      else this.decisionA = Math.min(this.decisionA, s.temps + 0.3); // il lève la tête souvent : tir dès qu'il est à portée
       return;
     }
 
@@ -546,12 +547,18 @@ export class BallonReel {
         const tEux = Math.min(...adverses.map((o) => dist(o.pos, esp) / (vCourse * o.facteur)));
         if (tLui + r.passeEspace.avanceSurAdversaireS < tEux) options.push({ point: esp, vise: esp });
       }
+      const adv: Camp = p.camp === 0 ? 1 : 0;
       for (const o of options) {
+        // Passe dans la surface adverse (12/11, « les actions finissent trop
+        // vite en tir ») : seulement vers un joueur vraiment libre, par une voie
+        // bien dégagée, et moins tentante qu'une passe qui garde le ballon.
+        const versSurface = this.dansSurface(o.vise, adv);
         if (!libre(p.pos, o.vise)) continue;
         const ouvert = Math.min(8, Math.min(...adverses.map((a) => dist(a.pos, o.vise))));
+        if (versSurface && (ouvert < r.construction.surfaceOuvertM || adverses.some((a) => distSegment(a.pos, p.pos, o.vise) < r.voieLibreM * r.construction.surfaceVoieFacteur))) continue;
         const gain = (o.vise.y - p.pos.y) * sens;
         const large = Math.abs(o.vise.x - W / 2) > r.construction.largeurM && (o.vise.y - L / 2) * sens > -10 ? r.construction.bonusLargeur : 0;
-        const sc = gain * poidsProgression + ouvert * r.poidsEspace - dist(p.pos, o.vise) * 0.08 + large + this.rng.entre(-2, 2);
+        const sc = gain * poidsProgression + ouvert * r.poidsEspace - dist(p.pos, o.vise) * 0.08 + large - (versSurface ? r.construction.surfaceMalus : 0) + this.rng.entre(-2, 2);
         if (sc > score) {
           score = sc;
           meilleur = { q, point: o.point };
@@ -561,10 +568,7 @@ export class BallonReel {
     const presse = pression < r.pressionM;
     // Avant bouché (adversaire proche dans le cône) : il fait tourner le ballon
     // (passe latérale ou en retrait) plutôt que de foncer dans le bloc.
-    const bouche = adverses.some((o) => {
-      const avant = (o.pos.y - p.pos.y) * sens;
-      return o.poste.id !== "G" && avant > 0 && avant < r.construction.boucheM && Math.abs(o.pos.x - p.pos.x) < 2 + avant * 0.6;
-    });
+    const bouche = this.avantBouche(p);
     const seuil = bouche ? r.seuilPasse - r.construction.baisseSeuil : r.seuilPasse;
     if (meilleur && (p.poste.id === "G" || presse || score > seuil)) {
       this.passer(meilleur.q, presse, meilleur.point);
@@ -954,6 +958,19 @@ export class BallonReel {
    *    leur ligne de passe, font un pas de côté ou décrochent pour l'ouvrir.
    *  Ces décalages dépendent des adversaires, mais restent bornés autour de la
    *  place donnée par la projection (pas de dérive, référence §9.2 règle 6). */
+  /** Un adversaire (hors gardien) devant le porteur, dans un cône de
+   *  construction.boucheM : l'avant est bouché, on ne fonce pas dedans. */
+  private avantBouche(p: JoueurSim): boolean {
+    const s = this.sim;
+    const sens = p.camp === 0 ? 1 : -1;
+    const b = s.reg(p.camp).ballon.construction.boucheM;
+    return s.joueurs.some((o) => {
+      if (o.camp === p.camp || o.poste.id === "G") return false;
+      const avant = (o.pos.y - p.pos.y) * sens;
+      return avant > 0 && avant < b && Math.abs(o.pos.x - p.pos.x) < 2 + avant * 0.6;
+    });
+  }
+
   /** Effets du contre-pressing adverse sur ce porteur (neutres hors de la fenêtre de contre-pressing). */
   private contrePresse(p: JoueurSim): { precipite: number; gene: number } {
     const adv: Camp = p.camp === 0 ? 1 : 0;
@@ -1129,10 +1146,28 @@ export class BallonReel {
       else {
         const butAdv = { x: W / 2, y: sens === 1 ? L : 0 };
         const dBut = dist(p.pos, butAdv);
+        // Avant bouché (12/11, « les actions finissent trop vite en tir ») : il
+        // ne fonce plus dans le bloc, il temporise et cherche une passe : il
+        // s'écarte de côté de l'adversaire le plus proche (il protège le ballon).
+        const bouche = this.avantBouche(p);
+        const avance = bouche ? s.reg(p.camp).ballon.construction.temporiseM : r.dribbleAvanceM;
         p.cible =
           dBut < 35 // dernier tiers : droit vers le but
-            ? { x: p.pos.x + ((butAdv.x - p.pos.x) / dBut) * r.dribbleAvanceM, y: p.pos.y + ((butAdv.y - p.pos.y) / dBut) * r.dribbleAvanceM }
-            : { x: p.pos.x + (W / 2 - p.pos.x) * 0.2, y: Math.min(L - 3, Math.max(3, p.pos.y + sens * r.dribbleAvanceM)) };
+            ? { x: p.pos.x + ((butAdv.x - p.pos.x) / dBut) * avance, y: p.pos.y + ((butAdv.y - p.pos.y) / dBut) * avance }
+            : { x: p.pos.x + (W / 2 - p.pos.x) * 0.2, y: Math.min(L - 3, Math.max(3, p.pos.y + sens * avance)) };
+        if (bouche) {
+          const proche = s.joueurs
+            .filter((o) => o.camp !== p.camp && o.poste.id !== "G")
+            .reduce((a, o) => (dist(o.pos, p.pos) < dist(a.pos, p.pos) ? o : a));
+          const cote = proche.pos.x > p.pos.x ? -1 : 1;
+          const ecart = s.reg(p.camp).ballon.construction.ecartM;
+          p.cible = { x: Math.min(W - 2, Math.max(2, p.cible.x + cote * ecart)), y: p.cible.y };
+        }
+        // Un adversaire arrive sur lui : il décide tout de suite (passe avant le tacle).
+        const rp = s.reg(p.camp).ballon;
+        if (this.decisionA > s.temps + rp.reactionPressionS && s.joueurs.some((o) => o.camp !== p.camp && o.poste.id !== "G" && dist(o.pos, p.pos) < rp.pressionM)) {
+          this.decisionA = s.temps + rp.reactionPressionS;
+        }
       }
       if (this.arrete === "engagement") {
         this.placerPartenaire(p.camp, p); // un coéquipier à côté pour recevoir l'engagement

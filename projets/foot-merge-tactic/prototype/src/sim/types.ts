@@ -272,7 +272,28 @@ export interface Reglages {
     pauseArretS: { min: number; max: number };
     centre: { zoneProfondeurM: number; ecartAxeM: number; proba: number; dureeS: number; erreurDeg: number; partEnLAir: number };
     degagement: { zoneM: number; longueurMinM: number; longueurMaxM: number; dureeS: number; erreurDeg: number };
-    construction: { boucheM: number; baisseSeuil: number; largeurM: number; bonusLargeur: number };
+    /** Construction : avant bouché (adversaire dans un cône de boucheM) → seuil
+     *  de passe baissé de baisseSeuil (circulation) et le porteur temporise
+     *  (il n'avance que de temporiseM au lieu de foncer). Passe dans la surface
+     *  adverse : receveur à surfaceOuvertM au moins de tout adversaire, voie
+     *  libre × surfaceVoieFacteur, note diminuée de surfaceMalus. */
+    construction: {
+      boucheM: number;
+      baisseSeuil: number;
+      largeurM: number;
+      bonusLargeur: number;
+      temporiseM: number;
+      /** En temporisant, il s'écarte de ecartM de l'adversaire le plus proche. */
+      ecartM: number;
+      surfaceOuvertM: number;
+      surfaceVoieFacteur: number;
+      surfaceMalus: number;
+    };
+    /** Tir de loin (hors surface, à moins de tirDistanceM) : chance à chaque
+     *  décision = probaBase + probaMax × (1 − distance / tirDistanceM). */
+    tirLoin: { probaBase: number; probaMax: number };
+    /** Un adversaire à moins de pressionM : le porteur décide dans ce délai (s). */
+    reactionPressionS: number;
     marquage: { declenchementM: number; zoneM: number; demiLargeurM: number; rayonM: number; distanceM: number; milieux: boolean; zonePressingM: number };
     /** Probabilité de passer quand même à un joueur hors-jeu. */
     horsJeuVuProba: number;

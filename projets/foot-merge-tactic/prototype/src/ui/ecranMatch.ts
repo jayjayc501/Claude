@@ -478,8 +478,9 @@ export class EcranMatch {
         height: 49 * K,
         filter: fusions ? `url(#match-aura-${Math.min(3, fusions)})` : undefined,
       }, g);
-      // Avant de l'anneau redessiné par-dessus : le socle reste le même pour
-      // tous, seule la flamme (aura) autour de la figurine est colorée (12/11).
+      // Avant de l'anneau redessiné par-dessus : socle à la couleur de
+      // l'équipe (bleu ou rouge, comme le maillot), la flamme (aura) autour de
+      // la figurine garde la couleur de la fusion (12/11).
       svg("path", { d: `M ${-17 * K} 0 A ${17 * K} ${5 * K} 0 0 0 ${17 * K} 0`, class: "match-socle" }, g);
     } else {
       svg("circle", { cy: -14, r: 9, fill: camp === 0 ? "#3563C0" : COULEUR_EUX, stroke: "#fff", "stroke-width": 1.5 }, g);

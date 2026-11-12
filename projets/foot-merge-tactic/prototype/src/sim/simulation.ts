@@ -511,7 +511,7 @@ export class MatchSim {
       // En transition, seuls les joueurs loin de leur place sprintent (repli,
       // projection) ; les autres trottent ou courent pour se replacer.
       // Contre-attaque : toute l'équipe qui récupère se projette en sprint.
-      const transition = this.temps < j.sprintJusqua && d > (j.phase === "attaque" ? al.toleranceM / 2 : al.toleranceM);
+      const transition = this.temps < j.sprintJusqua && (j.phase === "attaque" || d > al.toleranceM);
       // Pris devant sa place (ballon joué derrière lui) : il se replace vite,
       // côté but (défense de couverture).
       const recule = (j.cible.y - j.pos.y) * (j.camp === 0 ? 1 : -1) < -al.reculUrgentM;

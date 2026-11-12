@@ -9,6 +9,7 @@
 import type { Donnees } from "./donnees";
 import { hauteurLigneDefensiveM, lignesAttaqueM, projeter, type LignesTenues } from "./projection";
 import { BallonReel } from "./ballon";
+import { type EffetJoueur, type Influences, type OptionsInfluences, chargerInfluences, effetJoueur, paliersAtteints, reglagesEquipe } from "./influences";
 import { Aleatoire } from "./rng";
 import type { Cellule, Equipe, Joueur, Phase, Placement, PointM, PointNorm, Poste, Reglages } from "./types";
 
@@ -46,6 +47,8 @@ export interface JoueurSim {
   facteur: number;
   /** Part fixe de son temps de perception du ballon (secondes). */
   perceptionS: number;
+  /** Effet individuel de son style (vitesse, pressing, tacle…) ; neutre sans style. */
+  effet: EffetJoueur;
 }
 
 export class MatchSim {
@@ -68,6 +71,15 @@ export class MatchSim {
   lignesDef: [number | null, number | null] = [null, null];
   /** Plus grand déplacement d'un joueur pendant un pas (contrôle anti-téléportation). */
   maxDeplacementParPas = 0;
+  /** Temps passé avec le ballon par chaque camp (secondes). */
+  tempsPossession: [number, number] = [0, 0];
+  /** Tactique de chaque équipe (modifiable en plein match). */
+  tactiques: [string, string];
+  /** Tactiques et styles actifs ou non (pour comparer). */
+  options: OptionsInfluences = { tactiques: true, styles: true };
+  readonly influences: Influences;
+  /** Réglages de chaque équipe : base + tactique + paliers de styles. */
+  private regs: [Reglages, Reglages];
 
   private rng: Aleatoire;
   private prochainChangement = Infinity;
@@ -85,6 +97,9 @@ export class MatchSim {
     ballonReel = false,
   ) {
     this.rng = new Aleatoire(graine);
+    this.influences = chargerInfluences();
+    this.tactiques = [equipes[0].tactique ?? "EQU", equipes[1].tactique ?? "EQU"];
+    this.regs = [reglages, reglages];
     this.balle = ballonReel ? new BallonReel(this, graine) : null;
     this.ballon = this.centre();
     this.cibleBallon = this.centre();
@@ -116,9 +131,38 @@ export class MatchSim {
           plongeJusqua: 0,
           facteur: 1 + this.rng.entre(-v, v),
           perceptionS: this.rng.entre(reglages.mouvement.perception.minS, reglages.mouvement.perception.maxS),
+          effet: effetJoueur(joueur, this.influences, this.options),
         });
       }
     });
+    this.recalculerInfluences();
+  }
+
+  /** Réglages de l'équipe `camp` (tactique et paliers de styles compris). */
+  reg(camp: Camp): Reglages {
+    return this.regs[camp];
+  }
+
+  /** Change la tactique d'une équipe, même en plein match. */
+  definirTactique(camp: Camp, tactique: string): void {
+    this.tactiques[camp] = tactique;
+    this.recalculerInfluences();
+  }
+
+  /** Active ou coupe les tactiques et les styles (pour mesurer leur effet). */
+  definirOptions(options: Partial<OptionsInfluences>): void {
+    this.options = { ...this.options, ...options };
+    this.recalculerInfluences();
+  }
+
+  /** Styles dont le palier est atteint par une équipe (vide si les styles sont coupés). */
+  paliers(camp: Camp): string[] {
+    return this.options.styles ? paliersAtteints(this.equipes[camp], this.equipes[camp].composition, this.influences) : [];
+  }
+
+  private recalculerInfluences(): void {
+    for (const camp of [0, 1] as const) this.regs[camp] = reglagesEquipe(this.reglages, this.equipes[camp], this.tactiques[camp], this.influences, this.options);
+    for (const j of this.joueurs) j.effet = effetJoueur(j.joueur, this.influences, this.options);
   }
 
   private centre(): PointM {
@@ -170,6 +214,7 @@ export class MatchSim {
     if (!this.demarre) return;
     const dt = this.reglages.pasDeTempsS;
     this.temps += dt;
+    this.tempsPossession[this.possession] += dt;
     this.gererPossession();
     if (this.balle) this.balle.pas(dt);
     else this.deplacerBallon(dt);
@@ -199,12 +244,11 @@ export class MatchSim {
       this.prochaineCible = this.temps;
     }
     // Chaque joueur bascule quand il a réagi, puis part en course de transition.
-    const sprint = this.reglages.transition.sprint;
     for (const j of this.joueurs) {
       if (j.reagitA === null || this.temps < j.reagitA) continue;
       j.phase = j.camp === this.possession ? "attaque" : "defense";
       j.reagitA = null;
-      j.sprintJusqua = this.temps + sprint.dureeMaxS;
+      j.sprintJusqua = this.temps + this.reg(j.camp).transition.sprint.dureeMaxS;
     }
     // La forme de l'équipe change dès que son premier joueur a réagi.
     for (const camp of [0, 1] as const) {
@@ -272,22 +316,23 @@ export class MatchSim {
    *  vitesses du réglage. Ne dépend que du ballon et du temps, jamais des
    *  positions des joueurs (pas de boucle). */
   private tenirLignes(dt: number): void {
-    const l = this.reglages.projection.defense.ligneDefensive;
     const L = this.donnees.longueurM;
     for (const camp of [0, 1] as const) {
+      const R = this.reg(camp);
+      const l = R.projection.defense.ligneDefensive;
       const defend = this.joueurs.filter((j) => j.camp === camp && j.phase === "defense").length;
       if (defend === 0) {
         this.lignesDef[camp] = null;
         continue;
       }
       const ballon = this.versRepere(camp, this.ballon);
-      const voulue = hauteurLigneDefensiveM(ballon, this.reglages, L);
+      const voulue = hauteurLigneDefensiveM(ballon, R, L);
       let h = this.lignesDef[camp];
       if (h === null) {
         // Elle vient de perdre le ballon : sa ligne part de la hauteur où
         // jouaient ses défenseurs (forme d'attaque), sinon de sa place.
         const attaquait = defend < this.joueurs.filter((j) => j.camp === camp).length;
-        h = attaquait ? lignesAttaqueM(ballon, this.reglages, L).arriereM : voulue;
+        h = attaquait ? lignesAttaqueM(ballon, R, L).arriereM : voulue;
       }
       // Ballon qui arrive sur la ligne : elle recule vite (les défenseurs se
       // retournent et courent), sinon pas à pas (transitions groupées).
@@ -333,7 +378,7 @@ export class MatchSim {
     for (const j of this.joueurs) {
       const vu = this.jeuPercu(j);
       const ballonRepere = this.versRepere(j.camp, vu.ballon);
-      const p = projeter(j.cellule.centre, j.poste, j.phase, ballonRepere, this.reglages, this.donnees.longueurM, this.lignesTenues(j.camp, vu.lignesDef));
+      const p = projeter(j.cellule.centre, j.poste, j.phase, ballonRepere, this.reg(j.camp), this.donnees.longueurM, this.lignesTenues(j.camp, vu.lignesDef));
       j.cible = this.versAbsolu(j.camp, p);
     }
     for (const camp of [0, 1] as const) this.espacerLignes(camp);
@@ -344,8 +389,8 @@ export class MatchSim {
    *  on garde l'ordre gauche-droite et un écart minimal entre voisins
    *  (6 à 8 m chez les entraîneurs, voir docs/reference-football.md §3). */
   private espacerLignes(camp: Camp): void {
-    const ecart = this.reglages.projection.defense.ecartMinDansLigneM;
-    const bornes = this.reglages.projection.defense.largeurLigneBornesM;
+    const ecart = this.reg(camp).projection.defense.ecartMinDansLigneM;
+    const bornes = this.reg(camp).projection.defense.largeurLigneBornesM;
     const W = this.donnees.largeurM;
     for (const ligne of ["defense", "milieu", "attaque"] as const) {
       const js = this.joueurs
@@ -385,7 +430,7 @@ export class MatchSim {
       const plonge = this.temps < j.plongeJusqua;
       const vMax = plonge
         ? this.reglages.ballon.tir.plongeonVitesseMS
-        : (this.temps < j.sprintJusqua ? this.reglages.transition.sprint.vitesseMS : m.vitesseMaxMS) * j.facteur * conduit;
+        : (this.temps < j.sprintJusqua ? this.reg(j.camp).transition.sprint.vitesseMS : m.vitesseMaxMS) * j.facteur * j.effet.vitesse * conduit;
       // 1. Course : vers la cible, en freinant à l'approche, accélération limitée.
       const dx = j.cible.x - j.pos.x;
       const dy = j.cible.y - j.pos.y;

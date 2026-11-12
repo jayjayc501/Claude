@@ -111,7 +111,7 @@ h2 { font-size: 15px; font-weight: 600; margin: 14px 0 6px; }
 .rond { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 .rond-nous { background: var(--nous); }
 .rond-eux { background: var(--eux); margin-left: 6px; }
-.commandes { display: flex; gap: 8px; margin-bottom: 8px; }
+.commandes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 .commandes .bouton { flex: 1; }
 .etiquette { font-size: 13px; color: var(--texte-2); }
 .segments { display: flex; gap: 6px; margin: 4px 0 10px; }
@@ -262,3 +262,7 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .prepa-tactique-valeur { font-size: 14px; font-weight: 700; color: #16201A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Liste native invisible par-dessus (16 px : sinon l'iPhone zoome quand on la touche). */
 .prepa-tactique select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; cursor: pointer; }
+.influences { flex-wrap: wrap; }
+.choix-tactique { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--texte-2); }
+.choix-tactique select { font: inherit; font-size: 16px; color: var(--texte); background: var(--carte); border: 1px solid var(--bord); border-radius: 8px; min-height: 36px; padding: 0 4px; max-width: 9.5em; }
+.infos-influences { font-size: 12px; min-height: 2.8em; }

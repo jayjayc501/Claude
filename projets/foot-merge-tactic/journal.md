@@ -327,3 +327,38 @@ Demandes du concepteur : « ajouter la possibilité d'ajouter une tactique : Pre
 - (suite) Pictogramme du Récupérateur : **poing fermé vu de face** (4 doigts repliés, pouce en travers), sans bras : le bras « n'était pas compréhensible » (concepteur).
 - (suite) Le concepteur veut un pictogramme plus facile à identifier : **aimant penché** (🧲, pôles pleins) pour le Récupérateur, qui « aimante » le ballon.
 - (suite) Aimant mis à la verticale, pôles en haut (demande du concepteur).
+
+## 12/11/2026 (suite) — Tactiques et styles dans le moteur
+
+Demande du concepteur : « tout d'un coup », avec un bouton qui active ou désactive tactiques et styles, et un moyen de changer de tactique en plein match pour valider l'impact. Référence relue : §3 (le bloc), §4 (pressing, contre-pressing), §5, §7.
+- **Principe** : tactiques et styles ne réécrivent pas le moteur, ils modulent ses réglages, équipe par équipe (`src/sim/influences.ts`, chiffres dans `src/data/influences.json`, **PROPOSITION**). Sans tactique (Équilibrée) ni style, réglages de base inchangés : les 87 tests du moteur donnent exactement les mêmes résultats.
+- **Tactiques** :
+  - Pressing : bloc haut (ligne 24 à 46 m, 13 m derrière le ballon), lignes resserrées, pressing déclenché à 17 m, 3 joueurs sortent sur le porteur, tacles plus fréquents, un peu plus de fautes ; **nouveau comportement** : les milieux et attaquants libres ferment les lignes de passe (entre le ballon et les adversaires à moins de 22 m), d'après la référence §4.
+  - Gegenpressing : contre-pressing 7 s, 5 joueurs, rayon 28 m (2 places de plus : extérieur et passe longue), tacles plus fréquents.
+  - Contre : bloc bas (ligne 9 à 25 m, recul plus rapide), pressing à 6 m, 1 seul joueur en contre-pressing, attaquants plus hauts, passes plus verticales et plus longues, plus de passes dans l'espace, sprint de transition plus long et plus rapide.
+  - Tiki-taka : passes de 5 à 24 m, passe plus facile, préférence pour le joueur libre plutôt que l'avancée, rotation dès que l'avant est bouché, moins de tirs de loin, de centres et de dribbles, décisions plus rapides.
+- **Styles** : effet sur le joueur + effet d'équipe à 3 joueurs (palier) :
+  - Récupérateur : presse de plus loin (×1,6), tacle plus (×1,4) / contre-pressing +1 joueur, +2 s ;
+  - Technicien : passes plus précises, dribbles et protection meilleurs / passes plus courtes et plus sûres, rotation ;
+  - Rapide : +8 % de vitesse, dribbles moins sûrs / sprint de transition +2 s, plus de passes dans l'espace ;
+  - Rempart : tacle plus, moins de fautes, relance moins précise / ligne qui recule plus vite.
+- Nouveaux réglages (valeurs de base = comportement d'avant) : `ballon.presseurs` (2), `ballon.poidsProgression` (0,5), `ballon.poidsEspace` (1,2), `ballon.marquage.zonePressingM` (0 = inactif).
+- **Écran du match** : liste de tactique pour chaque équipe (modifiable en plein match), boutons « Tactiques ✓/✗ » et « Styles ✓/✗ », tableau de bord (tactiques, paliers atteints, possession, passes réussies, hauteur des lignes défensives). La tactique de la préparation et les styles des joueurs passent au moteur.
+- **Mesures** (`bun run scripts/mesurer-influences.ts 30 180`) :
+
+```
+30 matchs de 180 s par configuration, contre l'adversaire en Équilibrée (moyennes par match, notre équipe)
+Configuration      Poss.  Passes Réuss.  Tirs  T.rap. T.cont  Buts  B.cont  Ligne  Récup. dont H. Tacles Fautes R.adv. Ch.camp/min
+Équilibrée            53%   25.3     73%    3.9    1.2    4.4   0.43   0.60   30.8    9.1    1.6    0.7    0.7     69%    6.3
+Pressing              52%   25.7     75%    4.4    1.8    3.6   0.37   0.30   36.5    9.0    2.1    1.1    1.1     73%    6.1
+Gegenpressing         53%   26.1     74%    4.1    1.2    4.6   0.50   0.30   31.1    9.3    1.9    0.9    0.8     70%    6.3
+Contre                54%   24.8     64%    4.5    1.3    4.5   0.67   0.47   25.8   10.1    2.0    0.9    0.4     68%    6.9
+Tiki-taka             61%   42.4     86%    3.6    0.7    4.3   0.47   0.50   30.5    7.6    1.4    0.4    0.5     72%    5.2
+3 Récupérateurs       53%   26.1     73%    3.9    1.3    4.6   0.40   0.30   31.1    9.3    2.2    0.8    0.5     69%    6.4
+3 Techniciens         53%   28.0     77%    3.9    0.9    4.4   0.60   0.57   30.6    9.0    1.8    1.2    0.6     73%    6.1
+3 Rapides             52%   23.7     69%    4.4    1.6    4.4   0.40   0.67   30.2    9.2    1.6    0.6    0.7     71%    6.3
+3 Remparts            53%   25.9     68%    3.4    1.2    5.0   0.37   0.50   27.7    9.3    1.6    1.1    0.4     72%    6.3
+```
+
+  Lecture : Pressing = ligne +6 m, plus de récupérations hautes et de tirs rapides, moins de buts encaissés, plus de fautes ; Contre = bloc bas, plus de récupérations, meilleure attaque, passes moins réussies ; Tiki-taka = 61 % de possession, 42 passes à 86 %, moins de changements de camp ; Gegenpressing = moins de buts encaissés ; les styles ont des effets plus faibles (3 joueurs sur 11), à juger en match. Pressing : la réussite des passes adverses ne baisse pas encore (73 % contre 69 %).
+- Tests : 100 verts (6 nouveaux : correctifs, réglages inchangés sans tactique ni style, palier à 3 joueurs, changement de tactique en plein match rejouable, réalisme du bloc (Pressing plus haut, Contre plus bas), réalisme du Tiki-taka). Page vérifiée au format téléphone, aucune erreur.

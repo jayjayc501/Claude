@@ -89,6 +89,8 @@ export interface Joueur {
   nom: string;
   /** Rôles naturels (1 ou 2), par exemple ["DC", "MDC"]. */
   postes: string[];
+  /** Style de jeu (REC, TEC, RAP, REM) ; absent ou null : aucun style. */
+  style?: string | null;
 }
 
 export interface Placement {
@@ -102,6 +104,8 @@ export interface Equipe {
   nationalite: string;
   joueurs: Joueur[];
   composition: Placement[];
+  /** Tactique d'équipe (EQU, PRS, GEG, CON, TIK) ; absente : Équilibrée. */
+  tactique?: string;
 }
 
 export type Phase = "attaque" | "defense";
@@ -190,6 +194,11 @@ export interface Reglages {
     passeMaxM: number;
     voieLibreM: number;
     seuilPasse: number;
+    /** Joueurs qui sortent sur le porteur (le premier presse, les autres couvrent). */
+    presseurs: number;
+    /** Poids du gain vers l'avant et de l'espace autour du receveur dans la note d'une passe. */
+    poidsProgression: number;
+    poidsEspace: number;
     pressionM: number;
     pressingM: number;
     decisionS: { min: number; max: number };
@@ -229,7 +238,7 @@ export interface Reglages {
     centre: { zoneProfondeurM: number; ecartAxeM: number; proba: number; dureeS: number; erreurDeg: number; partEnLAir: number };
     degagement: { zoneM: number; longueurMinM: number; longueurMaxM: number; dureeS: number; erreurDeg: number };
     construction: { boucheM: number; baisseSeuil: number; largeurM: number; bonusLargeur: number };
-    marquage: { declenchementM: number; zoneM: number; demiLargeurM: number; rayonM: number; distanceM: number; milieux: boolean };
+    marquage: { declenchementM: number; zoneM: number; demiLargeurM: number; rayonM: number; distanceM: number; milieux: boolean; zonePressingM: number };
     /** Probabilité de passer quand même à un joueur hors-jeu. */
     horsJeuVuProba: number;
     /** Juste après une perte : les plus proches (dans rayonM) pressent pendant dureeS. */

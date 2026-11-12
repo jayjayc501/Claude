@@ -233,12 +233,13 @@ export class BallonReel {
 
   private tacler(dt: number): void {
     const p = this.porteur!;
-    const t = this.sim.reglages.ballon.tacle;
-    for (const o of this.sim.joueurs) {
+    const s = this.sim;
+    for (const o of s.joueurs) {
       if (o.camp === p.camp || o.poste.id === "G") continue;
+      const t = s.reg(o.camp).ballon.tacle;
       if (dist(o.pos, p.pos) > t.rayonM) continue;
-      const f = this.sim.temps < this.protegeJusqua ? this.sim.reglages.ballon.protection.facteurTacle : 1;
-      if (this.rng.suivant() < 1 - Math.exp(-t.parSeconde * f * dt)) {
+      const f = s.temps < this.protegeJusqua ? s.reg(p.camp).ballon.protection.facteurTacle * p.effet.protection : 1;
+      if (this.rng.suivant() < 1 - Math.exp(-t.parSeconde * o.effet.tacle * f * dt)) {
         this.duelGagne(o);
         return;
       }
@@ -251,7 +252,7 @@ export class BallonReel {
     const s = this.sim;
     const r = s.reglages.ballon;
     const p = this.porteur!;
-    if (this.rng.suivant() >= r.fautes.proba) {
+    if (this.rng.suivant() >= s.reg(o.camp).ballon.fautes.proba * o.effet.fautes) {
       this.stats.tacles[o.camp]++;
       this.donner(o);
       return;
@@ -270,8 +271,8 @@ export class BallonReel {
 
   private decider(): void {
     const s = this.sim;
-    const r = s.reglages.ballon;
     const p = this.porteur!;
+    const r = s.reg(p.camp).ballon; // décisions selon la tactique de son équipe
     const sens = p.camp === 0 ? 1 : -1;
     const W = s.donnees.largeurM;
     const L = s.donnees.longueurM;
@@ -416,7 +417,7 @@ export class BallonReel {
         const ouvert = Math.min(8, Math.min(...adverses.map((a) => dist(a.pos, o.vise))));
         const gain = (o.vise.y - p.pos.y) * sens;
         const large = Math.abs(o.vise.x - W / 2) > r.construction.largeurM && (o.vise.y - L / 2) * sens > -10 ? r.construction.bonusLargeur : 0;
-        const sc = gain * 0.5 + ouvert * 1.2 - dist(p.pos, o.vise) * 0.08 + large + this.rng.entre(-2, 2);
+        const sc = gain * r.poidsProgression + ouvert * r.poidsEspace - dist(p.pos, o.vise) * 0.08 + large + this.rng.entre(-2, 2);
         if (sc > score) {
           score = sc;
           meilleur = { q, point: o.point };
@@ -497,10 +498,10 @@ export class BallonReel {
    *  raté, l'adversaire prend le ballon ou le ballon part libre. */
   private dribbler(o: JoueurSim, sens: number): void {
     const s = this.sim;
-    const db = s.reglages.ballon.dribble;
     const p = this.porteur!;
+    const db = s.reg(p.camp).ballon.dribble;
     this.stats.dribbles[p.camp]++;
-    if (this.rng.suivant() < db.probaReussite) {
+    if (this.rng.suivant() < Math.min(0.95, db.probaReussite * p.effet.dribble)) {
       this.stats.dribblesReussis[p.camp]++;
       o.freineJusqua = s.temps + db.eliminationS;
       p.sprintJusqua = Math.max(p.sprintJusqua, s.temps + db.eliminationS);
@@ -524,8 +525,8 @@ export class BallonReel {
   }
 
   private passer(q: JoueurSim, presse = false, point: PointM | null = null, anticipe = true): void {
-    const r = this.sim.reglages.ballon;
     const p = this.porteur!;
+    const r = this.sim.reg(p.camp).ballon;
     const d = dist(p.pos, point ?? q.pos);
     let v = Math.min(r.vitessePasseMaxMS, r.vitessePasseMinMS + r.vitessePasseParMetre * d);
     if (point) {
@@ -541,7 +542,7 @@ export class BallonReel {
     const dy = cible.y - this.sim.ballon.y;
     const n = Math.hypot(dx, dy) || 1;
     const gene = presse ? r.imprecision.sousPressionFacteur : 1; // passe jouée sous pression : moins précise
-    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * gene * Math.PI) / 180) * this.rng.entre(-1, 1);
+    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * gene * p.effet.imprecision * Math.PI) / 180) * this.rng.entre(-1, 1);
     const c = Math.cos(erreur);
     const si = Math.sin(erreur);
     this.stats.passes[p.camp]++;
@@ -773,11 +774,14 @@ export class BallonReel {
    *  défenseur libre suit un attaquant dangereux, côté but, à 1,5 m. */
   private marquer(campDef: Camp): void {
     const s = this.sim;
-    const m = s.reglages.ballon.marquage;
+    const m = s.reg(campDef).ballon.marquage;
     const W = s.donnees.largeurM;
     const L = s.donnees.longueurM;
     const but = { x: W / 2, y: campDef === 0 ? 0 : L };
-    if (dist(s.ballon, but) > m.declenchementM) return;
+    if (dist(s.ballon, but) > m.declenchementM) {
+      this.fermerLignes(campDef, m.zonePressingM, m.rayonM);
+      return;
+    }
     const dangereux = s.joueurs
       .filter((a) => a.camp !== campDef && a.poste.id !== "G" && a !== this.porteur && dist(a.pos, but) < m.zoneM && Math.abs(a.pos.x - W / 2) < m.demiLargeurM)
       .sort((a, b) => dist(a.pos, but) - dist(b.pos, but));
@@ -790,6 +794,28 @@ export class BallonReel {
       const n = dist(a.pos, but) || 1;
       meilleur.cible = { x: a.pos.x + ((but.x - a.pos.x) / n) * m.distanceM, y: a.pos.y + ((but.y - a.pos.y) / n) * m.distanceM };
       meilleur.auBallon = true; // il colle son attaquant (évitement réduit)
+    }
+  }
+
+  /** Pressing (référence §4) : pendant qu'un joueur presse le porteur, les
+   *  milieux et attaquants libres ferment les lignes de passe en se plaçant
+   *  entre le ballon et les adversaires proches. Inactif si zone = 0. */
+  private fermerLignes(campDef: Camp, zoneM: number, rayonM: number): void {
+    const s = this.sim;
+    const p = this.porteur;
+    if (zoneM <= 0 || !p || p.camp === campDef) return;
+    const solutions = s.joueurs
+      .filter((a) => a.camp !== campDef && a !== p && a.poste.id !== "G" && dist(a.pos, s.ballon) < zoneM)
+      .sort((a, b) => dist(a.pos, s.ballon) - dist(b.pos, s.ballon));
+    const libres = s.joueurs.filter((d) => d.camp === campDef && !d.auBallon && (d.poste.ligneDefense === "milieu" || d.poste.ligneDefense === "attaque"));
+    for (const a of solutions) {
+      let meilleur: JoueurSim | null = null;
+      for (const d of libres) if (dist(d.pos, a.pos) < rayonM && (!meilleur || dist(d.pos, a.pos) < dist(meilleur.pos, a.pos))) meilleur = d;
+      if (!meilleur) continue;
+      libres.splice(libres.indexOf(meilleur), 1);
+      const n = dist(a.pos, s.ballon) || 1;
+      meilleur.cible = { x: a.pos.x + ((s.ballon.x - a.pos.x) / n) * 2, y: a.pos.y + ((s.ballon.y - a.pos.y) / n) * 2 };
+      meilleur.auBallon = true;
     }
   }
 
@@ -833,7 +859,9 @@ export class BallonReel {
         this.eloigner(p.camp);
         return;
       }
-      const cp = r.contrePressing;
+      const defense: Camp = p.camp === 0 ? 1 : 0;
+      const rd = s.reg(defense).ballon; // pressing selon la tactique de l'équipe qui défend
+      const cp = rd.contrePressing;
       const contre = this.perte !== null && this.perte.camp !== p.camp && s.temps - this.perte.a < cp.dureeS;
       if (contre) {
         // Contre-pressing (référence §4) : juste après la perte, les plus proches
@@ -845,6 +873,8 @@ export class BallonReel {
           { ...s.ballon },
           { x: s.ballon.x, y: s.ballon.y + sens * 5 },
           { x: s.ballon.x + vers * 5, y: s.ballon.y + sens * 2 },
+          { x: s.ballon.x - vers * 5, y: s.ballon.y + sens * 2 }, // contre-pressing renforcé : ferme l'extérieur
+          { x: s.ballon.x, y: s.ballon.y + sens * 10 }, // et la passe longue vers l'avant
         ];
         s.joueurs
           .filter((j) => j.camp !== p.camp && j.poste.id !== "G" && dist(j.pos, p.pos) < cp.rayonM)
@@ -860,12 +890,17 @@ export class BallonReel {
       // Pressing normal (référence §4) : le plus proche presse le porteur, le
       // suivant couvre entre le porteur et le but ; les autres tiennent leur place.
       const presseurs = s.joueurs
-        .filter((j) => j.camp !== p.camp && j.poste.id !== "G" && dist(j.pos, p.pos) < r.pressingM)
+        .filter((j) => j.camp !== p.camp && j.poste.id !== "G" && dist(j.pos, p.pos) < rd.pressingM * j.effet.pressing)
         .sort((a, b) => dist(a.pos, p.pos) - dist(b.pos, p.pos))
-        .slice(0, 2);
+        .slice(0, rd.presseurs);
+      // 1er : sur le porteur ; 2e : couvre vers le but ; 3e (pressing haut) : ferme la passe vers l'intérieur.
+      const vers = W / 2 - s.ballon.x > 0 ? 1 : -1;
       presseurs.forEach((j, i) => {
         j.auBallon = i === 0;
-        j.cible = i === 0 ? { ...s.ballon } : { x: s.ballon.x + (W / 2 - s.ballon.x) * 0.2, y: s.ballon.y + sens * 6 };
+        j.cible =
+          i === 0 ? { ...s.ballon }
+          : i === 1 ? { x: s.ballon.x + (W / 2 - s.ballon.x) * 0.2, y: s.ballon.y + sens * 6 }
+          : { x: s.ballon.x + vers * 7, y: s.ballon.y + sens * 3 };
       });
       return;
     }

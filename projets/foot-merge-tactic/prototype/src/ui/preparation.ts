@@ -112,8 +112,9 @@ export class Preparation {
     return {
       nom: "Votre équipe",
       nationalite: "Plusieurs",
-      joueurs: this.etat.effectif.map((m) => ({ id: m.id, nom: this.fiche(m.id).nom, postes: [this.fiche(m.id).poste] })),
+      joueurs: this.etat.effectif.map((m) => ({ id: m.id, nom: this.fiche(m.id).nom, postes: [this.fiche(m.id).poste], style: this.fiche(m.id).style })),
       composition: this.etat.composition.map((p) => ({ ...p })),
+      tactique: this.etat.tactique,
     };
   }
 
@@ -233,7 +234,7 @@ export class Preparation {
     const t = this.d.tactiques.find((x) => x.code === code);
     if (!t) return { ok: false, erreur: "Tactique inconnue." };
     this.etat = { ...this.etat, tactique: code };
-    return { ok: true, etat: this.etat, message: `Tactique : ${t.nom} (${t.aide}). Pas encore d'effet sur le match.` };
+    return { ok: true, etat: this.etat, message: `Tactique : ${t.nom} (${t.aide}).` };
   }
 
   /** Composition prête pour le match ? */

@@ -69,7 +69,7 @@ function demarrer(): void {
   const ongletMatch = html("button", { type: "button", class: "onglet" }, onglets, "Match");
   const contenu = html("main", {}, app);
 
-  const match = new EcranMatch(donnees, reglages, equipes);
+  const match = new EcranMatch(donnees, reglages, equipes, prepa.d.tactiques, prepa.d.styles);
   const preparation = new EcranPreparation(prepa, () => {
     ecrire(prepa.etat.composition);
     try {

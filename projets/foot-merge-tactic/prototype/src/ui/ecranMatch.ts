@@ -1,9 +1,10 @@
 // Écran de match : terrain entier, vertical. Votre équipe attaque vers le haut.
-// Les joueurs partent de leurs positions de coup d'envoi, puis montent ou
-// redescendent selon une possession simulée (pas encore de vrai jeu).
+// Tactique de chaque équipe modifiable en plein match, tactiques et styles
+// activables ou non, pour juger leur effet (proposition du 12/11).
 
 import type { Donnees } from "../sim/donnees";
 import { projeterRect } from "../sim/projection";
+import type { OptionsInfluences } from "../sim/influences";
 import { MatchSim, type ModePossession } from "../sim/simulation";
 import type { Equipe, Reglages } from "../sim/types";
 import { dessinerLignes, html, svg } from "./dom";
@@ -39,11 +40,18 @@ export class EcranMatch {
   private boutonPause!: HTMLButtonElement;
   private boutonZones!: HTMLButtonElement;
   private boutonsMode: Record<ModePossession, HTMLButtonElement> = {} as Record<ModePossession, HTMLButtonElement>;
+  /** Tactiques et styles actifs (gardés d'un match à l'autre). */
+  private options: OptionsInfluences = { tactiques: true, styles: true };
+  /** Tactique choisie sur cet écran pour chaque équipe (null : celle de l'équipe). */
+  private tactiquesForcees: [string | null, string | null] = [null, null];
+  private infos!: HTMLElement;
 
   constructor(
     private donnees: Donnees,
     private reglages: Reglages,
     private equipes: () => [Equipe, Equipe],
+    private listeTactiques: { code: string; nom: string }[] = [],
+    private nomsStyles: Record<string, string> = {},
   ) {
     this.racine = html("section", { class: "ecran" });
   }
@@ -54,6 +62,7 @@ export class EcranMatch {
   /** Appelé à l'ouverture de l'écran : nouveau match au coup d'envoi. */
   ouvrir(): void {
     this.actif = true;
+    this.tactiquesForcees = [null, null]; // la tactique choisie en préparation s'applique
     this.nouveauMatch();
     this.dernier = performance.now();
     requestAnimationFrame((t) => this.boucle(t));
@@ -65,6 +74,10 @@ export class EcranMatch {
 
   private nouveauMatch(): void {
     this.sim = new MatchSim(this.donnees, this.reglages, this.equipes(), this.graine, true);
+    this.sim.definirOptions(this.options);
+    this.tactiquesForcees.forEach((t, camp) => {
+      if (t) this.sim.definirTactique(camp as 0 | 1, t);
+    });
     this.reserve = 0;
     this.construire();
   }
@@ -113,6 +126,41 @@ export class EcranMatch {
       this.dessiner();
     });
 
+    // Tactiques (modifiables en plein match) et interrupteurs tactiques / styles.
+    const c2 = html("div", { class: "commandes influences" }, r);
+    (["Vous", "Eux"] as const).forEach((qui, camp) => {
+      const l = html("label", { class: "choix-tactique" }, c2);
+      html("span", {}, l, qui);
+      const sel = html("select", { "aria-label": `Tactique : ${qui === "Vous" ? "votre équipe" : "adversaire"}` }, l);
+      for (const t of this.listeTactiques) {
+        const o = html("option", { value: t.code }, sel, t.nom);
+        o.selected = t.code === this.sim.tactiques[camp];
+      }
+      sel.disabled = !this.options.tactiques;
+      sel.addEventListener("change", () => {
+        this.tactiquesForcees[camp] = sel.value;
+        this.sim.definirTactique(camp as 0 | 1, sel.value);
+        this.majInfos(true);
+      });
+    });
+    for (const cle of ["tactiques", "styles"] as const) {
+      const b = html("button", { type: "button", class: "bouton bouton-court" }, c2, cle === "tactiques" ? "Tactiques" : "Styles");
+      const maj = () => {
+        b.classList.toggle("bouton-actif", this.options[cle]);
+        b.setAttribute("aria-pressed", String(this.options[cle]));
+        b.textContent = `${cle === "tactiques" ? "Tactiques" : "Styles"} ${this.options[cle] ? "✓" : "✗"}`;
+      };
+      maj();
+      b.addEventListener("click", () => {
+        this.options = { ...this.options, [cle]: !this.options[cle] };
+        this.sim.definirOptions(this.options);
+        for (const sel of c2.querySelectorAll("select")) sel.disabled = !this.options.tactiques;
+        maj();
+        this.majInfos(true);
+      });
+    }
+    this.infos = html("p", { class: "note infos-influences", "aria-live": "off" }, r);
+
     const s = svg("svg", {
       viewBox: `0 0 ${68 * ECHELLE + 2 * MARGE} ${105 * ECHELLE + 2 * MARGE}`,
       class: "terrain",
@@ -142,7 +190,7 @@ export class EcranMatch {
       "p",
       { class: "note" },
       r,
-      "Le ballon est réel : les joueurs le conduisent, le passent, le tirent, l'adversaire l'intercepte ou le tacle. Pas encore de fautes, de hors-jeu ni de corners ; décisions volontairement simples.",
+      "Tactiques et styles : proposition à juger en regardant le match. Coupez-les ou changez de tactique en plein match pour voir la différence.",
     );
 
     this.majCommandes();
@@ -198,7 +246,7 @@ export class EcranMatch {
       for (const j of sim.joueurs) {
         if (j.camp !== 0 || vus.has(j.poste.id)) continue;
         vus.add(j.poste.id);
-        const r = projeterRect(j.poste.rect, j.poste, sim.phases[0], ballon, this.reglages, this.donnees.longueurM, sim.lignesTenues(0));
+        const r = projeterRect(j.poste.rect, j.poste, sim.phases[0], ballon, sim.reg(0), this.donnees.longueurM, sim.lignesTenues(0));
         const a = sim.versAbsolu(0, { x: r.x, y: r.y + r.h });
         svg("rect", {
           x: this.X(a.x),
@@ -247,5 +295,27 @@ export class EcranMatch {
       texte = `${qui} : ${etat}`;
     }
     if (this.statut.textContent !== texte) this.statut.textContent = texte;
+    this.majInfos();
+  }
+
+  private derniereMajInfos = 0;
+
+  /** Tableau de bord des influences : tactiques, paliers de styles, possession, hauteur des lignes. */
+  private majInfos(force = false): void {
+    const sim = this.sim;
+    if (!force && performance.now() - this.derniereMajInfos < 500) return;
+    this.derniereMajInfos = performance.now();
+    const nom = (code: string) => this.listeTactiques.find((t) => t.code === code)?.nom ?? code;
+    const paliers = (camp: 0 | 1) => sim.paliers(camp).map((p) => this.nomsStyles[p] ?? p).join(", ") || "aucun";
+    const total = sim.tempsPossession[0] + sim.tempsPossession[1];
+    const poss = total > 0 ? `${Math.round((100 * sim.tempsPossession[0]) / total)} %` : "—";
+    const ligne = (camp: 0 | 1) => (sim.lignesDef[camp] === null ? "—" : `${Math.round(sim.lignesDef[camp]!)} m`);
+    const st = sim.balle?.stats;
+    const reussite = (camp: 0 | 1) => (st && st.passes[camp] ? `${Math.round((100 * st.passesReussies[camp]) / st.passes[camp])} %` : "—");
+    const t = this.options.tactiques ? `${nom(sim.tactiques[0])} contre ${nom(sim.tactiques[1])}` : "tactiques coupées";
+    const texte =
+      `${t} · paliers de styles : ${this.options.styles ? paliers(0) : "styles coupés"}. ` +
+      `Possession ${poss} · passes réussies ${reussite(0)} / ${reussite(1)} · ligne défensive ${ligne(0)} / ${ligne(1)} (vous / eux).`;
+    if (this.infos.textContent !== texte) this.infos.textContent = texte;
   }
 }

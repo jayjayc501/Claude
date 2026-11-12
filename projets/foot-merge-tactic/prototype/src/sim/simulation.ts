@@ -10,8 +10,9 @@ import type { Donnees } from "./donnees";
 import { hauteurLigneDefensiveM, lignesAttaqueM, projeter, type LignesTenues } from "./projection";
 import { BallonReel } from "./ballon";
 import { type EffetJoueur, type Influences, type OptionsInfluences, chargerInfluences, effetJoueur, paliersAtteints, reglagesEquipe } from "./influences";
+import { PARAMETRES_NOTES, notesDe } from "./notes";
 import { Aleatoire } from "./rng";
-import type { Cellule, Equipe, Joueur, Phase, Placement, PointM, PointNorm, Poste, Reglages } from "./types";
+import type { Cellule, Equipe, Joueur, Notes, Phase, Placement, PointM, PointNorm, Poste, Reglages } from "./types";
 
 export type Camp = 0 | 1;
 
@@ -45,6 +46,11 @@ export interface JoueurSim {
   /** Écart individuel de vitesse et d'accélération, en attendant l'attribut
    *  « vitesse » : deux joueurs ne courent jamais exactement pareil. */
   facteur: number;
+  /** Sous-notes du joueur (référence 65 quand elles manquent). */
+  notes: Notes;
+  /** Vitesse et accélération : écart individuel × notes de pointe et d'accélération. */
+  vitesseF: number;
+  accelF: number;
   /** Part fixe de son temps de perception du ballon (secondes). */
   perceptionS: number;
   /** Effet individuel de son style (vitesse, pressing, tacle…) ; neutre sans style. */
@@ -124,6 +130,10 @@ export class MatchSim {
         const cellule = donnees.cellule(placement.poste, placement.cellule);
         const pos = this.versAbsolu(camp, cellule.centre);
         const v = reglages.mouvement.variationIndividuelle;
+        const facteur = 1 + this.rng.entre(-v, v);
+        const perceptionS = this.rng.entre(reglages.mouvement.perception.minS, reglages.mouvement.perception.maxS);
+        const notes = notesDe(joueur);
+        const pn = PARAMETRES_NOTES;
         this.joueurs.push({
           camp,
           joueur,
@@ -140,8 +150,11 @@ export class MatchSim {
           auBallon: false,
           depart: { ...pos },
           plongeJusqua: 0,
-          facteur: 1 + this.rng.entre(-v, v),
-          perceptionS: this.rng.entre(reglages.mouvement.perception.minS, reglages.mouvement.perception.maxS),
+          facteur,
+          notes,
+          vitesseF: facteur * (1 + (notes.pointe - pn.reference) * pn.vitesse.pointeParPoint),
+          accelF: facteur * (1 + (notes.acceleration - pn.reference) * pn.vitesse.accelerationParPoint),
+          perceptionS,
           effet: effetJoueur(joueur, this.influences, this.options),
           ciblePrec: { ...pos },
           vitCible: { x: 0, y: 0 },
@@ -489,7 +502,7 @@ export class MatchSim {
       const plonge = this.temps < j.plongeJusqua;
       const vMax = plonge
         ? this.reglages.ballon.tir.plongeonVitesseMS
-        : (this.temps < j.sprintJusqua ? this.reg(j.camp).transition.sprint.vitesseMS : m.vitesseMaxMS) * j.facteur * j.effet.vitesse * conduit;
+        : (this.temps < j.sprintJusqua ? this.reg(j.camp).transition.sprint.vitesseMS : m.vitesseMaxMS) * j.vitesseF * j.effet.vitesse * conduit;
       // 1. Course vers la cible (allures, 12/11) : on suit sa place qui bouge
       //    (vitesse de la cible, lissée) et on rattrape l'écart en douceur :
       //    marche pour un petit écart, trot, course ; pleine vitesse seulement
@@ -518,7 +531,7 @@ export class MatchSim {
       // Près du ballon, ou en route vers l'action (sa place est près du ballon) : on y va franchement.
       const versAction = Math.hypot(j.cible.x - this.ballon.x, j.cible.y - this.ballon.y) < al.zoneActiveM * 0.75;
       const actif = plonge || j.auBallon || transition || recule || versAction || Math.hypot(j.pos.x - this.ballon.x, j.pos.y - this.ballon.y) < al.zoneActiveM;
-      const plafond = actif ? vMax : Math.min(vMax, (al.courseMS + Math.max(0, d - al.toleranceM) * al.rattrapageParM) * j.facteur);
+      const plafond = actif ? vMax : Math.min(vMax, (al.courseMS + Math.max(0, d - al.toleranceM) * al.rattrapageParM) * j.vitesseF);
       let vx = 0;
       let vy = 0;
       const tau = actif ? al.reponseRapideS : al.reponseS;
@@ -534,7 +547,7 @@ export class MatchSim {
       const a = Math.hypot(ax, ay);
       // On freine (ou on se retourne) plus fort qu'on n'accélère.
       const freine = ax * j.vit.x + ay * j.vit.y < 0;
-      const aMax = (freine ? m.freinageMS2 : m.accelerationMS2) * j.facteur * dt * (plonge ? 10 : 1);
+      const aMax = (freine ? m.freinageMS2 : m.accelerationMS2) * j.accelF * dt * (plonge ? 10 : 1);
       if (a > aMax) {
         ax = (ax / a) * aMax;
         ay = (ay / a) * aMax;

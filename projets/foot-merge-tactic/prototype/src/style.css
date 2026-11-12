@@ -222,6 +222,7 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .prepa-cible.cible-non { fill: #C2413D; fill-opacity: 0.25; stroke: #C2413D; }
 .prepa-nom rect { fill: #fff; stroke: #FFC400; stroke-width: 2; }
 .prepa-nom text { font-size: 10px; font-weight: 700; text-anchor: middle; fill: #16201A; }
+.prepa-nom text.prepa-nom-notes { font-size: 9px; font-weight: 600; fill: #3A4A40; }
 .prepa-fantome { position: fixed; left: 0; top: 0; width: 56px; height: 57px; pointer-events: none; z-index: 20; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.3)); }
 
 .prepa-banc, .prepa-mercato { background: #fff; border-radius: 14px; outline: 3px solid transparent; outline-offset: -3px; transition: outline-color 0.1s; }

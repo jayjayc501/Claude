@@ -5,6 +5,7 @@
 //
 // Tout reste déterministe (générateur à graine) et indépendant de l'affichage.
 
+import { PARAMETRES_NOTES as PN, decaler } from "./notes";
 import { Aleatoire } from "./rng";
 import type { Camp, JoueurSim, MatchSim } from "./simulation";
 import type { PointM } from "./types";
@@ -323,7 +324,9 @@ export class BallonReel {
       // Contre-pressing : juste après la perte, on va au duel plus franchement.
       const cp = s.reg(o.camp).ballon.contrePressing;
       const contre = this.perte !== null && this.perte.camp === o.camp && s.temps - this.perte.a < cp.dureeS ? cp.tacleFois : 1;
-      if (this.rng.suivant() < 1 - Math.exp(-t.parSeconde * o.effet.tacle * f * contre * dt)) {
+      // Notes : duel du défenseur contre dribble du porteur.
+      const n = Math.exp((o.notes.duel - p.notes.dribble) * PN.physique.tacleParPoint);
+      if (this.rng.suivant() < 1 - Math.exp(-t.parSeconde * o.effet.tacle * f * contre * n * dt)) {
         this.duelGagne(o);
         return;
       }
@@ -336,7 +339,9 @@ export class BallonReel {
     const s = this.sim;
     const r = s.reglages.ballon;
     const p = this.porteur!;
-    if (this.rng.suivant() >= s.reg(o.camp).ballon.fautes.proba * o.effet.fautes) {
+    // Un défenseur dépassé (duel sous le dribble du porteur) fait plus de fautes.
+    const n = Math.exp(-(o.notes.duel - p.notes.dribble) * PN.physique.fautesParPoint);
+    if (this.rng.suivant() >= s.reg(o.camp).ballon.fautes.proba * o.effet.fautes * n) {
       this.stats.tacles[o.camp]++;
       this.donner(o);
       return;
@@ -483,7 +488,8 @@ export class BallonReel {
     const db = r.dribble;
     const devant = adverses.find((o) => o.poste.id !== "G" && dist(o.pos, p.pos) < db.distanceM && (o.pos.y - p.pos.y) * sens > -0.5);
     const tente = p.poste.ligneDefense === "defense" ? db.probaTentative * 0.25 : p.poste.ligneDefense === "gardien" ? 0 : db.probaTentative;
-    if (devant && this.rng.suivant() < tente) {
+    // Notes : on tente plus souvent le 1 contre 1 quand on a l'avantage (dribble et accélération).
+    if (devant && this.rng.suivant() < (tente > 0 ? decaler(tente, this.avantage1c1(p, devant) * PN.unContreUn.poidsTentative) : 0)) {
       this.dribbler(devant, sens);
       return;
     }
@@ -504,8 +510,8 @@ export class BallonReel {
         const d = dist(p.pos, point);
         const gain = (point.y - p.pos.y) * sens;
         if (d < jl.distanceMinM || d > jl.distanceMaxM || gain < jl.gainMinM) continue;
-        const tLui = dist(q.pos, point) / (s.reglages.mouvement.vitesseMaxMS * q.facteur);
-        const tEux = Math.min(...adverses.map((o) => dist(o.pos, point) / (s.reglages.mouvement.vitesseMaxMS * o.facteur)));
+        const tLui = dist(q.pos, point) / (s.reglages.mouvement.vitesseMaxMS * q.vitesseF);
+        const tEux = Math.min(...adverses.map((o) => dist(o.pos, point) / (s.reglages.mouvement.vitesseMaxMS * o.vitesseF)));
         if (tLui + jl.avanceS > Math.max(tEux, T * 0.8)) continue;
         if (!choixJL || gain > choixJL.gain) choixJL = { q, point, gain };
       }
@@ -543,8 +549,8 @@ export class BallonReel {
       if (avance > 0 && q.vit.y * sens > r.passeEspace.courseMinMS && esp.y > 2 && esp.y < L - 2) {
         // L'espace est à lui s'il y arrive nettement avant tout adversaire.
         const vCourse = s.reglages.mouvement.vitesseMaxMS;
-        const tLui = dist(q.pos, esp) / (vCourse * q.facteur);
-        const tEux = Math.min(...adverses.map((o) => dist(o.pos, esp) / (vCourse * o.facteur)));
+        const tLui = dist(q.pos, esp) / (vCourse * q.vitesseF);
+        const tEux = Math.min(...adverses.map((o) => dist(o.pos, esp) / (vCourse * o.vitesseF)));
         if (tLui + r.passeEspace.avanceSurAdversaireS < tEux) options.push({ point: esp, vise: esp });
       }
       const adv: Camp = p.camp === 0 ? 1 : 0;
@@ -596,7 +602,7 @@ export class BallonReel {
     const d = dist(b, point) || 1;
     const k = r.frottementParS;
     const v = Math.min(30, (k * d) / (1 - Math.exp(-k * T)));
-    const e = (this.rng.entre(-1, 1) * angleErreurDeg * Math.PI) / 180;
+    const e = (this.rng.entre(-1, 1) * angleErreurDeg * this.precisionPasse(this.porteur) * Math.PI) / 180;
     const ux = (point.x - b.x) / d;
     const uy = (point.y - b.y) / d;
     this.lancer((ux * Math.cos(e) - uy * Math.sin(e)) * v, (ux * Math.sin(e) + uy * Math.cos(e)) * v);
@@ -658,7 +664,8 @@ export class BallonReel {
     const p = this.porteur!;
     const db = s.reg(p.camp).ballon.dribble;
     this.stats.dribbles[p.camp]++;
-    if (this.rng.suivant() < Math.min(0.95, db.probaReussite * p.effet.dribble)) {
+    // Notes : dribble et accélération du porteur contre duel et accélération du défenseur.
+    if (this.rng.suivant() < decaler(Math.min(0.95, db.probaReussite * p.effet.dribble), this.avantage1c1(p, o))) {
       this.stats.dribblesReussis[p.camp]++;
       o.freineJusqua = s.temps + db.eliminationS;
       p.sprintJusqua = Math.max(p.sprintJusqua, s.temps + db.eliminationS);
@@ -689,7 +696,7 @@ export class BallonReel {
     if (point) {
       // Passe dans l'espace : dosée pour arriver au point quand le receveur y arrive.
       const k = r.frottementParS;
-      const T = dist(q.pos, point) / (this.sim.reglages.mouvement.vitesseMaxMS * q.facteur) + 0.3;
+      const T = dist(q.pos, point) / (this.sim.reglages.mouvement.vitesseMaxMS * q.vitesseF) + 0.3;
       v = Math.max(8, Math.min(r.vitessePasseMaxMS, (k * d) / (1 - Math.exp(-k * T))));
     }
     const t = d / v;
@@ -702,7 +709,7 @@ export class BallonReel {
     const g = this.sim.reg(p.camp === 0 ? 1 : 0).ballon.gene;
     const dAdv = Math.min(...this.sim.joueurs.filter((o) => o.camp !== p.camp && o.poste.id !== "G").map((o) => dist(o.pos, p.pos)));
     const gene = (presse ? r.imprecision.sousPressionFacteur : 1) * (dAdv < g.rayonM ? g.facteur : 1) * this.contrePresse(p).gene;
-    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * gene * p.effet.imprecision * Math.PI) / 180) * this.rng.entre(-1, 1);
+    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * gene * p.effet.imprecision * this.precisionPasse(p) * Math.PI) / 180) * this.rng.entre(-1, 1);
     const c = Math.cos(erreur);
     const si = Math.sin(erreur);
     this.stats.passes[p.camp]++;
@@ -742,13 +749,17 @@ export class BallonReel {
     const gardien = s.joueurs.find((j) => j.camp !== p.camp && j.poste.id === "G");
     const cote = gardien ? (gardien.pos.x > but.x ? -1 : 1) : this.rng.suivant() < 0.5 ? -1 : 1;
     const vise = but.x + cote * this.rng.entre(t.viseMinM, t.viseMaxM);
-    const erreur = penalty ? t.erreurPenaltyM : t.erreurBaseM + t.erreurParMetre * dist(p.pos, but);
+    // Notes : la précision réduit l'erreur de visée, la puissance accélère le tir.
+    const ecartPrecision = p.notes.precision - PN.reference;
+    const precision = ecartPrecision === 0 ? 1 : Math.exp(-ecartPrecision * PN.tir.erreurParPoint);
+    const erreur = (penalty ? t.erreurPenaltyM : t.erreurBaseM + t.erreurParMetre * dist(p.pos, but)) * precision;
     const cible = { x: vise + this.rng.entre(-erreur, erreur), y: but.y };
     const dx = cible.x - s.ballon.x;
     const dy = cible.y - s.ballon.y;
     const n = Math.hypot(dx, dy) || 1;
+    const vTir = r.vitesseTirMS * (1 + (p.notes.puissance - PN.reference) * PN.tir.puissanceParPoint);
     this.stats.tirs[p.camp]++;
-    this.lancer((dx / n) * r.vitesseTirMS, (dy / n) * r.vitesseTirMS);
+    this.lancer((dx / n) * vTir, (dy / n) * vTir);
     this.tirEnCours = true;
     this.tirPenalty = penalty;
     this.plongeon = null;
@@ -758,7 +769,9 @@ export class BallonReel {
     const point = { x: s.ballon.x + dx * Math.max(0, Math.min(1, k)), y: gardien.pos.y };
     const ecart = Math.abs(point.x - gardien.pos.x);
     const loin = t.arretParMetreDistance * Math.max(0, dist(s.ballon, but) - 11); // de loin, le gardien a le temps
-    const proba = penalty ? r.fautes.arretPenaltyProba : Math.max(t.arretMin, Math.min(0.95, t.arretMax - t.arretParMetre * Math.max(0, ecart - 0.5) + loin));
+    const base = penalty ? r.fautes.arretPenaltyProba : Math.max(t.arretMin, Math.min(0.95, t.arretMax - t.arretParMetre * Math.max(0, ecart - 0.5) + loin));
+    // Notes : puissance du tireur contre le gardien (gardien à la référence tant qu'il n'a pas de notes).
+    const proba = decaler(base, (PN.reference - p.notes.puissance) * PN.tir.poidsPuissanceArret);
     this.arret = Math.abs(cible.x - but.x) > DEMI_BUT_M ? "non" : this.rng.suivant() < proba ? "oui" : "non";
     this.plongeon = { gardien, point };
     gardien.plongeJusqua = s.temps + t.plongeonDureeS;
@@ -817,11 +830,16 @@ export class BallonReel {
       if (this.reserve && s.temps < this.reserve.jusqua && j.camp !== this.reserve.camp) continue;
       if (j === this.dernier && s.temps - this.dernierTemps < r.recontactS) continue;
       const gardienAdverse = j.poste.id === "G" && this.tirEnCours && this.dernier !== null && j.camp !== this.dernier.camp;
-      const rayon = j === this.receveur ? r.rayonReceveurM : gardienAdverse ? r.tir.rayonPlongeonM : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM;
+      // Notes : le duel donne la portée sur le ballon (interceptions, ballons disputés, têtes).
+      let portee = this.portee(j);
+      // Passe bien dosée (note de passe du passeur) : plus dure à intercepter.
+      if (this.receveur && this.dernier && j.camp !== this.dernier.camp && j.poste.id !== "G" && this.dernier.notes.passe !== PN.reference)
+        portee *= 1 - (this.dernier.notes.passe - PN.reference) * PN.technique.interceptionParPoint;
+      const rayon = j === this.receveur ? r.rayonReceveurM : gardienAdverse ? r.tir.rayonPlongeonM : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM * portee;
       const d = dist(j.pos, s.ballon);
       if (d > rayon) continue;
       const adverseDuTireur = this.dernier !== null && j.camp !== this.dernier.camp && j.poste.id !== "G";
-      if (adverseDuTireur && !this.tirPenalty && vBalle > r.contre.vitesseMinMS && d <= r.rayonControleM) {
+      if (adverseDuTireur && !this.tirPenalty && vBalle > r.contre.vitesseMinMS && d <= r.rayonControleM * portee) {
         // Ballon rapide qui arrive sur un adversaire : contrôlé, ou dévié (contre).
         if (vBalle > r.vitesseControleMaxMS || this.rng.suivant() > r.contre.probaControle) {
           this.devier(j, vBalle);
@@ -832,8 +850,8 @@ export class BallonReel {
         if (this.arret === "?") this.arret = this.rng.suivant() < (this.tirPenalty ? r.fautes.arretPenaltyProba : r.arretProba) ? "oui" : "non";
         if (this.arret === "non") continue;
       }
-      if (d < meilleurD) {
-        meilleurD = d;
+      if (d / portee < meilleurD) {
+        meilleurD = d / portee;
         gagnant = j;
       }
     }
@@ -862,8 +880,13 @@ export class BallonReel {
     if (gagnant === this.receveur && !this.tirEnCours) {
       // Receveur serré par un adversaire : contrôle parfois raté (pressing, 12/11).
       const g = s.reg(gagnant.camp === 0 ? 1 : 0).ballon.gene;
-      const serre = s.joueurs.some((o) => o.camp !== gagnant!.camp && o.poste.id !== "G" && dist(o.pos, gagnant!.pos) < g.controleRayonM);
-      if (serre && this.rng.suivant() < g.controleRate) {
+      // Notes : dribble du receveur (contrôle sous pression) contre duel de l'adversaire le plus proche.
+      let serre: JoueurSim | null = null;
+      for (const o of s.joueurs) {
+        if (o.camp === gagnant.camp || o.poste.id === "G" || dist(o.pos, gagnant.pos) >= g.controleRayonM) continue;
+        if (!serre || dist(o.pos, gagnant.pos) < dist(serre.pos, gagnant.pos)) serre = o;
+      }
+      if (serre && this.rng.suivant() < decaler(g.controleRate, serre.notes.duel - gagnant.notes.dribble)) {
         const a = this.rng.entre(-Math.PI, Math.PI);
         this.vit = { x: Math.cos(a) * 4, y: Math.sin(a) * 4 };
         this.dernier = gagnant;
@@ -876,6 +899,23 @@ export class BallonReel {
     if (gagnant === this.receveur) this.stats.passesReussies[gagnant.camp]++;
     else if (this.dernier && gagnant.camp !== this.dernier.camp) this.stats.interceptions[gagnant.camp]++;
     this.donner(gagnant);
+  }
+
+  /** Avantage du porteur en 1 contre 1, en points de notes : dribble contre duel,
+   *  plus une part de l'écart d'accélération (la vitesse fait passer). */
+  private avantage1c1(p: JoueurSim, o: JoueurSim): number {
+    return p.notes.dribble - o.notes.duel + PN.unContreUn.poidsVitesse * (p.notes.acceleration - o.notes.acceleration);
+  }
+
+  /** Note de passe : multiplicateur de l'imprécision (1 à la référence). */
+  private precisionPasse(j: JoueurSim | null): number {
+    const e = j ? j.notes.passe - PN.reference : 0;
+    return e === 0 ? 1 : Math.exp(-e * PN.technique.imprecisionPasseParPoint);
+  }
+
+  /** Note de duel : portée sur le ballon (1 à la référence ; gardien : toujours 1). */
+  private portee(j: JoueurSim): number {
+    return j.poste.id === "G" ? 1 : 1 + (j.notes.duel - PN.reference) * PN.physique.porteeParPoint;
   }
 
   private devier(j: JoueurSim, v: number): void {
@@ -934,7 +974,7 @@ export class BallonReel {
 
   /** Premier point de la trajectoire du ballon que ce joueur peut atteindre à temps. */
   private pointInterception(j: JoueurSim): PointM {
-    const vMax = this.sim.reglages.mouvement.vitesseMaxMS * j.facteur;
+    const vMax = this.sim.reglages.mouvement.vitesseMaxMS * j.vitesseF;
     for (let t = 0; t <= 3; t += 1 / 15) {
       const b = this.pointArrivee(t);
       if (dist(j.pos, b) <= vMax * t + this.sim.reglages.ballon.rayonControleM) return b;

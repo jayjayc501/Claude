@@ -463,3 +463,47 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 - **Tactiques** (40 matchs) : signatures gardées. Tiki-taka 62 % de possession, 49 passes, 91 % ; Contre 47 %, le moins de passes (27), 10 m gagnés par passe (6 en Équilibrée), 46 % de ballons longs, bloc le plus bas, tir le plus vite après la récupération ; Pressing : passes adverses réussies 72 % (83 %), récupérations hautes 2,9 (1,7) ; Gegenpressing : 44 % des pertes en jeu reprises en 5 s (31 %).
 - Limites : encore 5,4 changements de camp par minute (vrai football : 2 à 4) et 3,9 m/s de moyenne (vrai : environ 2) ; les passes ratées sont maintenant la première cause de perte (1,6 par minute).
 - Tests : 107 verts (réglages de couverture et de tempo ajustés pour garder la défense de couverture, la transition offensive et le rythme des passes dans leurs bornes). Vérifié au format téléphone, aucune erreur.
+
+## 12/11/2026 (soir) — Caractéristiques des joueurs : 4 notes, 8 sous-notes
+
+**Décisions du concepteur**
+- 4 notes : **Vitesse** (accélération, vitesse de pointe), **Technique** (passe, dribble : protection du ballon et dribble), **Tir** (précision, puissance), **Physique** (**duel** plutôt que tacle, endurance).
+- L'**endurance** est une note clé : elle est enregistrée, le moteur l'interprétera plus tard (pas d'effet pour l'instant).
+- **Gardien** : 4 caractéristiques à lui, encore à choisir. Pour l'instant, pas de notes (le moteur le traite comme un gardien moyen, 65).
+
+**Ce qui a été fait** (PROPOSITION, chiffres dans `src/data/notes.json`)
+- `src/sim/notes.ts` : sous-notes sur 99, note affichée = moyenne des deux sous-notes ; une sous-note absente vaut 65. Règle unique : on compare la sous-note de l'un à celle de l'adversaire direct ; une probabilité est décalée sur sa cote (logit) de l'écart ÷ 15 (+10 points ≈ 50 → 66 %, +20 ≈ 79 %) ; un taux est multiplié par exp(écart × coefficient). **À 65 partout, le moteur est inchangé** (vérifié par un test : même match, mêmes statistiques, mêmes positions).
+- Branchements :
+  - Vitesse : pointe ± 0,6 % de vitesse par point (90 → 9,2 m/s en sprint au lieu de 8), accélération ± 1 % par point ; l'écart aléatoire de ± 6 % reste par-dessus. Sert aussi aux passes dans l'espace et au jeu long (qui arrive le premier).
+  - 1 contre 1 : avantage = dribble du porteur − duel du défenseur + ½ écart d'accélération ; il décide de la réussite du dribble et donne plus envie de le tenter.
+  - Passe : imprécision des passes, centres, ballons longs et dégagements ; passe bien dosée plus dure à intercepter.
+  - Dribble : aussi le contrôle quand on est serré (contre le duel de l'adversaire le plus proche) et les tacles subis.
+  - Tir : précision (erreur de visée), puissance (vitesse du tir, et chances d'arrêt contre le gardien à 65).
+  - Duel : taux de tacle (contre le dribble du porteur), fautes (un défenseur dépassé en fait plus), portée sur le ballon (interceptions, ballons disputés, têtes).
+- Joueurs de démonstration notés dans `preparation.json` (profils variés selon le poste et le style ; gardien sans notes). L'adversaire du prototype n'a pas de notes : c'est une équipe moyenne à 65.
+- Écran de préparation : en touchant un joueur, son nom, son style et ses 4 notes (« VIT 71 · TEC 63 · TIR 75 · PHY 75 » ; gardien : « notes à venir »). Sous le joueur quand il n'y a pas la place au-dessus.
+
+**Mesures** (`bun run scripts/mesurer-notes.ts 120 180` : 120 matchs de 3 min par ligne, adversaire à 65, Équilibrée, styles coupés)
+
+| Notre équipe | V / N / D | Buts | Possession | Passes réussies | Tirs | Dribbles réussis | Changements de camp / min |
+|---|---|---|---|---|---|---|---|
+| Sans notes (65) | 23 / 57 / 20 % | 0,3 – 0,3 | 52 % | 83 % | 2,5 – 2,2 | 53 % | 5,8 |
+| 60 partout | 15 / 68 / 18 % | 0,2 – 0,2 | 47 % | 79 % | 1,7 – 2,8 | 37 % | 5,7 |
+| 70 partout | 24 / 62 / 14 % | 0,4 – 0,3 | 53 % | 84 % | 3,0 – 1,9 | 59 % | 5,7 |
+| 75 partout | 43 / 53 / 5 % | 0,6 – 0,1 | 55 % | 85 % | 3,7 – 1,4 | 74 % | 5,5 |
+| 80 partout | 68 / 27 / 5 % | 1,0 – 0,1 | 57 % | 87 % | 4,4 – 0,9 | 82 % | 5,3 |
+| Vitesse 80 seule | 28 / 63 / 10 % | 0,4 – 0,1 | 52 % | 84 % | 3,5 – 1,7 | 62 % | 5,9 |
+| Technique 80 seule | 24 / 58 / 18 % | 0,3 – 0,2 | 55 % | 86 % | 3,3 – 1,9 | 75 % | 5,0 |
+| Tir 80 seule | 38 / 48 / 14 % | 0,6 – 0,2 | 51 % | 83 % | 2,5 – 2,2 | 50 % | 5,7 |
+| Duel 80 seule | 18 / 68 / 14 % | 0,2 – 0,2 | 53 % | 83 % | 3,0 – 1,7 | 47 % | 5,9 |
+
+- Chaque note a une signature : Vitesse, plus de tirs et moins de buts encaissés ; Technique, possession, passes et dribbles, **moins de va-et-vient** (5,0 changements de camp par minute) ; Tir, deux fois plus de buts pour le même nombre de tirs ; Duel, moins de tirs adverses.
+- Une équipe à 80 partout gagne 2 matchs sur 3 contre une équipe à 65, mais concède encore des nuls et quelques défaites.
+- « Une star » (ailier gauche à 90 en Vitesse face à un latéral droit à 55) : 9,2 m/s de pointe au lieu de 8, dribbles réussis 1,1 par match au lieu de 0,7, tirs dans les 8 s qui suivent ses ballons 1,6 au lieu de 1,3. Effet visible mais modeste : le moteur ne cherche pas encore l'ailier rapide (le choix des passes ne tient pas compte des duels favorables).
+- Premier essai, sans « envie de dribbler » et avec des effets plus faibles : Tir 80 ne changeait presque rien (conversion 12 → 14 %), le test « une star » non plus. Coefficients relevés (précision 0,025 → 0,04, poids de la puissance contre le gardien 0,5 → 1, pointe 0,004 → 0,006, accélération 0,008 → 0,01, passe 0,025 → 0,03 et interceptions).
+
+**Tests** : 112 verts (5 nouveaux dans `tests/notes.test.ts` : 4 notes de 2 sous-notes, décalage nul à écart nul, 65 partout = match identique, vitesse, équipe à 80 qui tire plus et passe mieux).
+
+**À juger par le concepteur** : est-ce que la différence se voit en regardant un match ; écart souhaité entre une équipe à 75 et une à 65 ; place du hasard (beaucoup de 0-0 sur 3 minutes de jeu).
+
+**Ouvert** : les 4 caractéristiques du gardien ; effet de l'endurance ; points donnés par un niveau de carte et par une fusion ; note globale selon le poste (proposée, pas codée) ; styles qui gardent leurs bonus de précision et de vitesse (proposé de les retirer, pas encore décidé).

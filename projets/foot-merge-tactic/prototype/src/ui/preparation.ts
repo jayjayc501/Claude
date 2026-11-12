@@ -6,7 +6,7 @@
 import brut from "../data/preparation.json";
 import type { Donnees } from "../sim/donnees";
 import { JOUEURS_SUR_LE_TERRAIN, echanger, placer, remplacer, retirer } from "../sim/placement";
-import type { Equipe, Placement } from "../sim/types";
+import type { Equipe, Notes, Placement } from "../sim/types";
 
 export interface Fiche {
   nom: string;
@@ -16,6 +16,8 @@ export interface Fiche {
   /** Un des styles de la première version, ou null : pas de style. */
   style: string | null;
   prix: number;
+  /** Sous-notes (12/11) ; null = pas encore de notes (gardien). */
+  notes?: Partial<Notes> | null;
 }
 
 export interface Membre {
@@ -112,7 +114,7 @@ export class Preparation {
     return {
       nom: "Votre équipe",
       nationalite: "Plusieurs",
-      joueurs: this.etat.effectif.map((m) => ({ id: m.id, nom: this.fiche(m.id).nom, postes: [this.fiche(m.id).poste], style: this.fiche(m.id).style })),
+      joueurs: this.etat.effectif.map((m) => ({ id: m.id, nom: this.fiche(m.id).nom, postes: [this.fiche(m.id).poste], style: this.fiche(m.id).style, notes: this.fiche(m.id).notes ?? null })),
       composition: this.etat.composition.map((p) => ({ ...p })),
       tactique: this.etat.tactique,
     };

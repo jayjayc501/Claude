@@ -18,6 +18,7 @@ import { BUSTES } from "./bustes";
 import { CORPS_PICTOS, PICTOS } from "./pictos";
 import { html, svg } from "./dom";
 import { type Action, type Issue, Preparation, libellePoste } from "./preparation";
+import { notesAffichees } from "../sim/notes";
 
 // Plateau : x de 0 à 1 sur W, y de 0,5 (ligne médiane, en haut) à 0 (but, en bas) sur H.
 // H = 1,5 W donne des hexagones presque réguliers ; MH laisse dépasser les bustes du haut.
@@ -405,7 +406,10 @@ export class EcranPreparation {
       g.addEventListener("touchstart", (ev) => ev.preventDefault(), { passive: false });
       const style = this.prepa.fiche(pl.joueurId).style;
       const libelle = style ? `${nom} · ${this.prepa.d.styles[style] ?? style}` : `${nom} · sans style`;
-      if (pl.joueurId === this.choisi) this.etiquette(s, libelle, x, socle - 48 * echelle - 4);
+      // Les 4 notes (12/11) sous le nom ; le gardien n'a pas encore de notes.
+      const notes = notesAffichees({ id: pl.joueurId, nom, postes: [], notes: this.prepa.fiche(pl.joueurId).notes ?? null });
+      const ligneNotes = notes ? notes.map((n) => `${n.code} ${n.valeur}`).join(" · ") : "notes à venir";
+      if (pl.joueurId === this.choisi) this.etiquette(s, libelle, x, socle - 48 * echelle - 4, ligneNotes, socle + 6);
     }
   }
 
@@ -481,13 +485,21 @@ export class EcranPreparation {
     b.innerHTML = PICTOS[style]!;
   }
 
-  /** Nom du joueur touché, au-dessus du buste. */
-  private etiquette(s: SVGSVGElement, nom: string, x: number, bas: number): void {
-    const l = nom.length * 6.2 + 14;
+  /** Nom du joueur touché (et ses 4 notes), au-dessus du buste. */
+  private etiquette(s: SVGSVGElement, nom: string, x: number, bas: number, notes?: string, hautSiCoupe?: number): void {
+    const l = Math.max(nom.length * 6.2, (notes?.length ?? 0) * 5.4) + 14;
+    const h = notes ? 29 : 16;
+    // Pas la place au-dessus (rangée du haut) : sous le socle.
+    if (bas - h < 2 && hautSiCoupe !== undefined) bas = hautSiCoupe + h;
     const g = svg("g", { class: "prepa-nom" }, s);
-    svg("rect", { x: x - l / 2, y: bas - 16, width: l, height: 16, rx: 6 }, g);
-    const t = svg("text", { x, y: bas - 4.5 }, g);
+    svg("rect", { x: Math.min(W - l - 2, Math.max(2, x - l / 2)), y: bas - h, width: l, height: h, rx: 6 }, g);
+    const cx = Math.min(W - l / 2 - 2, Math.max(l / 2 + 2, x));
+    const t = svg("text", { x: cx, y: bas - h + 11.5 }, g);
     t.textContent = nom;
+    if (notes) {
+      const n = svg("text", { x: cx, y: bas - 4.5, class: "prepa-nom-notes" }, g);
+      n.textContent = notes;
+    }
   }
 
   /** Liste déroulante de la tactique d'équipe, au-dessus du terrain (une seule à la fois).

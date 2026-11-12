@@ -84,6 +84,20 @@ export interface DonneesPostes {
   plateaux: Record<string, PlateauDef>;
 }
 
+/** Sous-notes d'un joueur de champ (12/11 : 4 notes de 2 sous-notes, sur 99).
+ *  Vitesse = accélération + pointe ; Technique = passe + dribble ;
+ *  Tir = précision + puissance ; Physique = duel + endurance. */
+export interface Notes {
+  acceleration: number;
+  pointe: number;
+  passe: number;
+  dribble: number;
+  precision: number;
+  puissance: number;
+  duel: number;
+  endurance: number;
+}
+
 export interface Joueur {
   id: string;
   nom: string;
@@ -91,6 +105,8 @@ export interface Joueur {
   postes: string[];
   /** Style de jeu (REC, TEC, RAP, REM) ; absent ou null : aucun style. */
   style?: string | null;
+  /** Sous-notes ; absentes (ou gardien, pour l'instant) : toutes à la référence (65). */
+  notes?: Partial<Notes> | null;
 }
 
 export interface Placement {

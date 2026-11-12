@@ -306,3 +306,9 @@ Demande du concepteur : intégrer l'écran de la maquette du 12/11 ; moteur fig�
 Retour du concepteur : « le fond vert pâle ne fait pas terrain de foot ».
 - Pelouse rayée (vert #4E9A5A / #58A564) et tracé blanc complet à l'échelle de la largeur : lignes de touche, ligne médiane, rond central, surface et petite surface, point de penalty, arc, corners, but.
 - Cases à 38 % (au lieu de 30 %), contour blanc à 45 %, noms de poste à 60 % : lisibles sur le vert.
+
+## 12/11/2026 (suite) — Styles : 4 pour la première version
+
+Décisions du concepteur : tactique d'équipe séparée des styles ; pas de style de gardien ; styles avant les notes ; 4 styles (Presseur, Technicien, Rapide, Rempart) ; certains joueurs sans style.
+- Écran de préparation : compteurs des 4 styles (toujours affichés, du plus fréquent au moins fréquent) ; `preparation.json` ramené à ces 4 styles, 7 joueurs sur 18 sans style (`null`), dont le gardien.
+- Tests : 6 verts pour l'écran (compteurs mis à jour).

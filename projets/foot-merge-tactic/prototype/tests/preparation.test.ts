@@ -60,7 +60,12 @@ describe("écran de préparation", () => {
       { code: "BRA", n: 2 },
       { code: "ITA", n: 2 },
     ]);
-    expect(styles[0]).toEqual({ code: "REM", n: 3 });
+    expect(styles).toEqual([
+      { code: "REM", n: 2 },
+      { code: "PRE", n: 2 },
+      { code: "TEC", n: 2 },
+      { code: "RAP", n: 1 },
+    ]); // 4 titulaires sans style
     expect(p.palier(4)).toEqual({ prochain: 5, atteint: true });
     expect(p.palier(2)).toEqual({ prochain: 3, atteint: false });
   });

@@ -13,7 +13,8 @@ export interface Fiche {
   pays: string;
   /** Identifiant de postes.json (AC s'affiche BU). */
   poste: string;
-  style: string;
+  /** Un des styles de la première version, ou null : pas de style. */
+  style: string | null;
   prix: number;
 }
 
@@ -111,14 +112,15 @@ export class Preparation {
     };
   }
 
-  /** Joueurs sur le terrain par pays (pays du deck, dans l'ordre) et par style (du plus fréquent au moins fréquent). */
+  /** Joueurs sur le terrain par pays (pays du deck, dans l'ordre) et par style (les 4, du plus fréquent au moins
+   *  fréquent) ; un joueur sans style ne compte dans aucun. */
   compteurs(): { pays: { code: string; n: number }[]; styles: { code: string; n: number }[] } {
     const surTerrain = this.etat.composition.map((p) => this.fiche(p.joueurId));
     const pays = this.d.deck.map((p) => ({ code: p.code, n: surTerrain.filter((f) => f.pays === p.code).length }));
-    const parStyle = new Map<string, number>();
-    for (const f of surTerrain) parStyle.set(f.style, (parStyle.get(f.style) ?? 0) + 1);
     const ordre = Object.keys(this.d.styles);
-    const styles = [...parStyle].map(([code, n]) => ({ code, n })).sort((a, b) => b.n - a.n || ordre.indexOf(a.code) - ordre.indexOf(b.code));
+    const styles = ordre
+      .map((code) => ({ code, n: surTerrain.filter((f) => f.style === code).length }))
+      .sort((a, b) => b.n - a.n || ordre.indexOf(a.code) - ordre.indexOf(b.code));
     return { pays, styles };
   }
 

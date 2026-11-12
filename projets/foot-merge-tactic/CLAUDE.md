@@ -122,7 +122,7 @@ Maquette de l'écran de préparation sur claude.ai : https://claude.ai/artifact/
 - Pour une nationalité donnée, **tout le monde a les mêmes joueurs**. Seuls les niveaux de cartes diffèrent.
 - Chaque joueur a **deux traits : sa nationalité et un style de jeu** (sa spécialité).
 - **Bonus de même nationalité**, cohérent avec la tradition de football du pays.
-- **Styles (12/11)** : prochain chantier. **Le choix tactique de l'équipe (pressing, contre, passes courtes…) est séparé des styles** : l'équipe a sa tactique en plus des styles de ses joueurs, les styles ne la débloquent pas. **Pas de styles propres au gardien.** **Styles et notes ne se définissent pas ensemble pour l'instant** : on vérifie d'abord la cohérence des styles dans le moteur, pas la liste finale des joueurs.
+- **Styles (12/11)** : prochain chantier. **4 styles pour la première version** (7, c'était trop) : **Presseur, Technicien, Rapide, Rempart**, en deux paires opposées (pressing contre conservation ; vitesse en contre contre défense qui recule vite). Créateur, Finisseur et Combatif sont mis de côté. **Certains joueurs n'ont aucun style.** **Le choix tactique de l'équipe (pressing, contre, passes courtes…) est séparé des styles** : l'équipe a sa tactique en plus des styles de ses joueurs, les styles ne la débloquent pas. **Pas de styles propres au gardien.** **Styles et notes ne se définissent pas ensemble pour l'instant** : on vérifie d'abord la cohérence des styles dans le moteur, pas la liste finale des joueurs.
 
 ### Cartes, progression, fusions
 - Chaque **carte joueur a son propre niveau**, comme dans Clash Royale. La **carte change de couleur** quand elle évolue en dehors des matchs : Bronze, Argent, Or sont les couleurs du niveau. Tous les joueurs ne commencent pas au même niveau. **En pause depuis le 12/11** : couleurs Bronze/Argent/Or retirées de l'interface, à revoir plus tard.
@@ -186,7 +186,7 @@ Traits :
 - Paliers de bonus à 3, 5 et 7 joueurs, pour les styles comme pour la nationalité.
 - Traditions nationales sans caricature (pressing pour l'Allemagne, technique pour l'Espagne, rigueur défensive pour l'Italie…) ; à l'intérieur d'un pays, les joueurs gardent des styles individuels variés.
 - Le style est indépendant du poste.
-- **Proposition de Claude (12/11)**, base de départ, à juger en regardant des matchs. Chaque style a un effet sur le joueur, un effet d'équipe aux paliers et une contrepartie :
+- **Proposition de Claude (12/11)**, base de départ, à juger en regardant des matchs. Chaque style a un effet sur le joueur, un effet d'équipe aux paliers et une contrepartie. Seuls Presseur, Rempart, Rapide et Technicien sont retenus pour la première version (validé le 12/11). Cercle possible, à vérifier en match : Technicien bat Presseur, qui gêne la relance du Rempart, qui ferme les espaces du Rapide, qui punit en contre l'équipe montée pour garder le ballon. Créateur (il faut d'abord les appels et démarquages), Finisseur et Combatif (trop proches des futures notes) attendent :
   - Presseur : presse plus tôt et plus longtemps / contre-pressing renforcé / espaces dans le dos ;
   - Rempart : marquage plus serré, tacles plus sûrs / la ligne de défense recule plus vite / relance plus pauvre ;
   - Rapide : sprint de transition plus fort / plus de contres et de passes dans l'espace / plus de pertes de balle en conduite ;
@@ -194,7 +194,8 @@ Traits :
   - Créateur : plus de passes qui cassent les lignes / les coéquipiers font plus d'appels / passes plus risquées ;
   - Combatif : gagne plus de duels, réagit vite après une perte / plus de récupérations au milieu / plus de fautes ;
   - Finisseur : tire plus tôt et mieux cadré / plus de joueurs dans la surface sur les centres / défend moins.
-  - Première étape proposée : coder Presseur, Rapide et Technicien, et vérifier qu'ils se voient dans le match.
+  - Première étape proposée : coder les 4 styles retenus, et vérifier qu'ils se voient dans le match.
+  - Écran de préparation (12/11) : compteurs des 4 styles ; dans les données de démonstration, 7 joueurs sur 18 n'ont pas de style (dont le gardien).
 
 Adversaires :
 - L'IA joue le rôle d'entraîneur (deck, mercato, fusions, placement, ajustements), avec les mêmes règles que le joueur, sans tricher. La difficulté vient du niveau des cartes et de la qualité des choix.
@@ -212,7 +213,7 @@ Toujours ouvertes :
 - Égalités : classement des groupes, matchs nuls en demi-finale et en finale.
 - Temps de football simulé par mi-temps, nombre de temps forts montrés, durées exactes de la préparation et de la mi-temps.
 - Taille de l'effectif de chaque pays (fréquence des copies, donc des fusions) ; budget, prix et revente au mercato.
-- Liste finale des styles et de leurs effets ; paliers.
+- Effets chiffrés des 4 styles de la première version ; paliers ; retour éventuel de Créateur, Finisseur, Combatif ; part des joueurs sans style.
 - Couleurs au-delà de l'Or ; écarts de niveau entre adversaires (appariement ou plafond) ; ressources pour faire évoluer les cartes.
 - Moteur technique final ; dimensions du terrain ; coordonnées et tailles des rectangles ; liste finale des postes.
 - Comportement exact de chaque poste ; liste des attributs ; liste des consignes tactiques.
@@ -287,4 +288,4 @@ Historique détaillé : `journal.md` (par jour) et `docs/historique-etat.md` (an
 - Règle de séance (concepteur, 12/11) : **économiser les tokens** : peu de lectures, peu de tests et de captures, le concepteur valide lui-même ; mettre à jour le projet claude.ai seulement aux grandes étapes ; réponses courtes ; une conversation par sujet.
 - **12/11 (interface)** : maquette de l'écran de préparation (bustes, couleurs par pays, fusions en couleurs) : https://claude.ai/artifact/67QRVRz7Fd6f8YWD9gHPq4. Décisions dans « Interface (séance du 12/11) ».
 - **12/11 : écran de préparation intégré au prototype** (moteur inchangé, 93 tests verts) : bustes, hors poste refusé, banc de 5, mercato (achat, fusion automatique, vente au glisser). Données dans `src/data/preparation.json`. Chrono et classement fixes ; budget, prix et revente provisoires ; achats non gardés au rechargement. Pelouse rayée avec tracé complet (le vert pâle « ne faisait pas terrain de foot »).
-- **Prochaine étape (12/11) : les styles**, dans une nouvelle conversation. Décisions dans « Deck, mercato et traits » (tactique d'équipe séparée, pas de style de gardien, pas de notes pour l'instant) ; proposition de départ dans « Traits ».
+- **Prochaine étape (12/11) : les styles**, dans une nouvelle conversation. Décisions dans « Deck, mercato et traits » (4 styles : Presseur, Technicien, Rapide, Rempart ; joueurs sans style possibles ; tactique d'équipe séparée ; pas de style de gardien ; pas de notes pour l'instant) ; proposition de départ dans « Traits ».

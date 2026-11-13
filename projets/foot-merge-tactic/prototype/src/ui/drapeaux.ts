@@ -5,6 +5,8 @@ const CORPS: Record<string, string> = {
   FRA: '<rect width="9" height="6" fill="#EF4135"/><rect width="6" height="6" fill="#fff"/><rect width="3" height="6" fill="#0055A4"/>',
   ITA: '<rect width="9" height="6" fill="#CE2B37"/><rect width="6" height="6" fill="#fff"/><rect width="3" height="6" fill="#009246"/>',
   ESP: '<rect width="9" height="6" fill="#C60B1E"/><rect y="1.5" width="9" height="3" fill="#FFC400"/>',
+  ENG: '<rect width="9" height="6" fill="#fff"/><rect x="3.9" width="1.2" height="6" fill="#CE1124"/><rect y="2.4" width="9" height="1.2" fill="#CE1124"/>',
+  GER: '<rect width="9" height="2" fill="#000"/><rect y="2" width="9" height="2" fill="#DD0000"/><rect y="4" width="9" height="2" fill="#FFCE00"/>',
   ARG: '<rect width="9" height="6" fill="#74ACDF"/><rect y="2" width="9" height="2" fill="#fff"/><circle cx="4.5" cy="3" r="0.7" fill="#F6B40E"/>',
   BRA: '<rect width="9" height="6" fill="#009C3B"/><path d="M4.5 0.7 L8.2 3 L4.5 5.3 L0.8 3 Z" fill="#FFDF00"/><circle cx="4.5" cy="3" r="1.25" fill="#002776"/>',
 };

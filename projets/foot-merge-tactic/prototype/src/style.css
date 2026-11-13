@@ -553,3 +553,7 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .fiche-pays, .offre-drapeau { display: inline-flex; align-items: center; gap: 5px; }
 svg.drapeau { display: inline-block; flex: none; border-radius: 2px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); }
 .mt-titre { white-space: nowrap; }
+.prepa-groupe.champ { margin: 6px 0 2px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.prepa-groupe.champ .prepa-equipe { min-height: 30px; padding: 2px 4px; }
+.champ-sous { white-space: nowrap; }
+.champ-resultats { margin: 0 2px 2px; font-size: 10.5px; font-weight: 600; color: #4A5A50; }

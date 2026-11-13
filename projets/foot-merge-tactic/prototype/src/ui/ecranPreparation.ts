@@ -58,6 +58,15 @@ export interface ControlePartie {
   aGarder(): number;
   /** Choix de l'ordinateur (le plus récent d'abord) et taille de son banc. */
   ordi(): { titulaires: number; banc: number; choix: { nom: string; poste: string; prix: number; couleur: string; pays: string }[] };
+  /** Championnat (13/11) : journée, classement, prochain adversaire, résultats de la journée passée. */
+  championnat(): {
+    journee: number;
+    total: number;
+    fini: boolean;
+    prochain: string | null;
+    classement: { nom: string; points: number; joues: number; diff: number; toi: boolean; prochain: boolean }[];
+    resultats: string[];
+  };
   /** Mi-temps (13/11) : score, forme et note de match de tes joueurs ; null hors mi-temps. */
   miTemps(): { score: [number, number]; joueur(id: string): { forme: number; note: number } | null } | null;
   jouer(): void;
@@ -410,18 +419,35 @@ export class EcranPreparation {
     if (p.aGarder() > 0) html("span", { class: "prepa-discret" }, parent, `Garde au moins ${p.aGarder()} pièce${p.aGarder() > 1 ? "s" : ""} pour finir ton équipe ; le reste servira au banc.`);
   }
 
-  /** Après le draft : le premier mercato remplit le banc. */
+  /** Après le draft : mercato, puis championnat (journée, classement, prochain adversaire). */
   private rendreEnteteMercato(parent: HTMLElement): void {
+    const ch = this.partie!.championnat();
     const tete = html("div", { class: "draft-tete" }, parent);
     const t = html("div", { class: "prepa-titre" }, tete);
-    html("span", { class: "prepa-h" }, t, "Mercato");
-    html("span", { class: "prepa-sous" }, t, "Complète ton banc");
-    // Le bouton du match reste en haut, toujours visible (13/11).
-    const pret = this.prepa.pret();
-    const j = html("button", { type: "button", class: "partie-jouer-mini", disabled: !pret, title: pret ? "Jouer le match" : "Il faut 11 titulaires" }, tete, "Jouer ▶");
-    j.addEventListener("click", () => this.partie!.jouer());
+    if (ch.fini) {
+      const premier = ch.classement[0];
+      html("span", { class: "prepa-h" }, t, "Championnat terminé");
+      html("span", { class: "prepa-sous" }, t, premier ? (premier.toi ? "Tu es champion ! 🏆" : `Champion : ${premier.nom}`) : "");
+    } else {
+      html("span", { class: "prepa-h mt-titre" }, t, `Journée ${ch.journee}/${ch.total}`);
+      html("span", { class: "prepa-sous champ-sous" }, t, ch.prochain ? `contre ${ch.prochain}` : "");
+      // Le bouton du match reste en haut, toujours visible (13/11).
+      const pret = this.prepa.pret();
+      const j = html("button", { type: "button", class: "partie-jouer-mini", disabled: !pret, title: pret ? "Jouer le match" : "Il faut 11 titulaires" }, tete, "Jouer ▶");
+      j.addEventListener("click", () => this.partie!.jouer());
+    }
     this.boutonNouvelle(tete);
-    this.rendreEtapes(parent, 2, 11);
+    // Classement (4 équipes) : toi en bleu, ton prochain adversaire en rouge.
+    const groupe = html("div", { class: "prepa-groupe champ" }, parent);
+    ch.classement.forEach((e, i) => {
+      const cl = e.toi ? " toi" : e.prochain ? " prochain" : "";
+      const b = html("div", { class: `prepa-equipe${cl}`, "aria-label": `${i + 1}e ${e.nom}, ${e.points} points` }, groupe);
+      html("span", { class: "prepa-avatar" }, b, String(i + 1));
+      const n = html("span", { class: "prepa-equipe-texte" }, b);
+      html("span", { class: "prepa-equipe-nom" }, n, e.nom);
+      html("span", { class: "prepa-equipe-pts" }, n, `${e.points} pt${e.points > 1 ? "s" : ""} · ${e.diff > 0 ? "+" : ""}${e.diff}`);
+    });
+    if (ch.resultats.length) html("div", { class: "champ-resultats" }, parent, ch.resultats.join("  ·  "));
   }
 
   /** Mi-temps (13/11) : déplacer ses joueurs, faire des changements, voir la fatigue. */
@@ -459,10 +485,10 @@ export class EcranPreparation {
     const o = this.partie!.ordi();
     const b = html("div", { class: "draft-ordi" }, parent);
     const t = html("div", { class: "draft-ordi-tete" }, b);
-    html("span", {}, t, "L'ordinateur drafte aussi");
+    html("span", {}, t, "Les 3 ordinateurs draftent aussi");
     html("span", {}, t, `${o.titulaires}/11`);
     const l = html("div", { class: "draft-ordi-liste" }, b);
-    if (!o.choix.length) html("span", { class: "draft-ordi-vide" }, l, "Il choisit après toi, dans la même réserve de cartes.");
+    if (!o.choix.length) html("span", { class: "draft-ordi-vide" }, l, "Ils choisissent après toi, dans la même réserve de cartes.");
     for (const c of o.choix) {
       const e = html("span", { class: "draft-ordi-carte" }, l);
       e.style.setProperty("--pays", c.couleur);
@@ -474,7 +500,7 @@ export class EcranPreparation {
   /** Bouton pour lancer le match une fois les 11 titulaires en place. */
   private rendreJouer(parent: HTMLElement): void {
     const o = this.partie!.ordi();
-    html("p", { class: "prepa-discret" }, parent, `L'ordinateur a fini son draft et son mercato : 11 titulaires, ${o.banc} remplaçant${o.banc > 1 ? "s" : ""}.`);
+    html("p", { class: "prepa-discret" }, parent, `Les ordinateurs ont fait leur mercato : ${o.banc} remplaçant${o.banc > 1 ? "s" : ""} en tout.`);
   }
 
   private rendreEntete(parent: HTMLElement): void {

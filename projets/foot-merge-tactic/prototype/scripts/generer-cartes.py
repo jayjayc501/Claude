@@ -14,9 +14,11 @@ Lancer : python3 scripts/generer-cartes.py  → src/data/cartes.json
 import json, random
 from pathlib import Path
 
+# 13/11 (concepteur) : « trop de bleus » ; Angleterre (rouge) et Allemagne (vert jade)
+# remplacent le Brésil et l'Argentine, aux mêmes postes, styles et prix.
 PAYS = {
-    "FRA": ("France", "#1F3A93"), "ESP": ("Espagne", "#B85600"), "BRA": ("Brésil", "#17773F"),
-    "ARG": ("Argentine", "#5BA4D9"), "ITA": ("Italie", "#0B7FA8"),
+    "FRA": ("France", "#1F3A93"), "ESP": ("Espagne", "#B85600"), "ENG": ("Angleterre", "#C8102E"),
+    "GER": ("Allemagne", "#2E9E7E"), "ITA": ("Italie", "#0B7FA8"),
 }
 # (nom, poste, style, prix) ; AC = buteur (BU).
 JOUEURS = {
@@ -26,12 +28,12 @@ JOUEURS = {
     "ESP": [("Ibarra", "G", None, 2), ("Otero", "DC", None, 3), ("Medina", "DC", None, 1), ("Castell", "DG", "REM", 2),
             ("Prieto", "DD", None, 1), ("Arnau", "MC", "TEC", 5), ("Salvat", "MC", None, 4), ("Almar", "MC", None, 2),
             ("Cuesta", "AG", None, 2), ("Robles", "AD", "REC", 3), ("Sanz", "AC", "RAP", 4), ("Galdós", "AC", None, 1)],
-    "BRA": [("Caldeira", "G", None, 1), ("Teodoro", "DC", "REC", 3), ("Mattos", "DC", None, 1), ("Valadares", "DG", None, 2),
-            ("Brandão", "DD", "RAP", 4), ("Barreto", "MC", "REM", 3), ("Rezende", "MC", None, 2), ("Peixoto", "MC", None, 1),
-            ("Lima", "AG", None, 4), ("Amaral", "AD", None, 2), ("Lobo", "AC", "TEC", 5), ("Souto", "AC", None, 2)],
-    "ARG": [("Ledesma", "G", None, 2), ("Ferreyra", "DC", None, 3), ("Godoy", "DC", None, 1), ("Quiroga", "DG", "RAP", 3),
-            ("Benítez", "DD", None, 1), ("Arrieta", "MC", "REC", 5), ("Bustos", "MC", None, 2), ("Villalba", "MC", None, 1),
-            ("Lucero", "AG", "TEC", 4), ("Sosa", "AD", "REM", 2), ("Funes", "AC", None, 4), ("Acosta", "AC", None, 2)],
+    "ENG": [("Ashdown", "G", None, 1), ("Pemberton", "DC", "REC", 3), ("Thornley", "DC", None, 1), ("Whitcombe", "DG", None, 2),
+            ("Cartwright", "DD", "RAP", 4), ("Lockwood", "MC", "REM", 3), ("Fairley", "MC", None, 2), ("Penrose", "MC", None, 1),
+            ("Kingsley", "AG", None, 4), ("Merriman", "AD", None, 2), ("Blackwood", "AC", "TEC", 5), ("Haverly", "AC", None, 2)],
+    "GER": [("Hagedorn", "G", None, 2), ("Falkenrath", "DC", None, 3), ("Wendler", "DC", None, 1), ("Kessler", "DG", "RAP", 3),
+            ("Ostermann", "DD", None, 1), ("Rautenberg", "MC", "REC", 5), ("Steinbach", "MC", None, 2), ("Vogler", "MC", None, 1),
+            ("Achterberg", "AG", "TEC", 4), ("Hartwig", "AD", "REM", 2), ("Brenner", "AC", None, 4), ("Jaschke", "AC", None, 2)],
     "ITA": [("Ferraro", "G", None, 4), ("Monti", "DC", "TEC", 3), ("Vitale", "DC", "REM", 5), ("Bonetti", "DG", None, 1),
             ("Conti", "DD", "REC", 2), ("Vianello", "MC", None, 2), ("Galli", "MC", None, 2), ("Rinaldi", "MC", None, 2),
             ("Serra", "AG", None, 1), ("Fabbri", "AD", "RAP", 4), ("Lombardi", "AC", None, 3), ("Moretti", "AC", None, 1)],
@@ -49,13 +51,13 @@ STYLE = {  # accent du style
     "REM": [-2, 0, 0, -3, 0, 0, 7, 0], "REC": [0, 0, -1, 0, 0, 0, 4, 6],
 }
 NATION = {  # légère couleur nationale, sans caricature
-    "FRA": [2, 2, 0, 0, 0, 0, 0, 0], "ESP": [0, 0, 3, 1, 0, 0, 0, 0], "BRA": [0, 0, 0, 3, 1, 0, 0, 0],
-    "ARG": [0, 0, 0, 2, 0, 0, 2, 0], "ITA": [0, 0, 0, 0, 0, 0, 3, 0],
+    "FRA": [2, 2, 0, 0, 0, 0, 0, 0], "ESP": [0, 0, 3, 1, 0, 0, 0, 0], "ENG": [1, 1, 0, 0, 0, 2, 2, 0],
+    "GER": [0, 0, 2, 0, 1, 0, 0, 2], "ITA": [0, 0, 0, 0, 0, 0, 3, 0],
 }
 
 CLES_G = ["reflexes", "placement", "sorties", "relance"]
 NATION_G = {  # légère couleur nationale du gardien
-    "FRA": [2, 0, 0, 0], "ESP": [0, 0, 0, 3], "BRA": [0, -1, 2, 2], "ARG": [0, 0, 3, 0], "ITA": [0, 3, 0, 0],
+    "FRA": [2, 0, 0, 0], "ESP": [0, 0, 0, 3], "ENG": [0, 0, 3, 0], "GER": [2, 2, 0, 0], "ITA": [0, 3, 0, 0],
 }
 
 def main():

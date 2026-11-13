@@ -9,13 +9,13 @@
    "nom": "Espagne",
    "couleur": "#B85600"
   },
-  "BRA": {
-   "nom": "Brésil",
-   "couleur": "#17773F"
+  "ENG": {
+   "nom": "Angleterre",
+   "couleur": "#C8102E"
   },
-  "ARG": {
-   "nom": "Argentine",
-   "couleur": "#5BA4D9"
+  "GER": {
+   "nom": "Allemagne",
+   "couleur": "#2E9E7E"
   },
   "ITA": {
    "nom": "Italie",
@@ -479,24 +479,24 @@
    }
   },
   {
-   "id": "BRA-CALDEIRA",
-   "nom": "Caldeira",
-   "pays": "BRA",
+   "id": "ENG-ASHDOWN",
+   "nom": "Ashdown",
+   "pays": "ENG",
    "poste": "G",
    "style": null,
    "prix": 1,
    "copies": 10,
    "notes": {
     "reflexes": 51,
-    "placement": 55,
-    "sorties": 65,
-    "relance": 64
+    "placement": 56,
+    "sorties": 66,
+    "relance": 62
    }
   },
   {
-   "id": "BRA-TEODORO",
-   "nom": "Teodoro",
-   "pays": "BRA",
+   "id": "ENG-PEMBERTON",
+   "nom": "Pemberton",
+   "pays": "ENG",
    "poste": "DC",
    "style": "REC",
    "prix": 3,
@@ -504,18 +504,18 @@
    "notes": {
     "acceleration": 68,
     "pointe": 69,
-    "passe": 68,
-    "dribble": 65,
-    "precision": 59,
-    "puissance": 68,
-    "duel": 86,
-    "endurance": 77
+    "passe": 67,
+    "dribble": 61,
+    "precision": 57,
+    "puissance": 69,
+    "duel": 87,
+    "endurance": 76
    }
   },
   {
-   "id": "BRA-MATTOS",
-   "nom": "Mattos",
-   "pays": "BRA",
+   "id": "ENG-THORNLEY",
+   "nom": "Thornley",
+   "pays": "ENG",
    "poste": "DC",
    "style": null,
    "prix": 1,
@@ -524,150 +524,150 @@
     "acceleration": 54,
     "pointe": 60,
     "passe": 54,
-    "dribble": 52,
-    "precision": 47,
-    "puissance": 57,
-    "duel": 72,
-    "endurance": 61
+    "dribble": 48,
+    "precision": 46,
+    "puissance": 58,
+    "duel": 74,
+    "endurance": 60
    }
   },
   {
-   "id": "BRA-VALADARES",
-   "nom": "Valadares",
-   "pays": "BRA",
+   "id": "ENG-WHITCOMBE",
+   "nom": "Whitcombe",
+   "pays": "ENG",
    "poste": "DG",
    "style": null,
    "prix": 2,
    "copies": 8,
    "notes": {
-    "acceleration": 64,
-    "pointe": 67,
+    "acceleration": 65,
+    "pointe": 68,
     "passe": 63,
-    "dribble": 64,
-    "precision": 51,
-    "puissance": 58,
-    "duel": 64,
+    "dribble": 61,
+    "precision": 50,
+    "puissance": 60,
+    "duel": 66,
     "endurance": 69
    }
   },
   {
-   "id": "BRA-BRANDAO",
-   "nom": "Brandão",
-   "pays": "BRA",
+   "id": "ENG-CARTWRIGHT",
+   "nom": "Cartwright",
+   "pays": "ENG",
    "poste": "DD",
    "style": "RAP",
    "prix": 4,
    "copies": 4,
    "notes": {
-    "acceleration": 82,
-    "pointe": 81,
+    "acceleration": 83,
+    "pointe": 82,
     "passe": 72,
-    "dribble": 74,
-    "precision": 66,
-    "puissance": 70,
-    "duel": 75,
+    "dribble": 71,
+    "precision": 65,
+    "puissance": 72,
+    "duel": 77,
     "endurance": 80
    }
   },
   {
-   "id": "BRA-BARRETO",
-   "nom": "Barreto",
-   "pays": "BRA",
+   "id": "ENG-LOCKWOOD",
+   "nom": "Lockwood",
+   "pays": "ENG",
    "poste": "MC",
    "style": "REM",
    "prix": 3,
    "copies": 6,
    "notes": {
-    "acceleration": 62,
-    "pointe": 62,
+    "acceleration": 63,
+    "pointe": 63,
     "passe": 76,
-    "dribble": 72,
-    "precision": 70,
-    "puissance": 68,
-    "duel": 78,
-    "endurance": 72
+    "dribble": 69,
+    "precision": 69,
+    "puissance": 70,
+    "duel": 79,
+    "endurance": 71
    }
   },
   {
-   "id": "BRA-REZENDE",
-   "nom": "Rezende",
-   "pays": "BRA",
+   "id": "ENG-FAIRLEY",
+   "nom": "Fairley",
+   "pays": "ENG",
    "poste": "MC",
    "style": null,
    "prix": 2,
    "copies": 8,
    "notes": {
-    "acceleration": 59,
+    "acceleration": 60,
     "pointe": 60,
-    "passe": 71,
-    "dribble": 70,
-    "precision": 60,
-    "puissance": 60,
-    "duel": 61,
-    "endurance": 65
+    "passe": 70,
+    "dribble": 66,
+    "precision": 58,
+    "puissance": 62,
+    "duel": 62,
+    "endurance": 64
    }
   },
   {
-   "id": "BRA-PEIXOTO",
-   "nom": "Peixoto",
-   "pays": "BRA",
+   "id": "ENG-PENROSE",
+   "nom": "Penrose",
+   "pays": "ENG",
    "poste": "MC",
    "style": null,
    "prix": 1,
    "copies": 10,
    "notes": {
-    "acceleration": 55,
+    "acceleration": 56,
     "pointe": 54,
     "passe": 64,
-    "dribble": 61,
-    "precision": 58,
-    "puissance": 54,
-    "duel": 56,
-    "endurance": 63
+    "dribble": 58,
+    "precision": 56,
+    "puissance": 56,
+    "duel": 58,
+    "endurance": 62
    }
   },
   {
-   "id": "BRA-LIMA",
-   "nom": "Lima",
-   "pays": "BRA",
+   "id": "ENG-KINGSLEY",
+   "nom": "Kingsley",
+   "pays": "ENG",
    "poste": "AG",
    "style": null,
    "prix": 4,
    "copies": 4,
    "notes": {
-    "acceleration": 82,
-    "pointe": 84,
+    "acceleration": 83,
+    "pointe": 85,
     "passe": 76,
-    "dribble": 84,
-    "precision": 75,
-    "puissance": 71,
-    "duel": 66,
+    "dribble": 81,
+    "precision": 74,
+    "puissance": 73,
+    "duel": 68,
     "endurance": 77
    }
   },
   {
-   "id": "BRA-AMARAL",
-   "nom": "Amaral",
-   "pays": "BRA",
+   "id": "ENG-MERRIMAN",
+   "nom": "Merriman",
+   "pays": "ENG",
    "poste": "AD",
    "style": null,
    "prix": 2,
    "copies": 8,
    "notes": {
-    "acceleration": 72,
-    "pointe": 68,
+    "acceleration": 73,
+    "pointe": 69,
     "passe": 61,
-    "dribble": 72,
-    "precision": 60,
-    "puissance": 59,
-    "duel": 51,
+    "dribble": 69,
+    "precision": 59,
+    "puissance": 61,
+    "duel": 53,
     "endurance": 60
    }
   },
   {
-   "id": "BRA-LOBO",
-   "nom": "Lobo",
-   "pays": "BRA",
+   "id": "ENG-BLACKWOOD",
+   "nom": "Blackwood",
+   "pays": "ENG",
    "poste": "AC",
    "style": "TEC",
    "prix": 5,
@@ -676,51 +676,51 @@
     "acceleration": 80,
     "pointe": 80,
     "passe": 76,
-    "dribble": 86,
-    "precision": 91,
-    "puissance": 86,
-    "duel": 70,
-    "endurance": 71
+    "dribble": 82,
+    "precision": 90,
+    "puissance": 88,
+    "duel": 72,
+    "endurance": 70
    }
   },
   {
-   "id": "BRA-SOUTO",
-   "nom": "Souto",
-   "pays": "BRA",
+   "id": "ENG-HAVERLY",
+   "nom": "Haverly",
+   "pays": "ENG",
    "poste": "AC",
    "style": null,
    "prix": 2,
    "copies": 8,
    "notes": {
-    "acceleration": 63,
+    "acceleration": 64,
     "pointe": 62,
-    "passe": 57,
-    "dribble": 65,
-    "precision": 77,
-    "puissance": 70,
-    "duel": 59,
+    "passe": 56,
+    "dribble": 62,
+    "precision": 76,
+    "puissance": 72,
+    "duel": 60,
     "endurance": 60
    }
   },
   {
-   "id": "ARG-LEDESMA",
-   "nom": "Ledesma",
-   "pays": "ARG",
+   "id": "GER-HAGEDORN",
+   "nom": "Hagedorn",
+   "pays": "GER",
    "poste": "G",
    "style": null,
    "prix": 2,
    "copies": 8,
    "notes": {
-    "reflexes": 61,
-    "placement": 66,
-    "sorties": 67,
+    "reflexes": 63,
+    "placement": 68,
+    "sorties": 64,
     "relance": 62
    }
   },
   {
-   "id": "ARG-FERREYRA",
-   "nom": "Ferreyra",
-   "pays": "ARG",
+   "id": "GER-FALKENRATH",
+   "nom": "Falkenrath",
+   "pays": "GER",
    "poste": "DC",
    "style": null,
    "prix": 3,
@@ -728,18 +728,18 @@
    "notes": {
     "acceleration": 66,
     "pointe": 69,
-    "passe": 70,
-    "dribble": 68,
-    "precision": 57,
+    "passe": 72,
+    "dribble": 66,
+    "precision": 58,
     "puissance": 70,
-    "duel": 88,
-    "endurance": 73
+    "duel": 86,
+    "endurance": 75
    }
   },
   {
-   "id": "ARG-GODOY",
-   "nom": "Godoy",
-   "pays": "ARG",
+   "id": "GER-WENDLER",
+   "nom": "Wendler",
+   "pays": "GER",
    "poste": "DC",
    "style": null,
    "prix": 1,
@@ -747,18 +747,18 @@
    "notes": {
     "acceleration": 54,
     "pointe": 58,
-    "passe": 56,
-    "dribble": 55,
-    "precision": 43,
+    "passe": 58,
+    "dribble": 53,
+    "precision": 44,
     "puissance": 57,
-    "duel": 72,
-    "endurance": 62
+    "duel": 70,
+    "endurance": 64
    }
   },
   {
-   "id": "ARG-QUIROGA",
-   "nom": "Quiroga",
-   "pays": "ARG",
+   "id": "GER-KESSLER",
+   "nom": "Kessler",
+   "pays": "GER",
    "poste": "DG",
    "style": "RAP",
    "prix": 3,
@@ -766,18 +766,18 @@
    "notes": {
     "acceleration": 77,
     "pointe": 79,
-    "passe": 70,
-    "dribble": 72,
-    "precision": 59,
+    "passe": 72,
+    "dribble": 70,
+    "precision": 60,
     "puissance": 66,
-    "duel": 74,
-    "endurance": 77
+    "duel": 72,
+    "endurance": 79
    }
   },
   {
-   "id": "ARG-BENITEZ",
-   "nom": "Benítez",
-   "pays": "ARG",
+   "id": "GER-OSTERMANN",
+   "nom": "Ostermann",
+   "pays": "GER",
    "poste": "DD",
    "style": null,
    "prix": 1,
@@ -785,18 +785,18 @@
    "notes": {
     "acceleration": 63,
     "pointe": 61,
-    "passe": 58,
-    "dribble": 56,
-    "precision": 47,
+    "passe": 60,
+    "dribble": 54,
+    "precision": 48,
     "puissance": 54,
-    "duel": 61,
-    "endurance": 64
+    "duel": 59,
+    "endurance": 66
    }
   },
   {
-   "id": "ARG-ARRIETA",
-   "nom": "Arrieta",
-   "pays": "ARG",
+   "id": "GER-RAUTENBERG",
+   "nom": "Rautenberg",
+   "pays": "GER",
    "poste": "MC",
    "style": "REC",
    "prix": 5,
@@ -804,18 +804,18 @@
    "notes": {
     "acceleration": 78,
     "pointe": 76,
-    "passe": 84,
-    "dribble": 87,
-    "precision": 77,
+    "passe": 86,
+    "dribble": 84,
+    "precision": 78,
     "puissance": 76,
-    "duel": 84,
-    "endurance": 90
+    "duel": 82,
+    "endurance": 92
    }
   },
   {
-   "id": "ARG-BUSTOS",
-   "nom": "Bustos",
-   "pays": "ARG",
+   "id": "GER-STEINBACH",
+   "nom": "Steinbach",
+   "pays": "GER",
    "poste": "MC",
    "style": null,
    "prix": 2,
@@ -823,18 +823,18 @@
    "notes": {
     "acceleration": 59,
     "pointe": 58,
-    "passe": 71,
-    "dribble": 68,
-    "precision": 62,
+    "passe": 73,
+    "dribble": 66,
+    "precision": 63,
     "puissance": 62,
-    "duel": 62,
-    "endurance": 65
+    "duel": 60,
+    "endurance": 67
    }
   },
   {
-   "id": "ARG-VILLALBA",
-   "nom": "Villalba",
-   "pays": "ARG",
+   "id": "GER-VOGLER",
+   "nom": "Vogler",
+   "pays": "GER",
    "poste": "MC",
    "style": null,
    "prix": 1,
@@ -842,18 +842,18 @@
    "notes": {
     "acceleration": 56,
     "pointe": 51,
-    "passe": 65,
-    "dribble": 59,
-    "precision": 56,
+    "passe": 67,
+    "dribble": 57,
+    "precision": 57,
     "puissance": 53,
-    "duel": 60,
-    "endurance": 63
+    "duel": 58,
+    "endurance": 65
    }
   },
   {
-   "id": "ARG-LUCERO",
-   "nom": "Lucero",
-   "pays": "ARG",
+   "id": "GER-ACHTERBERG",
+   "nom": "Achterberg",
+   "pays": "GER",
    "poste": "AG",
    "style": "TEC",
    "prix": 4,
@@ -861,37 +861,37 @@
    "notes": {
     "acceleration": 82,
     "pointe": 79,
-    "passe": 75,
-    "dribble": 86,
-    "precision": 73,
+    "passe": 77,
+    "dribble": 84,
+    "precision": 74,
     "puissance": 67,
-    "duel": 63,
-    "endurance": 71
+    "duel": 61,
+    "endurance": 73
    }
   },
   {
-   "id": "ARG-SOSA",
-   "nom": "Sosa",
-   "pays": "ARG",
+   "id": "GER-HARTWIG",
+   "nom": "Hartwig",
+   "pays": "GER",
    "poste": "AD",
    "style": "REM",
    "prix": 2,
    "copies": 8,
    "notes": {
-    "acceleration": 67,
+    "acceleration": 66,
     "pointe": 70,
-    "passe": 63,
-    "dribble": 68,
+    "passe": 64,
+    "dribble": 66,
     "precision": 60,
     "puissance": 58,
-    "duel": 61,
-    "endurance": 62
+    "duel": 58,
+    "endurance": 64
    }
   },
   {
-   "id": "ARG-FUNES",
-   "nom": "Funes",
-   "pays": "ARG",
+   "id": "GER-BRENNER",
+   "nom": "Brenner",
+   "pays": "GER",
    "poste": "AC",
    "style": null,
    "prix": 4,
@@ -899,18 +899,18 @@
    "notes": {
     "acceleration": 74,
     "pointe": 77,
-    "passe": 69,
-    "dribble": 77,
-    "precision": 83,
+    "passe": 71,
+    "dribble": 75,
+    "precision": 84,
     "puissance": 83,
-    "duel": 74,
-    "endurance": 69
+    "duel": 72,
+    "endurance": 71
    }
   },
   {
-   "id": "ARG-ACOSTA",
-   "nom": "Acosta",
-   "pays": "ARG",
+   "id": "GER-JASCHKE",
+   "nom": "Jaschke",
+   "pays": "GER",
    "poste": "AC",
    "style": null,
    "prix": 2,
@@ -918,12 +918,12 @@
    "notes": {
     "acceleration": 66,
     "pointe": 65,
-    "passe": 54,
-    "dribble": 64,
-    "precision": 73,
+    "passe": 56,
+    "dribble": 62,
+    "precision": 74,
     "puissance": 68,
-    "duel": 60,
-    "endurance": 56
+    "duel": 58,
+    "endurance": 58
    }
   },
   {

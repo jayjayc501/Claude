@@ -1,7 +1,7 @@
 // Une partie (13/11) : draft des 11 titulaires, premier mercato pour le banc,
-// puis un match. Deux équipes (toi et l'ordinateur) piochent dans la même
-// réserve de cartes, à copies limitées ; l'ordinateur suit les mêmes règles,
-// avec le même budget. Indépendant de l'affichage : testable sans navigateur.
+// puis un championnat (13/11 : 4 équipes, toi et 3 ordinateurs). Toutes les
+// équipes piochent dans la même réserve de cartes, à copies limitées ; les
+// ordinateurs suivent les mêmes règles, avec le même budget. Indépendant de l'affichage : testable sans navigateur.
 // Règles : data/partie.json ; cartes : data/cartes.json.
 
 import cartesBrut from "../data/cartes.json";
@@ -28,6 +28,10 @@ export interface Regles {
   mercatoTaille: number;
   relanceCout: number;
   bonusFusionParNiveau: number;
+  /** Championnat : noms des équipes de l'ordinateur, pièces gagnées à chaque journée. */
+  nomsOrdis: string[];
+  gainParJournee: number;
+  allerRetour: boolean;
   ordi: { reserveBanc: number; relancesMax: number };
 }
 
@@ -43,6 +47,8 @@ export interface Camp {
 }
 
 export type Resultat = { ok: true; message: string } | { ok: false; erreur: string };
+
+const TACTIQUES_ORDIS = ["EQU", "PRS", "CON", "TIK"];
 
 export const REGLES = reglesBrut as unknown as Regles;
 export const CATALOGUE = cartesBrut as unknown as { pays: Record<string, { nom: string; couleur: string }>; cartes: Carte[] };
@@ -99,9 +105,11 @@ export class Partie {
   readonly cartes: Record<string, Carte>;
   readonly reserve: Reserve;
   readonly rng: Aleatoire;
-  readonly camps: [Camp, Camp];
-  /** Choix de l'ordinateur pendant le draft, dans l'ordre (pour l'afficher). */
-  readonly choixOrdi: string[] = [];
+  /** camps[0] : toi ; camps[1..] : les ordinateurs. */
+  readonly camps: Camp[];
+  readonly noms: string[];
+  /** Choix des ordinateurs pendant le draft, dans l'ordre (pour l'afficher). */
+  readonly choixOrdi: { camp: number; id: string }[] = [];
 
   constructor(
     readonly donnees: Donnees,
@@ -115,7 +123,8 @@ export class Partie {
     this.reserve = new Reserve(liste);
     this.rng = new Aleatoire(graine);
     const camp = (): Camp => ({ budget: regles.budgetDepart, effectif: [], composition: [] });
-    this.camps = [camp(), camp()];
+    this.noms = ["Toi", ...regles.nomsOrdis];
+    this.camps = this.noms.map(camp);
   }
 
   carte(id: string): Carte {
@@ -124,18 +133,18 @@ export class Partie {
     return c;
   }
 
-  draftFini(camp: 0 | 1): boolean {
-    return this.camps[camp].composition.length >= JOUEURS_SUR_LE_TERRAIN;
+  draftFini(camp: number): boolean {
+    return this.camps[camp]!.composition.length >= JOUEURS_SUR_LE_TERRAIN;
   }
 
   /** Pièces à garder pour finir le draft (au moins 1 par titulaire restant après celui-ci). */
-  aGarder(camp: 0 | 1): number {
-    return Math.max(0, JOUEURS_SUR_LE_TERRAIN - this.camps[camp].composition.length - 1);
+  aGarder(camp: number): number {
+    return Math.max(0, JOUEURS_SUR_LE_TERRAIN - this.camps[camp]!.composition.length - 1);
   }
 
   /** Une case peut-elle encore recevoir un titulaire ? Le dernier choix est le gardien s'il manque. */
-  casePermise(camp: 0 | 1, poste: string, cellule: number): boolean {
-    const c = this.camps[camp];
+  casePermise(camp: number, poste: string, cellule: number): boolean {
+    const c = this.camps[camp]!;
     if (this.draftFini(camp) || occupant(c.composition, poste, cellule)) return false;
     const def = this.donnees.poste(poste);
     if (cellule < 0 || cellule >= def.cases.length || nombreAuPoste(c.composition, poste) >= def.max) return false;
@@ -145,8 +154,8 @@ export class Partie {
   }
 
   /** Joueurs proposés pour un poste : tirés de la réserve, sans ceux de l'équipe ; au moins un abordable. */
-  offre(camp: 0 | 1, poste: string): string[] {
-    const c = this.camps[camp];
+  offre(camp: number, poste: string): string[] {
+    const c = this.camps[camp]!;
     const deja = new Set(c.effectif.map((m) => m.id));
     // 13/11 (« les prix de 1 à 3, c'est pas terrible ») : tous les joueurs du poste
     // ont la même chance, et l'offre montre une vedette (4 ou 5 pièces) s'il en reste.
@@ -164,8 +173,8 @@ export class Partie {
   }
 
   /** Recrute un titulaire pendant le draft. */
-  choisir(camp: 0 | 1, poste: string, cellule: number, id: string): Resultat {
-    const c = this.camps[camp];
+  choisir(camp: number, poste: string, cellule: number, id: string): Resultat {
+    const c = this.camps[camp]!;
     const k = this.carte(id);
     if (k.poste !== poste) return { ok: false, erreur: `${k.nom} ne joue pas à ce poste.` };
     if (!this.casePermise(camp, poste, cellule)) return { ok: false, erreur: "Cette case n'est pas libre." };
@@ -190,13 +199,13 @@ export class Partie {
   }
 
   /** L'ordinateur remplit la prochaine case de sa formation. Renvoie la carte choisie. */
-  ordiChoisir(): string | null {
-    const c = this.camps[1];
-    const slot = this.planOrdi.find((s) => this.casePermise(1, s.poste, s.cellule));
+  ordiChoisir(camp = 1): string | null {
+    const c = this.camps[camp]!;
+    const slot = this.planOrdi.find((s) => this.casePermise(camp, s.poste, s.cellule));
     if (!slot) return null;
-    const offre = this.offre(1, slot.poste);
+    const offre = this.offre(camp, slot.poste);
     const restants = JOUEURS_SUR_LE_TERRAIN - c.composition.length;
-    const max = c.budget - this.aGarder(1);
+    const max = c.budget - this.aGarder(camp);
     // Part du budget visée pour ce choix, en gardant de quoi faire un banc.
     const cible = Math.max(1, (c.budget - this.regles.ordi.reserveBanc) / restants);
     const memePays = (id: string) => c.effectif.filter((m) => this.carte(m.id).pays === this.carte(id).pays).length;
@@ -207,10 +216,34 @@ export class Partie {
     const plafond = Math.min(max - this.regles.ordi.reserveBanc, Math.floor(cible + 0.8));
     const choix = tri(offre.filter((id) => this.carte(id).prix <= plafond)) ?? tri(offre.filter((id) => this.carte(id).prix <= max));
     if (!choix) return null;
-    const r = this.choisir(1, slot.poste, slot.cellule, choix);
+    const r = this.choisir(camp, slot.poste, slot.cellule, choix);
     if (!r.ok) return null;
-    this.choixOrdi.push(choix);
+    this.choixOrdi.push({ camp, id: choix });
     return choix;
+  }
+
+  /** Chaque ordinateur fait un choix de draft (après le tien). */
+  ordisChoisissent(): { camp: number; id: string }[] {
+    const faits: { camp: number; id: string }[] = [];
+    for (let c = 1; c < this.camps.length; c++) {
+      const id = this.ordiChoisir(c);
+      if (id) faits.push({ camp: c, id });
+    }
+    return faits;
+  }
+
+  /** Fin du draft : les ordinateurs finissent leur équipe puis font leur premier mercato. */
+  finirDraftOrdis(bancMax: number, fusionsMax: number): void {
+    for (let c = 1; c < this.camps.length; c++) {
+      while (!this.draftFini(c) && this.ordiChoisir(c));
+      this.ordiMercato(bancMax, fusionsMax, c);
+    }
+  }
+
+  /** Journée suivante du championnat : chaque équipe gagne des pièces, les ordinateurs font leur mercato. */
+  nouvelleJournee(bancMax: number, fusionsMax: number): void {
+    for (const c of this.camps) c.budget += this.regles.gainParJournee;
+    for (let c = 1; c < this.camps.length; c++) this.ordiMercato(bancMax, fusionsMax, c);
   }
 
   /** Cartes du mercato (tous postes, copies comprises). */
@@ -219,8 +252,8 @@ export class Partie {
   }
 
   /** Mercato de l'ordinateur : fusionne ses copies, puis remplit son banc ; relance si rien d'utile. */
-  ordiMercato(bancMax: number, fusionsMax: number): string[] {
-    const c = this.camps[1];
+  ordiMercato(bancMax: number, fusionsMax: number, camp = 1): string[] {
+    const c = this.camps[camp]!;
     const achats: string[] = [];
     let relances = 0;
     for (;;) {
@@ -248,17 +281,23 @@ export class Partie {
   }
 
   /** Équipe de l'ordinateur pour le match (notes avec le bonus de fusion). */
-  equipeOrdi(nom = "Ordinateur"): Equipe {
-    const c = this.camps[1];
+  equipeOrdi(nom = "Ordinateur", camp = 1): Equipe {
+    return this.equipeDe(camp, nom);
+  }
+
+  /** Équipe d'un camp pour un match (notes avec le bonus de fusion). */
+  equipeDe(camp: number, nom = this.noms[camp] ?? "Ordinateur"): Equipe {
+    const c = this.camps[camp]!;
     return {
       nom,
-      nationalite: "Ordinateur",
+      nationalite: nom,
       joueurs: c.effectif.map((m) => {
         const k = this.carte(m.id);
         return { id: k.id, nom: k.nom, postes: [k.poste], style: k.style, notes: notesFusionnees(k.notes, m.fusions, this.regles.bonusFusionParNiveau) };
       }),
       composition: c.composition.map((p) => ({ ...p })),
-      tactique: "EQU",
+      // Chaque ordinateur a sa tactique (13/11), pour des adversaires différents.
+      tactique: TACTIQUES_ORDIS[camp % TACTIQUES_ORDIS.length] ?? "EQU",
     };
   }
 }

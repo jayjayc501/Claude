@@ -1,78 +1,42 @@
 // Bustes du catalogue (13/11) : planches Kling découpées par scripts/decouper-planches.py.
 // Fichier généré : ne pas modifier à la main.
 
-import I_ARG_ACOSTA from "../images/joueurs/ARG-ACOSTA.webp";
-import I_ARG_ACOSTA_bleu from "../images/joueurs/ARG-ACOSTA-bleu.webp";
-import I_ARG_ACOSTA_rouge from "../images/joueurs/ARG-ACOSTA-rouge.webp";
-import I_ARG_ARRIETA from "../images/joueurs/ARG-ARRIETA.webp";
-import I_ARG_ARRIETA_bleu from "../images/joueurs/ARG-ARRIETA-bleu.webp";
-import I_ARG_ARRIETA_rouge from "../images/joueurs/ARG-ARRIETA-rouge.webp";
-import I_ARG_BENITEZ from "../images/joueurs/ARG-BENITEZ.webp";
-import I_ARG_BENITEZ_bleu from "../images/joueurs/ARG-BENITEZ-bleu.webp";
-import I_ARG_BENITEZ_rouge from "../images/joueurs/ARG-BENITEZ-rouge.webp";
-import I_ARG_BUSTOS from "../images/joueurs/ARG-BUSTOS.webp";
-import I_ARG_BUSTOS_bleu from "../images/joueurs/ARG-BUSTOS-bleu.webp";
-import I_ARG_BUSTOS_rouge from "../images/joueurs/ARG-BUSTOS-rouge.webp";
-import I_ARG_FERREYRA from "../images/joueurs/ARG-FERREYRA.webp";
-import I_ARG_FERREYRA_bleu from "../images/joueurs/ARG-FERREYRA-bleu.webp";
-import I_ARG_FERREYRA_rouge from "../images/joueurs/ARG-FERREYRA-rouge.webp";
-import I_ARG_FUNES from "../images/joueurs/ARG-FUNES.webp";
-import I_ARG_FUNES_bleu from "../images/joueurs/ARG-FUNES-bleu.webp";
-import I_ARG_FUNES_rouge from "../images/joueurs/ARG-FUNES-rouge.webp";
-import I_ARG_GODOY from "../images/joueurs/ARG-GODOY.webp";
-import I_ARG_GODOY_bleu from "../images/joueurs/ARG-GODOY-bleu.webp";
-import I_ARG_GODOY_rouge from "../images/joueurs/ARG-GODOY-rouge.webp";
-import I_ARG_LEDESMA from "../images/joueurs/ARG-LEDESMA.webp";
-import I_ARG_LEDESMA_bleu from "../images/joueurs/ARG-LEDESMA-bleu.webp";
-import I_ARG_LEDESMA_rouge from "../images/joueurs/ARG-LEDESMA-rouge.webp";
-import I_ARG_LUCERO from "../images/joueurs/ARG-LUCERO.webp";
-import I_ARG_LUCERO_bleu from "../images/joueurs/ARG-LUCERO-bleu.webp";
-import I_ARG_LUCERO_rouge from "../images/joueurs/ARG-LUCERO-rouge.webp";
-import I_ARG_QUIROGA from "../images/joueurs/ARG-QUIROGA.webp";
-import I_ARG_QUIROGA_bleu from "../images/joueurs/ARG-QUIROGA-bleu.webp";
-import I_ARG_QUIROGA_rouge from "../images/joueurs/ARG-QUIROGA-rouge.webp";
-import I_ARG_SOSA from "../images/joueurs/ARG-SOSA.webp";
-import I_ARG_SOSA_bleu from "../images/joueurs/ARG-SOSA-bleu.webp";
-import I_ARG_SOSA_rouge from "../images/joueurs/ARG-SOSA-rouge.webp";
-import I_ARG_VILLALBA from "../images/joueurs/ARG-VILLALBA.webp";
-import I_ARG_VILLALBA_bleu from "../images/joueurs/ARG-VILLALBA-bleu.webp";
-import I_ARG_VILLALBA_rouge from "../images/joueurs/ARG-VILLALBA-rouge.webp";
-import I_BRA_AMARAL from "../images/joueurs/BRA-AMARAL.webp";
-import I_BRA_AMARAL_bleu from "../images/joueurs/BRA-AMARAL-bleu.webp";
-import I_BRA_AMARAL_rouge from "../images/joueurs/BRA-AMARAL-rouge.webp";
-import I_BRA_BARRETO from "../images/joueurs/BRA-BARRETO.webp";
-import I_BRA_BARRETO_bleu from "../images/joueurs/BRA-BARRETO-bleu.webp";
-import I_BRA_BARRETO_rouge from "../images/joueurs/BRA-BARRETO-rouge.webp";
-import I_BRA_BRANDAO from "../images/joueurs/BRA-BRANDAO.webp";
-import I_BRA_BRANDAO_bleu from "../images/joueurs/BRA-BRANDAO-bleu.webp";
-import I_BRA_BRANDAO_rouge from "../images/joueurs/BRA-BRANDAO-rouge.webp";
-import I_BRA_CALDEIRA from "../images/joueurs/BRA-CALDEIRA.webp";
-import I_BRA_CALDEIRA_bleu from "../images/joueurs/BRA-CALDEIRA-bleu.webp";
-import I_BRA_CALDEIRA_rouge from "../images/joueurs/BRA-CALDEIRA-rouge.webp";
-import I_BRA_LIMA from "../images/joueurs/BRA-LIMA.webp";
-import I_BRA_LIMA_bleu from "../images/joueurs/BRA-LIMA-bleu.webp";
-import I_BRA_LIMA_rouge from "../images/joueurs/BRA-LIMA-rouge.webp";
-import I_BRA_LOBO from "../images/joueurs/BRA-LOBO.webp";
-import I_BRA_LOBO_bleu from "../images/joueurs/BRA-LOBO-bleu.webp";
-import I_BRA_LOBO_rouge from "../images/joueurs/BRA-LOBO-rouge.webp";
-import I_BRA_MATTOS from "../images/joueurs/BRA-MATTOS.webp";
-import I_BRA_MATTOS_bleu from "../images/joueurs/BRA-MATTOS-bleu.webp";
-import I_BRA_MATTOS_rouge from "../images/joueurs/BRA-MATTOS-rouge.webp";
-import I_BRA_PEIXOTO from "../images/joueurs/BRA-PEIXOTO.webp";
-import I_BRA_PEIXOTO_bleu from "../images/joueurs/BRA-PEIXOTO-bleu.webp";
-import I_BRA_PEIXOTO_rouge from "../images/joueurs/BRA-PEIXOTO-rouge.webp";
-import I_BRA_REZENDE from "../images/joueurs/BRA-REZENDE.webp";
-import I_BRA_REZENDE_bleu from "../images/joueurs/BRA-REZENDE-bleu.webp";
-import I_BRA_REZENDE_rouge from "../images/joueurs/BRA-REZENDE-rouge.webp";
-import I_BRA_SOUTO from "../images/joueurs/BRA-SOUTO.webp";
-import I_BRA_SOUTO_bleu from "../images/joueurs/BRA-SOUTO-bleu.webp";
-import I_BRA_SOUTO_rouge from "../images/joueurs/BRA-SOUTO-rouge.webp";
-import I_BRA_TEODORO from "../images/joueurs/BRA-TEODORO.webp";
-import I_BRA_TEODORO_bleu from "../images/joueurs/BRA-TEODORO-bleu.webp";
-import I_BRA_TEODORO_rouge from "../images/joueurs/BRA-TEODORO-rouge.webp";
-import I_BRA_VALADARES from "../images/joueurs/BRA-VALADARES.webp";
-import I_BRA_VALADARES_bleu from "../images/joueurs/BRA-VALADARES-bleu.webp";
-import I_BRA_VALADARES_rouge from "../images/joueurs/BRA-VALADARES-rouge.webp";
+import I_ENG_ASHDOWN from "../images/joueurs/ENG-ASHDOWN.webp";
+import I_ENG_ASHDOWN_bleu from "../images/joueurs/ENG-ASHDOWN-bleu.webp";
+import I_ENG_ASHDOWN_rouge from "../images/joueurs/ENG-ASHDOWN-rouge.webp";
+import I_ENG_BLACKWOOD from "../images/joueurs/ENG-BLACKWOOD.webp";
+import I_ENG_BLACKWOOD_bleu from "../images/joueurs/ENG-BLACKWOOD-bleu.webp";
+import I_ENG_BLACKWOOD_rouge from "../images/joueurs/ENG-BLACKWOOD-rouge.webp";
+import I_ENG_CARTWRIGHT from "../images/joueurs/ENG-CARTWRIGHT.webp";
+import I_ENG_CARTWRIGHT_bleu from "../images/joueurs/ENG-CARTWRIGHT-bleu.webp";
+import I_ENG_CARTWRIGHT_rouge from "../images/joueurs/ENG-CARTWRIGHT-rouge.webp";
+import I_ENG_FAIRLEY from "../images/joueurs/ENG-FAIRLEY.webp";
+import I_ENG_FAIRLEY_bleu from "../images/joueurs/ENG-FAIRLEY-bleu.webp";
+import I_ENG_FAIRLEY_rouge from "../images/joueurs/ENG-FAIRLEY-rouge.webp";
+import I_ENG_HAVERLY from "../images/joueurs/ENG-HAVERLY.webp";
+import I_ENG_HAVERLY_bleu from "../images/joueurs/ENG-HAVERLY-bleu.webp";
+import I_ENG_HAVERLY_rouge from "../images/joueurs/ENG-HAVERLY-rouge.webp";
+import I_ENG_KINGSLEY from "../images/joueurs/ENG-KINGSLEY.webp";
+import I_ENG_KINGSLEY_bleu from "../images/joueurs/ENG-KINGSLEY-bleu.webp";
+import I_ENG_KINGSLEY_rouge from "../images/joueurs/ENG-KINGSLEY-rouge.webp";
+import I_ENG_LOCKWOOD from "../images/joueurs/ENG-LOCKWOOD.webp";
+import I_ENG_LOCKWOOD_bleu from "../images/joueurs/ENG-LOCKWOOD-bleu.webp";
+import I_ENG_LOCKWOOD_rouge from "../images/joueurs/ENG-LOCKWOOD-rouge.webp";
+import I_ENG_MERRIMAN from "../images/joueurs/ENG-MERRIMAN.webp";
+import I_ENG_MERRIMAN_bleu from "../images/joueurs/ENG-MERRIMAN-bleu.webp";
+import I_ENG_MERRIMAN_rouge from "../images/joueurs/ENG-MERRIMAN-rouge.webp";
+import I_ENG_PEMBERTON from "../images/joueurs/ENG-PEMBERTON.webp";
+import I_ENG_PEMBERTON_bleu from "../images/joueurs/ENG-PEMBERTON-bleu.webp";
+import I_ENG_PEMBERTON_rouge from "../images/joueurs/ENG-PEMBERTON-rouge.webp";
+import I_ENG_PENROSE from "../images/joueurs/ENG-PENROSE.webp";
+import I_ENG_PENROSE_bleu from "../images/joueurs/ENG-PENROSE-bleu.webp";
+import I_ENG_PENROSE_rouge from "../images/joueurs/ENG-PENROSE-rouge.webp";
+import I_ENG_THORNLEY from "../images/joueurs/ENG-THORNLEY.webp";
+import I_ENG_THORNLEY_bleu from "../images/joueurs/ENG-THORNLEY-bleu.webp";
+import I_ENG_THORNLEY_rouge from "../images/joueurs/ENG-THORNLEY-rouge.webp";
+import I_ENG_WHITCOMBE from "../images/joueurs/ENG-WHITCOMBE.webp";
+import I_ENG_WHITCOMBE_bleu from "../images/joueurs/ENG-WHITCOMBE-bleu.webp";
+import I_ENG_WHITCOMBE_rouge from "../images/joueurs/ENG-WHITCOMBE-rouge.webp";
 import I_ESP_ALMAR from "../images/joueurs/ESP-ALMAR.webp";
 import I_ESP_ALMAR_bleu from "../images/joueurs/ESP-ALMAR-bleu.webp";
 import I_ESP_ALMAR_rouge from "../images/joueurs/ESP-ALMAR-rouge.webp";
@@ -145,6 +109,42 @@ import I_FRA_ROUX_rouge from "../images/joueurs/FRA-ROUX-rouge.webp";
 import I_FRA_TESSIER from "../images/joueurs/FRA-TESSIER.webp";
 import I_FRA_TESSIER_bleu from "../images/joueurs/FRA-TESSIER-bleu.webp";
 import I_FRA_TESSIER_rouge from "../images/joueurs/FRA-TESSIER-rouge.webp";
+import I_GER_ACHTERBERG from "../images/joueurs/GER-ACHTERBERG.webp";
+import I_GER_ACHTERBERG_bleu from "../images/joueurs/GER-ACHTERBERG-bleu.webp";
+import I_GER_ACHTERBERG_rouge from "../images/joueurs/GER-ACHTERBERG-rouge.webp";
+import I_GER_BRENNER from "../images/joueurs/GER-BRENNER.webp";
+import I_GER_BRENNER_bleu from "../images/joueurs/GER-BRENNER-bleu.webp";
+import I_GER_BRENNER_rouge from "../images/joueurs/GER-BRENNER-rouge.webp";
+import I_GER_FALKENRATH from "../images/joueurs/GER-FALKENRATH.webp";
+import I_GER_FALKENRATH_bleu from "../images/joueurs/GER-FALKENRATH-bleu.webp";
+import I_GER_FALKENRATH_rouge from "../images/joueurs/GER-FALKENRATH-rouge.webp";
+import I_GER_HAGEDORN from "../images/joueurs/GER-HAGEDORN.webp";
+import I_GER_HAGEDORN_bleu from "../images/joueurs/GER-HAGEDORN-bleu.webp";
+import I_GER_HAGEDORN_rouge from "../images/joueurs/GER-HAGEDORN-rouge.webp";
+import I_GER_HARTWIG from "../images/joueurs/GER-HARTWIG.webp";
+import I_GER_HARTWIG_bleu from "../images/joueurs/GER-HARTWIG-bleu.webp";
+import I_GER_HARTWIG_rouge from "../images/joueurs/GER-HARTWIG-rouge.webp";
+import I_GER_JASCHKE from "../images/joueurs/GER-JASCHKE.webp";
+import I_GER_JASCHKE_bleu from "../images/joueurs/GER-JASCHKE-bleu.webp";
+import I_GER_JASCHKE_rouge from "../images/joueurs/GER-JASCHKE-rouge.webp";
+import I_GER_KESSLER from "../images/joueurs/GER-KESSLER.webp";
+import I_GER_KESSLER_bleu from "../images/joueurs/GER-KESSLER-bleu.webp";
+import I_GER_KESSLER_rouge from "../images/joueurs/GER-KESSLER-rouge.webp";
+import I_GER_OSTERMANN from "../images/joueurs/GER-OSTERMANN.webp";
+import I_GER_OSTERMANN_bleu from "../images/joueurs/GER-OSTERMANN-bleu.webp";
+import I_GER_OSTERMANN_rouge from "../images/joueurs/GER-OSTERMANN-rouge.webp";
+import I_GER_RAUTENBERG from "../images/joueurs/GER-RAUTENBERG.webp";
+import I_GER_RAUTENBERG_bleu from "../images/joueurs/GER-RAUTENBERG-bleu.webp";
+import I_GER_RAUTENBERG_rouge from "../images/joueurs/GER-RAUTENBERG-rouge.webp";
+import I_GER_STEINBACH from "../images/joueurs/GER-STEINBACH.webp";
+import I_GER_STEINBACH_bleu from "../images/joueurs/GER-STEINBACH-bleu.webp";
+import I_GER_STEINBACH_rouge from "../images/joueurs/GER-STEINBACH-rouge.webp";
+import I_GER_VOGLER from "../images/joueurs/GER-VOGLER.webp";
+import I_GER_VOGLER_bleu from "../images/joueurs/GER-VOGLER-bleu.webp";
+import I_GER_VOGLER_rouge from "../images/joueurs/GER-VOGLER-rouge.webp";
+import I_GER_WENDLER from "../images/joueurs/GER-WENDLER.webp";
+import I_GER_WENDLER_bleu from "../images/joueurs/GER-WENDLER-bleu.webp";
+import I_GER_WENDLER_rouge from "../images/joueurs/GER-WENDLER-rouge.webp";
 import I_ITA_BONETTI from "../images/joueurs/ITA-BONETTI.webp";
 import I_ITA_BONETTI_bleu from "../images/joueurs/ITA-BONETTI-bleu.webp";
 import I_ITA_BONETTI_rouge from "../images/joueurs/ITA-BONETTI-rouge.webp";
@@ -183,30 +183,18 @@ import I_ITA_VITALE_bleu from "../images/joueurs/ITA-VITALE-bleu.webp";
 import I_ITA_VITALE_rouge from "../images/joueurs/ITA-VITALE-rouge.webp";
 
 export const BUSTES_CATALOGUE: Record<string, string> = {
-  "ARG-ACOSTA": I_ARG_ACOSTA,
-  "ARG-ARRIETA": I_ARG_ARRIETA,
-  "ARG-BENITEZ": I_ARG_BENITEZ,
-  "ARG-BUSTOS": I_ARG_BUSTOS,
-  "ARG-FERREYRA": I_ARG_FERREYRA,
-  "ARG-FUNES": I_ARG_FUNES,
-  "ARG-GODOY": I_ARG_GODOY,
-  "ARG-LEDESMA": I_ARG_LEDESMA,
-  "ARG-LUCERO": I_ARG_LUCERO,
-  "ARG-QUIROGA": I_ARG_QUIROGA,
-  "ARG-SOSA": I_ARG_SOSA,
-  "ARG-VILLALBA": I_ARG_VILLALBA,
-  "BRA-AMARAL": I_BRA_AMARAL,
-  "BRA-BARRETO": I_BRA_BARRETO,
-  "BRA-BRANDAO": I_BRA_BRANDAO,
-  "BRA-CALDEIRA": I_BRA_CALDEIRA,
-  "BRA-LIMA": I_BRA_LIMA,
-  "BRA-LOBO": I_BRA_LOBO,
-  "BRA-MATTOS": I_BRA_MATTOS,
-  "BRA-PEIXOTO": I_BRA_PEIXOTO,
-  "BRA-REZENDE": I_BRA_REZENDE,
-  "BRA-SOUTO": I_BRA_SOUTO,
-  "BRA-TEODORO": I_BRA_TEODORO,
-  "BRA-VALADARES": I_BRA_VALADARES,
+  "ENG-ASHDOWN": I_ENG_ASHDOWN,
+  "ENG-BLACKWOOD": I_ENG_BLACKWOOD,
+  "ENG-CARTWRIGHT": I_ENG_CARTWRIGHT,
+  "ENG-FAIRLEY": I_ENG_FAIRLEY,
+  "ENG-HAVERLY": I_ENG_HAVERLY,
+  "ENG-KINGSLEY": I_ENG_KINGSLEY,
+  "ENG-LOCKWOOD": I_ENG_LOCKWOOD,
+  "ENG-MERRIMAN": I_ENG_MERRIMAN,
+  "ENG-PEMBERTON": I_ENG_PEMBERTON,
+  "ENG-PENROSE": I_ENG_PENROSE,
+  "ENG-THORNLEY": I_ENG_THORNLEY,
+  "ENG-WHITCOMBE": I_ENG_WHITCOMBE,
   "ESP-ALMAR": I_ESP_ALMAR,
   "ESP-ARNAU": I_ESP_ARNAU,
   "ESP-CASTELL": I_ESP_CASTELL,
@@ -231,6 +219,18 @@ export const BUSTES_CATALOGUE: Record<string, string> = {
   "FRA-PERROT": I_FRA_PERROT,
   "FRA-ROUX": I_FRA_ROUX,
   "FRA-TESSIER": I_FRA_TESSIER,
+  "GER-ACHTERBERG": I_GER_ACHTERBERG,
+  "GER-BRENNER": I_GER_BRENNER,
+  "GER-FALKENRATH": I_GER_FALKENRATH,
+  "GER-HAGEDORN": I_GER_HAGEDORN,
+  "GER-HARTWIG": I_GER_HARTWIG,
+  "GER-JASCHKE": I_GER_JASCHKE,
+  "GER-KESSLER": I_GER_KESSLER,
+  "GER-OSTERMANN": I_GER_OSTERMANN,
+  "GER-RAUTENBERG": I_GER_RAUTENBERG,
+  "GER-STEINBACH": I_GER_STEINBACH,
+  "GER-VOGLER": I_GER_VOGLER,
+  "GER-WENDLER": I_GER_WENDLER,
   "ITA-BONETTI": I_ITA_BONETTI,
   "ITA-CONTI": I_ITA_CONTI,
   "ITA-FABBRI": I_ITA_FABBRI,
@@ -245,30 +245,18 @@ export const BUSTES_CATALOGUE: Record<string, string> = {
   "ITA-VITALE": I_ITA_VITALE,
 };
 export const BLEUS_CATALOGUE: Record<string, string> = {
-  "ARG-ACOSTA": I_ARG_ACOSTA_bleu,
-  "ARG-ARRIETA": I_ARG_ARRIETA_bleu,
-  "ARG-BENITEZ": I_ARG_BENITEZ_bleu,
-  "ARG-BUSTOS": I_ARG_BUSTOS_bleu,
-  "ARG-FERREYRA": I_ARG_FERREYRA_bleu,
-  "ARG-FUNES": I_ARG_FUNES_bleu,
-  "ARG-GODOY": I_ARG_GODOY_bleu,
-  "ARG-LEDESMA": I_ARG_LEDESMA_bleu,
-  "ARG-LUCERO": I_ARG_LUCERO_bleu,
-  "ARG-QUIROGA": I_ARG_QUIROGA_bleu,
-  "ARG-SOSA": I_ARG_SOSA_bleu,
-  "ARG-VILLALBA": I_ARG_VILLALBA_bleu,
-  "BRA-AMARAL": I_BRA_AMARAL_bleu,
-  "BRA-BARRETO": I_BRA_BARRETO_bleu,
-  "BRA-BRANDAO": I_BRA_BRANDAO_bleu,
-  "BRA-CALDEIRA": I_BRA_CALDEIRA_bleu,
-  "BRA-LIMA": I_BRA_LIMA_bleu,
-  "BRA-LOBO": I_BRA_LOBO_bleu,
-  "BRA-MATTOS": I_BRA_MATTOS_bleu,
-  "BRA-PEIXOTO": I_BRA_PEIXOTO_bleu,
-  "BRA-REZENDE": I_BRA_REZENDE_bleu,
-  "BRA-SOUTO": I_BRA_SOUTO_bleu,
-  "BRA-TEODORO": I_BRA_TEODORO_bleu,
-  "BRA-VALADARES": I_BRA_VALADARES_bleu,
+  "ENG-ASHDOWN": I_ENG_ASHDOWN_bleu,
+  "ENG-BLACKWOOD": I_ENG_BLACKWOOD_bleu,
+  "ENG-CARTWRIGHT": I_ENG_CARTWRIGHT_bleu,
+  "ENG-FAIRLEY": I_ENG_FAIRLEY_bleu,
+  "ENG-HAVERLY": I_ENG_HAVERLY_bleu,
+  "ENG-KINGSLEY": I_ENG_KINGSLEY_bleu,
+  "ENG-LOCKWOOD": I_ENG_LOCKWOOD_bleu,
+  "ENG-MERRIMAN": I_ENG_MERRIMAN_bleu,
+  "ENG-PEMBERTON": I_ENG_PEMBERTON_bleu,
+  "ENG-PENROSE": I_ENG_PENROSE_bleu,
+  "ENG-THORNLEY": I_ENG_THORNLEY_bleu,
+  "ENG-WHITCOMBE": I_ENG_WHITCOMBE_bleu,
   "ESP-ALMAR": I_ESP_ALMAR_bleu,
   "ESP-ARNAU": I_ESP_ARNAU_bleu,
   "ESP-CASTELL": I_ESP_CASTELL_bleu,
@@ -293,6 +281,18 @@ export const BLEUS_CATALOGUE: Record<string, string> = {
   "FRA-PERROT": I_FRA_PERROT_bleu,
   "FRA-ROUX": I_FRA_ROUX_bleu,
   "FRA-TESSIER": I_FRA_TESSIER_bleu,
+  "GER-ACHTERBERG": I_GER_ACHTERBERG_bleu,
+  "GER-BRENNER": I_GER_BRENNER_bleu,
+  "GER-FALKENRATH": I_GER_FALKENRATH_bleu,
+  "GER-HAGEDORN": I_GER_HAGEDORN_bleu,
+  "GER-HARTWIG": I_GER_HARTWIG_bleu,
+  "GER-JASCHKE": I_GER_JASCHKE_bleu,
+  "GER-KESSLER": I_GER_KESSLER_bleu,
+  "GER-OSTERMANN": I_GER_OSTERMANN_bleu,
+  "GER-RAUTENBERG": I_GER_RAUTENBERG_bleu,
+  "GER-STEINBACH": I_GER_STEINBACH_bleu,
+  "GER-VOGLER": I_GER_VOGLER_bleu,
+  "GER-WENDLER": I_GER_WENDLER_bleu,
   "ITA-BONETTI": I_ITA_BONETTI_bleu,
   "ITA-CONTI": I_ITA_CONTI_bleu,
   "ITA-FABBRI": I_ITA_FABBRI_bleu,
@@ -307,30 +307,18 @@ export const BLEUS_CATALOGUE: Record<string, string> = {
   "ITA-VITALE": I_ITA_VITALE_bleu,
 };
 export const ROUGES_CATALOGUE: Record<string, string> = {
-  "ARG-ACOSTA": I_ARG_ACOSTA_rouge,
-  "ARG-ARRIETA": I_ARG_ARRIETA_rouge,
-  "ARG-BENITEZ": I_ARG_BENITEZ_rouge,
-  "ARG-BUSTOS": I_ARG_BUSTOS_rouge,
-  "ARG-FERREYRA": I_ARG_FERREYRA_rouge,
-  "ARG-FUNES": I_ARG_FUNES_rouge,
-  "ARG-GODOY": I_ARG_GODOY_rouge,
-  "ARG-LEDESMA": I_ARG_LEDESMA_rouge,
-  "ARG-LUCERO": I_ARG_LUCERO_rouge,
-  "ARG-QUIROGA": I_ARG_QUIROGA_rouge,
-  "ARG-SOSA": I_ARG_SOSA_rouge,
-  "ARG-VILLALBA": I_ARG_VILLALBA_rouge,
-  "BRA-AMARAL": I_BRA_AMARAL_rouge,
-  "BRA-BARRETO": I_BRA_BARRETO_rouge,
-  "BRA-BRANDAO": I_BRA_BRANDAO_rouge,
-  "BRA-CALDEIRA": I_BRA_CALDEIRA_rouge,
-  "BRA-LIMA": I_BRA_LIMA_rouge,
-  "BRA-LOBO": I_BRA_LOBO_rouge,
-  "BRA-MATTOS": I_BRA_MATTOS_rouge,
-  "BRA-PEIXOTO": I_BRA_PEIXOTO_rouge,
-  "BRA-REZENDE": I_BRA_REZENDE_rouge,
-  "BRA-SOUTO": I_BRA_SOUTO_rouge,
-  "BRA-TEODORO": I_BRA_TEODORO_rouge,
-  "BRA-VALADARES": I_BRA_VALADARES_rouge,
+  "ENG-ASHDOWN": I_ENG_ASHDOWN_rouge,
+  "ENG-BLACKWOOD": I_ENG_BLACKWOOD_rouge,
+  "ENG-CARTWRIGHT": I_ENG_CARTWRIGHT_rouge,
+  "ENG-FAIRLEY": I_ENG_FAIRLEY_rouge,
+  "ENG-HAVERLY": I_ENG_HAVERLY_rouge,
+  "ENG-KINGSLEY": I_ENG_KINGSLEY_rouge,
+  "ENG-LOCKWOOD": I_ENG_LOCKWOOD_rouge,
+  "ENG-MERRIMAN": I_ENG_MERRIMAN_rouge,
+  "ENG-PEMBERTON": I_ENG_PEMBERTON_rouge,
+  "ENG-PENROSE": I_ENG_PENROSE_rouge,
+  "ENG-THORNLEY": I_ENG_THORNLEY_rouge,
+  "ENG-WHITCOMBE": I_ENG_WHITCOMBE_rouge,
   "ESP-ALMAR": I_ESP_ALMAR_rouge,
   "ESP-ARNAU": I_ESP_ARNAU_rouge,
   "ESP-CASTELL": I_ESP_CASTELL_rouge,
@@ -355,6 +343,18 @@ export const ROUGES_CATALOGUE: Record<string, string> = {
   "FRA-PERROT": I_FRA_PERROT_rouge,
   "FRA-ROUX": I_FRA_ROUX_rouge,
   "FRA-TESSIER": I_FRA_TESSIER_rouge,
+  "GER-ACHTERBERG": I_GER_ACHTERBERG_rouge,
+  "GER-BRENNER": I_GER_BRENNER_rouge,
+  "GER-FALKENRATH": I_GER_FALKENRATH_rouge,
+  "GER-HAGEDORN": I_GER_HAGEDORN_rouge,
+  "GER-HARTWIG": I_GER_HARTWIG_rouge,
+  "GER-JASCHKE": I_GER_JASCHKE_rouge,
+  "GER-KESSLER": I_GER_KESSLER_rouge,
+  "GER-OSTERMANN": I_GER_OSTERMANN_rouge,
+  "GER-RAUTENBERG": I_GER_RAUTENBERG_rouge,
+  "GER-STEINBACH": I_GER_STEINBACH_rouge,
+  "GER-VOGLER": I_GER_VOGLER_rouge,
+  "GER-WENDLER": I_GER_WENDLER_rouge,
   "ITA-BONETTI": I_ITA_BONETTI_rouge,
   "ITA-CONTI": I_ITA_CONTI_rouge,
   "ITA-FABBRI": I_ITA_FABBRI_rouge,

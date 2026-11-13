@@ -87,6 +87,9 @@ export interface HabillageMatch {
   infos: (id: string, camp?: 0 | 1) => InfosJoueur | undefined;
   /** Mi-temps : ouvre l'écran de préparation pour déplacer et remplacer (13/11). */
   changements?: () => void;
+  /** Championnat (13/11) : fin du match, avec le score (toi, l'adversaire). Sans
+   *  elle, la fin du match propose un nouveau match. */
+  finMatch?: (score: [number, number]) => void;
 }
 
 export class EcranMatch {
@@ -251,6 +254,7 @@ export class EcranMatch {
       if (this.arret === "mi-temps") this.secondeMiTemps();
       else if (this.arret === "fin") {
         this.graine += 1;
+        if (this.habillage.finMatch) return this.habillage.finMatch([this.sim.score[0], this.sim.score[1]]);
         this.nouveauMatch();
         return;
       } else if (!this.sim.demarre) this.sim.demarrer();
@@ -258,6 +262,7 @@ export class EcranMatch {
       this.majCommandes();
     });
     const nouveau = html("button", { type: "button", class: "match-puce", "aria-label": "Nouveau match" }, cmd, "↺ Nouveau");
+    if (h.finMatch) nouveau.style.display = "none"; // championnat : pas de match rejoué
     nouveau.addEventListener("click", () => {
       this.graine += 1;
       this.nouveauMatch();
@@ -539,7 +544,7 @@ export class EcranMatch {
     const enJeu = this.sim.demarre && !this.enPause && !this.arret;
     this.boutonJouer.textContent =
       this.arret === "mi-temps" ? "▶ 2e mi-temps"
-      : this.arret === "fin" ? "↺ Nouveau match"
+      : this.arret === "fin" ? (this.habillage.finMatch ? "Continuer ▶" : "↺ Nouveau match")
       : !this.sim.demarre ? "▶ Coup d'envoi"
       : enJeu ? "❚❚ Pause"
       : "▶ Reprendre";
@@ -854,7 +859,7 @@ export class EcranMatch {
       const c = html("button", { type: "button", class: "match-changements" }, carte, "⇄ Changements, places, fatigue");
       c.addEventListener("click", () => this.habillage.changements!());
     } else if (this.arret === "mi-temps") html("p", { class: "match-panneau-aide" }, carte, "Tu peux changer ta tactique sous le terrain avant de reprendre.");
-    const b = html("button", { type: "button", class: "match-jouer" }, carte, this.arret === "fin" ? "↺ Nouveau match" : "▶ 2e mi-temps");
+    const b = html("button", { type: "button", class: "match-jouer" }, carte, this.arret === "fin" ? (this.habillage.finMatch ? "Continuer ▶" : "↺ Nouveau match") : "▶ 2e mi-temps");
     b.addEventListener("click", () => this.boutonJouer.click());
     this.panneau = p;
   }

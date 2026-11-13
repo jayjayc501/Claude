@@ -601,3 +601,27 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 **Tests** : 130 verts, dont 4 nouveaux (`tests/mitemps.test.ts` : remplaçant frais, déplacement, barème, notes de tous les joueurs). Parcours vérifié au format téléphone : draft, match, panneau de mi-temps, écran des changements, reprise en 2e mi-temps.
 
 **À juger par le concepteur** : le barème des notes (souvent entre 5,5 et 7) ; la fatigue à la mi-temps (encore faible : elle grimpe surtout après la 60e) ; les bustes (quelques mains un peu pâles là où il y avait des gants).
+
+## 13/11/2026 (midi) — Pays européens, touches, championnat de 4 équipes
+
+**Demandes du concepteur** : « trop de bleus » : garder France, Italie, Espagne et ajouter Angleterre (rouge et blanc) et Allemagne (« leur vert bizarre ») ; bugs sur les touches (« ils donnent le ballon à l'adversaire directement qui est collé », double touche) ; les gardiens sont difficiles à identifier ; « simuler tout un championnat de 4 équipes », avec un mercato après chaque journée, « peut-être 10 pièces à chaque fois ».
+
+**Décisions validées dans la séance** : pays France, Espagne, Angleterre, Allemagne, Italie ; championnat de 4 équipes avec un mercato après chaque journée.
+
+**Ce qui a été fait** (chiffres en PROPOSITION)
+- **Pays** : Brésil et Argentine remplacés par l'Angleterre (maillot rouge, col blanc) et l'Allemagne (vert menthe) dans `scripts/generer-cartes.py` (12 joueurs chacun, un de chaque style, notes tirées comme les autres, gardiens à part) ; `cartes.json` régénéré ; tableau des 60 cartes mis à jour (colonnes des notes de gardien ajoutées).
+- **Bustes** : 2 planches Kling (une retouche chacune), puis 5 joueurs de champ refaits à part parce qu'ils gardaient des gants (2 crédits chacun). Drapeaux anglais et allemand ajoutés au découpage ; réglage de maillot propre à un joueur possible (`MAILLOT["GER-RAUTENBERG"]`, maillot à rayures pâles). Crédits Kling dépensés au total : environ 96 sur 375.
+- **Gardiens** : ils gardent le maillot de leur pays, avec gants et drapeau (c'est ce qui les distingue des joueurs de champ) ; en match, maillot de l'équipe comme les autres.
+- **Touches** (`src/sim/ballon.ts`) : le lanceur cherche un partenaire démarqué (adversaire à plus de 3 m, ligne de passe libre) et attend jusqu'à 3 s s'il n'y en a pas ; la touche part en lob vers ce partenaire (`lancerTouche`) ; le lanceur ne peut plus retoucher le ballon avant un autre joueur (`lanceur`) ; les adversaires reculent de 2,5 m.
+- **Championnat** (`src/jeu/championnat.ts`, `src/jeu/partie.ts`, `src/main.ts`) : 4 équipes (toi, Tigres, Requins, Aigles), aller simple (3 journées), 3 points la victoire et 1 le nul ; l'autre match de la journée est simulé sans affichage ; après chaque journée, +10 pièces pour tout le monde (`gainParJournee`) puis mercato ; les ordinateurs jouent chacun une tactique (Équilibrée, Pressing, Contre, Tiki-taka). Écran de préparation : « Journée 2/3 · contre Requins », classement en 4 pastilles (toi en bleu, ton prochain adversaire en rouge), résultats de la journée ; à la fin, « Championnat terminé » et le champion. L'en-tête est compacté pour que l'écran tienne toujours sur une page.
+
+**Mesures** (touches, mêmes graines)
+
+| | Touches | Gardées | Perdues | Doubles touches |
+|---|---|---|---|---|
+| Avant | 29 | 5 | 15 | 6 |
+| Après | 24 | 24 | 0 | 0 |
+
+**Tests** : 134 verts (nouveaux : `tests/touches.test.ts`, `tests/championnat.test.ts` : calendrier, classement, championnat complet simulé). Parcours vérifié au format téléphone : draft, match complet, retour à la préparation de la journée 2 avec classement et +10 pièces.
+
+**À juger par le concepteur** : les touches ; le rythme du championnat (3 journées, est-ce assez ?) ; les +10 pièces par journée (avis de Claude : bon point de départ, une fusion de niveau 1 coûte souvent 2 à 4 pièces ; on pourra ajouter une prime de victoire) ; les nouveaux maillots et bustes.

@@ -128,6 +128,9 @@ export class BallonReel {
 
   /** Statistiques de chaque joueur (13/11, pour la note de match), par « camp:id ». */
   readonly statsJoueurs = new Map<string, StatsJoueur>();
+  /** Touche (13/11, « il y a double touche ») : le lanceur ne rejoue pas le
+   *  ballon avant qu'un autre joueur l'ait touché. */
+  private lanceur: JoueurSim | null = null;
   /** Dernière passe réussie (pour les passes décisives). */
   private passeReussie: { de: JoueurSim; vers: JoueurSim; t: number } | null = null;
 
@@ -148,6 +151,7 @@ export class BallonReel {
     this.plongeon = null;
     this.perte = null;
     this.passeReussie = null;
+    this.lanceur = null;
     this.tirEvite.clear();
   }
 
@@ -197,6 +201,7 @@ export class BallonReel {
   remettre(point: PointM, camp: Camp, arrete: "corner" | "penalty" | "engagement" | "sixMetres" | "coupFranc" | "touche" | null = null, texte?: string, tireur: JoueurSim | null = null): void {
     const s = this.sim;
     this.tireur = tireur;
+    this.lanceur = null;
     this.arrete = arrete;
     this.horsJeu = false;
     this.tirPenalty = false;
@@ -248,16 +253,16 @@ export class BallonReel {
     }
   }
 
-  /** Coup franc : les adversaires se tiennent à 9,15 m du ballon. */
-  private eloigner(camp: Camp): void {
+  /** Coup franc : les adversaires se tiennent à 9,15 m du ballon (touche : 2 m). */
+  private eloigner(camp: Camp, rayon = 9.5): void {
     const b = this.sim.ballon;
     for (const o of this.sim.joueurs) {
       if (o.camp === camp) continue;
       const d = dist(o.cible, b);
-      if (d >= 9.5) continue;
+      if (d >= rayon) continue;
       const ux = d > 0.1 ? (o.cible.x - b.x) / d : 0;
       const uy = d > 0.1 ? (o.cible.y - b.y) / d : camp === 0 ? 1 : -1;
-      o.cible = { x: b.x + ux * 9.5, y: b.y + uy * 9.5 };
+      o.cible = { x: b.x + ux * rayon, y: b.y + uy * rayon };
     }
   }
 
@@ -431,23 +436,35 @@ export class BallonReel {
     const poidsProgression = r.poidsProgression + (this.depuisRecuperation(p.camp) < r.contreAttaque.dureeS ? r.contreAttaque.bonusProgression : 0);
 
     if (this.arrete === "touche") {
-      // Touche : passe (à la main) vers le coéquipier le plus libre, à moins de 22 m.
-      this.arrete = null;
+      // Touche (13/11, « ils donnent le ballon à l'adversaire collé ») : passe à la main
+      // vers un coéquipier démarqué (adversaire à plus de 3 m, ligne de passe libre),
+      // à moins de 22 m. Personne de libre : on attend un peu (3 s au plus) qu'un
+      // coéquipier se démarque, puis on joue le moins marqué.
       let choix: JoueurSim | null = null;
       let mieux = -Infinity;
+      let libre = false;
       for (const q of s.joueurs) {
         if (q === p || q.camp !== p.camp || q.poste.id === "G") continue;
         const d = dist(p.pos, q.pos);
         if (d < 4 || d > 22) continue;
-        const ouvert = Math.min(8, Math.min(...adverses.map((a) => dist(a.pos, q.pos))));
-        const sc = ouvert - d * 0.1 + this.rng.entre(-1.5, 1.5);
+        const marque = Math.min(...adverses.map((a) => dist(a.pos, q.pos)));
+        const coupe = adverses.some((a) => distSegment(a.pos, p.pos, q.pos) < 1.8 && dist(a.pos, q.pos) > 1);
+        const ok = marque >= 3 && !coupe;
+        const sc = (ok ? 10 : 0) + Math.min(8, marque) - d * 0.1 - (coupe ? 4 : 0) + this.rng.entre(-1, 1);
         if (sc > mieux) {
           mieux = sc;
           choix = q;
+          libre = ok;
         }
       }
+      const attente = this.evenement ? s.temps - this.evenement.a : 99;
+      if ((!choix || !libre) && attente < 3 + s.reglages.ballon.pauseArretS.max) {
+        this.decisionA = s.temps + 0.3;
+        return;
+      }
+      this.arrete = null;
       if (choix) {
-        this.passer(choix, false, null, false);
+        this.lancerTouche(p, choix);
         return;
       }
     }
@@ -667,6 +684,21 @@ export class BallonReel {
     this.lancer((ux * Math.cos(e) - uy * Math.sin(e)) * v, (ux * Math.sin(e) + uy * Math.cos(e)) * v);
     this.airDebut = this.sim.temps;
     this.airJusqua = this.sim.temps + T * r.centre.partEnLAir;
+  }
+
+  /** Touche : lancer à la main, en l'air, dans les pieds du coéquipier (pas de
+   *  hors-jeu). Personne ne peut couper le ballon à la sortie des mains. */
+  private lancerTouche(p: JoueurSim, q: JoueurSim): void {
+    const d = dist(p.pos, q.pos);
+    this.stats.passes[p.camp]++;
+    this.sj(p).passes++;
+    this.stats.distancePasses[p.camp] += d;
+    // Un peu devant le receveur s'il court, sinon dans ses pieds.
+    const point = { x: q.pos.x + q.vit.x * 0.3, y: q.pos.y + q.vit.y * 0.3 };
+    this.lober(point, 0.45 + d / 18, 3);
+    this.receveur = q;
+    this.horsJeu = false;
+    this.lanceur = p;
   }
 
   /** Ballon long aérien vers un coéquipier (jeu long, contre-attaque). */
@@ -917,6 +949,7 @@ export class BallonReel {
     for (const j of s.joueurs) {
       if (this.reserve && s.temps < this.reserve.jusqua && j.camp !== this.reserve.camp) continue;
       if (j === this.dernier && s.temps - this.dernierTemps < r.recontactS) continue;
+      if (j === this.lanceur) continue;
       const gardienAdverse = j.poste.id === "G" && this.tirEnCours && this.dernier !== null && j.camp !== this.dernier.camp;
       // Notes : le duel donne la portée sur le ballon (interceptions, ballons disputés, têtes).
       let portee = this.portee(j);
@@ -1049,6 +1082,7 @@ export class BallonReel {
   /** Le joueur prend le ballon aux pieds ; son équipe a la possession. */
   private donner(j: JoueurSim): void {
     const r = this.sim.reglages.ballon;
+    if (j !== this.lanceur) this.lanceur = null;
     const avant = this.sim.possession;
     if (j.camp !== avant) this.perte = { camp: avant, a: this.sim.temps };
     this.porteur = j;
@@ -1400,6 +1434,7 @@ export class BallonReel {
       else if (this.reserve && this.reserve.camp !== camp) {
         nombre = 0;
         if (this.arrete === "coupFranc") this.eloigner(this.reserve.camp);
+        if (this.arrete === "touche") this.eloigner(this.reserve.camp, 2.5);
         if (this.arrete === "engagement") this.eloignerEngagement(this.reserve.camp);
       }
       else if (this.reserve && this.tireur) {

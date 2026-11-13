@@ -32,7 +32,10 @@ L_SORTIE, H_SORTIE = 192, 194
 HAUTEUR_VISIBLE = 0.86
 
 # Teinte de référence du maillot de chaque planche (degrés) et saturation minimale.
-MAILLOT = {"FRA": (228, 0.30, 0.10), "ESP": (24, 0.38, 0.50), "BRA": (135, 0.30, 0.10), "ARG": (203, 0.22, 0.10), "ITA": (212, 0.40, 0.10)}
+MAILLOT = {"FRA": (228, 0.30, 0.10), "ESP": (24, 0.38, 0.50), "BRA": (135, 0.30, 0.10), "ARG": (203, 0.22, 0.10), "ITA": (212, 0.40, 0.10),
+           "ENG": (355, 0.45, 0.25), "GER": (165, 0.10, 0.20)}
+# Maillot à rayures très pâles (image refaite à part, 13/11).
+MAILLOT["GER-RAUTENBERG"] = (165, 0.04, 0.20)
 TOLERANCE_TEINTE = 20
 # Match : ton équipe en bleu, l'adversaire en rouge (mêmes teintes que recolorer-equipe.py / -adversaires.py).
 BLEU = (220 / 360, 0.78, 0.56)
@@ -52,6 +55,14 @@ def drapeau(code: str, w: int, h: int) -> Image.Image:
     elif code == "ESP":
         d.rectangle([0, 0, w, h], fill=(198, 11, 30))
         d.rectangle([0, h / 4, w, 3 * h / 4], fill=(255, 196, 0))
+    elif code == "ENG":
+        d.rectangle([0, 0, w, h], fill=(255, 255, 255))
+        e = max(2, round(h / 5))
+        d.rectangle([w / 2 - e / 2, 0, w / 2 + e / 2, h], fill=(206, 17, 36))
+        d.rectangle([0, h / 2 - e / 2, w, h / 2 + e / 2], fill=(206, 17, 36))
+    elif code == "GER":
+        for i, c in enumerate([(0, 0, 0), (221, 0, 0), (255, 206, 0)]):
+            d.rectangle([0, i * h / 3, w, (i + 1) * h / 3], fill=c)
     elif code == "ARG":
         for i, c in enumerate([(116, 172, 223), (255, 255, 255), (116, 172, 223)]):
             d.rectangle([0, i * h / 3, w, (i + 1) * h / 3], fill=c)
@@ -307,7 +318,8 @@ def traiter(planche: Path) -> list[str]:
     for i, ident, case in cases:
         alpha = detourer(case, degrade=seul in ids)
 
-        rgb, maillot = nettoyer_maillot(case, alpha, pays)
+        # Un réglage propre à un joueur refait à part passe avant celui du pays.
+        rgb, maillot = nettoyer_maillot(case, alpha, ident if ident in MAILLOT else pays)
         if i == 0:
             rgb = peau_naturelle(rgb, alpha, maillot)  # le gardien
         else:
@@ -349,7 +361,7 @@ def ecrire_module() -> None:
 
 if __name__ == "__main__":
     # Planches retenues (13/11) : la dernière version de chaque pays, puis les joueurs refaits à part.
-    planches = [Path(p) for p in sys.argv[1:]] or [BRUT / f for f in ("FRA-v4.jpg", "ESP-v4.jpg", "BRA-v3.jpg", "ARG-v4.jpg", "ITA-v4.jpg", "BRA-REZENDE.jpg", "ITA-CONTI.jpg", "ITA-FERRARO.jpg") if (BRUT / f).exists()]
+    planches = [Path(p) for p in sys.argv[1:]] or [BRUT / f for f in ("FRA-v4.jpg", "ESP-v4.jpg", "ENG-v2.jpg", "GER-v2.jpg", "ITA-v4.jpg", "ITA-CONTI.jpg", "ITA-FERRARO.jpg", "ENG-PEMBERTON.jpg", "ENG-CARTWRIGHT.jpg", "GER-RAUTENBERG.jpg", "GER-STEINBACH.jpg", "GER-HARTWIG.jpg") if (BRUT / f).exists()]
     for p in planches:
         print(p.stem, len(traiter(p)), "bustes")
     ecrire_module()

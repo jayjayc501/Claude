@@ -130,6 +130,8 @@ export class BallonReel {
   evenement: { texte: string; a: number } | null = null;
   /** Après un but : chacun regagne son camp avant l'engagement. */
   engagement: { camp: Camp; depuis: number; minS: number } | null = null;
+  /** Buts du match, dans l'ordre : équipe qui marque, buteur, minute. */
+  buts: { camp: Camp; joueur: string | null; contreSonCamp: boolean; minute: number }[] = [];
   /** Défenseurs que le tir en cours a déjà passés sans les toucher. */
   private tirEvite = new Set<JoueurSim>();
   /** Joueur désigné pour la remise en jeu (le gardien sur un six mètres). */
@@ -799,6 +801,14 @@ export class BallonReel {
       const marqueur: Camp = y >= L ? 0 : 1;
       if (Math.abs(x - W / 2) <= DEMI_BUT_M) {
         s.score[marqueur]++;
+        // Buteur (13/11) : le dernier à avoir touché le ballon ; contre son camp s'il est de l'autre équipe.
+        const m = s.minutesJouees();
+        this.buts.push({
+          camp: marqueur,
+          joueur: this.dernier?.joueur.nom ?? null,
+          contreSonCamp: !!this.dernier && this.dernier.camp !== marqueur,
+          minute: Math.min(s.debutPeriode > 0 ? 90 : 45, Math.floor(m.affilee) + 1 + (s.debutPeriode > 0 ? 45 : 0)),
+        });
         this.preparerEngagement(marqueur === 0 ? 1 : 0, "But !");
       } else {
         this.stats.sorties++;

@@ -17,6 +17,8 @@ export interface InfoFiche {
   style: { code: string; nom: string } | null;
   notes: Partial<Notes> | null;
   fusions: number;
+  /** Bouton en bas de la fiche (13/11 : « Recruter » depuis le mercato). */
+  action?: { libelle: string; piece: boolean; possible: boolean; faire: () => void };
 }
 
 const POSTES: Record<string, string> = {
@@ -118,6 +120,17 @@ export function ouvrirFiche(info: InfoFiche): void {
         html("span", { class: "fiche-sous-valeur" }, l, String(n[cle]));
       }
       html("span", { class: `fiche-valeur ${palier(valeur)}`, "aria-label": `${nom} ${valeur}` }, ligne, String(valeur));
+    });
+  }
+
+  if (info.action) {
+    const a = info.action;
+    const b = html("button", { type: "button", class: `fiche-action${a.possible ? "" : " impossible"}`, disabled: !a.possible }, corps);
+    b.append(a.libelle);
+    if (a.piece) html("span", { class: "fiche-piece", "aria-hidden": "true" }, b);
+    b.addEventListener("click", () => {
+      fermerFiche();
+      a.faire();
     });
   }
 

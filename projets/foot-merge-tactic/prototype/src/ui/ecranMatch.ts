@@ -42,11 +42,15 @@ const GRAND_PORTEUR: Record<Vue, number> = { pions: 1, figurines: 1.4, action: 1
  *  d'un coup). Fondu de ACTION_FONDU_MS à chaque changement. 12/11, « le mode
  *  action scintille » : seuils de 13/18 m, 0,8 s de jeu (0,2 s à l'écran en
  *  ×3,5) et zone collée au ballon donnaient 7 changements par seconde. */
-const ACTION_ENTREE_M = 12;
-const ACTION_SORTIE_M = 21;
-const ACTION_MIN_MS = 1600;
-const ACTION_SUIVI_MS = 10;
-const ACTION_FONDU_MS = 260;
+/* 13/11, « autour du ballon, certains restent en rond, ce n'est pas fluide » :
+ * on entre en figurine tout de suite (près du ballon ou du centre de l'action,
+ * 16 m), on n'en sort qu'après 1,2 s loin des deux (25 m) ; fondu croisé
+ * pion ↔ figurine, sans instant vide. */
+const ACTION_ENTREE_M = 16;
+const ACTION_SORTIE_M = 25;
+const ACTION_MIN_MS = 1200;
+const ACTION_SUIVI_MS = 14;
+const ACTION_FONDU_MS = 240;
 const RAYON_ROND = 7;
 /** Rayon du ballon à l'écran (unités SVG) ; plus gros que nature pour rester lisible. */
 const RAYON_BALLON = 5;
@@ -120,6 +124,7 @@ export class EcranMatch {
   private enAction: boolean[] = [];
   private actionDepuis: number[] = [];
   private fonduAction: (Animation | null)[] = [];
+  private fonduPion: (Animation | null)[] = [];
   private centreAction: { x: number; y: number } | null = null;
   private tempsAction = 0;
   /** Ballon : groupe, motif qui tourne quand il roule, traînée, angle et dernière position. */
@@ -419,6 +424,7 @@ export class EcranMatch {
     this.enAction = this.sim.joueurs.map(() => false);
     this.actionDepuis = this.sim.joueurs.map(() => -Infinity);
     this.fonduAction = this.sim.joueurs.map(() => null);
+    this.fonduPion = this.sim.joueurs.map(() => null);
     this.centreAction = null;
     if (this.vue === "action") {
       const gf = svg("g", {}, s);
@@ -740,6 +746,19 @@ export class EcranMatch {
     html("strong", {}, score, `${sim.score[0]} – ${sim.score[1]}`);
     html("span", { class: "eux" }, score, h.nomEux);
     if (this.arret === "fin") html("span", { class: "match-panneau-sous" }, carte, `Mi-temps : ${this.scoreMiTemps[0]} – ${this.scoreMiTemps[1]}`);
+    // Buteurs (13/11, demande du concepteur), sous le score, de chaque côté.
+    const buts = sim.balle?.buts ?? [];
+    if (buts.length) {
+      const zone = html("div", { class: "match-panneau-buteurs" }, carte);
+      for (const camp of [0, 1] as const) {
+        const col = html("div", { class: camp === 0 ? "nous" : "eux" }, zone);
+        for (const b of buts.filter((x) => x.camp === camp)) {
+          const l = html("span", { class: "buteur" }, col);
+          html("span", { class: "minute" }, l, `${b.minute}'`);
+          l.append(` ${b.joueur ?? "?"}${b.contreSonCamp ? " (c.s.c.)" : ""}`);
+        }
+      }
+    }
     const total = sim.tempsPossession[0] + sim.tempsPossession[1];
     const pc = (a: number, b: number) => (b > 0 ? `${Math.round((100 * a) / b)} %` : "—");
     const cadres = (c: 0 | 1) => sim.score[c] + st.arrets[c === 0 ? 1 : 0];
@@ -785,9 +804,11 @@ export class EcranMatch {
     }
     const c = this.centreAction;
     sim.joueurs.forEach((j, i) => {
-      const d = Math.hypot(j.pos.x - c.x, j.pos.y - c.y);
+      // Distance au plus proche du ballon et du centre de l'action.
+      const d = Math.min(Math.hypot(j.pos.x - c.x, j.pos.y - c.y), Math.hypot(j.pos.x - sim.ballon.x, j.pos.y - sim.ballon.y));
       const voulu = sim.demarre && (j === porteur || (this.enAction[i] ? d < ACTION_SORTIE_M : d < ACTION_ENTREE_M));
-      if (voulu !== this.enAction[i] && (j === porteur || maintenant - this.actionDepuis[i]! >= ACTION_MIN_MS || !sim.demarre)) {
+      // Entrer : tout de suite. Sortir : seulement après ACTION_MIN_MS dans l'état (pas de clignotement).
+      if (voulu !== this.enAction[i] && (voulu || maintenant - this.actionDepuis[i]! >= ACTION_MIN_MS || !sim.demarre)) {
         this.enAction[i] = voulu;
         this.actionDepuis[i] = maintenant;
         this.fondre(i, voulu);
@@ -807,19 +828,25 @@ export class EcranMatch {
     const pion = this.pions[i]!;
     const fig = f.firstElementChild as SVGGElement;
     this.fonduAction[i]?.cancel();
+    this.fonduPion[i]?.cancel();
     f.style.display = "";
+    pion.style.display = "";
+    // Fondu croisé : la figurine grandit depuis le socle pendant que le pion s'efface (et l'inverse).
     const a = fig.animate(
       versFigurine
-        ? [{ opacity: 0 }, { opacity: 1 }]
-        : [{ opacity: 1 }, { opacity: 0 }],
+        ? [{ opacity: 0, transform: "scale(0.55)" }, { opacity: 1, transform: "scale(1.06)", offset: 0.7 }, { opacity: 1, transform: "scale(1)" }]
+        : [{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(0.6)" }],
       { duration: ACTION_FONDU_MS, easing: "ease-out" },
     );
-    if (versFigurine) pion.style.display = "none";
-    else pion.style.display = "";
+    const b = pion.animate(versFigurine ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 0 }, { opacity: 1 }], { duration: ACTION_FONDU_MS, easing: "ease-out" });
     a.onfinish = () => {
       if (!this.enAction[i]) f.style.display = "none";
     };
+    b.onfinish = () => {
+      if (this.enAction[i]) pion.style.display = "none";
+    };
     this.fonduAction[i] = a;
+    this.fonduPion[i] = b;
   }
 
   /** Ballon : au sol il roule (le motif tourne), en l'air il monte au-dessus

@@ -42,6 +42,25 @@ describe("écran de préparation", () => {
     expect(p.etat.mercato[0]).toBeNull();
   });
 
+  test("mercato glissé : achat et placement, achat et remplacement, refus hors poste sans rien acheter", () => {
+    const p = nouvelle();
+    expect(p.appliquer({ type: "achat", place: 2, vers: { poste: "DG", cellule: 0 } }).ok).toBe(false); // Brandão (AD) en DG : hors poste
+    expect(p.etat.budget).toBe(7);
+    expect(p.etat.mercato[2]).toBe("CB");
+    expect(p.essayer({ type: "achat", place: 3, vers: { poste: "DC", cellule: 1 } }).ok).toBe(false); // déjà 11 sur le terrain
+    expect(p.appliquer({ type: "banc", id: "NV" }).ok).toBe(true);
+    const r = p.appliquer({ type: "achat", place: 3, vers: { poste: "DC", cellule: 1 } }); // Vianello, 2 pièces, sur une case libre
+    expect(r.ok).toBe(true);
+    expect(p.placement("MV")).toEqual({ joueurId: "MV", poste: "DC", cellule: 1 });
+    expect(p.etat.budget).toBe(5);
+    expect(p.appliquer({ type: "achat", place: 2, vers: { remplace: "KM" } }).ok).toBe(true); // Brandão remplace Moura
+    expect(p.placement("CB")?.poste).toBe("AD");
+    expect(p.banc()).toContain("KM");
+    expect(p.etat.budget).toBe(3);
+    expect(p.appliquer({ type: "achat", place: 1, vers: { remplace: "IS" } }).ok).toBe(true); // Almar (3 pièces) remplace Salvat
+    expect(p.appliquer({ type: "achat", place: 5, vers: { remplace: "PA" } }).ok).toBe(false); // Lobo : 3 pièces, il n'en reste plus
+  });
+
   test("vente : le joueur quitte l'équipe, le budget remonte", () => {
     const p = nouvelle();
     expect(p.appliquer({ type: "vente", id: "TR" }).ok).toBe(true);

@@ -430,5 +430,15 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 @keyframes fiche-ligne { from { transform: translateX(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes fiche-barre { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { .fiche, .fiche-voile, .fiche-note, .fiche-buste img, .fiche-barre i { animation: none; } }
-/* Bouton « i » des cartes du mercato : voir la fiche avant d'acheter. */
-.prepa-info { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 900; font-style: italic; font-family: Georgia, serif; color: #fff; background: #2F7FE0; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); z-index: 2; }
+.fiche-action { margin-top: 2px; height: 48px; border: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-size: 17px; font-weight: 900; letter-spacing: 0.01em; color: #fff; background: linear-gradient(180deg, #4FCB7E, #1F9A55); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.18), 0 3px 8px rgba(31, 154, 85, 0.35); cursor: pointer; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2); animation: fiche-ligne 0.35s ease-out 0.3s both; }
+.fiche-action:active { transform: translateY(2px); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.18); }
+.fiche-action.impossible { background: #DCE2DE; color: #6B7A70; box-shadow: none; text-shadow: none; font-size: 14px; cursor: default; }
+.fiche-piece { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFF3B0, #FFC400 55%, #D99A00); box-shadow: inset 0 0 0 2px rgba(160, 110, 0, 0.45); }
+/* Buteurs dans le panneau de mi-temps et de fin de match (13/11). */
+.match-panneau-buteurs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 2px 0 6px; font-size: 12.5px; }
+.match-panneau-buteurs > div { display: grid; gap: 2px; align-content: start; }
+.match-panneau-buteurs .nous { text-align: left; }
+.match-panneau-buteurs .eux { text-align: right; }
+.match-panneau-buteurs .buteur { font-weight: 700; color: #1F2A23; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.match-panneau-buteurs .buteur::before { content: "⚽ "; font-size: 11px; }
+.match-panneau-buteurs .minute { font-weight: 800; font-variant-numeric: tabular-nums; color: #5D6B62; }

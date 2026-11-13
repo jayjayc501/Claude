@@ -58,6 +58,8 @@ export type Action =
   | { type: "remplacement"; entrant: string; sortant: string }
   | { type: "banc"; id: string }
   | { type: "vente"; id: string }
+  /** Carte du mercato glissée (13/11) : achat, puis placement sur une case ou à la place d'un joueur. */
+  | { type: "achat"; place: number; vers?: { poste: string; cellule: number } | { remplace: string } }
   | { type: "rien" };
 
 export type Issue = { ok: true; etat: EtatPrepa; message: string } | { ok: false; erreur: string };
@@ -190,6 +192,22 @@ export class Preparation {
         if (this.banc().length >= this.d.bancMax) return { ok: false, erreur: `Banc plein (${this.d.bancMax} places).` };
         return avec(retirer(e.composition, a.id), `${this.fiche(a.id).nom} va sur le banc.`);
       }
+      case "achat": {
+        // Placé directement sur une case libre, il ne passe pas par le banc : pas besoin de place.
+        const r = this.essayerAchat(a.place, !!a.vers && !("remplace" in a.vers));
+        if (!r.ok || !a.vers) return r;
+        const id = this.etat.mercato[a.place]!;
+        // Copie déjà dans l'effectif : la carte fusionne, où qu'on la lâche.
+        if (this.membre(id)) return r;
+        const suite: Action = "remplace" in a.vers ? { type: "remplacement", entrant: id, sortant: a.vers.remplace } : { type: "case", id, poste: a.vers.poste, cellule: a.vers.cellule };
+        const avant = this.etat;
+        this.etat = r.etat;
+        const r2 = this.essayer(suite);
+        this.etat = avant;
+        if (!r2.ok) return r2;
+        const f = this.fiche(id);
+        return { ok: true, etat: r2.etat, message: "remplace" in a.vers ? `${f.nom} recruté : il entre, ${this.fiche(a.vers.remplace).nom} va sur le banc.` : `${f.nom} recruté et placé.` };
+      }
       case "vente": {
         const f = this.fiche(a.id);
         if (!this.membre(a.id)) return { ok: false, erreur: "" };
@@ -210,6 +228,13 @@ export class Preparation {
   /** Achat de la carte n° `place` du mercato : fusion avec la copie de
    *  l'effectif s'il y en a une, sinon le joueur va sur le banc. */
   acheter(place: number): Issue {
+    const r = this.essayerAchat(place);
+    if (r.ok) this.etat = r.etat;
+    return r;
+  }
+
+  /** Résultat de l'achat de la carte n° `place`, sans rien changer. */
+  essayerAchat(place: number, sansBanc = false): Issue {
     const e = this.etat;
     const id = e.mercato[place];
     if (!id) return { ok: false, erreur: "" };
@@ -217,18 +242,18 @@ export class Preparation {
     if (e.budget < f.prix) return { ok: false, erreur: `Pas assez de pièces pour ${f.nom} (${f.prix}).` };
     const copie = this.membre(id);
     if (copie && copie.fusions >= this.d.fusionsMax) return { ok: false, erreur: `${f.nom} : fusion maximale atteinte.` };
-    if (!copie && this.banc().length >= this.d.bancMax) return { ok: false, erreur: `Banc plein (${this.d.bancMax} places).` };
+    if (!copie && !sansBanc && this.banc().length >= this.d.bancMax) return { ok: false, erreur: `Banc plein (${this.d.bancMax} places).` };
     const effectif = copie
       ? e.effectif.map((m) => (m.id === id ? { ...m, fusions: m.fusions + 1 } : m))
       : [...e.effectif, { id, fusions: 0 }];
-    this.etat = {
+    const etat = {
       ...e,
       effectif,
       budget: e.budget - f.prix,
       mercato: e.mercato.map((x, i) => (i === place ? null : x)),
     };
     const message = copie ? `${f.nom} fusionne : niveau ${copie.fusions + 1}.` : `${f.nom} rejoint le banc.`;
-    return { ok: true, etat: this.etat, message };
+    return { ok: true, etat, message };
   }
 
   /** Choix de la tactique d'équipe (une seule à la fois). */

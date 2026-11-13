@@ -541,3 +541,14 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 - **Point de vigilance** : à 80 contre 65, 90 % de victoires. Si c'est trop, on réduit l'échelle (15 → 20) sans toucher au reste.
 
 **Tests** : 113 verts. Nouveau : fatigue (rien avant 30 min ; à la 89e, endurance 40 bien plus fatiguée qu'endurance 90). Modifiés : les signatures des tactiques sont mesurées sur 24 matchs au lieu de 12 (le Gegenpressing tombait à +4 points au lieu de +5 sur 12 matchs, du bruit) ; passes par minute < 18 au lieu de 16 (plus de passes vers la surface).
+
+## 13/11/2026 (nuit) — Mercato au toucher, vue Action plus fluide, buteurs
+
+**Retours du concepteur** : au mercato, impossible de voir les notes avant d'acheter (« un clic, je vois les notes ; en restant appuyé, je peux les bouger ») ; en match, autour du ballon, certains joueurs restent en rond (« pas trop fluide ») ; à la mi-temps et à la fin, il faut le nom des buteurs. Ensuite : les fusions, et le plan global des cartes et du mercato.
+
+**Ce qui a été fait**
+- **Mercato** : toucher une carte ouvre sa fiche, avec un gros bouton « Recruter · prix » (ou « Fusionner », ou la raison si c'est impossible : pas assez de pièces, banc plein…). Rester appuyé soulève la carte : lâchée sur le banc, achat ; sur une case libre, achat et placement (si moins de 11 sur le terrain) ; sur un joueur, achat et remplacement (le joueur remplacé va sur le banc) ; sur sa copie, fusion. Hors poste : refusé, rien n'est acheté. Le petit « i » est retiré. Nouvelle action `achat` dans `preparation.ts`, test ajouté.
+- **Vue Action** : un joueur passe en figurine **tout de suite** dès qu'il est à moins de 16 m du ballon ou du centre de l'action (12 m avant, et il fallait attendre 1,6 s dans son état) ; il ne redevient pion qu'après 1,2 s à plus de 25 m des deux. **Fondu croisé** : la figurine grandit depuis le socle pendant que le pion s'efface (avant : le pion disparaissait d'un coup, puis la figurine apparaissait).
+- **Buteurs** : le moteur note chaque but (équipe, buteur = dernier à avoir touché le ballon, contre son camp, minute). Le panneau de mi-temps et de fin de match les affiche sous le score, de chaque côté (« ⚽ 23' Roux »). Test ajouté.
+
+**Tests** : 115 verts.

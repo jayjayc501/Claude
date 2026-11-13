@@ -81,6 +81,8 @@ export class EcranPreparation {
     origine: Element;
     fantome: HTMLImageElement | null;
     action: Action;
+    /** Carte du mercato glissée (n° de la place), ou null pour un joueur de l'effectif. */
+    mercato: number | null;
   } | null = null;
 
   constructor(
@@ -169,6 +171,8 @@ export class EcranPreparation {
   }
 
   private cibleAu(id: string, cx: number, cy: number): Action {
+    const place = this.glisse?.mercato ?? null;
+    if (place !== null) return this.cibleAchat(id, place, cx, cy);
     const surTerrain = !!this.prepa.placement(id);
     if (this.dans(this.elMercato, cx, cy)) return { type: "vente", id };
     if (this.dans(this.elBanc, cx, cy)) {
@@ -184,6 +188,19 @@ export class EcranPreparation {
     return { type: "case", id, poste: c.poste, cellule: c.cellule };
   }
 
+  /** Carte du mercato lâchée : sur le banc, achat ; sur une case, achat et placement ;
+   *  sur un joueur, achat et remplacement (ou fusion si c'est sa copie). */
+  private cibleAchat(id: string, place: number, cx: number, cy: number): Action {
+    if (this.dans(this.elMercato, cx, cy)) return { type: "rien" };
+    if (this.dans(this.elBanc, cx, cy)) return { type: "achat", place };
+    const c = this.caseAuPointEcran(cx, cy);
+    if (!c) return { type: "rien" };
+    const occ = occupant(this.prepa.etat.composition, c.poste, c.cellule);
+    if (occ?.joueurId === id) return { type: "achat", place };
+    if (occ) return { type: "achat", place, vers: { remplace: occ.joueurId } };
+    return { type: "achat", place, vers: { poste: c.poste, cellule: c.cellule } };
+  }
+
   private montrerCible(a: Action): void {
     const calque = this.calqueCible;
     calque?.replaceChildren();
@@ -194,6 +211,14 @@ export class EcranPreparation {
     const classe = ok ? "cible-ok" : "cible-non";
     if (a.type === "vente") return void this.elMercato?.classList.add(classe);
     if (a.type === "banc") return void this.elBanc?.classList.add(classe);
+    if (a.type === "achat") {
+      const id = this.glisse?.id ?? "";
+      const v = a.vers;
+      const visee = !v || this.prepa.membre(id) ? this.prepa.placement(id) : "remplace" in v ? this.prepa.placement(v.remplace) : v;
+      if (!v && !visee) return void this.elBanc?.classList.add(classe);
+      if (visee && calque) this.dessinerCase(visee.poste, visee.cellule, calque, { class: `prepa-cible ${classe}` }, 1);
+      return;
+    }
     // Joueur du terrain lâché sur un remplaçant : on vise le banc.
     if (a.type === "remplacement" && a.sortant === this.glisse?.id) return void this.elBanc?.classList.add(classe);
     const visee =
@@ -205,7 +230,7 @@ export class EcranPreparation {
 
   // ---- Glisser-déposer -----------------------------------------------------
 
-  private appui(ev: PointerEvent, id: string, el: Element): void {
+  private appui(ev: PointerEvent, id: string, el: Element, mercato: number | null = null): void {
     if (this.glisse || (ev.pointerType === "mouse" && ev.button !== 0)) return;
     ev.preventDefault();
     el.setPointerCapture(ev.pointerId);
@@ -219,6 +244,7 @@ export class EcranPreparation {
       origine: el,
       fantome: null,
       action: { type: "rien" },
+      mercato,
     };
     const bouge = (e: PointerEvent) => this.bouger(e);
     const lache = (e: PointerEvent) => {
@@ -280,14 +306,25 @@ export class EcranPreparation {
       // Toucher sans glisser : la fiche du joueur (12/11).
       this.choisi = null;
       this.rendre();
-      return this.ouvrirFiche(gl.id);
+      return this.ouvrirFiche(gl.id, gl.mercato);
     }
     this.afficherIssue(this.prepa.appliquer(gl.action));
   }
 
   /** Fiche du joueur, façon Clash Royale (fiche.ts). */
-  private ouvrirFiche(id: string): void {
+  private ouvrirFiche(id: string, place: number | null = null): void {
     const f = this.prepa.fiche(id);
+    // Depuis le mercato : bouton pour recruter (ou fusionner) sans quitter la fiche.
+    const essai = place !== null ? this.prepa.essayerAchat(place) : null;
+    const fusion = place !== null && !!this.prepa.membre(id);
+    const action = essai
+      ? {
+          libelle: essai.ok ? `${fusion ? "Fusionner" : "Recruter"} · ${f.prix}` : essai.erreur,
+          piece: essai.ok,
+          possible: essai.ok,
+          faire: () => this.afficherIssue(this.prepa.acheter(place!)),
+        }
+      : undefined;
     const pays = this.prepa.d.deck.find((p) => p.code === f.pays) ?? { code: f.pays, nom: f.pays, couleur: "#3A4A40" };
     ouvrirFiche({
       id,
@@ -297,6 +334,7 @@ export class EcranPreparation {
       style: f.style ? { code: f.style, nom: this.prepa.d.styles[f.style] ?? f.style } : null,
       notes: f.notes ?? null,
       fusions: this.prepa.membre(id)?.fusions ?? 0,
+      action,
     });
   }
 
@@ -574,7 +612,7 @@ export class EcranPreparation {
     const t = html("div", { class: "prepa-mercato-tete" }, m);
     const g = html("div", { class: "prepa-titre" }, t);
     html("span", { class: "prepa-h petit" }, g, "Mercato");
-    html("span", { class: "prepa-discret" }, g, "Glisse un joueur ici pour le vendre");
+    html("span", { class: "prepa-discret" }, g, "Touche : fiche · Appui long : recruter");
     const budget = html("div", { class: "prepa-budget", "aria-label": `Budget : ${e.budget} pièces` }, t);
     html("span", { class: "prepa-piece" }, budget);
     html("span", { class: "prepa-nombre" }, budget, String(e.budget));
@@ -591,8 +629,8 @@ export class EcranPreparation {
         "button",
         {
           type: "button",
-          class: `prepa-carte${fusion ? " fusion" : ""}${trop ? " trop-cher" : ""}`,
-          "aria-label": `Recruter ${f.nom}, ${libellePoste(f.poste)}, ${f.style ? this.prepa.d.styles[f.style] : "sans style"}, ${f.prix} pièces${fusion ? ", fusion avec ta copie" : ""}`,
+          class: `prepa-carte prepa-tirable${fusion ? " fusion" : ""}${trop ? " trop-cher" : ""}`,
+          "aria-label": `Fiche de ${f.nom} (rester appuyé pour le glisser et le recruter), ${libellePoste(f.poste)}, ${f.style ? this.prepa.d.styles[f.style] : "sans style"}, ${f.prix} pièces${fusion ? ", fusion avec ta copie" : ""}`,
         },
         cartes,
       );
@@ -602,13 +640,12 @@ export class EcranPreparation {
       html("span", { class: "prepa-poste" }, k, libellePoste(f.poste));
       html("span", { class: "prepa-prix" }, k, String(f.prix));
       if (fusion) html("span", { class: "prepa-fusion" }, k, "Fusion");
-      // Petit « i » : voir la fiche avant d'acheter.
-      const info = html("span", { class: "prepa-info", role: "button", "aria-label": `Fiche de ${f.nom}` }, k, "i");
-      info.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        this.ouvrirFiche(id);
+      // 13/11 : toucher = fiche (avec « Recruter ») ; rester appuyé = glisser la carte
+      // sur le banc ou le terrain pour l'acheter.
+      k.addEventListener("pointerdown", (ev) => this.appui(ev, id, k, i));
+      k.addEventListener("click", (ev) => {
+        if (ev.detail === 0) this.ouvrirFiche(id, i); // clavier
       });
-      k.addEventListener("click", () => this.afficherIssue(this.prepa.acheter(i)));
     });
   }
 }

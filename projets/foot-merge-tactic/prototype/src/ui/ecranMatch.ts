@@ -15,7 +15,7 @@ import { CHAMP_ROUGE, GARDIEN_ROUGE } from "./adversaires";
 import { BUSTES } from "./bustes";
 import { BUSTES_BLEUS } from "./equipeBleue";
 import { dessinerLignes, html, svg } from "./dom";
-import { PICTOS } from "./pictos";
+import { CORPS_PICTOS, PICTOS } from "./pictos";
 import { activer, basculerMuet, estMuet, jouer } from "./son";
 
 const ECHELLE = 5; // unités SVG par mètre
@@ -67,6 +67,8 @@ const ANNONCE_S = 2.5;
 const ANNONCE_BUT_S = 5.5;
 const VITESSE_PAR_DEFAUT = 3.5;
 const COULEUR_EUX = "#C2413D";
+/** Couleur de chaque niveau de fusion (1 bleu, 2 or, 3 violet), comme sur la préparation. */
+const COULEURS_FUSION = ["", "#38E1FF", "#FFC400", "#C04BFF"];
 const BANDES = 12;
 
 export interface InfosJoueur {
@@ -81,8 +83,8 @@ export interface HabillageMatch {
   nomEux: string;
   tactiques: { code: string; nom: string }[];
   styles: Record<string, string>;
-  /** Couleur du pays et style d'un joueur de votre équipe. */
-  infos: (id: string) => InfosJoueur | undefined;
+  /** Couleur du pays, style et fusions d'un joueur (de ton équipe : camp 0 ; de l'adversaire : camp 1). */
+  infos: (id: string, camp?: 0 | 1) => InfosJoueur | undefined;
 }
 
 export class EcranMatch {
@@ -103,7 +105,7 @@ export class EcranMatch {
   private reserve = 0;
   /** Tactiques et styles actifs (gardés d'un match à l'autre). */
   /** Styles coupés en match pour l'instant (concepteur, 12/11) ; l'interrupteur reste pour essayer. */
-  private options: OptionsInfluences = { tactiques: true, styles: false };
+  private options: OptionsInfluences = { tactiques: true, styles: true };
   /** Tactique choisie sur cet écran pour chaque équipe (null : celle de l'équipe). */
   private tactiquesForcees: [string | null, string | null] = [null, null];
 
@@ -369,8 +371,8 @@ export class EcranMatch {
     const defs = svg("defs", {}, s);
     const auras: [string, number][][] = [
       [],
-      [["#5EC8FF", 1.2], ["#5EC8FF", 2.6]],
-      [["#FFC400", 1.2], ["#FFC400", 2.6]],
+      [["#FFFFFF", 0.7], ["#38E1FF", 1.8], ["#38E1FF", 3.6]],
+      [["#FFFFFF", 0.7], ["#FFC400", 1.8], ["#FFB000", 3.6]],
       [["#FFFFFF", 0.8], ["#C04BFF", 2.4], ["#FF4FD8", 4.5]],
     ];
     // Ballon moderne (12/11, « le ballon n'est pas beau ») : sphère brillante,
@@ -477,7 +479,8 @@ export class EcranMatch {
     const g = svg("g", { class: `match-pion${camp === 0 ? " nous" : " eux"}` }, parent);
     svg("ellipse", { cx: 0, cy: 0, rx: 17 * K, ry: 5 * K, class: "match-ombre-pion" }, g);
     svg("ellipse", { cx: 0, cy: 0, rx: 17 * K, ry: 5 * K, class: "match-socle" }, g);
-    const fusions = camp === 0 ? (this.habillage.infos(id)?.fusions ?? 0) : 0;
+    const info = this.habillage.infos(id, camp);
+    const fusions = info?.fusions ?? 0;
     if (image) {
       svg("image", {
         href: image,
@@ -491,6 +494,8 @@ export class EcranMatch {
       // l'équipe (bleu ou rouge, comme le maillot), la flamme (aura) autour de
       // la figurine garde la couleur de la fusion (12/11).
       svg("path", { d: `M ${-17 * K} 0 A ${17 * K} ${5 * K} 0 0 0 ${17 * K} 0`, class: "match-socle" }, g);
+      if (fusions) svg("path", { d: `M ${-17 * K} 0 A ${17 * K} ${5 * K} 0 0 0 ${17 * K} 0`, class: "match-socle-fusion", stroke: COULEURS_FUSION[Math.min(3, fusions)] }, g);
+      this.pastilleStyle(g, info?.style ?? null, 13 * K, -10 * K, 5.5 * Math.max(0.8, K));
     } else {
       svg("circle", { cy: -14, r: 9, fill: camp === 0 ? "#3563C0" : COULEUR_EUX, stroke: "#fff", "stroke-width": 1.5 }, g);
     }
@@ -504,10 +509,25 @@ export class EcranMatch {
     const g = svg("g", { class: `match-rond${camp === 0 ? " nous" : " eux"}` }, parent);
     // Couleur d'équipe (bleu / rouge) : la séparation entre les deux équipes prime
     // (12/11, « pas de séparation visuelle forte entre les 2 équipes »).
+    const info = this.habillage.infos(id, camp);
+    const fusions = Math.min(3, info?.fusions ?? 0);
+    // Fusion (13/11, « en match, les fusions ne se voient plus ») : anneau de la couleur du niveau.
+    if (fusions) svg("circle", { r: RAYON_ROND + 2.6, class: `match-rond-fusion niveau-${fusions}`, stroke: COULEURS_FUSION[fusions] }, g);
     svg("circle", { r: RAYON_ROND, fill: camp === 0 ? BLEU_NOUS : COULEUR_EUX }, g);
+    // Style (13/11, « il faut qu'on ait la visibilité ») : petite pastille du pictogramme.
+    this.pastilleStyle(g, info?.style ?? null, RAYON_ROND * 1.05, -RAYON_ROND * 1.05, 5.4);
     const titre = svg("title", {}, g);
     titre.textContent = nom;
     return g;
+  }
+
+  /** Pastille ronde du style (même pictogramme que sur la préparation). */
+  private pastilleStyle(g: SVGGElement, style: string | null, x: number, y: number, r: number): void {
+    if (!style || !CORPS_PICTOS[style]) return;
+    const p = svg("g", { transform: `translate(${x} ${y})`, class: "match-style" }, g);
+    svg("circle", { r, class: "match-style-fond" }, p);
+    const ic = svg("g", { transform: `scale(${(r * 1.5) / 24}) translate(-12 -12)`, class: "match-style-picto" }, p);
+    ic.innerHTML = CORPS_PICTOS[style]!;
   }
 
   private majCommandes(): void {
@@ -602,7 +622,7 @@ export class EcranMatch {
         if (porteur !== this.dernierPorteur) {
           // Nouveau porteur : sa figurine surgit.
           this.figPorteurImage!.setAttribute("href", this.images_[i] ?? "");
-          const f = porteur.camp === 0 ? (this.habillage.infos(porteur.joueur.id)?.fusions ?? 0) : 0;
+          const f = this.habillage.infos(porteur.joueur.id, porteur.camp)?.fusions ?? 0;
           if (f) this.figPorteurImage!.setAttribute("filter", `url(#match-aura-${Math.min(3, f)})`);
           else this.figPorteurImage!.removeAttribute("filter");
           this.figPorteurAnim!.style.animation = "none";

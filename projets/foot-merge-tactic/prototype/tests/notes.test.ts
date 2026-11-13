@@ -8,7 +8,13 @@ const donnees = chargerDonnees("hexagones");
 const reglages = chargerReglages();
 const { effectif, adversaire } = chargerEquipes(donnees);
 
-const uniformes = (n: number): Notes => ({ acceleration: n, pointe: n, passe: n, dribble: n, precision: n, puissance: n, duel: n, endurance: n });
+const uniformes = (n: number): Partial<Notes> => ({ acceleration: n, pointe: n, passe: n, dribble: n, precision: n, puissance: n, duel: n, endurance: n });
+
+/** Même équipe, avec un gardien noté (Réflexes, Placement, Sorties, Relance à n). */
+function avecGardien(e: Equipe, n: number): Equipe {
+  const gardien = e.composition.find((p) => p.poste === "G")?.joueurId;
+  return { ...e, joueurs: e.joueurs.map((j) => ({ ...j, style: null, notes: j.id === gardien ? { reflexes: n, placement: n, sorties: n, relance: n } : null })) };
+}
 
 /** Équipe sans style ; notes données à tous les joueurs de champ (undefined : pas de notes). */
 function avecNotes(e: Equipe, notes?: Partial<Notes>): Equipe {
@@ -31,6 +37,25 @@ describe("Notes des joueurs", () => {
     expect(n.duel).toBe(PARAMETRES_NOTES.reference);
     expect(notesAffichees({ id: "x", nom: "X", postes: ["MC"], notes: { passe: 80, dribble: 71 } })!.find((a) => a.code === "TEC")!.valeur).toBe(76);
     expect(notesAffichees({ id: "g", nom: "G", postes: ["G"], notes: null })).toBeNull();
+  });
+
+  test("gardien (13/11) : 4 notes simples ; sa relance est sa passe, ses sorties sa portée", () => {
+    const g = { id: "g", nom: "G", postes: ["G"], notes: { reflexes: 80, placement: 70, sorties: 60, relance: 75 } };
+    expect(notesAffichees(g)!.map((a) => `${a.code} ${a.valeur}`)).toEqual(["RÉF 80", "PLA 70", "SOR 60", "REL 75"]);
+    const n = notesDe(g);
+    expect(n.passe).toBe(75);
+    expect(n.duel).toBe(60);
+    expect(notesDe({ id: "x", nom: "X", postes: ["MC"], notes: null }).reflexes).toBe(PARAMETRES_NOTES.reference);
+  });
+
+  test("gardien : un bon gardien encaisse moins qu'un mauvais (mêmes matchs)", () => {
+    let bon = 0;
+    let mauvais = 0;
+    for (let g = 1; g <= 10; g++) {
+      bon += jouer(adversaire, avecGardien(effectif, 88), g, 120).score[0];
+      mauvais += jouer(adversaire, avecGardien(effectif, 42), g, 120).score[0];
+    }
+    expect(bon).toBeLessThan(mauvais);
   });
 
   test("écart nul : probabilité inchangée ; écart positif : plus de chances", () => {

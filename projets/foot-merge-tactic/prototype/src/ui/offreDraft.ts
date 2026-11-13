@@ -1,5 +1,6 @@
 // Draft (13/11) : quand on touche une case vide, quelques joueurs du poste,
-// tirés au hasard, s'affichent en cartes. On en choisit un, puis « Recruter ».
+// tirés au hasard, s'affichent en cartes. Un toucher sur une carte recrute le
+// joueur (13/11, « juste cliquer sur le joueur suffira ») ; ⓘ ouvre sa fiche.
 // Une carte trop chère reste visible mais grisée.
 
 import { html } from "./dom";
@@ -12,7 +13,7 @@ export interface CarteOffre {
   poste: string;
   style: { code: string; nom: string } | null;
   prix: number;
-  /** Les 4 notes (VIT, TEC, TIR, PHY), ou null (gardien). */
+  /** Les 4 notes (VIT, TEC, TIR, PHY ; gardien : RÉF, PLA, SOR, REL), ou null. */
   notes: { code: string; valeur: number }[] | null;
   image: string;
   abordable: boolean;
@@ -20,7 +21,10 @@ export interface CarteOffre {
   copies: number;
 }
 
-const COULEUR_NOTE: Record<string, string> = { VIT: "#F07F1A", TEC: "#2F7FE0", TIR: "#E0474C", PHY: "#23A06A" };
+const COULEUR_NOTE: Record<string, string> = {
+  VIT: "#F07F1A", TEC: "#2F7FE0", TIR: "#E0474C", PHY: "#23A06A",
+  "RÉF": "#E0474C", PLA: "#2F7FE0", SOR: "#F07F1A", REL: "#23A06A",
+};
 
 export function ouvrirOffre(o: {
   titre: string;
@@ -38,11 +42,9 @@ export function ouvrirOffre(o: {
   html("span", { class: "offre-sous" }, t, o.sousTitre);
   const fermer = html("button", { type: "button", class: "offre-fermer", "aria-label": "Fermer" }, tete, "✕");
 
-  let choisie: string | null = null;
   const grille = html("div", { class: "offre-grille" }, panneau);
-  const boutons: HTMLButtonElement[] = [];
   o.cartes.forEach((c, i) => {
-    const b = html("button", { type: "button", class: `offre-carte${c.abordable ? "" : " cher"}`, "aria-label": `${c.nom}, ${c.pays.nom}, ${c.prix} pièces${c.abordable ? "" : ", trop cher"}` }, grille);
+    const b = html("div", { role: "button", tabindex: "0", class: `offre-carte${c.abordable ? "" : " cher"}`, "aria-label": `Recruter ${c.nom}, ${c.pays.nom}, ${c.prix} pièces${c.abordable ? "" : ", trop cher"}` }, grille);
     b.style.setProperty("--pays", c.pays.couleur);
     b.style.setProperty("--i", String(i));
     const haut = html("span", { class: "offre-haut" }, b);
@@ -51,6 +53,11 @@ export function ouvrirOffre(o: {
     prix.prepend(html("i", { "aria-hidden": "true" }));
     html("img", { src: c.image, alt: "", draggable: "false" }, haut);
     if (!c.abordable) html("span", { class: "offre-ruban" }, haut, "Trop cher");
+    const info = html("button", { type: "button", class: "offre-info", "aria-label": `Fiche de ${c.nom}` }, haut, "i");
+    info.addEventListener("click", (e) => {
+      e.stopPropagation();
+      o.voirFiche(c.id);
+    });
     html("span", { class: "offre-nom" }, b, c.nom);
     const ligne = html("span", { class: "offre-ligne" }, b);
     if (c.style) {
@@ -67,26 +74,30 @@ export function ouvrirOffre(o: {
         html("small", {}, p, n.code);
         p.append(String(n.valeur));
       }
-    else html("span", { class: "offre-note-vide" }, notes, "Notes du gardien à venir");
-    b.addEventListener("click", () => {
-      choisie = c.id;
-      boutons.forEach((x, j) => x.classList.toggle("choisie", j === i));
-      maj();
+    else html("span", { class: "offre-note-vide" }, notes, "Pas encore de notes");
+    const recruter = () => {
+      if (!c.abordable) {
+        // Trop cher : la carte tremble, rien ne se passe.
+        b.classList.remove("refus");
+        void b.offsetWidth;
+        b.classList.add("refus");
+        return;
+      }
+      b.classList.add("choisie");
+      window.setTimeout(() => {
+        fermerOffre();
+        o.choisir(c.id);
+      }, 140);
+    };
+    b.addEventListener("click", recruter);
+    b.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        recruter();
+      }
     });
-    boutons.push(b);
   });
-
-  const pied = html("div", { class: "offre-pied" }, panneau);
-  const fiche = html("button", { type: "button", class: "offre-lien" }, pied, "Voir la fiche");
-  const ok = html("button", { type: "button", class: "offre-ok" }, pied, "Choisis un joueur");
-  function maj(): void {
-    const c = o.cartes.find((x) => x.id === choisie);
-    fiche.disabled = !c;
-    ok.disabled = !c || !c.abordable;
-    ok.replaceChildren(c ? (c.abordable ? `Recruter ${c.nom} · ${c.prix}` : "Trop cher pour ton budget") : "Choisis un joueur");
-    if (c?.abordable) ok.append(html("i", { class: "offre-piece", "aria-hidden": "true" }));
-  }
-  maj();
+  html("p", { class: "offre-aide" }, panneau, "Touche un joueur pour le recruter · ⓘ pour sa fiche");
 
   function fermerOffre(): void {
     document.removeEventListener("keydown", clavier);
@@ -100,12 +111,5 @@ export function ouvrirOffre(o: {
   fermer.addEventListener("click", fermerOffre);
   voile.addEventListener("click", (e) => {
     if (e.target === voile) fermerOffre();
-  });
-  fiche.addEventListener("click", () => choisie && o.voirFiche(choisie));
-  ok.addEventListener("click", () => {
-    if (!choisie) return;
-    const id = choisie;
-    fermerOffre();
-    o.choisir(id);
   });
 }

@@ -96,6 +96,11 @@ export interface Notes {
   puissance: number;
   duel: number;
   endurance: number;
+  /** Gardien (13/11) : 4 notes simples, sans sous-notes. */
+  reflexes: number;
+  placement: number;
+  sorties: number;
+  relance: number;
 }
 
 export interface Joueur {

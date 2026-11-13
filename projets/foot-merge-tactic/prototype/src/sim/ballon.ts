@@ -106,6 +106,11 @@ export class BallonReel {
   /** Ballon aérien (centre, dégagement) : personne ne le touche avant cet instant. */
   private airJusqua = -Infinity;
 
+  /** Engagement à jouer (début de période ou après un but). */
+  get enEngagement(): boolean {
+    return this.engagement !== null || this.arrete === "engagement";
+  }
+
   /** Jeu arrêté (remise en jeu, coup franc, corner, engagement à jouer). */
   get arretDeJeu(): boolean {
     return this.arrete !== null || this.engagement !== null;
@@ -775,11 +780,18 @@ export class BallonReel {
     // Point de passage du ballon à la hauteur du gardien.
     const k = Math.abs(dy) > 1e-6 ? (gardien.pos.y - s.ballon.y) / dy : 0;
     const point = { x: s.ballon.x + dx * Math.max(0, Math.min(1, k)), y: gardien.pos.y };
-    const ecart = Math.abs(point.x - gardien.pos.x);
-    const loin = t.arretParMetreDistance * Math.max(0, dist(s.ballon, but) - 11); // de loin, le gardien a le temps
+    const g = gardien.notes;
+    const pg = PN.gardien;
+    // Placement (13/11) : un gardien bien placé ferme l'angle, il a moins à couvrir.
+    const ecart = Math.abs(point.x - gardien.pos.x) * Math.max(0.6, Math.min(1.4, 1 - (g.placement - PN.reference) * pg.placementParPoint));
+    const distTir = dist(s.ballon, but);
+    const loin = t.arretParMetreDistance * Math.max(0, distTir - 11); // de loin, le gardien a le temps
     const base = penalty ? r.fautes.arretPenaltyProba : Math.max(t.arretMin, Math.min(0.95, t.arretMax - t.arretParMetre * Math.max(0, ecart - 0.5) + loin));
-    // Notes : puissance du tireur contre le gardien (gardien à la référence tant qu'il n'a pas de notes).
-    const proba = decaler(base, (PN.reference - p.notes.puissance) * PN.tir.poidsPuissanceArret);
+    // Notes : réflexes du gardien contre la puissance du tireur ; de près (face-à-face),
+    // ses sorties contre le dribble du tireur (13/11).
+    let ecartNotes = (g.reflexes - p.notes.puissance) * PN.tir.poidsPuissanceArret * pg.poidsReflexes;
+    if (!penalty && distTir < pg.sortiesDistanceM) ecartNotes += (g.sorties - p.notes.dribble) * pg.poidsSorties;
+    const proba = decaler(base, ecartNotes);
     this.arret = Math.abs(cible.x - but.x) > DEMI_BUT_M ? "non" : this.rng.suivant() < proba ? "oui" : "non";
     this.plongeon = { gardien, point };
     gardien.plongeJusqua = s.temps + t.plongeonDureeS;
@@ -890,7 +902,8 @@ export class BallonReel {
     if (this.tirEnCours && gagnant.poste.id === "G") {
       this.stats.arrets[gagnant.camp]++;
       this.evenement = { texte: "Arrêt", a: s.temps };
-      if (this.rng.suivant() < r.tir.paradeProba) {
+      // Réflexes (13/11) : un bon gardien bloque plus souvent au lieu de repousser.
+      if (this.rng.suivant() < decaler(r.tir.paradeProba, -(gagnant.notes.reflexes - PN.reference) * PN.gardien.poidsCaptage)) {
         // Parade : le gardien repousse le ballon sur le côté, derrière sa ligne (corner).
         const versLigne = gagnant.camp === 0 ? -1 : 1;
         const cote = s.ballon.x < s.donnees.largeurM / 2 ? -1 : 1;

@@ -93,10 +93,20 @@ describe("Partie contre l'ordinateur (13/11)", () => {
   });
 
   test("fusion : +4 par niveau sur chaque sous-note (proposition), 99 au plus", () => {
-    const n = CATALOGUE.cartes.find((c) => c.notes)!.notes!;
+    const n = CATALOGUE.cartes.find((c) => c.notes && c.poste !== "G")!.notes!;
     const f = notesFusionnees(n, 2)!;
     expect(f.passe).toBe(Math.min(99, n.passe + 2 * REGLES.bonusFusionParNiveau));
+    // Gardien : ses 4 notes montent aussi.
+    const g = CATALOGUE.cartes.find((c) => c.poste === "G")!.notes!;
+    expect(notesFusionnees(g, 1)!.reflexes).toBe(Math.min(99, g.reflexes + REGLES.bonusFusionParNiveau));
     expect(notesFusionnees(null, 2)).toBeNull();
+  });
+
+  test("offre du draft : une vedette (4-5 pièces) quand le poste en a une", () => {
+    for (let graine = 1; graine <= 10; graine++) {
+      const p = new Partie(donnees, graine, plan);
+      for (const poste of ["DC", "MC", "AC"]) expect(p.offre(0, poste).some((id) => p.carte(id).prix >= 4)).toBe(true);
+    }
   });
 
   test("les deux équipes draftées jouent un match", () => {

@@ -39,5 +39,6 @@
     "perteParMinute": 0.002,
     "parPoint": 0.04,
     "perteMax": 0.25
-  }
+  },
+  "gardien": { "poidsReflexes": 1, "placementParPoint": 0.012, "sortiesDistanceM": 12, "poidsSorties": 0.8, "poidsCaptage": 1 }
 }

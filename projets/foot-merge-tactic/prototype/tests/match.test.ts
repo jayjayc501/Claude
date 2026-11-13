@@ -46,3 +46,24 @@ describe("Buteurs (13/11)", () => {
     expect(vus).toBeGreaterThan(0);
   });
 });
+
+describe("Engagement (13/11)", () => {
+  test("au coup d'envoi, chacun est à sa place de placement, pas regroupé au centre", () => {
+    const { chargerDonnees, chargerEquipes, chargerReglages } = require("../src/sim/chargement");
+    const { MatchSim } = require("../src/sim/simulation");
+    const d = chargerDonnees("hexagones");
+    const r = chargerReglages();
+    const { effectif, adversaire } = chargerEquipes(d);
+    const sim = new MatchSim(d, r, [effectif, adversaire], 4, true);
+    sim.demarrer();
+    sim.avancer(1);
+    // Hors du joueur qui engage et de son partenaire, tout le monde reste près de sa place.
+    const loin = sim.joueurs.filter((j: any) => Math.hypot(j.pos.x - j.depart.x, j.pos.y - j.depart.y) > 3);
+    expect(loin.length).toBeLessThanOrEqual(2);
+    // Chaque équipe garde sa profondeur : du gardien à l'attaquant, au moins 35 m.
+    for (const camp of [0, 1]) {
+      const ys = sim.joueurs.filter((j: any) => j.camp === camp).map((j: any) => j.pos.y);
+      expect(Math.max(...ys) - Math.min(...ys)).toBeGreaterThan(35);
+    }
+  });
+});

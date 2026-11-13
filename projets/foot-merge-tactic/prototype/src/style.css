@@ -45,12 +45,12 @@ body {
 }
 #app { max-width: 520px; margin: 0 auto; padding: 10px 12px 40px; }
 .entete h1 { font-size: 15px; font-weight: 600; margin: 2px 0 6px; color: var(--texte-2); }
-.onglets { display: flex; gap: 6px; margin-bottom: 10px; }
+.onglets { display: flex; gap: 6px; margin-bottom: 6px; }
 .onglet, .bouton, .puce, .segment, .rang {
   font: inherit; color: inherit; background: var(--carte);
   border: 1px solid var(--bord); border-radius: 10px; cursor: pointer;
 }
-.onglet { flex: 1; min-height: 42px; font-weight: 500; }
+.onglet { flex: 1; min-height: 34px; font-weight: 500; }
 .onglet-actif { border-color: var(--accent); color: var(--accent); background: var(--accent-fond); }
 .ligne-statut { display: flex; justify-content: space-between; font-size: 14px; color: var(--texte-2); }
 .message { font-size: 14px; color: var(--texte-2); min-height: 42px; margin: 2px 0 4px; line-height: 1.45; }
@@ -369,6 +369,11 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-rond.nous circle { stroke: #fff; stroke-width: 2.2; }
 .match-rond.eux circle { stroke: #6E1A17; stroke-width: 2.2; }
 .match-rond { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)); }
+.match-rond-fusion { fill: none; stroke-width: 2.4; filter: drop-shadow(0 0 2px currentColor); }
+.match-rond-fusion.niveau-3 { stroke-dasharray: 3 1.6; }
+.match-socle-fusion { fill: none; stroke-width: 3; }
+.match-style-fond { fill: #2B2F36; stroke: #fff; stroke-width: 1; }
+.match-style-picto { fill: none; stroke: #fff; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; color: #fff; }
 .match-surgit { animation: match-surgit 0.3s cubic-bezier(0.2, 1.5, 0.4, 1); transform-box: fill-box; transform-origin: 50% 100%; }
 .match-fig-action { transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes match-surgit { from { transform: scale(0.3); opacity: 0.2; } to { transform: scale(1); opacity: 1; } }
@@ -510,3 +515,17 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .prepa-aide { margin: -2px 0 6px; }
 .prepa-relancer { flex: none; white-space: nowrap; margin-left: auto; border: 0; border-radius: 999px; padding: 5px 10px 5px 8px; display: inline-flex; align-items: center; gap: 5px; font: inherit; font-size: 12.5px; font-weight: 800; color: #4A3300; background: #FFF3C4; box-shadow: inset 0 0 0 1px rgba(160, 110, 0, 0.3); cursor: pointer; }
 .prepa-relancer:disabled { opacity: 0.5; cursor: default; }
+
+/* Fiche du gardien (13/11) : une barre par note, avec ce qu'elle fait. */
+.fiche-aide { display: block; font-size: 11px; line-height: 1.25; color: #5D6B62; }
+.fiche-detail > .fiche-barre { display: block; margin-top: 3px; }
+.offre-info { position: absolute; left: 8px; bottom: 8px; z-index: 2; width: 24px; height: 24px; border-radius: 50%; border: 0; padding: 0; font: italic 800 13px/24px Georgia, serif; color: #16201A; background: rgba(255, 255, 255, 0.92); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); cursor: pointer; }
+.offre-aide { margin: 8px 0 2px; text-align: center; font-size: 12px; font-weight: 600; color: #6B7A70; }
+.offre-carte.refus { animation: offre-refus 0.35s ease; }
+@keyframes offre-refus { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+.partie-jouer-mini { flex: none; height: 34px; padding: 0 14px; border: 0; border-radius: 12px; font: inherit; font-size: 15px; font-weight: 900; color: #fff; background: linear-gradient(180deg, #4F8BEB, #2459C6); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2); cursor: pointer; }
+.partie-jouer-mini:disabled { background: #DCE2DE; color: #6B7A70; box-shadow: none; cursor: default; }
+/* 13/11 : tout l'écran de préparation sur une page de téléphone. */
+.draft-progres { height: 6px; margin: 4px 0 2px; }
+.draft-etapes { font-size: 11px; }
+.prepa-tactique { padding: 4px 30px 4px 10px; margin-bottom: 4px; }

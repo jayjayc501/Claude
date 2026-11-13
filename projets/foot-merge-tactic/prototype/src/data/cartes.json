@@ -1,5 +1,5 @@
 {
- "_note": "Catalogue de 60 cartes (13/11), généré par scripts/generer-cartes.py. 5 pays × 12 joueurs (VALIDÉ) ; prix, copies et notes : PROPOSITION. Gardiens sans notes pour l'instant.",
+ "_note": "Catalogue de 60 cartes (13/11), généré par scripts/generer-cartes.py. 5 pays × 12 joueurs (VALIDÉ) ; prix, copies et notes : PROPOSITION. Gardiens : 4 notes simples (Réflexes, Placement, Sorties, Relance).",
  "pays": {
   "FRA": {
    "nom": "France",
@@ -38,7 +38,12 @@
    "style": null,
    "prix": 3,
    "copies": 6,
-   "notes": null
+   "notes": {
+    "reflexes": 66,
+    "placement": 73,
+    "sorties": 70,
+    "relance": 74
+   }
   },
   {
    "id": "FRA-GARNIER",
@@ -257,7 +262,12 @@
    "style": null,
    "prix": 2,
    "copies": 8,
-   "notes": null
+   "notes": {
+    "reflexes": 62,
+    "placement": 62,
+    "sorties": 64,
+    "relance": 68
+   }
   },
   {
    "id": "ESP-OTERO",
@@ -476,7 +486,12 @@
    "style": null,
    "prix": 1,
    "copies": 10,
-   "notes": null
+   "notes": {
+    "reflexes": 51,
+    "placement": 55,
+    "sorties": 65,
+    "relance": 64
+   }
   },
   {
    "id": "BRA-TEODORO",
@@ -695,7 +710,12 @@
    "style": null,
    "prix": 2,
    "copies": 8,
-   "notes": null
+   "notes": {
+    "reflexes": 61,
+    "placement": 66,
+    "sorties": 67,
+    "relance": 62
+   }
   },
   {
    "id": "ARG-FERREYRA",
@@ -914,7 +934,12 @@
    "style": null,
    "prix": 4,
    "copies": 4,
-   "notes": null
+   "notes": {
+    "reflexes": 80,
+    "placement": 71,
+    "sorties": 78,
+    "relance": 68
+   }
   },
   {
    "id": "ITA-MONTI",

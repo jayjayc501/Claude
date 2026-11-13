@@ -569,3 +569,18 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 **Tests** : 122 verts (catalogue, réserve, draft sur 20 graines, gardien en dernier, carte trop chère refusée, mercato de l'ordinateur, bonus de fusion, match entre deux équipes draftées). Parcours complet vérifié au format téléphone (draft de 11 joueurs, mercato, match).
 
 **À juger par le concepteur** : budget 30 et prix ; difficulté de l'ordinateur ; bonus de fusion (+4) ; bustes provisoires (plusieurs joueurs partagent la même image).
+
+## 13/11/2026 (matin) — Retours sur la partie contre l'ordinateur
+
+**Demandes du concepteur** : notes du gardien (4 notes simples suffisent) ; draft en un toucher ; prix de 1 à 5 et budget de 40 ou 50 (« toi de me dire ») ; en match, les fusions ne se voient plus ; à l'engagement, tout le monde est regroupé au milieu ; l'écran ne tient pas sur une page ; les styles doivent agir et se voir en match (pictogramme).
+
+**Ce qui a été fait**
+- **Gardien** : Réflexes, Placement, Sorties, Relance (`src/sim/notes.ts`, `src/data/notes.json` → `gardien`, PROPOSITION pour les chiffres). Arrêt : Réflexes contre la puissance du tireur ; Placement réduit la distance à couvrir (1,2 % par point) ; de près (moins de 12 m), Sorties contre le dribble du tireur ; Réflexes : il repousse moins souvent ; Relance = sa passe, Sorties = sa portée sur le ballon. Notes des 5 gardiens tirées à part dans `scripts/generer-cartes.py` (les autres cartes ne changent pas). Fiche : une barre par note, avec ce qu'elle fait.
+- **Draft** : un toucher sur une carte recrute (ⓘ pour la fiche ; carte trop chère : elle tremble). Offres : chaque joueur du poste a la même chance (avant : pondéré par les copies, les cartes à 1-2 pièces sortaient presque toujours), et une vedette (4 ou 5 pièces) s'il en reste. **Budget 40** (= 16 joueurs × 2,5, le prix moyen d'une carte).
+- **Ordinateur** : il dépensait tout au draft (aucun remplaçant) ; il plafonne maintenant son prix par choix et garde 5 pièces pour son banc (6 parties : 5 pièces après le draft, 0 à 2 remplaçants ou fusions).
+- **Fusions** : aura plus forte (le niveau 1, bleu clair sur maillot bleu, ne se voyait pas), anneau de couleur autour des pions, fusions de l'ordinateur affichées ; la fiche de tes joueurs montre les notes après fusion (« Fusion 1 · +4 partout »).
+- **Styles** : actifs par défaut en match ; pastille du pictogramme à côté de chaque pion et figurine.
+- **Engagement** : tant que l'engagement n'est pas joué, chacun va à sa place de coup d'envoi (celle du placement) ; avant, la projection serrait les deux équipes autour du ballon au centre.
+- **Écran sur une page** : plateau moins haut (hexagones aplatis, H = 1,1 W au lieu de 1,5 W), en-tête compact, bouton « Jouer ▶ » en haut. Tout tient dans 390 × 750 (vérifié en capture).
+
+**Tests** : 126 verts. Nouveaux : notes du gardien, un bon gardien encaisse moins qu'un mauvais (10 matchs), engagement (chacun près de sa place, équipes étalées sur plus de 35 m), vedette dans l'offre. Deux tests statistiques élargis (ligne du Contre : 16 matchs au lieu de 8 ; touches : 3 graines de plus) : l'engagement change le déroulé des matchs, l'effet reste (Contre −2,7 m sur 24 matchs). Couverture : 97 % des lignes (`bun test --coverage`) pour le moteur, les règles de partie et la logique de préparation.

@@ -129,7 +129,7 @@ export class Preparation {
   }
 
   /** Notes d'un membre, avec le bonus de ses fusions (PROPOSITION). */
-  private notesFusion(m: Membre): Partial<Notes> | null {
+  notesFusion(m: Membre): Partial<Notes> | null {
     const n = this.fiche(m.id).notes ?? null;
     if (!n || !m.fusions || !this.bonusFusion) return n;
     const r: Partial<Notes> = {};

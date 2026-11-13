@@ -463,6 +463,14 @@ export class MatchSim {
     // placement et des lignes tenues, jamais des positions du moment : pas de
     // boucle où un joueur bousculé entraîne les autres (la ligne adverse qui
     // s'enfonçait dans sa surface, 11/11).
+    // Engagement (13/11, « à l'engagement, ils sont tous regroupés ») : chacun
+    // reprend sa place de coup d'envoi, celle du placement, au lieu de se
+    // serrer autour du ballon au centre.
+    if (!this.demarre || this.balle?.enEngagement) {
+      for (const j of this.joueurs) j.cible = { ...j.depart };
+      this.balle?.surcharger();
+      return;
+    }
     for (const j of this.joueurs) {
       const vu = this.jeuPercu(j);
       const ballonRepere = this.versRepere(j.camp, vu.ballon);

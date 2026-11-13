@@ -78,9 +78,11 @@ export class Reserve {
   }
 
   /** `n` cartes différentes au plus, tirées au hasard en proportion des copies restantes. */
-  tirer(rng: Aleatoire, n: number, filtre: (c: Carte) => boolean = () => true, exclure: Set<string> = new Set()): string[] {
+  tirer(rng: Aleatoire, n: number, filtre: (c: Carte) => boolean = () => true, exclure: Set<string> = new Set(), uniforme = false): string[] {
     const ids = this.cartes.filter((c) => filtre(c) && !exclure.has(c.id) && this.reste(c.id) > 0).map((c) => c.id);
-    const poids = ids.map((id) => this.reste(id));
+    // Mercato : chaque copie a sa chance (les cartes bon marché tombent plus).
+    // Draft (uniforme) : chaque joueur a la même chance, pour voir tous les prix.
+    const poids = ids.map((id) => (uniforme ? 1 : this.reste(id)));
     const sortie: string[] = [];
     while (ids.length && sortie.length < n) {
       let r = rng.suivant() * poids.reduce((s, p) => s + p, 0);
@@ -146,10 +148,16 @@ export class Partie {
   offre(camp: 0 | 1, poste: string): string[] {
     const c = this.camps[camp];
     const deja = new Set(c.effectif.map((m) => m.id));
-    const ids = this.reserve.tirer(this.rng, this.regles.offreTaille, (x) => x.poste === poste, deja);
+    // 13/11 (« les prix de 1 à 3, c'est pas terrible ») : tous les joueurs du poste
+    // ont la même chance, et l'offre montre une vedette (4 ou 5 pièces) s'il en reste.
+    const ids = this.reserve.tirer(this.rng, this.regles.offreTaille, (x) => x.poste === poste, deja, true);
+    if (!ids.some((id) => this.carte(id).prix >= 4)) {
+      const vedette = this.reserve.tirer(this.rng, 1, (x) => x.poste === poste && x.prix >= 4, new Set([...deja, ...ids]), true);
+      if (vedette[0] && ids.length) ids[0] = vedette[0];
+    }
     const max = c.budget - this.aGarder(camp);
     if (!ids.some((id) => this.carte(id).prix <= max)) {
-      const abordables = this.reserve.tirer(this.rng, 1, (x) => x.poste === poste && x.prix <= max, new Set([...deja, ...ids]));
+      const abordables = this.reserve.tirer(this.rng, 1, (x) => x.poste === poste && x.prix <= max, new Set([...deja, ...ids]), true);
       if (abordables[0]) ids[ids.length - 1] = abordables[0];
     }
     return ids;
@@ -192,8 +200,12 @@ export class Partie {
     // Part du budget visée pour ce choix, en gardant de quoi faire un banc.
     const cible = Math.max(1, (c.budget - this.regles.ordi.reserveBanc) / restants);
     const memePays = (id: string) => c.effectif.filter((m) => this.carte(m.id).pays === this.carte(id).pays).length;
-    const note = (id: string) => this.valeur(id) + 1.5 * memePays(id) - 3 * Math.max(0, this.carte(id).prix - cible - 1);
-    const choix = offre.filter((id) => this.carte(id).prix <= max).sort((a, b) => note(b) - note(a))[0];
+    const note = (id: string) => this.valeur(id) + 1.5 * memePays(id) - 5 * Math.max(0, this.carte(id).prix - cible - 1);
+    // 13/11 : avec une vedette dans chaque offre, l'ordinateur dépensait tout au draft
+    // et n'avait plus de banc. Il garde sa réserve pour le banc tant qu'il le peut.
+    const tri = (ids: string[]) => ids.sort((a, b) => note(b) - note(a))[0];
+    const plafond = Math.min(max - this.regles.ordi.reserveBanc, Math.floor(cible + 0.8));
+    const choix = tri(offre.filter((id) => this.carte(id).prix <= plafond)) ?? tri(offre.filter((id) => this.carte(id).prix <= max));
     if (!choix) return null;
     const r = this.choisir(1, slot.poste, slot.cellule, choix);
     if (!r.ok) return null;

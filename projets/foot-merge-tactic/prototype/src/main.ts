@@ -51,9 +51,12 @@ function demarrer(): void {
     nomEux: "Ordinateur",
     tactiques: donneesPrepa().tactiques,
     styles: donneesPrepa().styles,
-    infos: (id) => {
+    infos: (id, camp = 0) => {
       const f = prepa.d.joueurs[id];
-      return f ? { couleur: couleurs[f.pays] ?? "#1F3A93", style: f.style, fusions: prepa.membre(id)?.fusions ?? 0 } : undefined;
+      if (!f) return undefined;
+      // Fusions : celles de ton effectif, ou celles de l'ordinateur pour ses joueurs.
+      const fusions = camp === 0 ? (prepa.membre(id)?.fusions ?? 0) : (partie.camps[1].effectif.find((m) => m.id === id)?.fusions ?? 0);
+      return { couleur: couleurs[f.pays] ?? "#1F3A93", style: f.style, fusions };
     },
   });
 

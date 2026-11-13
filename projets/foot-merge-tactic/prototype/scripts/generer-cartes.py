@@ -5,7 +5,9 @@ VALIDÉ : 5 pays (France, Espagne, Brésil, Argentine, Italie), 12 joueurs par p
 chaque style (4 sur 12), jamais le gardien ; un même style n'est pas au même poste
 d'un pays à l'autre. PROPOSITION : prix (3 cartes à 1 pièce, 4 à 2, 2 à 3, 2 à 4,
 1 star à 5 par pays), copies dans la réserve (10, 8, 6, 4, 3), notes tirées du
-prix, du poste, du style et d'une légère couleur nationale. Gardiens sans notes.
+prix, du poste, du style et d'une légère couleur nationale. Gardiens (13/11) :
+4 notes simples (Réflexes, Placement, Sorties, Relance), tirées à part pour ne pas
+changer celles des joueurs de champ.
 
 Lancer : python3 scripts/generer-cartes.py  → src/data/cartes.json
 """
@@ -51,8 +53,14 @@ NATION = {  # légère couleur nationale, sans caricature
     "ARG": [0, 0, 0, 2, 0, 0, 2, 0], "ITA": [0, 0, 0, 0, 0, 0, 3, 0],
 }
 
+CLES_G = ["reflexes", "placement", "sorties", "relance"]
+NATION_G = {  # légère couleur nationale du gardien
+    "FRA": [2, 0, 0, 0], "ESP": [0, 0, 0, 3], "BRA": [0, -1, 2, 2], "ARG": [0, 0, 3, 0], "ITA": [0, 3, 0, 0],
+}
+
 def main():
     rng = random.Random(1311)
+    rng_g = random.Random(1307)  # gardiens : tirage séparé
     cartes = []
     for code, joueurs in JOUEURS.items():
         for nom, poste, style, prix in joueurs:
@@ -63,11 +71,16 @@ def main():
                 # recentrer : la moyenne des sous-notes reste proche du niveau du prix
                 m = sum(ecarts) / 8
                 notes = {k: max(35, min(95, round(base + e - m + rng.randint(-2, 2)))) for k, e in zip(CLES, ecarts)}
+            else:
+                base = NIVEAU[prix] + rng_g.randint(-1, 1)
+                ecarts = [rng_g.randint(-6, 6) + n for n in NATION_G[code]]
+                m = sum(ecarts) / 4
+                notes = {k: max(35, min(95, round(base + e - m))) for k, e in zip(CLES_G, ecarts)}
             ident = f"{code}-{nom.upper().replace('Ã', 'A').replace('Ó', 'O').replace('Í', 'I')}"
             cartes.append({"id": ident, "nom": nom, "pays": code, "poste": poste, "style": style, "prix": prix,
                            "copies": COPIES[prix], "notes": notes})
     sortie = {
-        "_note": "Catalogue de 60 cartes (13/11), généré par scripts/generer-cartes.py. 5 pays × 12 joueurs (VALIDÉ) ; prix, copies et notes : PROPOSITION. Gardiens sans notes pour l'instant.",
+        "_note": "Catalogue de 60 cartes (13/11), généré par scripts/generer-cartes.py. 5 pays × 12 joueurs (VALIDÉ) ; prix, copies et notes : PROPOSITION. Gardiens : 4 notes simples (Réflexes, Placement, Sorties, Relance).",
         "pays": {c: {"nom": n, "couleur": col} for c, (n, col) in PAYS.items()},
         "copiesParPrix": COPIES,
         "cartes": cartes,
@@ -91,7 +104,7 @@ def main():
     print(f"{len(cartes)} cartes → {chemin}")
     for c in cartes:
         n = c["notes"]
-        moy = "" if not n else " ".join(f"{(n[a] + n[b]) // 2:>2}" for a, b in [("acceleration", "pointe"), ("passe", "dribble"), ("precision", "puissance"), ("duel", "endurance")])
+        moy = "" if not n else " ".join(str(n[k]) for k in CLES_G) if "reflexes" in n else " ".join(f"{(n[a] + n[b]) // 2:>2}" for a, b in [("acceleration", "pointe"), ("passe", "dribble"), ("precision", "puissance"), ("duel", "endurance")])
         print(f"{c['pays']} {c['nom']:<10} {c['poste']:<2} {c['style'] or '—':<3} {c['prix']} {moy}")
 
 main()

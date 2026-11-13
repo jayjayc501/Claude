@@ -224,7 +224,7 @@ describe("ballon réel : touche", () => {
   test("sur une touche, le joueur marque une pause puis fait une passe, sans partir avec le ballon", () => {
     let vues = 0;
     // Plus de graines que les autres tests : il y a peu de touches par match (12/11).
-    for (const g of [...GRAINES, 101, 102, 103]) {
+    for (const g of [...GRAINES, 101, 102, 103, 104, 105, 106]) {
       const m = match(g);
       const b = m.balle!;
       let attente = false;

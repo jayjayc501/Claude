@@ -22,10 +22,12 @@ import { notesAffichees } from "../sim/notes";
 import { ouvrirFiche } from "./fiche";
 
 // Plateau : x de 0 à 1 sur W, y de 0,5 (ligne médiane, en haut) à 0 (but, en bas) sur H.
-// H = 1,5 W donne des hexagones presque réguliers ; MH laisse dépasser les bustes du haut.
+// H = 1,5 W donnait des hexagones presque réguliers ; 13/11 (« l'interface ne rentre pas
+// dans l'écran ») : H = 1,1 W, des hexagones aplatis comme un plateau vu en perspective.
+// MH laisse dépasser les bustes du haut.
 const W = 300;
-const H = 450;
-const MH = 26;
+const H = 330;
+const MH = 22;
 const HAUT_TOTAL = MH + H + 10;
 
 const DELAI_APPUI_MS = 250;
@@ -348,8 +350,10 @@ export class EcranPreparation {
       pays,
       poste: f.poste,
       style: f.style ? { code: f.style, nom: this.prepa.d.styles[f.style] ?? f.style } : null,
-      notes: f.notes ?? null,
-      fusions: this.prepa.membre(id)?.fusions ?? 0,
+      // Notes après fusion (13/11, « est-ce que les fusions font compter les notes ? »).
+      notes: (place === null && this.prepa.membre(id) ? this.prepa.notesFusion(this.prepa.membre(id)!) : f.notes) ?? null,
+      fusions: place === null ? (this.prepa.membre(id)?.fusions ?? 0) : 0,
+      bonusFusion: this.prepa.bonusFusion,
       action,
     });
   }
@@ -392,7 +396,7 @@ export class EcranPreparation {
     const tete = html("div", { class: "draft-tete" }, parent);
     const t = html("div", { class: "prepa-titre" }, tete);
     html("span", { class: "prepa-h" }, t, "Draft");
-    html("span", { class: "prepa-sous" }, t, n === 10 && !this.prepa.etat.composition.some((x) => x.poste === "G") ? "Dernier choix : ton gardien" : "Touche une case pour recruter un titulaire");
+    html("span", { class: "prepa-sous" }, t, n === 10 && !this.prepa.etat.composition.some((x) => x.poste === "G") ? "Dernier choix : ton gardien" : "Touche une case libre");
     const budget = html("div", { class: "prepa-budget", "aria-label": `Budget : ${this.prepa.etat.budget} pièces` }, tete);
     html("span", { class: "prepa-piece" }, budget);
     html("span", { class: "prepa-nombre" }, budget, String(this.prepa.etat.budget));
@@ -406,7 +410,11 @@ export class EcranPreparation {
     const tete = html("div", { class: "draft-tete" }, parent);
     const t = html("div", { class: "prepa-titre" }, tete);
     html("span", { class: "prepa-h" }, t, "Mercato");
-    html("span", { class: "prepa-sous" }, t, "Complète ton banc ; deux copies fusionnent");
+    html("span", { class: "prepa-sous" }, t, "Complète ton banc");
+    // Le bouton du match reste en haut, toujours visible (13/11).
+    const pret = this.prepa.pret();
+    const j = html("button", { type: "button", class: "partie-jouer-mini", disabled: !pret, title: pret ? "Jouer le match" : "Il faut 11 titulaires" }, tete, "Jouer ▶");
+    j.addEventListener("click", () => this.partie!.jouer());
     this.boutonNouvelle(tete);
     this.rendreEtapes(parent, 2, 11);
   }
@@ -445,9 +453,6 @@ export class EcranPreparation {
 
   /** Bouton pour lancer le match une fois les 11 titulaires en place. */
   private rendreJouer(parent: HTMLElement): void {
-    const pret = this.prepa.pret();
-    const b = html("button", { type: "button", class: "partie-jouer", disabled: !pret }, parent, pret ? "Jouer le match ▶" : "Il faut 11 titulaires pour jouer");
-    b.addEventListener("click", () => this.partie!.jouer());
     const o = this.partie!.ordi();
     html("p", { class: "prepa-discret" }, parent, `L'ordinateur a fini son draft et son mercato : 11 titulaires, ${o.banc} remplaçant${o.banc > 1 ? "s" : ""}.`);
   }

@@ -666,6 +666,8 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 | 4 | tactiques coupées | 0-2 (0-1) | 12' Mercier, 76' Roux | oui |
 | 5 | toi en Contre, détour par la préparation | 0-2 (0-0) | 53' et 67' Roux | oui |
 
+**Fusion** : « Ok fusionne » (concepteur, 13/11, 22 h 20) : pull request n° 11 fusionnée sur `main` ; tests des empreintes et de l'arbitre relancés sur `main` (27 verts), page habituelle du prototype republiée.
+
 **Remarqué en passant, non corrigé** (rien ne devait changer) : après un détour par l'écran de préparation à la mi-temps, le gros bouton du haut affiche encore « ▶ 2e mi-temps » pendant la 2e mi-temps (au lieu de « ❚❚ Pause ») ; il redevient juste au premier toucher. C'était déjà le cas avant.
 
 **À juger par le concepteur** : la version de test sur son téléphone (page séparée : https://claude.ai/artifact/5AP8h49wchEwgmtjy8YR6a ; la page habituelle du prototype n'a pas été touchée) ; la pull request (changement de structure, à fusionner seulement avec son accord). Pour le réseau, plus tard : alléger le film (binaire, compression, ou positions arrondies au centimètre — ce dernier point changerait l'affichage d'un cheveu, donc à décider) ; faire passer aussi les matchs des ordinateurs par l'arbitre ; bloquer le changement d'onglet en plein match.

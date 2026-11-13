@@ -1,0 +1,41 @@
+# Foot Merge Tactic : télécharge les images générées avec Kling (l'environnement de
+# Claude ne peut pas joindre les serveurs de Kling). Liste « nom URL » dans
+# projets/foot-merge-tactic/images-kling/a-telecharger.txt ; chaque image est
+# réduite à 2048 px de large (JPEG) et ajoutée au dépôt dans images-kling/brut/.
+name: foot-merge-images
+
+on:
+  push:
+    branches: [main]
+    paths: ['projets/foot-merge-tactic/images-kling/a-telecharger.txt']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  telecharger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Télécharger et réduire
+        working-directory: projets/foot-merge-tactic/images-kling
+        run: |
+          mkdir -p brut
+          while read -r nom url; do
+            [ -z "$nom" ] && continue
+            case "$nom" in \#*) continue ;; esac
+            [ -f "brut/$nom.jpg" ] && continue
+            curl -sSfL --retry 3 "$url" -o "/tmp/$nom"
+            convert "/tmp/$nom" -resize '2048x2048>' -quality 92 "brut/$nom.jpg"
+            echo "$nom : $(identify -format '%wx%h' "brut/$nom.jpg")"
+          done < a-telecharger.txt
+      - name: Ajouter au dépôt
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add projets/foot-merge-tactic/images-kling/brut
+          git commit -m "Foot Merge Tactic : images Kling téléchargées" || exit 0
+          git pull --rebase
+          git push

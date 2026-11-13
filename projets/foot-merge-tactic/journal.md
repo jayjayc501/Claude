@@ -656,6 +656,16 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 
 **Preuve dans le vrai navigateur** (Chrome au format téléphone, `Math.random` à graine fixe pour avoir la même partie) : même draft, puis match complet sur l'ancienne page (branche `main`, vitesse ×4) et sur la nouvelle (vitesse ×3,5) : panneaux de mi-temps et de fin **identiques** (score, buteurs et minutes, toutes les statistiques, notes). Deuxième parcours avec des choix à la mi-temps (toi en Pressing, l'adversaire en Contre, styles coupés, détour par l'écran de préparation) : identiques aussi. Aucune erreur JavaScript. Listes et interrupteurs : actifs avant le coup d'envoi et à la mi-temps, grisés pendant le jeu (captures claires et sombres).
 
+**Contre-vérification demandée par le concepteur (13/11, 22 h)** : 5 matchs de plus dans Chrome, chacun avec une autre partie (graines 1001 à 5005 pour le hasard de la page), ancienne page en ×4 et nouvelle en ×3,5 en même temps, et des choix de mi-temps différents à chaque fois. Panneaux de mi-temps et de fin identiques dans les 5 cas, aucune erreur JavaScript.
+
+| Match | Choix à la mi-temps | Score (mi-temps) | Buteurs | Identique |
+|---|---|---|---|---|
+| 1 | aucun | 0-1 (0-1) | 15' Roux | oui |
+| 2 | toi en Gegenpressing | 0-2 (0-2) | 9' et 19' Mercier | oui |
+| 3 | adversaire en Tiki-taka, styles coupés | 0-3 (0-1) | 33' Mercier, 51' et 90' Blackwood | oui |
+| 4 | tactiques coupées | 0-2 (0-1) | 12' Mercier, 76' Roux | oui |
+| 5 | toi en Contre, détour par la préparation | 0-2 (0-0) | 53' et 67' Roux | oui |
+
 **Remarqué en passant, non corrigé** (rien ne devait changer) : après un détour par l'écran de préparation à la mi-temps, le gros bouton du haut affiche encore « ▶ 2e mi-temps » pendant la 2e mi-temps (au lieu de « ❚❚ Pause ») ; il redevient juste au premier toucher. C'était déjà le cas avant.
 
 **À juger par le concepteur** : la version de test sur son téléphone (page séparée : https://claude.ai/artifact/5AP8h49wchEwgmtjy8YR6a ; la page habituelle du prototype n'a pas été touchée) ; la pull request (changement de structure, à fusionner seulement avec son accord). Pour le réseau, plus tard : alléger le film (binaire, compression, ou positions arrondies au centimètre — ce dernier point changerait l'affichage d'un cheveu, donc à décider) ; faire passer aussi les matchs des ordinateurs par l'arbitre ; bloquer le changement d'onglet en plein match.

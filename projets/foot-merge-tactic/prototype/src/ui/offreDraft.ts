@@ -4,6 +4,7 @@
 // Une carte trop chère reste visible mais grisée.
 
 import { html } from "./dom";
+import { drapeau } from "./drapeaux";
 import { PICTOS } from "./pictos";
 
 export interface CarteOffre {
@@ -48,7 +49,7 @@ export function ouvrirOffre(o: {
     b.style.setProperty("--pays", c.pays.couleur);
     b.style.setProperty("--i", String(i));
     const haut = html("span", { class: "offre-haut" }, b);
-    html("span", { class: "offre-drapeau" }, haut, c.pays.code);
+    html("span", { class: "offre-drapeau" }, haut, c.pays.code).insertAdjacentHTML("afterbegin", drapeau(c.pays.code, 18));
     const prix = html("span", { class: "offre-prix" }, haut, String(c.prix));
     prix.prepend(html("i", { "aria-hidden": "true" }));
     html("img", { src: c.image, alt: "", draggable: "false" }, haut);

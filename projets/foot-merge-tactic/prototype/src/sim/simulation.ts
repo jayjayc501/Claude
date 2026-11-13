@@ -8,7 +8,8 @@
 
 import type { Donnees } from "./donnees";
 import { hauteurLigneDefensiveM, lignesAttaqueM, projeter, type LignesTenues } from "./projection";
-import { BallonReel } from "./ballon";
+import { BallonReel, statsVides } from "./ballon";
+import { noteMatch } from "./noteMatch";
 import { type EffetJoueur, type Influences, type OptionsInfluences, chargerInfluences, effetJoueur, paliersAtteints, reglagesEquipe } from "./influences";
 import { PARAMETRES_NOTES, notesDe } from "./notes";
 import { Aleatoire } from "./rng";
@@ -22,6 +23,8 @@ export type ModePossession = "auto" | "nous" | "eux";
 
 export interface JoueurSim {
   camp: Camp;
+  /** Temps simulé de son entrée en jeu (0 pour un titulaire) : sa fatigue part de là (13/11). */
+  entreeS: number;
   joueur: Joueur;
   placement: Placement;
   poste: Poste;
@@ -76,7 +79,7 @@ export class MatchSim {
   score: [number, number] = [0, 0];
   /** Ballon réel ; null : ballon simulé (anciens tests de projection). */
   readonly balle: BallonReel | null;
-  readonly joueurs: JoueurSim[];
+  joueurs: JoueurSim[];
   /** Hauteur de la ligne défensive que tient chaque équipe quand elle défend
    *  (mètres depuis son but ; null quand elle attaque). Elle suit le ballon à
    *  vitesse limitée : à la perte du ballon, elle part de la hauteur des
@@ -131,45 +134,107 @@ export class MatchSim {
       for (const placement of equipe.composition) {
         const joueur = equipe.joueurs.find((j) => j.id === placement.joueurId);
         if (!joueur) throw new Error(`Joueur inconnu : ${placement.joueurId}`);
-        const poste = donnees.poste(placement.poste);
-        const cellule = donnees.cellule(placement.poste, placement.cellule);
-        const pos = this.versAbsolu(camp, cellule.centre);
-        const v = reglages.mouvement.variationIndividuelle;
-        const facteur = 1 + this.rng.entre(-v, v);
-        const perceptionS = this.rng.entre(reglages.mouvement.perception.minS, reglages.mouvement.perception.maxS);
-        const notes = notesDe(joueur);
-        const pn = PARAMETRES_NOTES;
-        this.joueurs.push({
-          camp,
-          joueur,
-          placement,
-          poste,
-          cellule,
-          pos,
-          vit: { x: 0, y: 0 },
-          cible: { ...pos },
-          phase: "defense",
-          reagitA: null,
-          sprintJusqua: 0,
-          freineJusqua: 0,
-          auBallon: false,
-          depart: { ...pos },
-          plongeJusqua: 0,
-          facteur,
-          notes,
-          vitesseF: facteur * (1 + (notes.pointe - pn.reference) * pn.vitesse.pointeParPoint),
-          accelF: facteur * (1 + (notes.acceleration - pn.reference) * pn.vitesse.accelerationParPoint),
-          vitesseRepos: facteur * (1 + (notes.pointe - pn.reference) * pn.vitesse.pointeParPoint),
-          accelRepos: facteur * (1 + (notes.acceleration - pn.reference) * pn.vitesse.accelerationParPoint),
-          fatigue: 0,
-          perceptionS,
-          effet: effetJoueur(joueur, this.influences, this.options),
-          ciblePrec: { ...pos },
-          vitCible: { x: 0, y: 0 },
-        });
+        this.joueurs.push(this.creerJoueur(camp, joueur, placement));
       }
     });
     this.recalculerInfluences();
+  }
+
+  /** Un joueur sur le terrain, à sa place de coup d'envoi. */
+  private creerJoueur(camp: Camp, joueur: Joueur, placement: Placement): JoueurSim {
+    const reglages = this.reglages;
+    const poste = this.donnees.poste(placement.poste);
+    const cellule = this.donnees.cellule(placement.poste, placement.cellule);
+    const pos = this.versAbsolu(camp, cellule.centre);
+    const v = reglages.mouvement.variationIndividuelle;
+    const facteur = 1 + this.rng.entre(-v, v);
+    const perceptionS = this.rng.entre(reglages.mouvement.perception.minS, reglages.mouvement.perception.maxS);
+    const notes = notesDe(joueur);
+    const pn = PARAMETRES_NOTES;
+    return {
+      camp,
+      entreeS: this.temps,
+      joueur,
+      placement,
+      poste,
+      cellule,
+      pos,
+      vit: { x: 0, y: 0 },
+      cible: { ...pos },
+      phase: "defense",
+      reagitA: null,
+      sprintJusqua: 0,
+      freineJusqua: 0,
+      auBallon: false,
+      depart: { ...pos },
+      plongeJusqua: 0,
+      facteur,
+      notes,
+      vitesseF: facteur * (1 + (notes.pointe - pn.reference) * pn.vitesse.pointeParPoint),
+      accelF: facteur * (1 + (notes.acceleration - pn.reference) * pn.vitesse.accelerationParPoint),
+      vitesseRepos: facteur * (1 + (notes.pointe - pn.reference) * pn.vitesse.pointeParPoint),
+      accelRepos: facteur * (1 + (notes.acceleration - pn.reference) * pn.vitesse.accelerationParPoint),
+      fatigue: 0,
+      perceptionS,
+      effet: effetJoueur(joueur, this.influences, this.options),
+      ciblePrec: { ...pos },
+      vitCible: { x: 0, y: 0 },
+    };
+  }
+
+  /** Mi-temps (13/11, demande du concepteur) : nouvelle composition d'une équipe.
+   *  Un joueur qui reste garde sa fatigue et va à sa nouvelle place ; un
+   *  remplaçant entre frais, à la place du joueur qu'il remplace. */
+  changerEquipe(camp: Camp, equipe: Equipe): void {
+    this.equipes[camp] = equipe;
+    const anciens = this.joueurs.filter((j) => j.camp === camp);
+    const nouveaux: JoueurSim[] = [];
+    for (const placement of equipe.composition) {
+      const joueur = equipe.joueurs.find((j) => j.id === placement.joueurId);
+      if (!joueur) throw new Error(`Joueur inconnu : ${placement.joueurId}`);
+      const ancien = anciens.find((j) => j.joueur.id === placement.joueurId);
+      if (!ancien) {
+        nouveaux.push(this.creerJoueur(camp, joueur, placement));
+        continue;
+      }
+      ancien.placement = placement;
+      ancien.poste = this.donnees.poste(placement.poste);
+      ancien.cellule = this.donnees.cellule(placement.poste, placement.cellule);
+      ancien.depart = this.versAbsolu(camp, ancien.cellule.centre);
+      nouveaux.push(ancien);
+    }
+    const autres = this.joueurs.filter((j) => j.camp !== camp);
+    this.joueurs = camp === 0 ? [...nouveaux, ...autres] : [...autres, ...nouveaux];
+    this.balle?.oublierJoueurs();
+    this.recalculerInfluences();
+  }
+
+  /** Note de match sur 10 d'un joueur sur le terrain (13/11). */
+  noteDe(j: JoueurSim): number {
+    const st = this.balle?.statsJoueurs.get(`${j.camp}:${j.joueur.id}`) ?? statsVides();
+    const adv = j.camp === 0 ? 1 : 0;
+    return noteMatch(st, j.poste.id, this.score[adv], this.score[j.camp] - this.score[adv]);
+  }
+
+  /** Notes de tous les joueurs qui ont joué (même sortis), de la meilleure à la moins bonne. */
+  notesDuMatch(): { camp: Camp; id: string; nom: string; poste: string; note: number }[] {
+    const vus = new Map<string, { camp: Camp; id: string; nom: string; poste: string; note: number }>();
+    for (const j of this.joueurs) vus.set(`${j.camp}:${j.joueur.id}`, { camp: j.camp, id: j.joueur.id, nom: j.joueur.nom, poste: j.poste.id, note: this.noteDe(j) });
+    for (const [k, st] of this.balle?.statsJoueurs ?? []) {
+      if (vus.has(k)) continue;
+      const [c, id] = [Number(k.slice(0, 1)) as Camp, k.slice(2)];
+      const joueur = this.equipes[c].joueurs.find((x) => x.id === id);
+      const poste = joueur?.postes[0] ?? "MC";
+      const adv = c === 0 ? 1 : 0;
+      vus.set(k, { camp: c, id, nom: joueur?.nom ?? id, poste, note: noteMatch(st, poste, this.score[adv], this.score[c] - this.score[adv]) });
+    }
+    return [...vus.values()].sort((a, b) => b.note - a.note);
+  }
+
+  /** Forme d'un joueur sur 100 (13/11, « visualiser la fatigue ») : 100 = frais,
+   *  0 = la perte de vitesse maximale. */
+  forme(j: JoueurSim): number {
+    return Math.round(100 * (1 - j.fatigue / PARAMETRES_NOTES.endurance.perteMax));
   }
 
   /** Réglages de l'équipe `camp` (tactique et paliers de styles compris). */
@@ -280,9 +345,12 @@ export class MatchSim {
    *  d'autant plus vite que son endurance est faible. Chiffres : data/notes.json. */
   private fatiguer(): void {
     const e = PARAMETRES_NOTES.endurance;
-    const m = this.minutesJouees();
-    const au_dela = Math.max(0, m.affilee - e.seuilAffileeMin) + Math.max(0, m.total - e.seuilTotalMin);
+    const k = e.minutesParSeconde;
     for (const j of this.joueurs) {
+      // Minutes jouées par ce joueur (un remplaçant compte depuis son entrée).
+      const total = (this.temps - j.entreeS) * k;
+      const affilee = (this.temps - Math.max(this.debutPeriode, j.entreeS)) * k;
+      const au_dela = Math.max(0, affilee - e.seuilAffileeMin) + Math.max(0, total - e.seuilTotalMin);
       j.fatigue = au_dela > 0 ? Math.min(e.perteMax, au_dela * e.perteParMinute * Math.exp(-(j.notes.endurance - PARAMETRES_NOTES.reference) * e.parPoint)) : 0;
       j.vitesseF = j.vitesseRepos * (1 - j.fatigue);
       j.accelF = j.accelRepos * (1 - j.fatigue);

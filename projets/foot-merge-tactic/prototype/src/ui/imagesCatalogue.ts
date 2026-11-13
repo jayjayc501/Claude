@@ -6,6 +6,8 @@
 
 import type { Carte } from "../jeu/partie";
 import { BUSTES, TETES } from "./bustes";
+import { BUSTES_ROUGES } from "./adversaires";
+import { BLEUS_CATALOGUE, BUSTES_CATALOGUE, ROUGES_CATALOGUE } from "./bustesCatalogue";
 import { BUSTES_BLEUS } from "./equipeBleue";
 
 /** Bustes de la maquette : pays et style de chacun. */
@@ -53,6 +55,14 @@ export function busteDe(c: Carte): string {
 /** Inscrit l'image de chaque carte sous son identifiant, partout où l'interface cherche un buste. */
 export function inscrireImages(cartes: Carte[]): void {
   for (const c of cartes) {
+    // 13/11 : un buste à lui pour chaque carte (planches Kling, drapeau du pays).
+    if (BUSTES_CATALOGUE[c.id]) {
+      BUSTES[c.id] = BUSTES_CATALOGUE[c.id]!;
+      BUSTES_BLEUS[c.id] = BLEUS_CATALOGUE[c.id]!;
+      BUSTES_ROUGES[c.id] = ROUGES_CATALOGUE[c.id]!;
+      TETES[c.id] = { cx: 0.5, cy: 0.3, r: 0.32 };
+      continue;
+    }
     const k = busteDe(c);
     BUSTES[c.id] = BUSTES[k]!;
     BUSTES_BLEUS[c.id] = BUSTES_BLEUS[k]!;

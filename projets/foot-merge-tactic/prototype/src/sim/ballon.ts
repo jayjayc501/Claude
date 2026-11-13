@@ -6,6 +6,26 @@
 // Tout reste déterministe (générateur à graine) et indépendant de l'affichage.
 
 import { PARAMETRES_NOTES as PN, decaler } from "./notes";
+
+/** Statistiques d'un joueur pendant le match (13/11, note de match). */
+export interface StatsJoueur {
+  passes: number;
+  passesReussies: number;
+  tirs: number;
+  tirsCadres: number;
+  buts: number;
+  passesDecisives: number;
+  dribbles: number;
+  dribblesReussis: number;
+  tacles: number;
+  interceptions: number;
+  fautes: number;
+  arrets: number;
+}
+
+export function statsVides(): StatsJoueur {
+  return { passes: 0, passesReussies: 0, tirs: 0, tirsCadres: 0, buts: 0, passesDecisives: 0, dribbles: 0, dribblesReussis: 0, tacles: 0, interceptions: 0, fautes: 0, arrets: 0 };
+}
 import { Aleatoire } from "./rng";
 import type { Camp, JoueurSim, MatchSim } from "./simulation";
 import type { PointM } from "./types";
@@ -105,6 +125,31 @@ export class BallonReel {
   private plongeon: { gardien: JoueurSim; point: PointM } | null = null;
   /** Ballon aérien (centre, dégagement) : personne ne le touche avant cet instant. */
   private airJusqua = -Infinity;
+
+  /** Statistiques de chaque joueur (13/11, pour la note de match), par « camp:id ». */
+  readonly statsJoueurs = new Map<string, StatsJoueur>();
+  /** Dernière passe réussie (pour les passes décisives). */
+  private passeReussie: { de: JoueurSim; vers: JoueurSim; t: number } | null = null;
+
+  /** Statistiques d'un joueur (créées à la demande). */
+  sj(j: JoueurSim): StatsJoueur {
+    const k = `${j.camp}:${j.joueur.id}`;
+    let x = this.statsJoueurs.get(k);
+    if (!x) this.statsJoueurs.set(k, (x = statsVides()));
+    return x;
+  }
+
+  /** Mi-temps : des joueurs sortent du terrain, on oublie ceux qu'on suivait. */
+  oublierJoueurs(): void {
+    this.porteur = null;
+    this.receveur = null;
+    this.dernier = null;
+    this.tireur = null;
+    this.plongeon = null;
+    this.perte = null;
+    this.passeReussie = null;
+    this.tirEvite.clear();
+  }
 
   /** Engagement à jouer (début de période ou après un but). */
   get enEngagement(): boolean {
@@ -353,10 +398,12 @@ export class BallonReel {
     const n = Math.exp(-(o.notes.duel - p.notes.dribble) * PN.physique.fautesParPoint);
     if (this.rng.suivant() >= s.reg(o.camp).ballon.fautes.proba * o.effet.fautes * n) {
       this.stats.tacles[o.camp]++;
+      this.sj(o).tacles++;
       this.donner(o);
       return;
     }
     this.stats.fautes[o.camp]++;
+    this.sj(o).fautes++;
     const W = s.donnees.largeurM;
     const L = s.donnees.longueurM;
     const deSonBut = o.camp === 0 ? p.pos.y : L - p.pos.y; // distance au but du fautif
@@ -629,6 +676,7 @@ export class BallonReel {
     const jl = s.reg(p.camp).ballon.jeuLong;
     const d = dist(p.pos, point);
     this.stats.passes[p.camp]++;
+    this.sj(p).passes++;
     this.stats.distancePasses[p.camp] += d;
     this.stats.passesLongues[p.camp]++;
     const gainPasse = (point.y - p.pos.y) * (p.camp === 0 ? 1 : -1);
@@ -652,6 +700,7 @@ export class BallonReel {
       : { x: but.x + this.rng.entre(-6, 6), y: but.y - sens * this.rng.entre(6, 12) };
     this.stats.centres[p.camp]++;
     this.stats.passes[p.camp]++;
+    this.sj(p).passes++;
     this.lober(point, r.centre.dureeS, r.centre.erreurDeg);
     this.receveur = q;
   }
@@ -676,9 +725,11 @@ export class BallonReel {
     const p = this.porteur!;
     const db = s.reg(p.camp).ballon.dribble;
     this.stats.dribbles[p.camp]++;
+    this.sj(p).dribbles++;
     // Notes : dribble et accélération du porteur contre duel et accélération du défenseur.
     if (this.rng.suivant() < decaler(Math.min(0.95, db.probaReussite * p.effet.dribble), this.avantage1c1(p, o))) {
       this.stats.dribblesReussis[p.camp]++;
+      this.sj(p).dribblesReussis++;
       o.freineJusqua = s.temps + db.eliminationS;
       p.sprintJusqua = Math.max(p.sprintJusqua, s.temps + db.eliminationS);
       return;
@@ -725,6 +776,7 @@ export class BallonReel {
     const c = Math.cos(erreur);
     const si = Math.sin(erreur);
     this.stats.passes[p.camp]++;
+    this.sj(p).passes++;
     this.stats.distancePasses[p.camp] += d;
     const gainPasse = ((point ?? q.pos).y - p.pos.y) * (p.camp === 0 ? 1 : -1);
     this.stats.gainPasses[p.camp] += gainPasse;
@@ -771,6 +823,8 @@ export class BallonReel {
     const n = Math.hypot(dx, dy) || 1;
     const vTir = r.vitesseTirMS * (1 + (p.notes.puissance - PN.reference) * PN.tir.puissanceParPoint);
     this.stats.tirs[p.camp]++;
+    this.sj(p).tirs++;
+    if (Math.abs(cible.x - but.x) <= DEMI_BUT_M) this.sj(p).tirsCadres++;
     this.lancer((dx / n) * vTir, (dy / n) * vTir);
     this.tirEnCours = true;
     this.tirEvite.clear();
@@ -813,6 +867,12 @@ export class BallonReel {
       const marqueur: Camp = y >= L ? 0 : 1;
       if (Math.abs(x - W / 2) <= DEMI_BUT_M) {
         s.score[marqueur]++;
+        // Note de match (13/11) : buteur, passeur décisif (passe reçue dans les 12 s).
+        if (this.dernier && this.dernier.camp === marqueur) {
+          this.sj(this.dernier).buts++;
+          const pr = this.passeReussie;
+          if (pr && pr.vers === this.dernier && s.temps - pr.t < 12) this.sj(pr.de).passesDecisives++;
+        }
         // Buteur (13/11) : le dernier à avoir touché le ballon ; contre son camp s'il est de l'autre équipe.
         const m = s.minutesJouees();
         this.buts.push({
@@ -901,6 +961,7 @@ export class BallonReel {
     }
     if (this.tirEnCours && gagnant.poste.id === "G") {
       this.stats.arrets[gagnant.camp]++;
+      this.sj(gagnant).arrets++;
       this.evenement = { texte: "Arrêt", a: s.temps };
       // Réflexes (13/11) : un bon gardien bloque plus souvent au lieu de repousser.
       if (this.rng.suivant() < decaler(r.tir.paradeProba, -(gagnant.notes.reflexes - PN.reference) * PN.gardien.poidsCaptage)) {
@@ -934,8 +995,16 @@ export class BallonReel {
         return;
       }
     }
-    if (gagnant === this.receveur) this.stats.passesReussies[gagnant.camp]++;
-    else if (this.dernier && gagnant.camp !== this.dernier.camp) this.stats.interceptions[gagnant.camp]++;
+    if (gagnant === this.receveur) {
+      this.stats.passesReussies[gagnant.camp]++;
+      if (this.dernier && this.dernier.camp === gagnant.camp && this.dernier !== gagnant) {
+        this.sj(this.dernier).passesReussies++;
+        this.passeReussie = { de: this.dernier, vers: gagnant, t: s.temps };
+      }
+    } else if (this.dernier && gagnant.camp !== this.dernier.camp) {
+      this.stats.interceptions[gagnant.camp]++;
+      this.sj(gagnant).interceptions++;
+    }
     this.donner(gagnant);
   }
 

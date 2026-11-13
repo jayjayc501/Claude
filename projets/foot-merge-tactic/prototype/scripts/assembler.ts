@@ -12,11 +12,11 @@ const resultat = await Bun.build({
   minify: true,
   plugins: [
     {
-      // Images PNG incluses dans la page (le chargeur « dataurl » de Bun les rend vides).
-      name: "png-en-data-url",
+      // Images PNG et WebP incluses dans la page (le chargeur « dataurl » de Bun les rend vides).
+      name: "images-en-data-url",
       setup(b) {
-        b.onLoad({ filter: /\.png$/ }, ({ path }) => ({
-          contents: `export default ${JSON.stringify(`data:image/png;base64,${readFileSync(path).toString("base64")}`)};`,
+        b.onLoad({ filter: /\.(png|webp)$/ }, ({ path }) => ({
+          contents: `export default ${JSON.stringify(`data:image/${path.endsWith(".webp") ? "webp" : "png"};base64,${readFileSync(path).toString("base64")}`)};`,
           loader: "js",
         }));
       },

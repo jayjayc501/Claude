@@ -584,3 +584,20 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 - **Écran sur une page** : plateau moins haut (hexagones aplatis, H = 1,1 W au lieu de 1,5 W), en-tête compact, bouton « Jouer ▶ » en haut. Tout tient dans 390 × 750 (vérifié en capture).
 
 **Tests** : 126 verts. Nouveaux : notes du gardien, un bon gardien encaisse moins qu'un mauvais (10 matchs), engagement (chacun près de sa place, équipes étalées sur plus de 35 m), vedette dans l'offre. Deux tests statistiques élargis (ligne du Contre : 16 matchs au lieu de 8 ; touches : 3 graines de plus) : l'engagement change le déroulé des matchs, l'effet reste (Contre −2,7 m sur 24 matchs). Couverture : 97 % des lignes (`bun test --coverage`) pour le moteur, les règles de partie et la logique de préparation.
+
+## 13/11/2026 (fin de matinée) — Budget 50, mi-temps, note de match, 60 bustes
+
+**Demandes du concepteur** : budget 50 (« il faut pouvoir faire des fusions ») ; à la mi-temps, déplacer ses joueurs, faire des changements et voir la fatigue de chacun ; une note sur le match ; plus d'images pour des joueurs bien différents, avec le drapeau du pays. Sur la première planche : pas de bandeau (« c'est pas du tennis »), pas de gants pour les joueurs de champ, pas de gardien gris, des expressions variées, pas de filles.
+
+**Ce qui a été fait**
+- **Budget 50** (`partie.json`).
+- **Mi-temps** : le panneau de mi-temps a un bouton « Changements, places, fatigue » qui ouvre l'écran de préparation en mode mi-temps (sans mercato) : glisser pour déplacer ou remplacer, barre de forme sous chaque joueur (vert, jaune, rouge), note du match au-dessus de la tête ; « 2e mi-temps ▶ » reprend le match en cours (score et temps gardés). Moteur : `MatchSim.changerEquipe` (un joueur qui reste garde sa fatigue et va à sa nouvelle place ; un remplaçant entre frais) ; fatigue comptée pour chaque joueur depuis son entrée (`entreeS`) ; `forme()` sur 100.
+- **Note de match sur 10** (PROPOSITION, `src/sim/noteMatch.ts`, barème dans `src/data/noteMatch.json`) : 6 de base, + but, passe décisive, passes réussies, tirs cadrés, dribbles, tacles, interceptions, arrêts ; − passes ratées, fautes, buts encaissés (gardien, défenseurs) ; ± 0,3 selon le score. Statistiques par joueur dans le moteur (`statsJoueurs`). Panneau de mi-temps et de fin : ton meilleur, ton moins bon, homme du match.
+- **60 bustes** (Kling, 4 crédits par planche 4K de 12 joueurs) : une planche par pays, retouchée par Kling quand il le fallait (logos, gardiens verts ou gris, maillots de la mauvaise couleur), plus 3 joueurs refaits à part (un milieu brésilien qui ressemblait à une fille, un défenseur et le gardien italiens). Découpage par `scripts/decouper-planches.py` : fond retiré, logos et écussons effacés, gants des joueurs de champ repeints couleur peau, peau verte remise au naturel, **drapeau du pays cousu sur la poitrine**, même hauteur pour tous ; trois versions (couleur du pays, bleu pour ton équipe en match, rouge et retourné pour l'adversaire). Images WebP dans `src/images/joueurs/`, module généré `src/ui/bustesCatalogue.ts`.
+- **Téléchargement des images** : l'environnement de Claude ne peut pas joindre les serveurs de Kling ; un workflow GitHub Actions (`.github/workflows/foot-merge-images.yml`) télécharge les URL listées dans `images-kling/a-telecharger.txt` et les ajoute au dépôt (`images-kling/brut/`).
+- **Drapeaux** dans l'interface : fiche joueur et cartes du draft (`src/ui/drapeaux.ts`, SVG).
+- Crédits Kling dépensés : environ 70 (sur 375), dont 20 pour une série de planches refaite après les remarques du concepteur.
+
+**Tests** : 130 verts, dont 4 nouveaux (`tests/mitemps.test.ts` : remplaçant frais, déplacement, barème, notes de tous les joueurs). Parcours vérifié au format téléphone : draft, match, panneau de mi-temps, écran des changements, reprise en 2e mi-temps.
+
+**À juger par le concepteur** : le barème des notes (souvent entre 5,5 et 7) ; la fatigue à la mi-temps (encore faible : elle grimpe surtout après la 60e) ; les bustes (quelques mains un peu pâles là où il y avait des gants).

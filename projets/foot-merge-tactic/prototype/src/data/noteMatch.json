@@ -1,0 +1,21 @@
+{
+  "_note": "Note de match sur 10 (13/11, PROPOSITION). 6 de base ; chaque action ajoute ou retire des points ; buts encaissés pour le gardien et les défenseurs ; ± victoire selon le score. Bornée entre min et max.",
+  "base": 6,
+  "min": 3,
+  "max": 10,
+  "but": 1,
+  "passeDecisive": 0.6,
+  "passeReussie": 0.03,
+  "passeRatee": -0.06,
+  "tirCadre": 0.2,
+  "tirNonCadre": -0.05,
+  "dribbleReussi": 0.15,
+  "dribbleRate": -0.05,
+  "tacle": 0.2,
+  "interception": 0.15,
+  "faute": -0.2,
+  "arret": 0.35,
+  "encaisseGardien": -0.4,
+  "encaisseDefenseur": -0.2,
+  "victoire": 0.3
+}

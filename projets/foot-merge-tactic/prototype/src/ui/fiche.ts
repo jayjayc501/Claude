@@ -7,6 +7,7 @@ import { NOTES, NOTES_GARDIEN, estNotesGardien, notesDe } from "../sim/notes";
 import type { Notes } from "../sim/types";
 import { BUSTES } from "./bustes";
 import { html } from "./dom";
+import { drapeau } from "./drapeaux";
 import { PICTOS } from "./pictos";
 
 export interface InfoFiche {
@@ -82,7 +83,7 @@ export function ouvrirFiche(info: InfoFiche): void {
   // En-tête aux couleurs du pays.
   const tete = html("div", { class: "fiche-tete" }, carte);
   html("span", { class: "fiche-filigrane", "aria-hidden": "true" }, tete, info.pays.code);
-  html("span", { class: "fiche-pays" }, tete, info.pays.nom);
+  html("span", { class: "fiche-pays" }, tete, info.pays.nom).insertAdjacentHTML("afterbegin", drapeau(info.pays.code, 20));
   html("h2", { class: "fiche-nom" }, tete, info.nom);
   const puces = html("div", { class: "fiche-puces" }, tete);
   html("span", { class: "fiche-puce" }, puces, `${ABREGE[info.poste] ?? info.poste} · ${POSTES[info.poste] ?? info.poste}`);

@@ -37,6 +37,8 @@ function demarrer(): void {
   let preparation!: EcranPreparation;
   /** Joueurs proposés par poste, gardés jusqu'au prochain choix (fermer la fenêtre ne relance pas le tirage). */
   let offres = new Map<string, string[]>();
+  /** Mi-temps en cours : l'écran de préparation sert aux changements (13/11). */
+  let miTemps = false;
 
   const app = document.getElementById("app")!;
   const entete = html("header", { class: "entete" }, app);
@@ -49,6 +51,10 @@ function demarrer(): void {
   const match = new EcranMatch(donnees, reglages, equipes, {
     nomNous: "Toi",
     nomEux: "Ordinateur",
+    changements: () => {
+      miTemps = true;
+      montrer("preparation");
+    },
     tactiques: donneesPrepa().tactiques,
     styles: donneesPrepa().styles,
     infos: (id, camp = 0) => {
@@ -133,11 +139,19 @@ function demarrer(): void {
         }),
       };
     },
-    jouer: () => montrer("match"),
+    miTemps: () => (miTemps ? { score: match.scoreActuel, joueur: (id) => match.infosJoueur(id) } : null),
+    jouer: () => {
+      if (!miTemps) return montrer("match");
+      // Mi-temps : on revient au match en cours, les changements s'appliquent.
+      miTemps = false;
+      montrer("match", true);
+      match.lancerSecondeMiTemps();
+    },
     nouvelle: () => nouvellePartie(),
   };
 
   function nouvellePartie(): void {
+    miTemps = false;
     partie = new Partie(donnees, Math.floor(Math.random() * 2 ** 31), planOrdi);
     offres = new Map();
     const d: DonneesPrepa = {
@@ -178,7 +192,7 @@ function demarrer(): void {
     montrer("preparation");
   }
 
-  function montrer(ecran: "preparation" | "match"): void {
+  function montrer(ecran: "preparation" | "match", reprise = miTemps): void {
     if (ecran === "match" && !prepa.pret()) {
       preparation.signaler(partie.draftFini(0) ? "Il faut 11 joueurs sur le terrain avant de jouer." : "Termine d'abord ton draft : 11 titulaires.", true);
       return;
@@ -187,7 +201,7 @@ function demarrer(): void {
     ongletMatch.classList.toggle("onglet-actif", ecran === "match");
     if (ecran === "match") {
       contenu.replaceChildren(match.racine);
-      match.ouvrir();
+      match.ouvrir(reprise);
     } else {
       match.fermer();
       preparation.rendre();

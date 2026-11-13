@@ -58,6 +58,8 @@ export interface ControlePartie {
   aGarder(): number;
   /** Choix de l'ordinateur (le plus récent d'abord) et taille de son banc. */
   ordi(): { titulaires: number; banc: number; choix: { nom: string; poste: string; prix: number; couleur: string; pays: string }[] };
+  /** Mi-temps (13/11) : score, forme et note de match de tes joueurs ; null hors mi-temps. */
+  miTemps(): { score: [number, number]; joueur(id: string): { forme: number; note: number } | null } | null;
   jouer(): void;
   nouvelle(): void;
 }
@@ -375,7 +377,9 @@ export class EcranPreparation {
     const c = this.contenu;
     c.replaceChildren();
     const draft = this.partie?.enDraft() ?? false;
+    const mt = this.partie?.miTemps() ?? null;
     if (draft) this.rendreEnteteDraft(c);
+    else if (mt) this.rendreEnteteMiTemps(c, mt.score);
     else if (this.partie) this.rendreEnteteMercato(c);
     else this.rendreEntete(c);
     const milieu = html("div", { class: "prepa-milieu" }, c);
@@ -385,6 +389,7 @@ export class EcranPreparation {
     this.rendrePlateau(terrain);
     if (draft) return this.rendreOrdi(c);
     this.rendreBanc(c);
+    if (mt) return; // mi-temps : pas de mercato
     this.rendreMercato(c);
     if (this.partie) this.rendreJouer(c);
   }
@@ -417,6 +422,21 @@ export class EcranPreparation {
     j.addEventListener("click", () => this.partie!.jouer());
     this.boutonNouvelle(tete);
     this.rendreEtapes(parent, 2, 11);
+  }
+
+  /** Mi-temps (13/11) : déplacer ses joueurs, faire des changements, voir la fatigue. */
+  private rendreEnteteMiTemps(parent: HTMLElement, score: [number, number]): void {
+    const tete = html("div", { class: "draft-tete" }, parent);
+    const t = html("div", { class: "prepa-titre" }, tete);
+    html("span", { class: "prepa-h mt-titre" }, t, `Mi-temps ${score[0]}–${score[1]}`);
+    html("span", { class: "prepa-sous" }, t, "Glisse pour déplacer ou remplacer");
+    const j = html("button", { type: "button", class: "partie-jouer-mini", disabled: !this.prepa.pret() }, tete, "2e mi-temps ▶");
+    j.addEventListener("click", () => this.partie!.jouer());
+    const l = html("div", { class: "mt-legende" }, parent);
+    html("span", { class: "mt-forme-ex" }, l);
+    l.append("Forme (fatigue)");
+    html("span", { class: "mt-note-ex" }, l, "6.8");
+    l.append("Note du match");
   }
 
   /** Les trois étapes de la partie : titulaires, banc, match. */
@@ -564,6 +584,7 @@ export class EcranPreparation {
       const nom = this.prepa.fiche(pl.joueurId).nom;
       const g = svg("g", { class: "prepa-buste", "aria-label": nom }, dessus);
       this.figurine(g, pl.joueurId, fusions, x, socle, echelle);
+      this.infosMiTemps(g, pl.joueurId, x, socle, echelle);
       g.addEventListener("pointerdown", (ev) => this.appui(ev, pl.joueurId, g));
       // Les navigateurs ignorent `touch-action` sur les éléments SVG : sans
       // ceci, le doigt posé sur un buste ferait défiler la page.
@@ -575,6 +596,22 @@ export class EcranPreparation {
       const ligneNotes = notes ? notes.map((n) => `${n.code} ${n.valeur}`).join(" · ") : "notes à venir";
       if (pl.joueurId === this.choisi) this.etiquette(s, libelle, x, socle - 48 * echelle - 4, ligneNotes, socle + 6);
     }
+  }
+
+  /** Mi-temps : barre de forme sous le socle et note du match au-dessus de la tête. */
+  private infosMiTemps(g: SVGGElement, id: string, x: number, socle: number, echelle: number): void {
+    const info = this.partie?.miTemps()?.joueur(id);
+    if (!info) return;
+    const w = 30 * echelle;
+    const y = socle + 3 * echelle;
+    svg("rect", { x: x - w / 2, y, width: w, height: 4, rx: 2, class: "mt-forme-fond" }, g);
+    const f = Math.max(0, Math.min(100, info.forme));
+    svg("rect", { x: x - w / 2, y, width: (w * f) / 100, height: 4, rx: 2, class: `mt-forme ${f >= 80 ? "bien" : f >= 55 ? "moyen" : "faible"}` }, g);
+    const ny = socle - 50 * echelle;
+    const n = svg("g", { class: `mt-note ${info.note >= 7 ? "bien" : info.note >= 6 ? "moyen" : "faible"}` }, g);
+    svg("rect", { x: x - 13 * echelle - 9, y: ny - 7, width: 20, height: 12, rx: 6 }, n);
+    const t = svg("text", { x: x - 13 * echelle + 1, y: ny + 2.5, "text-anchor": "middle" }, n);
+    t.textContent = info.note.toFixed(1);
   }
 
   /** Pelouse rayée et tracé du demi-terrain. Les lignes sont à l'échelle de la

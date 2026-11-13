@@ -16,3 +16,6 @@ import RHF from "../images/adversaires/rouge-HF.png";
 /** Gardien d'abord, puis les joueurs de champ. */
 export const GARDIEN_ROUGE = RMO;
 export const CHAMP_ROUGE: Record<string, string> = { AM: RAM, CB: RCB, EL: REL, DK: RDK, MV: RMV, JM: RJM, TR: RTR, KM: RKM, BL: RBL, HF: RHF };
+
+/** Buste rouge propre à chaque carte du catalogue (13/11), rempli par inscrireImages. */
+export const BUSTES_ROUGES: Record<string, string> = {};

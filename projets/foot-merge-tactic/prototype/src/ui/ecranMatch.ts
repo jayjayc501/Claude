@@ -11,7 +11,7 @@ import type { OptionsInfluences } from "../sim/influences";
 import { projeterRect } from "../sim/projection";
 import { MatchSim } from "../sim/simulation";
 import type { Equipe, Reglages } from "../sim/types";
-import { CHAMP_ROUGE, GARDIEN_ROUGE } from "./adversaires";
+import { BUSTES_ROUGES, CHAMP_ROUGE, GARDIEN_ROUGE } from "./adversaires";
 import { BUSTES } from "./bustes";
 import { BUSTES_BLEUS } from "./equipeBleue";
 import { dessinerLignes, html, svg } from "./dom";
@@ -85,6 +85,8 @@ export interface HabillageMatch {
   styles: Record<string, string>;
   /** Couleur du pays, style et fusions d'un joueur (de ton équipe : camp 0 ; de l'adversaire : camp 1). */
   infos: (id: string, camp?: 0 | 1) => InfosJoueur | undefined;
+  /** Mi-temps : ouvre l'écran de préparation pour déplacer et remplacer (13/11). */
+  changements?: () => void;
 }
 
 export class EcranMatch {
@@ -186,10 +188,13 @@ export class EcranMatch {
   private Y = (m: number) => MARGE + (105 - m) * ECHELLE;
 
   /** Appelé à l'ouverture de l'écran : nouveau match au coup d'envoi. */
-  ouvrir(): void {
+  /** Ouvre l'écran : nouveau match, ou reprise du match en cours (mi-temps, 13/11). */
+  ouvrir(reprise = false): void {
     this.actif = true;
-    this.tactiquesForcees = [null, null]; // la tactique choisie en préparation s'applique
-    this.nouveauMatch();
+    if (!reprise || !this.sim || this.arret === "fin") {
+      this.tactiquesForcees = [null, null]; // la tactique choisie en préparation s'applique
+      this.nouveauMatch();
+    }
     this.dernier = performance.now();
     requestAnimationFrame((t) => this.boucle(t));
   }
@@ -415,7 +420,7 @@ export class EcranMatch {
       .map(([, image]) => image);
     let rang = 0;
     // Maillots d'équipe en match : bleu pour toi, rouge pour l'adversaire (12/11).
-    this.images_ = this.sim.joueurs.map((j) => (j.camp === 1 ? (j.poste.id === "G" ? GARDIEN_ROUGE : rouges[rang++ % rouges.length]!) : (BUSTES_BLEUS[j.joueur.id] ?? BUSTES[j.joueur.id])));
+    this.images_ = this.sim.joueurs.map((j) => (j.camp === 1 ? (BUSTES_ROUGES[j.joueur.id] ?? (j.poste.id === "G" ? GARDIEN_ROUGE : rouges[rang++ % rouges.length]!)) : (BUSTES_BLEUS[j.joueur.id] ?? BUSTES[j.joueur.id])));
     this.pions = this.sim.joueurs.map((j, i) =>
       this.vue === "figurines" ? this.pion(g, j.camp, j.joueur.id, j.joueur.nom, this.images_[i]) : this.pionRond(g, j.camp, j.joueur.id, j.joueur.nom),
     );
@@ -739,8 +744,38 @@ export class EcranMatch {
     this.montrerStats();
   }
 
-  /** Deuxième mi-temps : l'adversaire engage, chacun regagne sa place. */
+  /** Score du match en cours. */
+  get scoreActuel(): [number, number] {
+    return [this.sim.score[0], this.sim.score[1]];
+  }
+
+  /** Match arrêté à la mi-temps ? */
+  get aLaMiTemps(): boolean {
+    return this.arret === "mi-temps";
+  }
+
+  /** Forme (sur 100) et note de match d'un de tes joueurs sur le terrain. */
+  infosJoueur(id: string): { forme: number; note: number } | null {
+    const j = this.sim?.joueurs.find((x) => x.camp === 0 && x.joueur.id === id);
+    return j ? { forme: this.sim.forme(j), note: this.sim.noteDe(j) } : null;
+  }
+
+  /** Lance la 2e mi-temps (depuis l'écran de préparation). */
+  lancerSecondeMiTemps(): void {
+    if (this.arret === "mi-temps") this.secondeMiTemps();
+  }
+
+  /** Deuxième mi-temps : l'adversaire engage, chacun regagne sa place. Les
+   *  changements faits à la mi-temps (places, remplaçants) s'appliquent. */
   private secondeMiTemps(): void {
+    const e = this.equipes()[0];
+    const avant = this.sim.joueurs.filter((j) => j.camp === 0).map((j) => `${j.joueur.id}@${j.placement.poste}${j.placement.cellule}`).sort().join();
+    const apres = e.composition.map((p) => `${p.joueurId}@${p.poste}${p.cellule}`).sort().join();
+    if (avant !== apres) {
+      this.sim.changerEquipe(0, e);
+      this.construireTerrain();
+    }
+    if (e.tactique && !this.tactiquesForcees[0]) this.sim.definirTactique(0, e.tactique);
     this.panneau?.remove();
     this.panneau = null;
     this.arret = null;
@@ -799,7 +834,26 @@ export class EcranMatch {
       html("span", { class: "nom" }, table, nom);
       html("span", { class: "eux" }, table, b);
     }
-    if (this.arret === "mi-temps") html("p", { class: "match-panneau-aide" }, carte, "Tu peux changer ta tactique sous le terrain avant de reprendre.");
+    // Notes du match (13/11) : ton meilleur joueur, le sien ; homme du match à la fin.
+    const notes = sim.notesDuMatch();
+    if (notes.length) {
+      const z = html("div", { class: "match-panneau-notes" }, carte);
+      const ligne = (titre: string, n: (typeof notes)[number] | undefined, cl: string) => {
+        if (!n) return;
+        const l = html("div", { class: `match-note-ligne ${cl}` }, z);
+        html("span", {}, l, titre);
+        html("strong", {}, l, n.nom);
+        html("b", { class: n.note >= 7 ? "bien" : n.note >= 6 ? "moyen" : "faible" }, l, n.note.toFixed(1));
+      };
+      if (this.arret === "fin") ligne("★ Homme du match", notes[0], notes[0]!.camp === 0 ? "nous" : "eux");
+      ligne("Ton meilleur", notes.find((n) => n.camp === 0), "nous");
+      const pire = [...notes].reverse().find((n) => n.camp === 0);
+      ligne("Ton moins bon", pire, "nous");
+    }
+    if (this.arret === "mi-temps" && this.habillage.changements) {
+      const c = html("button", { type: "button", class: "match-changements" }, carte, "⇄ Changements, places, fatigue");
+      c.addEventListener("click", () => this.habillage.changements!());
+    } else if (this.arret === "mi-temps") html("p", { class: "match-panneau-aide" }, carte, "Tu peux changer ta tactique sous le terrain avant de reprendre.");
     const b = html("button", { type: "button", class: "match-jouer" }, carte, this.arret === "fin" ? "↺ Nouveau match" : "▶ 2e mi-temps");
     b.addEventListener("click", () => this.boutonJouer.click());
     this.panneau = p;

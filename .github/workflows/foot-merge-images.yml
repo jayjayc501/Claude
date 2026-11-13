@@ -19,6 +19,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Pillow
+        run: python3 -m pip install --quiet pillow
       - name: Télécharger et réduire
         working-directory: projets/foot-merge-tactic/images-kling
         run: |
@@ -28,8 +30,7 @@ jobs:
             case "$nom" in \#*) continue ;; esac
             [ -f "brut/$nom.jpg" ] && continue
             curl -sSfL --retry 3 "$url" -o "/tmp/$nom"
-            convert "/tmp/$nom" -resize '2048x2048>' -quality 92 "brut/$nom.jpg"
-            echo "$nom : $(identify -format '%wx%h' "brut/$nom.jpg")"
+            python3 -c "import sys; from PIL import Image; im = Image.open(sys.argv[1]).convert('RGB'); im.thumbnail((2048, 2048)); im.save(sys.argv[2], quality=92); print(sys.argv[2], im.size)" "/tmp/$nom" "brut/$nom.jpg"
           done < a-telecharger.txt
       - name: Ajouter au dépôt
         run: |

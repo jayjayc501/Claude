@@ -1,2 +1,3 @@
 # nom URL (une image par ligne)
 essai https://avatars.githubusercontent.com/u/9919?s=64
+FRA https://s15-kling.klingai.com/kimg/EMXN1y8qggEKBnVwbG9hZBIOeWxhYi1zdHVudC1zZ3AaaEtsaW5nQUlfS29sb3JzX0RpVF9IODAwXzFfa29sb3JzX3YzXzBfdDJpX3JlZmluZXItdjNfXzJmZTAyNTJmXzk3MTQ3YWMxOGZjZTUxYjM5N2VjMTIzYWE2MzNlY2M5MDRtcWYucG5n.origin?x-kcdn-pid=112372

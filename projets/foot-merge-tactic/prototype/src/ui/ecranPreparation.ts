@@ -44,6 +44,22 @@ const ZONE_DU_POSTE: Record<string, keyof typeof ZONES> = {
 const COULOIRS = new Set(["DG", "DD", "AG", "AD"]);
 const COULEUR_FUSION = ["", "#5EC8FF", "#FFC400", "#C04BFF"];
 
+/** Partie contre l'ordinateur (13/11) : draft des titulaires, puis mercato et match. */
+export interface ControlePartie {
+  /** Draft des 11 titulaires en cours ? */
+  enDraft(): boolean;
+  /** Case vide où l'on peut recruter maintenant (le gardien en dernier s'il manque). */
+  casePermise(poste: string, cellule: number): boolean;
+  /** Ouvre les joueurs proposés pour cette case. */
+  ouvrirCase(poste: string, cellule: number): void;
+  /** Pièces à garder pour finir le draft. */
+  aGarder(): number;
+  /** Choix de l'ordinateur (le plus récent d'abord) et taille de son banc. */
+  ordi(): { titulaires: number; banc: number; choix: { nom: string; poste: string; prix: number; couleur: string; pays: string }[] };
+  jouer(): void;
+  nouvelle(): void;
+}
+
 // Gardien : une case en double losange (deux hexagones fusionnés), sous le DC central.
 const GARDIEN_Y = 0.0578;
 const DOUBLE_LOSANGE = [
@@ -88,6 +104,7 @@ export class EcranPreparation {
   constructor(
     private prepa: Preparation,
     private auChangement: () => void,
+    private partie?: ControlePartie,
   ) {
     this.racine = html("section", { class: "prepa" });
     this.contenu = html("div", { class: "prepa-contenu" }, this.racine);
@@ -140,15 +157,14 @@ export class EcranPreparation {
     return DOUBLE_LOSANGE.map(([px, py]) => [cx - lg / 2 + (px / 100) * lg, cy - ht / 2 + (py / 100) * ht]);
   }
 
-  private dessinerCase(poste: string, cellule: number, parent: SVGGElement, attrs: Record<string, string | number>, retrait = 2): void {
+  private dessinerCase(poste: string, cellule: number, parent: SVGGElement, attrs: Record<string, string | number>, retrait = 2): SVGPolygonElement {
     if (poste === "G") {
       const pts = this.pointsGardien(retrait).map(([x, y]) => `${x!.toFixed(1)},${y!.toFixed(1)}`).join(" ");
-      svg("polygon", { points: pts, ...attrs }, parent);
-      return;
+      return svg("polygon", { points: pts, ...attrs }, parent);
     }
     const { x, y } = this.centreCase(poste, cellule);
     const { w, h } = this.tailleCase();
-    svg("polygon", { points: this.pointsHexagone(x, y, w - 2 * retrait, h - 2 * retrait), ...attrs }, parent);
+    return svg("polygon", { points: this.pointsHexagone(x, y, w - 2 * retrait, h - 2 * retrait), ...attrs }, parent);
   }
 
   // ---- Cible d'un glissement ----------------------------------------------
@@ -354,14 +370,86 @@ export class EcranPreparation {
   rendre(): void {
     const c = this.contenu;
     c.replaceChildren();
-    this.rendreEntete(c);
+    const draft = this.partie?.enDraft() ?? false;
+    if (draft) this.rendreEnteteDraft(c);
+    else if (this.partie) this.rendreEnteteMercato(c);
+    else this.rendreEntete(c);
     const milieu = html("div", { class: "prepa-milieu" }, c);
     this.rendreTraits(milieu);
     const terrain = html("div", { class: "prepa-terrain" }, milieu);
     this.rendreTactique(terrain);
     this.rendrePlateau(terrain);
+    if (draft) return this.rendreOrdi(c);
     this.rendreBanc(c);
     this.rendreMercato(c);
+    if (this.partie) this.rendreJouer(c);
+  }
+
+  /** Draft : titre, budget, progression ; touche une case pour recruter. */
+  private rendreEnteteDraft(parent: HTMLElement): void {
+    const p = this.partie!;
+    const n = this.prepa.etat.composition.length;
+    const tete = html("div", { class: "draft-tete" }, parent);
+    const t = html("div", { class: "prepa-titre" }, tete);
+    html("span", { class: "prepa-h" }, t, "Draft");
+    html("span", { class: "prepa-sous" }, t, n === 10 && !this.prepa.etat.composition.some((x) => x.poste === "G") ? "Dernier choix : ton gardien" : "Touche une case pour recruter un titulaire");
+    const budget = html("div", { class: "prepa-budget", "aria-label": `Budget : ${this.prepa.etat.budget} pièces` }, tete);
+    html("span", { class: "prepa-piece" }, budget);
+    html("span", { class: "prepa-nombre" }, budget, String(this.prepa.etat.budget));
+    this.boutonNouvelle(tete);
+    this.rendreEtapes(parent, 1, n);
+    if (p.aGarder() > 0) html("span", { class: "prepa-discret" }, parent, `Garde au moins ${p.aGarder()} pièce${p.aGarder() > 1 ? "s" : ""} pour finir ton équipe ; le reste servira au banc.`);
+  }
+
+  /** Après le draft : le premier mercato remplit le banc. */
+  private rendreEnteteMercato(parent: HTMLElement): void {
+    const tete = html("div", { class: "draft-tete" }, parent);
+    const t = html("div", { class: "prepa-titre" }, tete);
+    html("span", { class: "prepa-h" }, t, "Mercato");
+    html("span", { class: "prepa-sous" }, t, "Complète ton banc ; deux copies fusionnent");
+    this.boutonNouvelle(tete);
+    this.rendreEtapes(parent, 2, 11);
+  }
+
+  /** Les trois étapes de la partie : titulaires, banc, match. */
+  private rendreEtapes(parent: HTMLElement, etape: number, n: number): void {
+    const barre = html("div", { class: "draft-progres", role: "progressbar", "aria-valuemin": 0, "aria-valuemax": 3, "aria-valuenow": etape }, parent);
+    html("i", {}, barre).style.width = etape === 1 ? `${(n / 11) * 33}%` : "66%";
+    const etapes = html("div", { class: "draft-etapes" }, parent);
+    html("span", { class: etape === 1 ? "actif" : "fait" }, etapes, etape === 1 ? `① Titulaires ${n}/11` : "✓ Titulaires");
+    html("span", { class: etape === 2 ? "actif" : "" }, etapes, "② Mercato : le banc");
+    html("span", {}, etapes, "③ Match");
+  }
+
+  private boutonNouvelle(parent: HTMLElement): void {
+    const b = html("button", { type: "button", class: "partie-nouvelle", "aria-label": "Nouvelle partie", title: "Nouvelle partie" }, parent, "↺");
+    b.addEventListener("click", () => this.partie!.nouvelle());
+  }
+
+  /** Draft : ce que l'ordinateur a déjà pris dans la réserve commune. */
+  private rendreOrdi(parent: HTMLElement): void {
+    const o = this.partie!.ordi();
+    const b = html("div", { class: "draft-ordi" }, parent);
+    const t = html("div", { class: "draft-ordi-tete" }, b);
+    html("span", {}, t, "L'ordinateur drafte aussi");
+    html("span", {}, t, `${o.titulaires}/11`);
+    const l = html("div", { class: "draft-ordi-liste" }, b);
+    if (!o.choix.length) html("span", { class: "draft-ordi-vide" }, l, "Il choisit après toi, dans la même réserve de cartes.");
+    for (const c of o.choix) {
+      const e = html("span", { class: "draft-ordi-carte" }, l);
+      e.style.setProperty("--pays", c.couleur);
+      html("b", {}, e, libellePoste(c.poste));
+      e.append(`${c.nom} · ${c.prix}`);
+    }
+  }
+
+  /** Bouton pour lancer le match une fois les 11 titulaires en place. */
+  private rendreJouer(parent: HTMLElement): void {
+    const pret = this.prepa.pret();
+    const b = html("button", { type: "button", class: "partie-jouer", disabled: !pret }, parent, pret ? "Jouer le match ▶" : "Il faut 11 titulaires pour jouer");
+    b.addEventListener("click", () => this.partie!.jouer());
+    const o = this.partie!.ordi();
+    html("p", { class: "prepa-discret" }, parent, `L'ordinateur a fini son draft et son mercato : 11 titulaires, ${o.banc} remplaçant${o.banc > 1 ? "s" : ""}.`);
   }
 
   private rendreEntete(parent: HTMLElement): void {
@@ -370,11 +458,16 @@ export class EcranPreparation {
     const t = html("div", { class: "prepa-titre" }, tete);
     html("span", { class: "prepa-h" }, t, "Préparation");
     html("span", { class: "prepa-sous" }, t, `${d.groupe.nom} · ${d.groupe.match}`);
+    if (!d.chrono) return this.rendreGroupe(parent);
     const chrono = html("div", { class: "prepa-chrono", "aria-label": `Temps restant ${d.chrono}` }, tete);
     chrono.innerHTML =
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M9 2h6"></path></svg>';
     html("span", {}, chrono, d.chrono);
+    this.rendreGroupe(parent);
+  }
 
+  private rendreGroupe(parent: HTMLElement): void {
+    const d = this.prepa.d;
     const groupe = html("div", { class: "prepa-groupe" }, parent);
     for (const e of d.groupe.equipes) {
       const cl = e.toi ? " toi" : e.prochain ? " prochain" : "";
@@ -435,11 +528,21 @@ export class EcranPreparation {
       for (const c of cellules) {
         const z = ZONES[ZONE_DU_POSTE[p.id] ?? "mid"];
         const couleur = COULOIRS.has(p.id) ? z.lane : z.bg;
-        this.dessinerCase(p.id, c.index, cases, { fill: couleur, class: "prepa-case" });
-        if (!occupant(compo, p.id, c.index)) {
+        const vide = !occupant(compo, p.id, c.index);
+        const enDraft = vide && (this.partie?.enDraft() ?? false);
+        const permise = enDraft && this.partie!.casePermise(p.id, c.index);
+        const el = this.dessinerCase(p.id, c.index, cases, { fill: couleur, class: `prepa-case${permise ? " draft-libre" : enDraft ? " draft-bloque" : ""}` });
+        if (vide) {
           const { x, y } = this.centreCase(p.id, c.index);
           const t = svg("text", { x, y: y + 4, class: "prepa-role" }, cases);
           t.textContent = p.id === "G" ? "G" : this.libelleCase(c);
+          if (permise) {
+            const plus = svg("text", { x, y: y - 9, class: "draft-plus", "text-anchor": "middle" }, cases);
+            plus.textContent = "+";
+            el.addEventListener("click", () => this.partie!.ouvrirCase(p.id, c.index));
+            el.setAttribute("role", "button");
+            el.setAttribute("aria-label", `Recruter : ${p.id === "G" ? "gardien" : this.libelleCase(c)}`);
+          }
         }
       }
     }
@@ -612,10 +715,14 @@ export class EcranPreparation {
     const t = html("div", { class: "prepa-mercato-tete" }, m);
     const g = html("div", { class: "prepa-titre" }, t);
     html("span", { class: "prepa-h petit" }, g, "Mercato");
-    html("span", { class: "prepa-discret" }, g, "Touche : fiche · Appui long : recruter");
+    if (this.prepa.tirage) {
+      const r = html("button", { type: "button", class: "prepa-relancer", disabled: e.budget < this.prepa.relanceCout }, t, `↻ Relancer · ${this.prepa.relanceCout}`);
+      r.addEventListener("click", () => this.afficherIssue(this.prepa.relancer()));
+    }
     const budget = html("div", { class: "prepa-budget", "aria-label": `Budget : ${e.budget} pièces` }, t);
     html("span", { class: "prepa-piece" }, budget);
     html("span", { class: "prepa-nombre" }, budget, String(e.budget));
+    html("div", { class: "prepa-discret prepa-aide" }, m, "Touche : fiche · Appui long : glisser sur le banc ou le terrain");
     const cartes = html("div", { class: "prepa-cartes" }, m);
     e.mercato.forEach((id, i) => {
       if (!id) {

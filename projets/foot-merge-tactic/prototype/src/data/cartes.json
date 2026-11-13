@@ -1,0 +1,1129 @@
+{
+ "_note": "Catalogue de 60 cartes (13/11), généré par scripts/generer-cartes.py. 5 pays × 12 joueurs (VALIDÉ) ; prix, copies et notes : PROPOSITION. Gardiens sans notes pour l'instant.",
+ "pays": {
+  "FRA": {
+   "nom": "France",
+   "couleur": "#1F3A93"
+  },
+  "ESP": {
+   "nom": "Espagne",
+   "couleur": "#B85600"
+  },
+  "BRA": {
+   "nom": "Brésil",
+   "couleur": "#17773F"
+  },
+  "ARG": {
+   "nom": "Argentine",
+   "couleur": "#5BA4D9"
+  },
+  "ITA": {
+   "nom": "Italie",
+   "couleur": "#0B7FA8"
+  }
+ },
+ "copiesParPrix": {
+  "1": 10,
+  "2": 8,
+  "3": 6,
+  "4": 4,
+  "5": 3
+ },
+ "cartes": [
+  {
+   "id": "FRA-OLLIVIER",
+   "nom": "Ollivier",
+   "pays": "FRA",
+   "poste": "G",
+   "style": null,
+   "prix": 3,
+   "copies": 6,
+   "notes": null
+  },
+  {
+   "id": "FRA-GARNIER",
+   "nom": "Garnier",
+   "pays": "FRA",
+   "poste": "DC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 63,
+    "pointe": 66,
+    "passe": 60,
+    "dribble": 58,
+    "precision": 49,
+    "puissance": 62,
+    "duel": 75,
+    "endurance": 67
+   }
+  },
+  {
+   "id": "FRA-LEBRUN",
+   "nom": "Lebrun",
+   "pays": "FRA",
+   "poste": "DC",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 58,
+    "pointe": 63,
+    "passe": 59,
+    "dribble": 51,
+    "precision": 48,
+    "puissance": 57,
+    "duel": 75,
+    "endurance": 65
+   }
+  },
+  {
+   "id": "FRA-DELMAS",
+   "nom": "Delmas",
+   "pays": "FRA",
+   "poste": "DG",
+   "style": "TEC",
+   "prix": 3,
+   "copies": 6,
+   "notes": {
+    "acceleration": 76,
+    "pointe": 77,
+    "passe": 75,
+    "dribble": 74,
+    "precision": 61,
+    "puissance": 67,
+    "duel": 72,
+    "endurance": 75
+   }
+  },
+  {
+   "id": "FRA-MARCHAL",
+   "nom": "Marchal",
+   "pays": "FRA",
+   "poste": "DD",
+   "style": "REM",
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 68,
+    "pointe": 69,
+    "passe": 63,
+    "dribble": 61,
+    "precision": 53,
+    "puissance": 61,
+    "duel": 75,
+    "endurance": 70
+   }
+  },
+  {
+   "id": "FRA-FERRAND",
+   "nom": "Ferrand",
+   "pays": "FRA",
+   "poste": "MC",
+   "style": null,
+   "prix": 4,
+   "copies": 4,
+   "notes": {
+    "acceleration": 75,
+    "pointe": 74,
+    "passe": 82,
+    "dribble": 78,
+    "precision": 72,
+    "puissance": 74,
+    "duel": 76,
+    "endurance": 82
+   }
+  },
+  {
+   "id": "FRA-TESSIER",
+   "nom": "Tessier",
+   "pays": "FRA",
+   "poste": "MC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 65,
+    "pointe": 61,
+    "passe": 72,
+    "dribble": 65,
+    "precision": 61,
+    "puissance": 63,
+    "duel": 63,
+    "endurance": 70
+   }
+  },
+  {
+   "id": "FRA-BRISSAC",
+   "nom": "Brissac",
+   "pays": "FRA",
+   "poste": "MC",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 55,
+    "pointe": 56,
+    "passe": 61,
+    "dribble": 60,
+    "precision": 57,
+    "puissance": 56,
+    "duel": 57,
+    "endurance": 60
+   }
+  },
+  {
+   "id": "FRA-MERCIER",
+   "nom": "Mercier",
+   "pays": "FRA",
+   "poste": "AG",
+   "style": "RAP",
+   "prix": 5,
+   "copies": 3,
+   "notes": {
+    "acceleration": 95,
+    "pointe": 95,
+    "passe": 77,
+    "dribble": 86,
+    "precision": 78,
+    "puissance": 77,
+    "duel": 70,
+    "endurance": 82
+   }
+  },
+  {
+   "id": "FRA-BONNAUD",
+   "nom": "Bonnaud",
+   "pays": "FRA",
+   "poste": "AD",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 69,
+    "pointe": 66,
+    "passe": 57,
+    "dribble": 67,
+    "precision": 55,
+    "puissance": 54,
+    "duel": 49,
+    "endurance": 58
+   }
+  },
+  {
+   "id": "FRA-ROUX",
+   "nom": "Roux",
+   "pays": "FRA",
+   "poste": "AC",
+   "style": "REC",
+   "prix": 4,
+   "copies": 4,
+   "notes": {
+    "acceleration": 79,
+    "pointe": 75,
+    "passe": 66,
+    "dribble": 75,
+    "precision": 83,
+    "puissance": 82,
+    "duel": 76,
+    "endurance": 75
+   }
+  },
+  {
+   "id": "FRA-PERROT",
+   "nom": "Perrot",
+   "pays": "FRA",
+   "poste": "AC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 63,
+    "pointe": 66,
+    "passe": 55,
+    "dribble": 61,
+    "precision": 75,
+    "puissance": 67,
+    "duel": 57,
+    "endurance": 59
+   }
+  },
+  {
+   "id": "ESP-IBARRA",
+   "nom": "Ibarra",
+   "pays": "ESP",
+   "poste": "G",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": null
+  },
+  {
+   "id": "ESP-OTERO",
+   "nom": "Otero",
+   "pays": "ESP",
+   "poste": "DC",
+   "style": null,
+   "prix": 3,
+   "copies": 6,
+   "notes": {
+    "acceleration": 70,
+    "pointe": 72,
+    "passe": 75,
+    "dribble": 66,
+    "precision": 60,
+    "puissance": 71,
+    "duel": 85,
+    "endurance": 76
+   }
+  },
+  {
+   "id": "ESP-MEDINA",
+   "nom": "Medina",
+   "pays": "ESP",
+   "poste": "DC",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 57,
+    "pointe": 60,
+    "passe": 60,
+    "dribble": 54,
+    "precision": 46,
+    "puissance": 57,
+    "duel": 71,
+    "endurance": 65
+   }
+  },
+  {
+   "id": "ESP-CASTELL",
+   "nom": "Castell",
+   "pays": "ESP",
+   "poste": "DG",
+   "style": "REM",
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 65,
+    "pointe": 65,
+    "passe": 68,
+    "dribble": 59,
+    "precision": 52,
+    "puissance": 60,
+    "duel": 76,
+    "endurance": 67
+   }
+  },
+  {
+   "id": "ESP-PRIETO",
+   "nom": "Prieto",
+   "pays": "ESP",
+   "poste": "DD",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 58,
+    "pointe": 60,
+    "passe": 59,
+    "dribble": 58,
+    "precision": 48,
+    "puissance": 53,
+    "duel": 58,
+    "endurance": 60
+   }
+  },
+  {
+   "id": "ESP-ARNAU",
+   "nom": "Arnau",
+   "pays": "ESP",
+   "poste": "MC",
+   "style": "TEC",
+   "prix": 5,
+   "copies": 3,
+   "notes": {
+    "acceleration": 80,
+    "pointe": 75,
+    "passe": 94,
+    "dribble": 90,
+    "precision": 80,
+    "puissance": 77,
+    "duel": 79,
+    "endurance": 87
+   }
+  },
+  {
+   "id": "ESP-SALVAT",
+   "nom": "Salvat",
+   "pays": "ESP",
+   "poste": "MC",
+   "style": null,
+   "prix": 4,
+   "copies": 4,
+   "notes": {
+    "acceleration": 72,
+    "pointe": 70,
+    "passe": 86,
+    "dribble": 78,
+    "precision": 73,
+    "puissance": 73,
+    "duel": 74,
+    "endurance": 77
+   }
+  },
+  {
+   "id": "ESP-ALMAR",
+   "nom": "Almar",
+   "pays": "ESP",
+   "poste": "MC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 63,
+    "pointe": 58,
+    "passe": 73,
+    "dribble": 66,
+    "precision": 65,
+    "puissance": 61,
+    "duel": 65,
+    "endurance": 69
+   }
+  },
+  {
+   "id": "ESP-CUESTA",
+   "nom": "Cuesta",
+   "pays": "ESP",
+   "poste": "AG",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 71,
+    "pointe": 69,
+    "passe": 67,
+    "dribble": 73,
+    "precision": 64,
+    "puissance": 59,
+    "duel": 54,
+    "endurance": 65
+   }
+  },
+  {
+   "id": "ESP-ROBLES",
+   "nom": "Robles",
+   "pays": "ESP",
+   "poste": "AD",
+   "style": "REC",
+   "prix": 3,
+   "copies": 6,
+   "notes": {
+    "acceleration": 78,
+    "pointe": 74,
+    "passe": 69,
+    "dribble": 78,
+    "precision": 69,
+    "puissance": 62,
+    "duel": 64,
+    "endurance": 74
+   }
+  },
+  {
+   "id": "ESP-SANZ",
+   "nom": "Sanz",
+   "pays": "ESP",
+   "poste": "AC",
+   "style": "RAP",
+   "prix": 4,
+   "copies": 4,
+   "notes": {
+    "acceleration": 80,
+    "pointe": 78,
+    "passe": 68,
+    "dribble": 74,
+    "precision": 84,
+    "puissance": 80,
+    "duel": 66,
+    "endurance": 66
+   }
+  },
+  {
+   "id": "ESP-GALDOS",
+   "nom": "Galdós",
+   "pays": "ESP",
+   "poste": "AC",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 56,
+    "pointe": 56,
+    "passe": 52,
+    "dribble": 59,
+    "precision": 68,
+    "puissance": 65,
+    "duel": 51,
+    "endurance": 52
+   }
+  },
+  {
+   "id": "BRA-CALDEIRA",
+   "nom": "Caldeira",
+   "pays": "BRA",
+   "poste": "G",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": null
+  },
+  {
+   "id": "BRA-TEODORO",
+   "nom": "Teodoro",
+   "pays": "BRA",
+   "poste": "DC",
+   "style": "REC",
+   "prix": 3,
+   "copies": 6,
+   "notes": {
+    "acceleration": 68,
+    "pointe": 69,
+    "passe": 68,
+    "dribble": 65,
+    "precision": 59,
+    "puissance": 68,
+    "duel": 86,
+    "endurance": 77
+   }
+  },
+  {
+   "id": "BRA-MATTOS",
+   "nom": "Mattos",
+   "pays": "BRA",
+   "poste": "DC",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 54,
+    "pointe": 60,
+    "passe": 54,
+    "dribble": 52,
+    "precision": 47,
+    "puissance": 57,
+    "duel": 72,
+    "endurance": 61
+   }
+  },
+  {
+   "id": "BRA-VALADARES",
+   "nom": "Valadares",
+   "pays": "BRA",
+   "poste": "DG",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 64,
+    "pointe": 67,
+    "passe": 63,
+    "dribble": 64,
+    "precision": 51,
+    "puissance": 58,
+    "duel": 64,
+    "endurance": 69
+   }
+  },
+  {
+   "id": "BRA-BRANDAO",
+   "nom": "Brandão",
+   "pays": "BRA",
+   "poste": "DD",
+   "style": "RAP",
+   "prix": 4,
+   "copies": 4,
+   "notes": {
+    "acceleration": 82,
+    "pointe": 81,
+    "passe": 72,
+    "dribble": 74,
+    "precision": 66,
+    "puissance": 70,
+    "duel": 75,
+    "endurance": 80
+   }
+  },
+  {
+   "id": "BRA-BARRETO",
+   "nom": "Barreto",
+   "pays": "BRA",
+   "poste": "MC",
+   "style": "REM",
+   "prix": 3,
+   "copies": 6,
+   "notes": {
+    "acceleration": 62,
+    "pointe": 62,
+    "passe": 76,
+    "dribble": 72,
+    "precision": 70,
+    "puissance": 68,
+    "duel": 78,
+    "endurance": 72
+   }
+  },
+  {
+   "id": "BRA-REZENDE",
+   "nom": "Rezende",
+   "pays": "BRA",
+   "poste": "MC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 59,
+    "pointe": 60,
+    "passe": 71,
+    "dribble": 70,
+    "precision": 60,
+    "puissance": 60,
+    "duel": 61,
+    "endurance": 65
+   }
+  },
+  {
+   "id": "BRA-PEIXOTO",
+   "nom": "Peixoto",
+   "pays": "BRA",
+   "poste": "MC",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 55,
+    "pointe": 54,
+    "passe": 64,
+    "dribble": 61,
+    "precision": 58,
+    "puissance": 54,
+    "duel": 56,
+    "endurance": 63
+   }
+  },
+  {
+   "id": "BRA-LIMA",
+   "nom": "Lima",
+   "pays": "BRA",
+   "poste": "AG",
+   "style": null,
+   "prix": 4,
+   "copies": 4,
+   "notes": {
+    "acceleration": 82,
+    "pointe": 84,
+    "passe": 76,
+    "dribble": 84,
+    "precision": 75,
+    "puissance": 71,
+    "duel": 66,
+    "endurance": 77
+   }
+  },
+  {
+   "id": "BRA-AMARAL",
+   "nom": "Amaral",
+   "pays": "BRA",
+   "poste": "AD",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 72,
+    "pointe": 68,
+    "passe": 61,
+    "dribble": 72,
+    "precision": 60,
+    "puissance": 59,
+    "duel": 51,
+    "endurance": 60
+   }
+  },
+  {
+   "id": "BRA-LOBO",
+   "nom": "Lobo",
+   "pays": "BRA",
+   "poste": "AC",
+   "style": "TEC",
+   "prix": 5,
+   "copies": 3,
+   "notes": {
+    "acceleration": 80,
+    "pointe": 80,
+    "passe": 76,
+    "dribble": 86,
+    "precision": 91,
+    "puissance": 86,
+    "duel": 70,
+    "endurance": 71
+   }
+  },
+  {
+   "id": "BRA-SOUTO",
+   "nom": "Souto",
+   "pays": "BRA",
+   "poste": "AC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 63,
+    "pointe": 62,
+    "passe": 57,
+    "dribble": 65,
+    "precision": 77,
+    "puissance": 70,
+    "duel": 59,
+    "endurance": 60
+   }
+  },
+  {
+   "id": "ARG-LEDESMA",
+   "nom": "Ledesma",
+   "pays": "ARG",
+   "poste": "G",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": null
+  },
+  {
+   "id": "ARG-FERREYRA",
+   "nom": "Ferreyra",
+   "pays": "ARG",
+   "poste": "DC",
+   "style": null,
+   "prix": 3,
+   "copies": 6,
+   "notes": {
+    "acceleration": 66,
+    "pointe": 69,
+    "passe": 70,
+    "dribble": 68,
+    "precision": 57,
+    "puissance": 70,
+    "duel": 88,
+    "endurance": 73
+   }
+  },
+  {
+   "id": "ARG-GODOY",
+   "nom": "Godoy",
+   "pays": "ARG",
+   "poste": "DC",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 54,
+    "pointe": 58,
+    "passe": 56,
+    "dribble": 55,
+    "precision": 43,
+    "puissance": 57,
+    "duel": 72,
+    "endurance": 62
+   }
+  },
+  {
+   "id": "ARG-QUIROGA",
+   "nom": "Quiroga",
+   "pays": "ARG",
+   "poste": "DG",
+   "style": "RAP",
+   "prix": 3,
+   "copies": 6,
+   "notes": {
+    "acceleration": 77,
+    "pointe": 79,
+    "passe": 70,
+    "dribble": 72,
+    "precision": 59,
+    "puissance": 66,
+    "duel": 74,
+    "endurance": 77
+   }
+  },
+  {
+   "id": "ARG-BENITEZ",
+   "nom": "Benítez",
+   "pays": "ARG",
+   "poste": "DD",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 63,
+    "pointe": 61,
+    "passe": 58,
+    "dribble": 56,
+    "precision": 47,
+    "puissance": 54,
+    "duel": 61,
+    "endurance": 64
+   }
+  },
+  {
+   "id": "ARG-ARRIETA",
+   "nom": "Arrieta",
+   "pays": "ARG",
+   "poste": "MC",
+   "style": "REC",
+   "prix": 5,
+   "copies": 3,
+   "notes": {
+    "acceleration": 78,
+    "pointe": 76,
+    "passe": 84,
+    "dribble": 87,
+    "precision": 77,
+    "puissance": 76,
+    "duel": 84,
+    "endurance": 90
+   }
+  },
+  {
+   "id": "ARG-BUSTOS",
+   "nom": "Bustos",
+   "pays": "ARG",
+   "poste": "MC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 59,
+    "pointe": 58,
+    "passe": 71,
+    "dribble": 68,
+    "precision": 62,
+    "puissance": 62,
+    "duel": 62,
+    "endurance": 65
+   }
+  },
+  {
+   "id": "ARG-VILLALBA",
+   "nom": "Villalba",
+   "pays": "ARG",
+   "poste": "MC",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 56,
+    "pointe": 51,
+    "passe": 65,
+    "dribble": 59,
+    "precision": 56,
+    "puissance": 53,
+    "duel": 60,
+    "endurance": 63
+   }
+  },
+  {
+   "id": "ARG-LUCERO",
+   "nom": "Lucero",
+   "pays": "ARG",
+   "poste": "AG",
+   "style": "TEC",
+   "prix": 4,
+   "copies": 4,
+   "notes": {
+    "acceleration": 82,
+    "pointe": 79,
+    "passe": 75,
+    "dribble": 86,
+    "precision": 73,
+    "puissance": 67,
+    "duel": 63,
+    "endurance": 71
+   }
+  },
+  {
+   "id": "ARG-SOSA",
+   "nom": "Sosa",
+   "pays": "ARG",
+   "poste": "AD",
+   "style": "REM",
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 67,
+    "pointe": 70,
+    "passe": 63,
+    "dribble": 68,
+    "precision": 60,
+    "puissance": 58,
+    "duel": 61,
+    "endurance": 62
+   }
+  },
+  {
+   "id": "ARG-FUNES",
+   "nom": "Funes",
+   "pays": "ARG",
+   "poste": "AC",
+   "style": null,
+   "prix": 4,
+   "copies": 4,
+   "notes": {
+    "acceleration": 74,
+    "pointe": 77,
+    "passe": 69,
+    "dribble": 77,
+    "precision": 83,
+    "puissance": 83,
+    "duel": 74,
+    "endurance": 69
+   }
+  },
+  {
+   "id": "ARG-ACOSTA",
+   "nom": "Acosta",
+   "pays": "ARG",
+   "poste": "AC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 66,
+    "pointe": 65,
+    "passe": 54,
+    "dribble": 64,
+    "precision": 73,
+    "puissance": 68,
+    "duel": 60,
+    "endurance": 56
+   }
+  },
+  {
+   "id": "ITA-FERRARO",
+   "nom": "Ferraro",
+   "pays": "ITA",
+   "poste": "G",
+   "style": null,
+   "prix": 4,
+   "copies": 4,
+   "notes": null
+  },
+  {
+   "id": "ITA-MONTI",
+   "nom": "Monti",
+   "pays": "ITA",
+   "poste": "DC",
+   "style": "TEC",
+   "prix": 3,
+   "copies": 6,
+   "notes": {
+    "acceleration": 66,
+    "pointe": 70,
+    "passe": 73,
+    "dribble": 69,
+    "precision": 60,
+    "puissance": 68,
+    "duel": 85,
+    "endurance": 72
+   }
+  },
+  {
+   "id": "ITA-VITALE",
+   "nom": "Vitale",
+   "pays": "ITA",
+   "poste": "DC",
+   "style": "REM",
+   "prix": 5,
+   "copies": 3,
+   "notes": {
+    "acceleration": 77,
+    "pointe": 82,
+    "passe": 79,
+    "dribble": 73,
+    "precision": 69,
+    "puissance": 82,
+    "duel": 95,
+    "endurance": 86
+   }
+  },
+  {
+   "id": "ITA-BONETTI",
+   "nom": "Bonetti",
+   "pays": "ITA",
+   "poste": "DG",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 60,
+    "pointe": 59,
+    "passe": 58,
+    "dribble": 55,
+    "precision": 48,
+    "puissance": 54,
+    "duel": 65,
+    "endurance": 64
+   }
+  },
+  {
+   "id": "ITA-CONTI",
+   "nom": "Conti",
+   "pays": "ITA",
+   "poste": "DD",
+   "style": "REC",
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 65,
+    "pointe": 66,
+    "passe": 64,
+    "dribble": 60,
+    "precision": 53,
+    "puissance": 59,
+    "duel": 73,
+    "endurance": 77
+   }
+  },
+  {
+   "id": "ITA-VIANELLO",
+   "nom": "Vianello",
+   "pays": "ITA",
+   "poste": "MC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 61,
+    "pointe": 59,
+    "passe": 67,
+    "dribble": 63,
+    "precision": 62,
+    "puissance": 61,
+    "duel": 65,
+    "endurance": 66
+   }
+  },
+  {
+   "id": "ITA-GALLI",
+   "nom": "Galli",
+   "pays": "ITA",
+   "poste": "MC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 61,
+    "pointe": 60,
+    "passe": 68,
+    "dribble": 65,
+    "precision": 62,
+    "puissance": 63,
+    "duel": 66,
+    "endurance": 70
+   }
+  },
+  {
+   "id": "ITA-RINALDI",
+   "nom": "Rinaldi",
+   "pays": "ITA",
+   "poste": "MC",
+   "style": null,
+   "prix": 2,
+   "copies": 8,
+   "notes": {
+    "acceleration": 61,
+    "pointe": 59,
+    "passe": 71,
+    "dribble": 66,
+    "precision": 64,
+    "puissance": 61,
+    "duel": 67,
+    "endurance": 68
+   }
+  },
+  {
+   "id": "ITA-SERRA",
+   "nom": "Serra",
+   "pays": "ITA",
+   "poste": "AG",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 64,
+    "pointe": 64,
+    "passe": 59,
+    "dribble": 67,
+    "precision": 58,
+    "puissance": 54,
+    "duel": 50,
+    "endurance": 58
+   }
+  },
+  {
+   "id": "ITA-FABBRI",
+   "nom": "Fabbri",
+   "pays": "ITA",
+   "poste": "AD",
+   "style": "RAP",
+   "prix": 4,
+   "copies": 4,
+   "notes": {
+    "acceleration": 86,
+    "pointe": 85,
+    "passe": 69,
+    "dribble": 78,
+    "precision": 69,
+    "puissance": 66,
+    "duel": 61,
+    "endurance": 70
+   }
+  },
+  {
+   "id": "ITA-LOMBARDI",
+   "nom": "Lombardi",
+   "pays": "ITA",
+   "poste": "AC",
+   "style": null,
+   "prix": 3,
+   "copies": 6,
+   "notes": {
+    "acceleration": 71,
+    "pointe": 72,
+    "passe": 61,
+    "dribble": 73,
+    "precision": 83,
+    "puissance": 78,
+    "duel": 69,
+    "endurance": 63
+   }
+  },
+  {
+   "id": "ITA-MORETTI",
+   "nom": "Moretti",
+   "pays": "ITA",
+   "poste": "AC",
+   "style": null,
+   "prix": 1,
+   "copies": 10,
+   "notes": {
+    "acceleration": 59,
+    "pointe": 57,
+    "passe": 50,
+    "dribble": 60,
+    "precision": 71,
+    "puissance": 63,
+    "duel": 60,
+    "endurance": 53
+   }
+  }
+ ]
+}

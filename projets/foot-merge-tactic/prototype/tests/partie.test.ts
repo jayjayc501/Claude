@@ -1,0 +1,113 @@
+import { describe, expect, test } from "bun:test";
+import { CATALOGUE, Partie, REGLES, Reserve, notesFusionnees } from "../src/jeu/partie";
+import { chargerDonnees, chargerEquipes, chargerReglages } from "../src/sim/chargement";
+import { Aleatoire } from "../src/sim/rng";
+import { MatchSim } from "../src/sim/simulation";
+
+const donnees = chargerDonnees("hexagones");
+const { adversaire } = chargerEquipes(donnees);
+const plan = [...adversaire.composition.filter((p) => p.poste !== "G"), ...adversaire.composition.filter((p) => p.poste === "G")].map((p) => ({ poste: p.poste, cellule: p.cellule }));
+
+/** Draft d'un camp « joueur » qui suit la même formation et prend la carte la moins chère proposée. */
+function drafterJoueur(p: Partie): void {
+  for (const s of plan) {
+    expect(p.casePermise(0, s.poste, s.cellule)).toBe(true);
+    const offre = p.offre(0, s.poste);
+    const id = [...offre].sort((a, b) => p.carte(a).prix - p.carte(b).prix)[0]!;
+    const r = p.choisir(0, s.poste, s.cellule, id);
+    expect(r.ok).toBe(true);
+    p.ordiChoisir();
+  }
+}
+
+describe("Partie contre l'ordinateur (13/11)", () => {
+  test("catalogue : 60 cartes, 12 par pays, un style de chaque par pays, jamais le gardien", () => {
+    expect(CATALOGUE.cartes.length).toBe(60);
+    for (const pays of Object.keys(CATALOGUE.pays)) {
+      const c = CATALOGUE.cartes.filter((x) => x.pays === pays);
+      expect(c.length).toBe(12);
+      expect(c.filter((x) => x.poste === "G").length).toBe(1);
+      expect(c.filter((x) => x.style).map((x) => x.style).sort()).toEqual(["RAP", "REC", "REM", "TEC"]);
+    }
+    expect(CATALOGUE.cartes.every((c) => c.poste !== "G" || !c.style)).toBe(true);
+  });
+
+  test("réserve : tirage sans doublon, jamais une carte épuisée", () => {
+    const cartes = CATALOGUE.cartes.slice(0, 6);
+    const r = new Reserve(cartes);
+    const rng = new Aleatoire(3);
+    const id = cartes[0]!.id;
+    for (let i = 0; i < cartes[0]!.copies; i++) r.prendre(id);
+    for (let k = 0; k < 50; k++) {
+      const t = r.tirer(rng, 4);
+      expect(new Set(t).size).toBe(t.length);
+      expect(t).not.toContain(id);
+    }
+    expect(() => r.prendre(id)).toThrow();
+  });
+
+  test("draft : 11 titulaires de chaque côté, budget respecté, gardien compris, copies prises dans la réserve", () => {
+    for (let g = 1; g <= 20; g++) {
+      const p = new Partie(donnees, g, plan);
+      drafterJoueur(p);
+      while (!p.draftFini(1) && p.ordiChoisir());
+      for (const camp of [0, 1] as const) {
+        const c = p.camps[camp];
+        expect(c.composition.length).toBe(11);
+        expect(c.composition.filter((x) => x.poste === "G").length).toBe(1);
+        expect(c.budget).toBeGreaterThanOrEqual(0);
+        const depense = c.effectif.reduce((s, m) => s + p.carte(m.id).prix, 0);
+        expect(depense + c.budget).toBe(REGLES.budgetDepart);
+      }
+      const pris = [...p.camps[0].effectif, ...p.camps[1].effectif];
+      for (const k of CATALOGUE.cartes) expect(p.reserve.reste(k.id)).toBe(k.copies - pris.filter((m) => m.id === k.id).length);
+    }
+  });
+
+  test("le dernier choix est le gardien s'il manque ; une carte trop chère est refusée", () => {
+    const p = new Partie(donnees, 5, plan);
+    const champ = plan.filter((s) => s.poste !== "G");
+    for (const s of champ) {
+      const id = [...p.offre(0, s.poste)].sort((a, b) => p.carte(a).prix - p.carte(b).prix)[0]!;
+      expect(p.choisir(0, s.poste, s.cellule, id).ok).toBe(true);
+    }
+    expect(p.casePermise(0, "DC", 1)).toBe(false);
+    expect(p.casePermise(0, "G", 0)).toBe(true);
+    const g = p.offre(0, "G");
+    const cher = g.find((id) => p.carte(id).prix > p.camps[0].budget);
+    if (cher) expect(p.choisir(0, "G", 0, cher).ok).toBe(false);
+    expect(g.some((id) => p.carte(id).prix <= p.camps[0].budget)).toBe(true);
+  });
+
+  test("mercato de l'ordinateur : banc de 5 au plus, budget jamais négatif, copies fusionnées", () => {
+    for (let g = 1; g <= 20; g++) {
+      const p = new Partie(donnees, 100 + g, plan);
+      drafterJoueur(p);
+      p.ordiMercato(5, 3);
+      const c = p.camps[1];
+      expect(c.effectif.length - c.composition.length).toBeLessThanOrEqual(5);
+      expect(c.budget).toBeGreaterThanOrEqual(0);
+      expect(new Set(c.effectif.map((m) => m.id)).size).toBe(c.effectif.length);
+      expect(c.effectif.every((m) => m.fusions <= 3)).toBe(true);
+    }
+  });
+
+  test("fusion : +4 par niveau sur chaque sous-note (proposition), 99 au plus", () => {
+    const n = CATALOGUE.cartes.find((c) => c.notes)!.notes!;
+    const f = notesFusionnees(n, 2)!;
+    expect(f.passe).toBe(Math.min(99, n.passe + 2 * REGLES.bonusFusionParNiveau));
+    expect(notesFusionnees(null, 2)).toBeNull();
+  });
+
+  test("les deux équipes draftées jouent un match", () => {
+    const p = new Partie(donnees, 9, plan);
+    drafterJoueur(p);
+    p.ordiMercato(5, 3);
+    const nous = { nom: "Toi", nationalite: "Toi", joueurs: p.camps[0].effectif.map((m) => ({ id: m.id, nom: p.carte(m.id).nom, postes: [p.carte(m.id).poste], style: p.carte(m.id).style, notes: p.carte(m.id).notes })), composition: p.camps[0].composition, tactique: "EQU" };
+    const sim = new MatchSim(donnees, chargerReglages(), [nous, p.equipeOrdi()], 1, true);
+    sim.demarrer();
+    sim.avancer(30);
+    expect(sim.joueurs.length).toBe(22);
+    expect(sim.joueurs.every((j) => Number.isFinite(j.pos.x) && Number.isFinite(j.pos.y))).toBe(true);
+  });
+});

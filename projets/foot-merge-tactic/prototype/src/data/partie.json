@@ -1,0 +1,13 @@
+{
+  "_note": "Règles d'une partie (13/11). VALIDÉ : draft des 11 titulaires (on touche un poste, quelques joueurs tirés au hasard, on en choisit un), limité par un budget ; un seul budget pour le draft et le premier mercato, qui remplit le banc ; réserve commune aux équipes ; l'ordinateur fait tout comme le joueur, avec le même budget ; pour l'instant, 2 équipes et un seul match. PROPOSITION : les chiffres ci-dessous. offreTaille : 4 (avec 5 joueurs par poste unique, en proposer 5 montrerait toujours les mêmes). bonusFusionParNiveau : points ajoutés à chaque sous-note par niveau de fusion (règle des fusions encore ouverte).",
+  "budgetDepart": 30,
+  "offreTaille": 4,
+  "mercatoTaille": 6,
+  "relanceCout": 1,
+  "bonusFusionParNiveau": 4,
+  "ordi": {
+    "_note": "L'ordinateur garde quelques pièces pour son banc pendant le draft, et relance son mercato au plus 2 fois.",
+    "reserveBanc": 5,
+    "relancesMax": 2
+  }
+}

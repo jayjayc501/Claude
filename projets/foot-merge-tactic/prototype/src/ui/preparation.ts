@@ -84,6 +84,12 @@ export function etatInitial(d: DonneesPrepa): EtatPrepa {
 
 export class Preparation {
   etat: EtatPrepa;
+  /** Partie contre l'ordinateur (13/11) : réserve commune (chaque achat y prend une copie, chaque vente l'y rend),
+   *  tirage du mercato, coût d'une relance et bonus de fusion sur les notes. Absent : écran de démonstration. */
+  reserve?: { prendre(id: string): void; rendre(id: string): void };
+  tirage?: () => (string | null)[];
+  relanceCout = 1;
+  bonusFusion = 0;
 
   constructor(
     readonly donnees: Donnees,
@@ -116,10 +122,27 @@ export class Preparation {
     return {
       nom: "Votre équipe",
       nationalite: "Plusieurs",
-      joueurs: this.etat.effectif.map((m) => ({ id: m.id, nom: this.fiche(m.id).nom, postes: [this.fiche(m.id).poste], style: this.fiche(m.id).style, notes: this.fiche(m.id).notes ?? null })),
+      joueurs: this.etat.effectif.map((m) => ({ id: m.id, nom: this.fiche(m.id).nom, postes: [this.fiche(m.id).poste], style: this.fiche(m.id).style, notes: this.notesFusion(m) })),
       composition: this.etat.composition.map((p) => ({ ...p })),
       tactique: this.etat.tactique,
     };
+  }
+
+  /** Notes d'un membre, avec le bonus de ses fusions (PROPOSITION). */
+  private notesFusion(m: Membre): Partial<Notes> | null {
+    const n = this.fiche(m.id).notes ?? null;
+    if (!n || !m.fusions || !this.bonusFusion) return n;
+    const r: Partial<Notes> = {};
+    for (const [k, v] of Object.entries(n)) r[k as keyof Notes] = Math.min(99, (v ?? 65) + this.bonusFusion * m.fusions);
+    return r;
+  }
+
+  /** Nouveau tirage du mercato, contre `relanceCout` pièces. */
+  relancer(): Issue {
+    if (!this.tirage) return { ok: false, erreur: "" };
+    if (this.etat.budget < this.relanceCout) return { ok: false, erreur: "Pas assez de pièces pour relancer." };
+    this.etat = { ...this.etat, budget: this.etat.budget - this.relanceCout, mercato: this.tirage() };
+    return { ok: true, etat: this.etat, message: "Nouveau mercato." };
   }
 
   /** Joueurs sur le terrain par pays (pays du deck, dans l'ordre) et par style (les 4, du plus fréquent au moins
@@ -221,7 +244,12 @@ export class Preparation {
 
   appliquer(a: Action): Issue {
     const r = this.essayer(a);
-    if (r.ok) this.etat = r.etat;
+    if (r.ok) {
+      if (a.type === "achat") this.reserve?.prendre(this.etat.mercato[a.place]!);
+      // Une vente rend à la réserve toutes les copies du joueur (fusions comprises).
+      if (a.type === "vente") for (let i = 0; i <= (this.membre(a.id)?.fusions ?? 0); i++) this.reserve?.rendre(a.id);
+      this.etat = r.etat;
+    }
     return r;
   }
 
@@ -229,7 +257,10 @@ export class Preparation {
    *  l'effectif s'il y en a une, sinon le joueur va sur le banc. */
   acheter(place: number): Issue {
     const r = this.essayerAchat(place);
-    if (r.ok) this.etat = r.etat;
+    if (r.ok) {
+      this.reserve?.prendre(this.etat.mercato[place]!);
+      this.etat = r.etat;
+    }
     return r;
   }
 

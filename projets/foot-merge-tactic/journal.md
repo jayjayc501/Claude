@@ -552,3 +552,20 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 - **Buteurs** : le moteur note chaque but (équipe, buteur = dernier à avoir touché le ballon, contre son camp, minute). Le panneau de mi-temps et de fin de match les affiche sous le score, de chaque côté (« ⚽ 23' Roux »). Test ajouté.
 
 **Tests** : 115 verts.
+
+## 13/11/2026 — Partie contre l'ordinateur : draft, premier mercato, match
+
+**Demande du concepteur** : « prépare-moi une belle interface, et que je puisse jouer contre l'ordinateur qui fait aussi les drafts, avec le même budget que moi ; pour l'instant 2 équipes, un seul match ». Pas de nouvelles images (bustes de la maquette réutilisés).
+
+**Décisions validées dans la séance** : pays France, Espagne, Brésil, Argentine, Italie (France au milieu) ; un seul budget pour le draft et le premier mercato ; dans chaque pays, un joueur de chaque style (4 sur 12, jamais le gardien), et un même style à des postes différents d'un pays à l'autre.
+
+**Ce qui a été fait**
+- Catalogue de 60 cartes : `scripts/generer-cartes.py` → `src/data/cartes.json` (noms fictifs, pays, poste, style, prix 1 à 5, copies 10/8/6/4/3, 8 sous-notes ; gardiens sans notes). Chaque poste a une carte à 1 pièce (sinon l'ordinateur pouvait rester bloqué : corrigé avec Serra AG 1 et Rinaldi MC 2). Tableau modifiable : Claude Sheet « Foot Merge Tactic · les 60 cartes » (https://claude.ai/artifact/96ui2NMXpZ5QYYxvU4rpJF).
+- Règles de la partie dans `src/data/partie.json` (PROPOSITION) : budget 30, offre de 4 joueurs, mercato de 6, relance 1 pièce, fusion +4 à chaque sous-note par niveau ; ordinateur : banc de 5 au plus, 2 relances.
+- `src/jeu/partie.ts` : réserve commune (copies limitées, tirage pondéré), draft (case libre → 4 joueurs du poste, au moins un abordable ; il faut garder 1 pièce par titulaire restant ; gardien en dernier s'il manque), entraîneur ordinateur (même budget, même réserve, choisit après toi ; suit la formation de l'adversaire de démonstration ; valeur = moyenne des sous-notes, petit bonus de même pays ; mercato : copies pour fusionner, puis le banc).
+- Interface : en-tête à trois étapes (① Titulaires, ② Mercato : le banc, ③ Match) avec barre de progression ; cases libres qui pulsent avec un « + » ; offre en 2 × 2 cartes (couleur du pays, buste, prix, copies restantes, 4 notes en couleur, « Trop cher ») et bouton « Recruter » ; panneau de ce que l'ordinateur a pris ; mercato avec « ↻ Relancer · 1 » ; bouton « Jouer le match ▶ » ; « ↺ » pour une nouvelle partie. Match : « Toi » contre « Ordinateur ».
+- Correction : les cases du draft ne recevaient pas le toucher (`pointer-events`).
+
+**Tests** : 122 verts (catalogue, réserve, draft sur 20 graines, gardien en dernier, carte trop chère refusée, mercato de l'ordinateur, bonus de fusion, match entre deux équipes draftées). Parcours complet vérifié au format téléphone (draft de 11 joueurs, mercato, match).
+
+**À juger par le concepteur** : budget 30 et prix ; difficulté de l'ordinateur ; bonus de fusion (+4) ; bustes provisoires (plusieurs joueurs partagent la même image).

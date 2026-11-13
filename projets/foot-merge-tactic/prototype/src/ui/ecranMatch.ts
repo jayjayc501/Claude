@@ -3,13 +3,21 @@
 // chrono et barre de possession, pelouse rayée, joueurs en figurines sur leur
 // socle (les adversaires en maillot rouge), aura de fusion, le porteur du
 // ballon sur un socle doré avec son nom, annonces qui sautent, confettis.
-// Votre équipe attaque vers le haut. Tactique de chaque équipe modifiable en
-// plein match, tactiques et styles activables ou non (proposition du 12/11).
+// Votre équipe attaque vers le haut. Tactique de chaque équipe, tactiques et
+// styles activables ou non (proposition du 12/11) : avant le coup d'envoi et à
+// la mi-temps seulement (13/11 au soir, décision du concepteur).
+//
+// 13/11 au soir : l'écran ne fait plus avancer le moteur. Il demande chaque
+// mi-temps à l'arbitre de match (src/match/arbitre.ts) et lit son film, image
+// par image (pause, vitesse et vues inchangées). Plus tard, un arbitre serveur
+// prendra la place de l'arbitre local sans rien changer ici.
 
+import type { FournisseurGraines } from "../jeu/graines";
+import { type ArbitreMatch, DUREE_MI_TEMPS_S } from "../match/arbitre";
+import { type BilanMiTemps, type JoueurVu, LecteurFilm, type VueMatch } from "../match/film";
 import type { Donnees } from "../sim/donnees";
-import type { OptionsInfluences } from "../sim/influences";
+import { type OptionsInfluences, chargerInfluences, paliersAtteints, reglagesEquipe } from "../sim/influences";
 import { projeterRect } from "../sim/projection";
-import { MatchSim } from "../sim/simulation";
 import type { Equipe, Reglages } from "../sim/types";
 import { BUSTES_ROUGES, CHAMP_ROUGE, GARDIEN_ROUGE } from "./adversaires";
 import { BUSTES } from "./bustes";
@@ -60,8 +68,8 @@ const VEDETTE_MIN_S = 0.7;
 /** Écart minimal à l'écran entre deux pions ou figurines (unités SVG), selon la vue. */
 const ECART_AFFICHAGE: Record<Vue, number> = { pions: 2 * RAYON_ROND + 2, figurines: 18, action: 2 * RAYON_ROND + 3 };
 const CLE_VUE = "foot-merge-tactic.vue-match.v2";
-/** Une mi-temps : 180 s de jeu simulé, soit environ 51 s à l'écran en vitesse ×3,5 (12/11). */
-const DUREE_MI_TEMPS_S = 180;
+/** Tactiques et styles (pour les zones et les paliers affichés). */
+const INFLUENCES = chargerInfluences();
 /** Durée des annonces, en secondes de jeu simulé (≈ 0,7 s et 1,6 s à l'écran en ×3,5). */
 const ANNONCE_S = 2.5;
 const ANNONCE_BUT_S = 5.5;
@@ -94,8 +102,17 @@ export interface HabillageMatch {
 
 export class EcranMatch {
   readonly racine: HTMLElement;
-  private sim!: MatchSim;
-  private graine = 1;
+  /** Le film du match en cours (mi-temps calculées par l'arbitre) et l'image affichée. */
+  private lecteur = new LecteurFilm();
+  /** Équipes du match ; la tienne change si tu fais des changements à la mi-temps. */
+  private equipesMatch!: [Equipe, Equipe];
+  /** Tactique de chaque équipe en ce moment (pour les zones et les listes). */
+  private tactiques: [string, string] = ["EQU", "EQU"];
+  /** Bilan de la dernière mi-temps finie (statistiques, buteurs, notes, forme). */
+  private bilan: BilanMiTemps | null = null;
+  /** Mise à jour des listes de tactiques et des interrupteurs (grisés pendant le jeu). */
+  private majChoix: (() => void)[] = [];
+  private regZones: { cle: string; equipe: Equipe; reg: Reglages } | null = null;
   private vitesse = VITESSE_PAR_DEFAUT;
   /** Mi-temps en cours et arrêt du jeu (mi-temps, fin du match). */
   private periode: 1 | 2 = 1;
@@ -109,7 +126,6 @@ export class EcranMatch {
   private dernier = 0;
   private reserve = 0;
   /** Tactiques et styles actifs (gardés d'un match à l'autre). */
-  /** Styles coupés en match pour l'instant (concepteur, 12/11) ; l'interrupteur reste pour essayer. */
   private options: OptionsInfluences = { tactiques: true, styles: true };
   /** Tactique choisie sur cet écran pour chaque équipe (null : celle de l'équipe). */
   private tactiquesForcees: [string | null, string | null] = [null, null];
@@ -146,7 +162,7 @@ export class EcranMatch {
   private figPorteurAnim: SVGGElement | null = null;
   private dernierPorteur: unknown = null;
   /** Joueur mis en vedette (porteur, ou dernier à avoir touché le ballon pendant une passe). */
-  private vedette: import("../sim/simulation").JoueurSim | null = null;
+  private vedette: JoueurVu | null = null;
   private vedetteDepuis = -Infinity;
   private boutonsVue: HTMLButtonElement[] = [];
   private calquePions!: SVGGElement;
@@ -183,8 +199,23 @@ export class EcranMatch {
     private reglages: Reglages,
     private equipes: () => [Equipe, Equipe],
     private habillage: HabillageMatch,
+    /** D'où viennent les graines des matchs (13/11 au soir : un seul endroit). */
+    private graines: FournisseurGraines,
+    /** Celui qui calcule le match (13/11 au soir) : local aujourd'hui, serveur plus tard. */
+    private arbitre: ArbitreMatch,
   ) {
     this.racine = html("section", { class: "match" });
+  }
+
+  /** L'état du match à l'image affichée du film. */
+  private get instant(): VueMatch {
+    return this.lecteur.vue;
+  }
+
+  /** Entre le coup d'envoi et la mi-temps, et pendant la 2e mi-temps : on ne
+   *  change ni les tactiques ni les interrupteurs (13/11 au soir). */
+  private get enJeu(): boolean {
+    return this.instant.demarre && !this.arret;
   }
 
   private X = (m: number) => MARGE + m * ECHELLE;
@@ -194,7 +225,7 @@ export class EcranMatch {
   /** Ouvre l'écran : nouveau match, ou reprise du match en cours (mi-temps, 13/11). */
   ouvrir(reprise = false): void {
     this.actif = true;
-    if (!reprise || !this.sim || this.arret === "fin") {
+    if (!reprise || !this.lecteur.film || this.arret === "fin") {
       this.tactiquesForcees = [null, null]; // la tactique choisie en préparation s'applique
       this.nouveauMatch();
     }
@@ -207,11 +238,14 @@ export class EcranMatch {
   }
 
   private nouveauMatch(): void {
-    this.sim = new MatchSim(this.donnees, this.reglages, this.equipes(), this.graine, true);
-    this.sim.definirOptions(this.options);
+    this.equipesMatch = this.equipes();
+    this.lecteur.nouveauMatch();
+    this.lecteur.charger(this.arbitre.nouveauMatch(this.equipesMatch, this.graines.matchRegarde()));
+    this.tactiques = [this.equipesMatch[0].tactique ?? "EQU", this.equipesMatch[1].tactique ?? "EQU"];
     this.tactiquesForcees.forEach((t, camp) => {
-      if (t) this.sim.definirTactique(camp as 0 | 1, t);
+      if (t) this.tactiques[camp] = t;
     });
+    this.bilan = null;
     this.reserve = 0;
     this.enPause = false;
     this.periode = 1;
@@ -253,18 +287,18 @@ export class EcranMatch {
       activer(); // le son ne peut démarrer qu'après un geste
       if (this.arret === "mi-temps") this.secondeMiTemps();
       else if (this.arret === "fin") {
-        this.graine += 1;
-        if (this.habillage.finMatch) return this.habillage.finMatch([this.sim.score[0], this.sim.score[1]]);
+        this.graines.matchRegardeFini();
+        if (this.habillage.finMatch) return this.habillage.finMatch([this.instant.score[0], this.instant.score[1]]);
         this.nouveauMatch();
         return;
-      } else if (!this.sim.demarre) this.sim.demarrer();
+      } else if (!this.instant.demarre) this.coupDEnvoi();
       else this.enPause = !this.enPause;
       this.majCommandes();
     });
     const nouveau = html("button", { type: "button", class: "match-puce", "aria-label": "Nouveau match" }, cmd, "↺ Nouveau");
     if (h.finMatch) nouveau.style.display = "none"; // championnat : pas de match rejoué
     nouveau.addEventListener("click", () => {
-      this.graine += 1;
+      this.graines.matchRegardeFini();
       this.nouveauMatch();
     });
     const vitesses = [0.5, 1, 2, 3, 3.5, 4];
@@ -312,7 +346,8 @@ export class EcranMatch {
     this.terrain = html("div", { class: "match-terrain" }, r);
     this.construireTerrain();
 
-    // Tactiques (modifiables en plein match) et interrupteurs.
+    // Tactiques et interrupteurs : avant le coup d'envoi et à la mi-temps (13/11 au soir).
+    this.majChoix = [];
     const tac = html("div", { class: "match-tactiques" }, r);
     ([h.nomNous, h.nomEux] as const).forEach((qui, camp) => {
       const l = html("label", { class: `match-pilule${camp === 1 ? " eux" : ""}` }, tac);
@@ -321,21 +356,24 @@ export class EcranMatch {
       const sel = html("select", { "aria-label": `Tactique de ${qui}` }, l);
       for (const t of h.tactiques) {
         const o = html("option", { value: t.code }, sel, t.nom);
-        o.selected = t.code === this.sim.tactiques[camp];
+        o.selected = t.code === this.tactiques[camp];
       }
       const maj = () => {
         valeur.textContent = h.tactiques.find((t) => t.code === sel.value)?.nom ?? sel.value;
-        sel.disabled = !this.options.tactiques;
+        sel.disabled = !this.options.tactiques || this.enJeu;
         l.classList.toggle("coupee", !this.options.tactiques);
+        l.classList.toggle("figee", this.enJeu);
       };
       maj();
       sel.addEventListener("change", () => {
+        if (this.enJeu) return;
         this.tactiquesForcees[camp] = sel.value;
-        this.sim.definirTactique(camp as 0 | 1, sel.value);
+        this.tactiques[camp] = sel.value;
         maj();
         this.majBord(true);
       });
       l.addEventListener("maj", maj);
+      this.majChoix.push(maj);
     });
     const inter = html("div", { class: "match-interrupteurs" }, r);
     for (const cle of ["tactiques", "styles"] as const) {
@@ -345,11 +383,13 @@ export class EcranMatch {
         b.classList.toggle("actif", on);
         b.setAttribute("aria-pressed", String(on));
         b.textContent = cle === "tactiques" ? `Tactiques ${on ? "activées" : "coupées"}` : `Styles ${on ? "activés" : "coupés"}`;
+        b.disabled = this.enJeu;
       };
       maj();
+      this.majChoix.push(maj);
       b.addEventListener("click", () => {
+        if (this.enJeu) return;
         this.options = { ...this.options, [cle]: !this.options[cle] };
-        this.sim.definirOptions(this.options);
         maj();
         for (const l of tac.querySelectorAll("label")) l.dispatchEvent(new Event("maj"));
         this.majBord(true);
@@ -358,7 +398,7 @@ export class EcranMatch {
 
     // Tableau de bord.
     this.bord = html("div", { class: "match-bord" }, r);
-    html("p", { class: "match-note" }, r, "Tactiques et styles : proposition à juger en regardant le match. Coupe-les ou change de tactique en plein match pour voir la différence.");
+    html("p", { class: "match-note" }, r, "Tactiques et styles : proposition à juger en regardant le match. Coupe-les ou change de tactique avant le coup d'envoi ou à la mi-temps pour voir la différence.");
 
     this.majCommandes();
     this.dessiner();
@@ -419,29 +459,29 @@ export class EcranMatch {
     this.calquePions = g;
     // Figurines adverses : d'abord celles qui ne sont pas sur ton terrain, pour
     // éviter de voir ton joueur et sa copie rouge côte à côte.
-    const tesTitulaires = new Set(this.sim.joueurs.filter((j) => j.camp === 0).map((j) => j.joueur.id));
+    const tesTitulaires = new Set(this.instant.joueurs.filter((j) => j.camp === 0).map((j) => j.joueur.id));
     const rouges = Object.entries(CHAMP_ROUGE)
       .sort(([a], [b]) => Number(tesTitulaires.has(a)) - Number(tesTitulaires.has(b)))
       .map(([, image]) => image);
     let rang = 0;
     // Maillots d'équipe en match : bleu pour toi, rouge pour l'adversaire (12/11).
-    this.images_ = this.sim.joueurs.map((j) => (j.camp === 1 ? (BUSTES_ROUGES[j.joueur.id] ?? (j.poste.id === "G" ? GARDIEN_ROUGE : rouges[rang++ % rouges.length]!)) : (BUSTES_BLEUS[j.joueur.id] ?? BUSTES[j.joueur.id])));
-    this.pions = this.sim.joueurs.map((j, i) =>
+    this.images_ = this.instant.joueurs.map((j) => (j.camp === 1 ? (BUSTES_ROUGES[j.joueur.id] ?? (j.poste.id === "G" ? GARDIEN_ROUGE : rouges[rang++ % rouges.length]!)) : (BUSTES_BLEUS[j.joueur.id] ?? BUSTES[j.joueur.id])));
+    this.pions = this.instant.joueurs.map((j, i) =>
       this.vue === "figurines" ? this.pion(g, j.camp, j.joueur.id, j.joueur.nom, this.images_[i]) : this.pionRond(g, j.camp, j.joueur.id, j.joueur.nom),
     );
     // Vue « Action » : une figurine par joueur, au-dessus des pions, montrée près du ballon.
     this.figsAction = [];
     this.calqueFigs = null;
     this.ordreProfondeur = "";
-    this.enAction = this.sim.joueurs.map(() => false);
-    this.actionDepuis = this.sim.joueurs.map(() => -Infinity);
-    this.fonduAction = this.sim.joueurs.map(() => null);
-    this.fonduPion = this.sim.joueurs.map(() => null);
+    this.enAction = this.instant.joueurs.map(() => false);
+    this.actionDepuis = this.instant.joueurs.map(() => -Infinity);
+    this.fonduAction = this.instant.joueurs.map(() => null);
+    this.fonduPion = this.instant.joueurs.map(() => null);
     this.centreAction = null;
     if (this.vue === "action") {
       const gf = svg("g", {}, s);
       this.calqueFigs = gf;
-      this.figsAction = this.sim.joueurs.map((j, i) => {
+      this.figsAction = this.instant.joueurs.map((j, i) => {
         // Groupe extérieur : position ; intérieur (la figurine) : animation d'apparition.
         const f = svg("g", { style: "display:none" }, gf);
         this.pion(f, j.camp, j.joueur.id, j.joueur.nom, this.images_[i]).classList.add("match-fig-action");
@@ -541,11 +581,11 @@ export class EcranMatch {
   }
 
   private majCommandes(): void {
-    const enJeu = this.sim.demarre && !this.enPause && !this.arret;
+    const enJeu = this.instant.demarre && !this.enPause && !this.arret;
     this.boutonJouer.textContent =
       this.arret === "mi-temps" ? "▶ 2e mi-temps"
       : this.arret === "fin" ? (this.habillage.finMatch ? "Continuer ▶" : "↺ Nouveau match")
-      : !this.sim.demarre ? "▶ Coup d'envoi"
+      : !this.instant.demarre ? "▶ Coup d'envoi"
       : enJeu ? "❚❚ Pause"
       : "▶ Reprendre";
     this.boutonJouer.classList.toggle("en-jeu", enJeu);
@@ -557,6 +597,13 @@ export class EcranMatch {
       b.setAttribute("aria-pressed", String(v.id === this.vue));
     });
     this.boutonZones.setAttribute("aria-pressed", String(this.zonesVisibles));
+    for (const f of this.majChoix) f();
+  }
+
+  /** Coup d'envoi : l'arbitre calcule la 1re mi-temps avec les choix faits sur cet écran. */
+  private coupDEnvoi(): void {
+    const film = this.arbitre.premiereMiTemps({ options: { ...this.options }, tactiques: [...this.tactiquesForcees] });
+    this.lecteur.charger(film);
   }
 
   // ---- Boucle et dessin --------------------------------------------------------
@@ -565,15 +612,22 @@ export class EcranMatch {
     if (!this.actif) return;
     const ecoule = Math.min(0.1, (t - this.dernier) / 1000);
     this.dernier = t;
-    if (this.sim.demarre && !this.enPause && !this.arret) {
+    if (this.instant.demarre && !this.enPause && !this.arret) {
       this.reserve += ecoule * this.vitesse;
       const dt = this.reglages.pasDeTempsS;
       let n = 0;
       while (this.reserve >= dt && n < 20) {
-        this.sim.pas();
+        // Image suivante du film (un pas de simulation, 1/30 s de jeu).
+        const k = this.lecteur.image + 1;
+        if (!this.lecteur.disponible(k)) {
+          // Pas encore calculée (téléphone très lent) : on l'attend, sans prendre de retard.
+          this.reserve = Math.min(this.reserve, dt);
+          break;
+        }
+        this.lecteur.lire(k);
         this.reserve -= dt;
         n++;
-        if (this.sim.temps - this.debutPeriode >= DUREE_MI_TEMPS_S) {
+        if (k === this.lecteur.derniere) {
           this.finDePeriode();
           break;
         }
@@ -584,7 +638,7 @@ export class EcranMatch {
   }
 
   private dessiner(): void {
-    const sim = this.sim;
+    const sim = this.instant;
     // Vedette : le porteur, ou pendant une passe le dernier à avoir touché le
     // ballon ; elle ne change qu'après un court délai (sinon la figurine
     // apparaît et disparaît sans arrêt).
@@ -678,12 +732,18 @@ export class EcranMatch {
     this.calqueZones.replaceChildren();
     if (this.zonesVisibles) {
       const vus = new Set<string>();
-      const ballon = sim.versRepere(0, sim.ballon);
+      // Repère de ton équipe (le même calcul que le moteur : versRepere, versAbsolu, lignesTenues).
+      const W = this.donnees.largeurM;
+      const L = this.donnees.longueurM;
+      const ballon = { x: sim.ballon.x / W, y: sim.ballon.y / L };
+      const tenues = { ligneDefM: sim.lignesDef[0] ?? undefined, ligneAdverseM: sim.lignesDef[1] === null ? undefined : L - sim.lignesDef[1] };
+      const reg = this.reglagesZones();
       for (const j of sim.joueurs) {
         if (j.camp !== 0 || vus.has(j.poste.id)) continue;
         vus.add(j.poste.id);
-        const r = projeterRect(j.poste.rect, j.poste, sim.phases[0], ballon, sim.reg(0), this.donnees.longueurM, sim.lignesTenues(0));
-        const a = sim.versAbsolu(0, { x: r.x, y: r.y + r.h });
+        const poste = this.donnees.poste(j.poste.id);
+        const r = projeterRect(poste.rect, poste, sim.phases[0], ballon, reg, L, tenues);
+        const a = { x: r.x * W, y: (r.y + r.h) * L };
         svg("rect", { x: this.X(a.x), y: this.Y(a.y), width: r.w * 68 * ECHELLE, height: r.h * 105 * ECHELLE, rx: 4, class: "zone-match" }, this.calqueZones);
       }
     }
@@ -739,11 +799,20 @@ export class EcranMatch {
     this.majBord();
   }
 
+  /** Réglages de ton équipe (tactique et paliers de styles), pour dessiner les zones. */
+  private reglagesZones(): Reglages {
+    const equipe = this.equipesMatch[0];
+    const cle = `${this.tactiques[0]}|${this.options.tactiques}|${this.options.styles}`;
+    if (!this.regZones || this.regZones.cle !== cle || this.regZones.equipe !== equipe) this.regZones = { cle, equipe, reg: reglagesEquipe(this.reglages, equipe, this.tactiques[0], INFLUENCES, this.options) };
+    return this.regZones.reg;
+  }
+
   /** Fin d'une mi-temps : coup de sifflet et panneau de statistiques. */
   private finDePeriode(): void {
     this.reserve = 0;
+    this.bilan = this.lecteur.film?.bilan ?? null;
     this.arret = this.periode === 1 ? "mi-temps" : "fin";
-    if (this.periode === 1) this.scoreMiTemps = [...this.sim.score];
+    if (this.periode === 1) this.scoreMiTemps = [this.instant.score[0], this.instant.score[1]];
     jouer(this.arret === "fin" ? "Fin du match" : "Mi-temps");
     this.majCommandes();
     this.montrerStats();
@@ -751,7 +820,7 @@ export class EcranMatch {
 
   /** Score du match en cours. */
   get scoreActuel(): [number, number] {
-    return [this.sim.score[0], this.sim.score[1]];
+    return [this.instant.score[0], this.instant.score[1]];
   }
 
   /** Match arrêté à la mi-temps ? */
@@ -761,8 +830,8 @@ export class EcranMatch {
 
   /** Forme (sur 100) et note de match d'un de tes joueurs sur le terrain. */
   infosJoueur(id: string): { forme: number; note: number } | null {
-    const j = this.sim?.joueurs.find((x) => x.camp === 0 && x.joueur.id === id);
-    return j ? { forme: this.sim.forme(j), note: this.sim.noteDe(j) } : null;
+    const j = this.bilan?.joueurs.find((x) => x.camp === 0 && x.id === id);
+    return j ? { forme: j.forme, note: j.note } : null;
   }
 
   /** Lance la 2e mi-temps (depuis l'écran de préparation). */
@@ -774,28 +843,30 @@ export class EcranMatch {
    *  changements faits à la mi-temps (places, remplaçants) s'appliquent. */
   private secondeMiTemps(): void {
     const e = this.equipes()[0];
-    const avant = this.sim.joueurs.filter((j) => j.camp === 0).map((j) => `${j.joueur.id}@${j.placement.poste}${j.placement.cellule}`).sort().join();
-    const apres = e.composition.map((p) => `${p.joueurId}@${p.poste}${p.cellule}`).sort().join();
-    if (avant !== apres) {
-      this.sim.changerEquipe(0, e);
+    // L'arbitre applique les choix (places, remplaçants, tactique) et calcule la 2e mi-temps
+    // à partir de l'état exact de la fin de la 1re.
+    const film = this.arbitre.secondeMiTemps({ options: { ...this.options }, tactiques: [...this.tactiquesForcees], equipe0: e });
+    this.debutPeriode = this.instant.temps;
+    this.lecteur.charger(film);
+    if (film.entete.equipeChangee) {
+      this.equipesMatch = [e, this.equipesMatch[1]];
       this.construireTerrain();
     }
-    if (e.tactique && !this.tactiquesForcees[0]) this.sim.definirTactique(0, e.tactique);
+    if (e.tactique && !this.tactiquesForcees[0]) this.tactiques[0] = e.tactique;
     this.panneau?.remove();
     this.panneau = null;
     this.arret = null;
     this.periode = 2;
-    this.debutPeriode = this.sim.temps;
-    this.sim.commencerPeriode();
     this.enPause = false;
-    this.sim.balle?.coupDEnvoi(1, "2e mi-temps");
+    for (const f of this.majChoix) f();
   }
 
   /** Panneau de statistiques sur le terrain (mi-temps, fin du match). */
   private montrerStats(): void {
-    const sim = this.sim;
-    const st = sim.balle?.stats;
-    if (!st) return;
+    const sim = this.instant;
+    const bilan = this.bilan;
+    if (!bilan) return;
+    const st = bilan.stats;
     this.panneau?.remove();
     const h = this.habillage;
     const p = html("div", { class: "match-panneau", role: "dialog", "aria-label": this.arret === "fin" ? "Fin du match" : "Mi-temps" }, this.terrain);
@@ -807,7 +878,7 @@ export class EcranMatch {
     html("span", { class: "eux" }, score, h.nomEux);
     if (this.arret === "fin") html("span", { class: "match-panneau-sous" }, carte, `Mi-temps : ${this.scoreMiTemps[0]} – ${this.scoreMiTemps[1]}`);
     // Buteurs (13/11, demande du concepteur), sous le score, de chaque côté.
-    const buts = sim.balle?.buts ?? [];
+    const buts = bilan.buts;
     if (buts.length) {
       const zone = html("div", { class: "match-panneau-buteurs" }, carte);
       for (const camp of [0, 1] as const) {
@@ -840,7 +911,7 @@ export class EcranMatch {
       html("span", { class: "eux" }, table, b);
     }
     // Notes du match (13/11) : ton meilleur joueur, le sien ; homme du match à la fin.
-    const notes = sim.notesDuMatch();
+    const notes = bilan.notes;
     if (notes.length) {
       const z = html("div", { class: "match-panneau-notes" }, carte);
       const ligne = (titre: string, n: (typeof notes)[number] | undefined, cl: string) => {
@@ -867,8 +938,8 @@ export class EcranMatch {
   /** Vue « Action » (12/11, à la place de la caméra) : les joueurs proches du
    *  ballon passent en figurines, les autres restent des pions. Hystérésis et
    *  durée minimale : un joueur ne clignote pas d'un état à l'autre. */
-  private dessinerAction(pos: { x: number; y: number }[], porteur: import("../sim/simulation").JoueurSim | null, grand: number): void {
-    const sim = this.sim;
+  private dessinerAction(pos: { x: number; y: number }[], porteur: JoueurVu | null, grand: number): void {
+    const sim = this.instant;
     const maintenant = performance.now();
     // Centre de l'action : suit le ballon à vitesse limitée (temps de jeu).
     const dtJeu = Math.max(0, sim.temps - this.tempsAction);
@@ -931,7 +1002,7 @@ export class EcranMatch {
   /** Ballon : au sol il roule (le motif tourne), en l'air il monte au-dessus
    *  de son ombre et grossit ; une traînée suit les ballons rapides. */
   private dessinerBallon(): void {
-    const sim = this.sim;
+    const sim = this.instant;
     const visible = sim.demarre;
     this.ballon.style.display = visible ? "" : "none";
     this.ombreBallon.style.display = visible ? "" : "none";
@@ -993,10 +1064,10 @@ export class EcranMatch {
 
   /** Tableau de bord : possession, passes réussies, lignes défensives, paliers de styles. */
   private majBord(force = false): void {
-    const sim = this.sim;
+    const sim = this.instant;
     if (!force && performance.now() - this.derniereMajBord < 500) return;
     this.derniereMajBord = performance.now();
-    const st = sim.balle?.stats;
+    const st = sim.balle;
     const total = sim.tempsPossession[0] + sim.tempsPossession[1];
     const pc = (a: number, b: number) => (b > 0 ? `${Math.round((100 * a) / b)} %` : "—");
     const ligne = (camp: 0 | 1) => (sim.lignesDef[camp] === null ? "—" : `${Math.round(sim.lignesDef[camp]!)} m`);
@@ -1016,7 +1087,8 @@ export class EcranMatch {
     }
     const p = html("div", { class: "match-paliers" }, b);
     html("span", { class: "match-carte-titre" }, p, "Paliers de styles");
-    const paliers = sim.paliers(0);
+    // Styles dont le palier est atteint par ton équipe sur le terrain (vide si les styles sont coupés).
+    const paliers = this.options.styles ? paliersAtteints(this.equipesMatch[0], this.equipesMatch[0].composition, INFLUENCES) : [];
     if (!this.options.styles) html("span", { class: "match-discret" }, p, "styles coupés");
     else if (!paliers.length) html("span", { class: "match-discret" }, p, "aucun (3 joueurs du même style)");
     for (const code of paliers) {

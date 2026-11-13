@@ -625,3 +625,47 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 **Tests** : 134 verts (nouveaux : `tests/touches.test.ts`, `tests/championnat.test.ts` : calendrier, classement, championnat complet simulé). Parcours vérifié au format téléphone : draft, match complet, retour à la préparation de la journée 2 avec classement et +10 pièces.
 
 **À juger par le concepteur** : les touches ; le rythme du championnat (3 journées, est-ce assez ?) ; les +10 pièces par journée (avis de Claude : bon point de départ, une fusion de niveau 1 coûte souvent 2 à 4 pièces ; on pourra ajouter une prime de victoire) ; les nouveaux maillots et bustes.
+
+## 13/11/2026 (soir) — Préparer le mode en ligne : graine et arbitre de match (sans rien changer au jeu)
+
+**Demandes du concepteur** : préparer le prototype au futur mode en ligne (« match calculé par un serveur, téléphones qui jouent le film du match »), « SANS RIEN CHANGER AU JEU » : mêmes règles, réglages, équilibrage, écrans, et « même graine = même match, à l'identique ». Ne pas toucher `src/data/*.json` ni le moteur ; pas de serveur maintenant ; travail sur une branche avec pull request.
+
+**Décisions validées dans la séance** (réponses du concepteur à l'inventaire des actions possibles pendant le jeu)
+- Les listes « Tactique » des deux équipes et les interrupteurs « Tactiques » et « Styles » de l'écran du match ne se changent plus pendant le jeu : **avant le coup d'envoi et à la mi-temps seulement** (grisés pendant le jeu, pause comprise). Remplace « tactique modifiable en plein match » (12/11).
+- Changer d'onglet en plein match (Préparation puis Match) recommence le match au coup d'envoi avec la même graine : **gardé tel quel** pour l'instant, à bloquer plus tard pour le jeu en ligne.
+
+**Ce qui a été fait**
+- **Filet de sécurité, avant toute modification** : 134 tests verts ; nouveau test `tests/empreintes.test.ts` avec ses empreintes de référence (`tests/empreintes/reference.json`, enregistrées sur le code d'avant) : 6 matchs complets (graines 1, 2, 7, 42 ; une mi-temps avec remplaçant, joueur déplacé, Pressing pour toi et Contre pour l'adversaire ; styles coupés, Tiki-taka contre Gegenpressing et tactiques coupées à la mi-temps) et une partie complète (draft, mercatos, 3 journées de championnat, classement). Pour chaque match : chaque pas de simulation (positions des 22 joueurs et du ballon, score, porteur) passe dans un hachage SHA-256 au bit près, plus un échantillon en clair toutes les 30 s et le bilan de chaque mi-temps (statistiques, buteurs, possession, notes, forme).
+- **Inventaire des actions pendant une période** : sur l'écran du match, la tactique de chaque équipe et les deux interrupteurs agissaient tout de suite sur le moteur ; changer d'onglet recommençait le match. Pause, vitesse, son, zones et vues n'agissent que sur l'affichage (vérifié : ils ne font que lire le moteur). Question posée au concepteur avant de continuer (voir décisions).
+- **Graine** (`src/jeu/graines.ts`) : un « fournisseur de graines » regroupe tous les tirages. En local (`GrainesLocales`), exactement comme avant : partie tirée au sort, match regardé 1, 2, 3… (même graine si le match est recommencé), autres matchs de la journée 1000 + 7 × journée + camp. `main.ts` et l'écran du match passent par lui.
+- **Arbitre de match** (`src/match/`) : `arbitre.ts` (l'interface : nouveau match, 1re mi-temps avec les choix d'avant le coup d'envoi, 2e mi-temps avec les choix de la mi-temps, arrêt) ; `arbitreLocal.ts` (la version locale : elle appelle le moteur exactement comme le faisait l'écran, dans le même ordre ; à la mi-temps, elle applique les choix et repart de l'état exact de la fin de la 1re) ; `film.ts` (le format du film, documenté en tête du fichier : en-tête, morceaux d'images en colonnes de nombres, événements, bilan ; passage en JSON et retour).
+- **Calcul séparé de l'affichage** : l'écran du match (`src/ui/ecranMatch.ts`) ne fait plus avancer le moteur ; il lit le film image par image (une image = un pas de 1/30 s), avec la même boucle qu'avant (pause, vitesse, vues inchangées). L'arbitre local donne tout de suite l'image du coup d'envoi et un premier petit morceau, puis calcule le reste en arrière-plan par tranches de 4 ms : l'écran ne gèle jamais. Si une image n'était pas encore prête (téléphone très lent), l'écran l'attendrait sans prendre de retard.
+- Seuls changements visibles : listes et interrupteurs grisés pendant le jeu (style `figee` dans `style.css`), et la phrase d'aide sous le tableau de bord (« avant le coup d'envoi ou à la mi-temps » au lieu de « en plein match »).
+
+**Mesures** (mi-temps de 180 s, graine 1)
+
+| | Valeur |
+|---|---|
+| Images d'une mi-temps | 5 402 (le coup d'envoi + 5 401 pas : l'ancien écran faisait déjà 5 401 pas en 1re mi-temps, 5 400 en 2e, à cause de l'arrondi des 1/30 s ; gardé tel quel) |
+| Calcul d'une mi-temps | 0,29 s au total sur l'ordinateur de Claude, étalé en arrière-plan |
+| Images prêtes au coup d'envoi | 11 en 1,7 ms |
+| Mémoire d'une mi-temps | 2,5 Mo |
+| Mi-temps en JSON | 5 Mo (doubles précisions, sans compression : à alléger avant le réseau) |
+
+**Tests** : 161 verts (nouveaux : `tests/empreintes.test.ts`, 22 tests dont le fournisseur de graines ; `tests/arbitre.test.ts`, 5 tests : calcul par morceaux pendant la lecture, mi-temps demandée avant la fin du calcul, arrêt, format JSON). Les empreintes sont **identiques** par les trois chemins : le moteur appelé comme l'ancien écran, l'arbitre local lu image par image, et le film passé « par le réseau » en morceaux JSON de 37 images. `bun run verifier` passe.
+
+**Preuve dans le vrai navigateur** (Chrome au format téléphone, `Math.random` à graine fixe pour avoir la même partie) : même draft, puis match complet sur l'ancienne page (branche `main`, vitesse ×4) et sur la nouvelle (vitesse ×3,5) : panneaux de mi-temps et de fin **identiques** (score, buteurs et minutes, toutes les statistiques, notes). Deuxième parcours avec des choix à la mi-temps (toi en Pressing, l'adversaire en Contre, styles coupés, détour par l'écran de préparation) : identiques aussi. Aucune erreur JavaScript. Listes et interrupteurs : actifs avant le coup d'envoi et à la mi-temps, grisés pendant le jeu (captures claires et sombres).
+
+**Contre-vérification demandée par le concepteur (13/11, 22 h)** : 5 matchs de plus dans Chrome, chacun avec une autre partie (graines 1001 à 5005 pour le hasard de la page), ancienne page en ×4 et nouvelle en ×3,5 en même temps, et des choix de mi-temps différents à chaque fois. Panneaux de mi-temps et de fin identiques dans les 5 cas, aucune erreur JavaScript.
+
+| Match | Choix à la mi-temps | Score (mi-temps) | Buteurs | Identique |
+|---|---|---|---|---|
+| 1 | aucun | 0-1 (0-1) | 15' Roux | oui |
+| 2 | toi en Gegenpressing | 0-2 (0-2) | 9' et 19' Mercier | oui |
+| 3 | adversaire en Tiki-taka, styles coupés | 0-3 (0-1) | 33' Mercier, 51' et 90' Blackwood | oui |
+| 4 | tactiques coupées | 0-2 (0-1) | 12' Mercier, 76' Roux | oui |
+| 5 | toi en Contre, détour par la préparation | 0-2 (0-0) | 53' et 67' Roux | oui |
+
+**Remarqué en passant, non corrigé** (rien ne devait changer) : après un détour par l'écran de préparation à la mi-temps, le gros bouton du haut affiche encore « ▶ 2e mi-temps » pendant la 2e mi-temps (au lieu de « ❚❚ Pause ») ; il redevient juste au premier toucher. C'était déjà le cas avant.
+
+**À juger par le concepteur** : la version de test sur son téléphone (page séparée : https://claude.ai/artifact/5AP8h49wchEwgmtjy8YR6a ; la page habituelle du prototype n'a pas été touchée) ; la pull request (changement de structure, à fusionner seulement avec son accord). Pour le réseau, plus tard : alléger le film (binaire, compression, ou positions arrondies au centimètre — ce dernier point changerait l'affichage d'un cheveu, donc à décider) ; faire passer aussi les matchs des ordinateurs par l'arbitre ; bloquer le changement d'onglet en plein match.

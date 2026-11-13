@@ -7,6 +7,8 @@
 //    match (simulé), le classement, puis un mercato avec les pièces gagnées.
 
 import { Championnat, jouerMatch } from "./jeu/championnat";
+import { GrainesLocales } from "./jeu/graines";
+import { ArbitreLocal } from "./match/arbitreLocal";
 import { CATALOGUE, Partie, REGLES } from "./jeu/partie";
 import { chargerDonnees, chargerEquipes, chargerReglages } from "./sim/chargement";
 import { notesAffichees } from "./sim/notes";
@@ -26,6 +28,8 @@ const NOMS_POSTE: Record<string, string> = { G: "gardien", DC: "défenseur centr
 function demarrer(): void {
   const reglages = chargerReglages();
   const donnees = chargerDonnees("hexagones");
+  // Toutes les graines viennent d'ici (13/11 au soir) ; plus tard, d'un serveur.
+  const graines = new GrainesLocales();
   const { adversaire: adversaireDemo } = chargerEquipes(donnees);
   inscrireImages(CATALOGUE.cartes);
   // Formation de l'ordinateur : celle de l'adversaire de démonstration, gardien en dernier.
@@ -72,7 +76,8 @@ function demarrer(): void {
       return { couleur: couleurs[f.pays] ?? "#1F3A93", style: f.style, fusions };
     },
   };
-  const match = new EcranMatch(donnees, reglages, equipes, habillage);
+  // Le match est calculé par l'arbitre (13/11 au soir) : sur le téléphone aujourd'hui, par un serveur plus tard.
+  const match = new EcranMatch(donnees, reglages, equipes, habillage, graines, new ArbitreLocal(donnees, reglages));
 
   /** Fin de ton match : l'autre match de la journée est simulé, le classement avance,
    *  chacun gagne ses pièces et les ordinateurs font leur mercato (13/11). */
@@ -81,7 +86,7 @@ function demarrer(): void {
     championnat.enregistrer(0, adv, score);
     for (const r of championnat.rencontres) {
       if (r.score) continue;
-      r.score = jouerMatch(donnees, reglages, [partie.equipeDe(r.a), partie.equipeDe(r.b)], 1000 + championnat.journee * 7 + r.a);
+      r.score = jouerMatch(donnees, reglages, [partie.equipeDe(r.a), partie.equipeDe(r.b)], graines.matchSimule(championnat.journee, r.a));
     }
     resultats = championnat.rencontres.map((r) => `${partie.noms[r.a]} ${r.score![0]}–${r.score![1]} ${partie.noms[r.b]}`);
     championnat.suivante();
@@ -195,7 +200,7 @@ function demarrer(): void {
 
   function nouvellePartie(): void {
     miTemps = false;
-    partie = new Partie(donnees, Math.floor(Math.random() * 2 ** 31), planOrdi);
+    partie = new Partie(donnees, graines.partie(), planOrdi);
     championnat = new Championnat(partie.noms, REGLES.allerRetour);
     resultats = [];
     offres = new Map();

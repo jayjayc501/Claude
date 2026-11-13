@@ -350,6 +350,9 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-interrupteurs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .match-interrupteur { font: inherit; font-size: 12px; font-weight: 700; color: #4A5A50; background: #E1E6E2; border: none; border-radius: 999px; min-height: 34px; cursor: pointer; }
 .match-interrupteur.actif { color: #fff; background: #2B2F36; }
+/* Pendant le jeu, tactiques et interrupteurs sont figés (13/11 au soir) : on les change avant le coup d'envoi ou à la mi-temps. */
+.match-pilule.figee, .match-interrupteur:disabled { opacity: 0.45; cursor: default; }
+.match-pilule.figee select { cursor: default; }
 .match-bord { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .match-carte { background: #fff; border-radius: 12px; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .match-carte-titre { font-size: 9px; font-weight: 700; color: #4A5A50; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

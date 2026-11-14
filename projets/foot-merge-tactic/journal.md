@@ -775,3 +775,5 @@ Ordinateur (200 parties, `ordiTitulaires`) : équipes avec un fusionné sur le t
 **Tests** : 175 verts (nouveaux : `tests/preparation.test.ts`, prix de vente avec fusions, carte à 1 pièce libérée pour 0). Captures au format téléphone : fiche ouverte au toucher depuis le mercato et depuis le banc, halos en match.
 
 **À juger par le concepteur** : la visibilité des halos ; la vente d'une carte à 1 pièce (0 ou 1 pièce ?).
+
+**Décision (14/11, 10 h 45)** : une carte à 1 pièce se revend 0 (« et 0 pour l'instant »).

@@ -63,10 +63,14 @@ describe("écran de préparation", () => {
 
   test("vente : le joueur quitte l'équipe, le budget remonte", () => {
     const p = nouvelle();
+    const avant = p.etat.budget;
+    // 14/11 : prix de vente = ce qu'il a coûté (copies fusionnées comprises) moins 1.
+    const prix = p.prixVente("TR");
+    expect(prix).toBe(p.fiche("TR").prix * (1 + p.membre("TR")!.fusions) - 1);
     expect(p.appliquer({ type: "vente", id: "TR" }).ok).toBe(true);
     expect(p.membre("TR")).toBeUndefined();
     expect(p.etat.composition.length).toBe(10);
-    expect(p.etat.budget).toBe(10);
+    expect(p.etat.budget).toBe(avant + prix);
     expect(p.pret()).toBe(false);
   });
 
@@ -101,5 +105,12 @@ describe("écran de préparation", () => {
     expect(p.etat.tactique).toBe("TIK");
     expect(p.choisirTactique("XXX").ok).toBe(false);
     expect(p.etat.tactique).toBe("TIK");
+  });
+
+  test("14/11 : une carte à 1 pièce se libère sans rien rapporter (minimum 0)", () => {
+    const p = nouvelle();
+    const un = p.etat.effectif.find((m) => p.fiche(m.id).prix === 1 && m.fusions === 0);
+    if (!un) return;
+    expect(p.prixVente(un.id)).toBe(0);
   });
 });

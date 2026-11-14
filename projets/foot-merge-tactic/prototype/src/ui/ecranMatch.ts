@@ -99,6 +99,13 @@ const FORME_FLAMME =
   "M 0 0 C -0.42 0 -0.55 -0.3 -0.42 -0.52 C -0.34 -0.66 -0.36 -0.8 -0.24 -0.95 C -0.2 -0.8 -0.1 -0.74 -0.04 -0.7 " +
   "C -0.06 -0.84 0.02 -0.94 0.08 -1 C 0.12 -0.86 0.2 -0.8 0.26 -0.74 C 0.3 -0.8 0.32 -0.86 0.34 -0.9 " +
   "C 0.5 -0.66 0.56 -0.36 0.44 -0.18 C 0.34 -0.04 0.2 0 0 0 Z";
+
+/** La flamme à sa taille, coordonnées calculées (14/11 : pas de `transform` SVG
+ *  sur un élément animé en CSS, que certains navigateurs de téléphone ignorent). */
+function cheminFlamme(largeur: number, hauteur: number): string {
+  let i = 0;
+  return FORME_FLAMME.replace(/-?\d+(\.\d+)?/g, (n) => (Number(n) * (i++ % 2 === 0 ? largeur : hauteur)).toFixed(2));
+}
 const BANDES = 12;
 
 export interface InfosJoueur {
@@ -465,8 +472,8 @@ export class EcranMatch {
     // Fusion (14/11) : halo, flamme et aura aux couleurs de chaque équipe.
     FEU.forEach((feu, camp) => {
       const halo = svg("radialGradient", { id: `match-halo-feu-${camp}`, cx: "50%", cy: "50%", r: "50%" }, defs);
-      svg("stop", { offset: "0%", "stop-color": feu.coeur, "stop-opacity": "0.95" }, halo);
-      svg("stop", { offset: "45%", "stop-color": feu.milieu, "stop-opacity": "0.7" }, halo);
+      svg("stop", { offset: "0%", "stop-color": feu.coeur, "stop-opacity": "1" }, halo);
+      svg("stop", { offset: "55%", "stop-color": feu.milieu, "stop-opacity": "0.9" }, halo);
       svg("stop", { offset: "100%", "stop-color": feu.bord, "stop-opacity": "0" }, halo);
       const flamme = svg("linearGradient", { id: `match-feu-${camp}`, x1: "0", y1: "1", x2: "0", y2: "0" }, defs);
       svg("stop", { offset: "0%", "stop-color": feu.coeur, "stop-opacity": "0.95" }, flamme);
@@ -605,20 +612,24 @@ export class EcranMatch {
    *  étincelles) derrière un joueur fusionné, à la couleur de son équipe.
    *  (x, y) : pied de la flamme ; `taille` : rayon du pion ou demi-largeur de la figurine. */
   private feu(g: SVGGElement, camp: 0 | 1, niveau: number, x: number, y: number, taille: number, figurine: boolean): void {
+    // 14/11 (« je ne vois toujours pas les halos ou les flammes ») : plus grands, plus
+    // lumineux, et sans transformation SVG sur les éléments animés.
     const f = svg("g", { class: `match-feu niveau-${niveau}`, transform: `translate(${x} ${y})` }, g);
     if (niveau === 1) {
-      const r = taille * (figurine ? 1.25 : 2.1);
-      svg("ellipse", { cx: 0, cy: figurine ? -taille * 1.05 : -y, rx: r, ry: figurine ? r * 1.35 : r, fill: `url(#match-halo-feu-${camp})`, class: "match-flamme" }, f);
+      const r = taille * (figurine ? 1.65 : 3.2);
+      const cy = figurine ? -taille * 1.05 : -y;
+      svg("ellipse", { cx: 0, cy, rx: r, ry: figurine ? r * 1.3 : r, fill: `url(#match-halo-feu-${camp})`, class: "match-flamme" }, f);
+      svg("ellipse", { cx: 0, cy, rx: r * 0.72, ry: (figurine ? r * 1.3 : r) * 0.72, class: "match-halo-anneau", stroke: FEU[camp].coeur }, f);
       return;
     }
-    const largeur = taille * (niveau === 3 ? (figurine ? 2.5 : 3.9) : figurine ? 2 : 3);
-    const hauteur = taille * (niveau === 3 ? (figurine ? 3.5 : 6.4) : figurine ? 2.7 : 4.7);
-    svg("path", { d: FORME_FLAMME, fill: `url(#match-feu-${camp})`, class: "match-flamme-forme", transform: `scale(${largeur.toFixed(2)} ${hauteur.toFixed(2)})` }, f);
+    const largeur = taille * (niveau === 3 ? (figurine ? 2.9 : 4.4) : figurine ? 2.3 : 3.4);
+    const hauteur = taille * (niveau === 3 ? (figurine ? 4 : 7.2) : figurine ? 3.1 : 5.4);
+    svg("path", { d: cheminFlamme(largeur, hauteur), fill: `url(#match-feu-${camp})`, class: "match-flamme-forme" }, f);
     // Cœur clair de la flamme.
-    svg("path", { d: FORME_FLAMME, fill: FEU[camp].coeur, class: "match-flamme-coeur", transform: `scale(${(largeur * 0.5).toFixed(2)} ${(hauteur * 0.55).toFixed(2)})` }, f);
+    svg("path", { d: cheminFlamme(largeur * 0.5, hauteur * 0.55), fill: FEU[camp].coeur, class: "match-flamme-coeur" }, f);
     if (niveau === 3) {
       for (let i = 0; i < 3; i++) {
-        svg("circle", { cx: (i - 1) * largeur * 0.28, cy: -hauteur * (0.7 + 0.1 * i), r: Math.max(0.8, taille * 0.12), fill: FEU[camp].coeur, class: `match-etincelle e${i}` }, f);
+        svg("circle", { cx: (i - 1) * largeur * 0.28, cy: -hauteur * (0.7 + 0.1 * i), r: Math.max(1, taille * 0.14), fill: FEU[camp].coeur, class: `match-etincelle e${i}` }, f);
       }
     }
   }

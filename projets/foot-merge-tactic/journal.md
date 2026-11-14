@@ -762,3 +762,16 @@ Ordinateur (200 parties, `ordiTitulaires`) : équipes avec un fusionné sur le t
 **Tests** : 174 verts (nouveau : `tests/partie.test.ts`, équipe auto : budget, 11 titulaires à leur poste, banc, qualité, plusieurs cas).
 
 **À juger par le concepteur** : les deux niveaux (assez fort ? vraiment moyen ?), la place des boutons. Remarque : l'équipe auto pioche dans toute la réserve, ce que le draft normal ne permet pas (outil de test).
+
+## 14/11/2026 (midi) — Halos visibles, fiche du mercato, prix de vente
+
+**Demandes du concepteur** : « je ne vois toujours pas les halos ou les flammes durant le match, ça va pas du tout » ; « pour le mercato, quand je clique sur le joueur, j'arrive pas à voir sa fiche, elle disparaît, il y a un bug » ; « quand j'affiche un joueur que j'ai sur le banc, sur le terrain, j'aimerais bien voir son prix de vente, qui serait son prix d'achat moins 1 ; quoique ceux qui valent 1, je me pose la question ».
+
+**Ce qui a été fait**
+- **Fiche du mercato** (`fiche.ts`) : bug reproduit au toucher. Le toucher qui ouvre la fiche finit par un clic qui tombait sur le fond sombre (le mercato est en bas de l'écran, sous la fiche) et la refermait aussitôt ; au banc, plus haut, le clic tombait sur la fiche et elle restait. Le fond ne ferme plus la fiche que si l'appui a commencé sur lui.
+- **Prix de vente** (`preparation.ts`, `prixVente` ; `preparation.json` → `vente`, PROPOSITION) : ce que le joueur a coûté (la carte et ses copies fusionnées) moins 1, jamais sous 0 ; affiché sur la fiche d'un joueur de ton équipe (« Vente : 2 » avec la pièce) et appliqué quand on le revend au mercato (avant : son prix d'achat, sans compter les fusions). Une carte à 1 pièce se libère pour 0 (choix par défaut, à trancher par le concepteur).
+- **Halos et flammes** (`ecranMatch.ts`, `style.css`) : vérifiés dans de vraies parties (équipe auto haute qualité, 8 parties) : 6 sur 8 ont au moins un joueur fusionné sur le terrain, toujours de niveau 1, donc un halo, qui était trop discret. Le halo est plus grand, plus lumineux, avec un anneau, et il palpite plus fort. Les flammes (niveaux 2 et 3) sont plus grandes, et leur taille est désormais calculée dans le dessin, sans transformation SVG mêlée à l'animation CSS (combinaison que certains navigateurs de téléphone affichent mal, ce qui pouvait rendre la flamme minuscule).
+
+**Tests** : 175 verts (nouveaux : `tests/preparation.test.ts`, prix de vente avec fusions, carte à 1 pièce libérée pour 0). Captures au format téléphone : fiche ouverte au toucher depuis le mercato et depuis le banc, halos en match.
+
+**À juger par le concepteur** : la visibilité des halos ; la vente d'une carte à 1 pièce (0 ou 1 pièce ?).

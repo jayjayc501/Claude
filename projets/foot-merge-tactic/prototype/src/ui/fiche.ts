@@ -20,6 +20,8 @@ export interface InfoFiche {
   fusions: number;
   /** Boost de match d'un niveau de fusion (14/11 : caché, les notes affichées ne changent pas). */
   bonusFusion?: number;
+  /** Prix de vente d'un joueur de ton équipe (14/11) ; absent au mercato. */
+  vente?: number;
   /** Bouton en bas de la fiche (13/11 : « Recruter » depuis le mercato). */
   action?: { libelle: string; piece: boolean; possible: boolean; faire: () => void };
 }
@@ -95,6 +97,11 @@ export function ouvrirFiche(info: InfoFiche): void {
   if (info.fusions > 0) {
     const f = html("span", { class: "fiche-puce fusion" }, puces, `Fusion ${"★".repeat(Math.min(3, info.fusions))}${info.bonusFusion ? ` · boost de match +${info.bonusFusion * info.fusions}` : ""}`);
     f.style.setProperty("--aura", AURA[Math.min(3, info.fusions)] ?? AURA[3]!);
+  }
+
+  if (info.vente !== undefined) {
+    const v = html("span", { class: "fiche-puce vente" }, puces, `Vente : ${info.vente}`);
+    html("span", { class: "fiche-piece petite", "aria-hidden": "true" }, v);
   }
 
   // Buste sur son socle, qui déborde de l'en-tête.
@@ -174,8 +181,17 @@ export function ouvrirFiche(info: InfoFiche): void {
   }
   document.addEventListener("keydown", clavier);
   fermer.addEventListener("click", fermerFiche);
+  // 14/11 (« quand je clique sur le joueur du mercato, sa fiche disparaît ») : le
+  // toucher qui ouvre la fiche finit par un clic, qui tombait sur le fond sombre
+  // (le mercato est en bas de l'écran) et la refermait aussitôt. On ne ferme que
+  // si l'appui a commencé sur le fond.
+  let appuiSurFond = false;
+  voile.addEventListener("pointerdown", (e) => {
+    appuiSurFond = e.target === voile;
+  });
   voile.addEventListener("click", (e) => {
-    if (e.target === voile) fermerFiche();
+    if (e.target === voile && appuiSurFond) fermerFiche();
+    appuiSurFond = false;
   });
   fermer.focus({ preventScroll: true });
 }

@@ -36,6 +36,8 @@ export interface EtatPrepa {
 }
 
 export interface DonneesPrepa {
+  /** Règle de vente (14/11) : prix payé moins `moins`, au moins `minimum`. */
+  vente?: { moins: number; minimum: number };
   deck: { code: string; nom: string; couleur: string }[];
   styles: Record<string, string>;
   tactiques: { code: string; nom: string; court?: string; aide: string }[];
@@ -100,6 +102,14 @@ export class Preparation {
     etat?: EtatPrepa,
   ) {
     this.etat = etat ?? etatInitial(d);
+  }
+
+  /** Prix de vente d'un joueur de ton équipe (14/11, demande du concepteur) :
+   *  ce qu'il a coûté (la carte et ses copies fusionnées) moins une pièce. */
+  prixVente(id: string): number {
+    const m = this.membre(id);
+    const v = this.d.vente ?? { moins: 0, minimum: 0 };
+    return Math.max(v.minimum, this.fiche(id).prix * (1 + (m?.fusions ?? 0)) - v.moins);
   }
 
   fiche(id: string): Fiche {
@@ -230,9 +240,10 @@ export class Preparation {
       case "vente": {
         const f = this.fiche(a.id);
         if (!this.membre(a.id)) return { ok: false, erreur: "" };
-        return avec(retirer(e.composition, a.id), `${f.nom} vendu : +${f.prix}.`, {
+        const prix = this.prixVente(a.id);
+        return avec(retirer(e.composition, a.id), prix ? `${f.nom} vendu : +${prix}.` : `${f.nom} libéré (une carte à 1 pièce ne rapporte rien).`, {
           effectif: e.effectif.filter((m) => m.id !== a.id),
-          budget: e.budget + f.prix,
+          budget: e.budget + prix,
         });
       }
     }

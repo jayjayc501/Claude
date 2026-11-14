@@ -369,6 +369,8 @@ export class EcranPreparation {
       notes: f.notes ?? null,
       fusions: place === null ? (this.prepa.membre(id)?.fusions ?? 0) : 0,
       bonusFusion: this.prepa.bonusFusion,
+      // Joueur de ton équipe (banc ou terrain) : son prix de vente (14/11).
+      vente: place === null && this.prepa.membre(id) && this.partie ? this.prepa.prixVente(id) : undefined,
       action,
     });
   }

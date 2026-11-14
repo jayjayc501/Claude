@@ -24,11 +24,15 @@ import { BUSTES_ROUGES, CHAMP_ROUGE, GARDIEN_ROUGE } from "./adversaires";
 import { BUSTES } from "./bustes";
 import { BUSTES_BLEUS } from "./equipeBleue";
 import { dessinerLignes, html, svg } from "./dom";
+import { dessinerButsEtDrapeaux, imageStade } from "./stade";
 import { CORPS_PICTOS, PICTOS } from "./pictos";
 import { activer, basculerMuet, estMuet, jouer } from "./son";
 
 const ECHELLE = 5; // unités SVG par mètre
-const MARGE = 6;
+// 14/11 : place pour l'herbe autour, les panneaux et les tribunes (6 avant) ;
+// plus derrière les buts, où le téléphone a de la place en hauteur.
+const MARGE = 16;
+const MARGE_Y = 34;
 /** Trois rendus à comparer (12/11) : pions ronds et seul le porteur en
  *  figurine ; toutes les figurines en petit ; « Action » : les joueurs proches
  *  du ballon en figurines, les autres en pions (remplace la caméra, 12/11). */
@@ -82,7 +86,19 @@ const ANNONCE_BUT_S = 5.5;
 const VITESSE_PAR_DEFAUT = 3.5;
 const COULEUR_EUX = "#C2413D";
 /** Couleur de chaque niveau de fusion (1 bleu, 2 or, 3 violet), comme sur la préparation. */
-const COULEURS_FUSION = ["", "#38E1FF", "#FFC400", "#C04BFF"];
+/** Fusion en match (14/11, concepteur : « la flamme de la couleur de l'équipe qui
+ *  grossit », « au début un halo qui se transforme en flamme ») : niveau 1 = halo,
+ *  2 = flamme, 3 = grande flamme avec étincelles, en bleu pour toi et en rouge pour
+ *  l'adversaire. Le bleu, l'or et le violet des niveaux restent sur l'écran de préparation. */
+const FEU = [
+  { coeur: "#E6EEFF", milieu: "#5B8CFF", bord: "#2D5BD8" },
+  { coeur: "#FFE6E1", milieu: "#FF6B5E", bord: "#C2413D" },
+] as const;
+/** Flamme dessinée de 0 (base) à -1 (pointe), largeur de -0,5 à 0,5. */
+const FORME_FLAMME =
+  "M 0 0 C -0.42 0 -0.55 -0.3 -0.42 -0.52 C -0.34 -0.66 -0.36 -0.8 -0.24 -0.95 C -0.2 -0.8 -0.1 -0.74 -0.04 -0.7 " +
+  "C -0.06 -0.84 0.02 -0.94 0.08 -1 C 0.12 -0.86 0.2 -0.8 0.26 -0.74 C 0.3 -0.8 0.32 -0.86 0.34 -0.9 " +
+  "C 0.5 -0.66 0.56 -0.36 0.44 -0.18 C 0.34 -0.04 0.2 0 0 0 Z";
 const BANDES = 12;
 
 export interface InfosJoueur {
@@ -230,8 +246,11 @@ export class EcranMatch {
     return this.instant.demarre && !this.arret;
   }
 
-  private X = (m: number) => MARGE + m * ECHELLE;
-  private Y = (m: number) => MARGE + (105 - m) * ECHELLE;
+  // Changement de côté à la mi-temps (14/11, concepteur : « à la mi-temps, on ne
+  // change pas de côté, c'est un peu bizarre ») : en 2e mi-temps, le terrain est
+  // affiché retourné (ton équipe attaque vers le bas). Le moteur ne change pas.
+  private X = (m: number) => MARGE + (this.periode === 2 ? 68 - m : m) * ECHELLE;
+  private Y = (m: number) => MARGE_Y + (this.periode === 2 ? m : 105 - m) * ECHELLE;
 
   /** Appelé à l'ouverture de l'écran : nouveau match au coup d'envoi. */
   /** Ouvre l'écran : nouveau match, ou reprise du match en cours (mi-temps, 13/11). */
@@ -419,7 +438,7 @@ export class EcranMatch {
 
   private construireTerrain(): void {
     const s = svg("svg", {
-      viewBox: `0 0 ${68 * ECHELLE + 2 * MARGE} ${105 * ECHELLE + 2 * MARGE}`,
+      viewBox: `0 0 ${68 * ECHELLE + 2 * MARGE} ${105 * ECHELLE + 2 * MARGE_Y}`,
       role: "img",
       "aria-label": "Terrain de match",
     });
@@ -431,13 +450,6 @@ export class EcranMatch {
     this.vedetteDepuis = -Infinity;
     const K = this.k;
     const defs = svg("defs", {}, s);
-    const auras: [string, number][][] = [
-      [],
-      // 14/11 (« les flammes des joueurs fusionnés ne se voyaient plus trop ») : plus larges.
-      [["#FFFFFF", 0.9], ["#38E1FF", 2.6], ["#38E1FF", 5.2]],
-      [["#FFFFFF", 0.9], ["#FFC400", 2.6], ["#FFB000", 5.2]],
-      [["#FFFFFF", 1], ["#C04BFF", 3.2], ["#FF4FD8", 6.4]],
-    ];
     // Ballon moderne (12/11, « le ballon n'est pas beau ») : sphère brillante,
     // motif de match bleu et or qui tourne quand il roule, reflet, traînée.
     const sphere = svg("radialGradient", { id: "match-ballon-sphere", cx: "38%", cy: "32%", r: "75%" }, defs);
@@ -450,24 +462,37 @@ export class EcranMatch {
     svg("stop", { offset: "100%", "stop-color": "#FFFFFF", "stop-opacity": "0.75" }, queue);
     const clip = svg("clipPath", { id: "match-ballon-clip" }, defs);
     svg("circle", { r: RAYON_BALLON }, clip);
-    auras.forEach((ombres, n) => {
-      if (!n) return;
-      // Flamme de fusion (14/11) : halo coloré qui palpite derrière le joueur.
-      const fl = svg("radialGradient", { id: `match-flamme-${n}`, cx: "50%", cy: "60%", r: "50%" }, defs);
-      svg("stop", { offset: "0%", "stop-color": COULEURS_FUSION[n]!, "stop-opacity": "0.95" }, fl);
-      svg("stop", { offset: "55%", "stop-color": COULEURS_FUSION[n]!, "stop-opacity": "0.5" }, fl);
-      svg("stop", { offset: "100%", "stop-color": COULEURS_FUSION[n]!, "stop-opacity": "0" }, fl);
-      const f = svg("filter", { id: `match-aura-${n}`, x: "-60%", y: "-60%", width: "220%", height: "220%", "color-interpolation-filters": "sRGB" }, defs);
-      for (const [c, e] of ombres) svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: e, "flood-color": c, "flood-opacity": 1 }, f);
+    // Fusion (14/11) : halo, flamme et aura aux couleurs de chaque équipe.
+    FEU.forEach((feu, camp) => {
+      const halo = svg("radialGradient", { id: `match-halo-feu-${camp}`, cx: "50%", cy: "50%", r: "50%" }, defs);
+      svg("stop", { offset: "0%", "stop-color": feu.coeur, "stop-opacity": "0.95" }, halo);
+      svg("stop", { offset: "45%", "stop-color": feu.milieu, "stop-opacity": "0.7" }, halo);
+      svg("stop", { offset: "100%", "stop-color": feu.bord, "stop-opacity": "0" }, halo);
+      const flamme = svg("linearGradient", { id: `match-feu-${camp}`, x1: "0", y1: "1", x2: "0", y2: "0" }, defs);
+      svg("stop", { offset: "0%", "stop-color": feu.coeur, "stop-opacity": "0.95" }, flamme);
+      svg("stop", { offset: "40%", "stop-color": feu.milieu, "stop-opacity": "0.95" }, flamme);
+      svg("stop", { offset: "100%", "stop-color": feu.bord, "stop-opacity": "0.15" }, flamme);
+      for (let n = 1; n <= 3; n++) {
+        const f = svg("filter", { id: `match-aura-${camp}-${n}`, x: "-60%", y: "-60%", width: "220%", height: "220%", "color-interpolation-filters": "sRGB" }, defs);
+        svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: 0.9, "flood-color": "#FFFFFF", "flood-opacity": 1 }, f);
+        svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: 1.6 + n, "flood-color": feu.milieu, "flood-opacity": 1 }, f);
+      }
     });
 
-    // Pelouse rayée, comme sur l'écran de préparation.
+    // Pelouse rayée (affichée tout de suite), puis le stade peint une fois
+    // (14/11 : tonte en damier, lumière, panneaux, tribunes ; voir stade.ts).
     const W = 68 * ECHELLE + 2 * MARGE;
-    const H = 105 * ECHELLE + 2 * MARGE;
+    const H = 105 * ECHELLE + 2 * MARGE_Y;
     svg("rect", { x: 0, y: 0, width: W, height: H, rx: 14, class: "match-pelouse" }, s);
     const hb = (105 * ECHELLE) / BANDES;
-    for (let i = 0; i < BANDES; i += 2) svg("rect", { x: MARGE, y: MARGE + i * hb, width: 68 * ECHELLE, height: hb, class: "match-bande" }, s);
+    for (let i = 0; i < BANDES; i += 2) svg("rect", { x: MARGE, y: MARGE_Y + i * hb, width: 68 * ECHELLE, height: hb, class: "match-bande" }, s);
+    const decor = svg("image", { x: 0, y: 0, width: W, height: H, preserveAspectRatio: "none", class: "match-stade" }, s);
+    const densite = Math.min(3, Math.max(1.5, globalThis.devicePixelRatio || 1));
+    void imageStade({ echelle: ECHELLE, margeX: MARGE, margeY: MARGE_Y }, densite).then((url) => {
+      if (url) decor.setAttribute("href", url);
+    });
     dessinerLignes(svg("g", { class: "match-lignes" }, s), this.X, this.Y, false);
+    dessinerButsEtDrapeaux(svg("g", { class: "match-buts" }, s), this.X, this.Y);
     this.calqueZones = svg("g", { class: "zones-match" }, s);
 
     // Halo du porteur, ombre du ballon, joueurs, ballon.
@@ -553,20 +578,20 @@ export class EcranMatch {
     const info = this.habillage.infos(id, camp);
     const fusions = info?.fusions ?? 0;
     if (image) {
-      if (fusions) svg("ellipse", { cx: 0, cy: -22 * K, rx: 22 * K, ry: 31 * K, fill: `url(#match-flamme-${Math.min(3, fusions)})`, class: "match-flamme" }, g);
+      if (fusions) this.feu(g, camp, Math.min(3, fusions), 0, 0, 20 * K, true);
       svg("image", {
         href: image,
         x: -24 * K,
         y: -48 * K,
         width: 48 * K,
         height: 49 * K,
-        filter: fusions ? `url(#match-aura-${Math.min(3, fusions)})` : undefined,
+        filter: fusions ? `url(#match-aura-${camp}-${Math.min(3, fusions)})` : undefined,
       }, g);
       // Avant de l'anneau redessiné par-dessus : socle à la couleur de
       // l'équipe (bleu ou rouge, comme le maillot), la flamme (aura) autour de
       // la figurine garde la couleur de la fusion (12/11).
       svg("path", { d: `M ${-17 * K} 0 A ${17 * K} ${5 * K} 0 0 0 ${17 * K} 0`, class: "match-socle" }, g);
-      if (fusions) svg("path", { d: `M ${-17 * K} 0 A ${17 * K} ${5 * K} 0 0 0 ${17 * K} 0`, class: "match-socle-fusion", stroke: COULEURS_FUSION[Math.min(3, fusions)] }, g);
+      if (fusions) svg("path", { d: `M ${-17 * K} 0 A ${17 * K} ${5 * K} 0 0 0 ${17 * K} 0`, class: "match-socle-fusion", stroke: FEU[camp].milieu }, g);
       this.pastilleStyle(g, info?.style ?? null, 13 * K, -10 * K, 5.5 * Math.max(0.8, K));
     } else {
       svg("circle", { cy: -14, r: 9, fill: camp === 0 ? "#3563C0" : COULEUR_EUX, stroke: "#fff", "stroke-width": 1.5 }, g);
@@ -576,6 +601,28 @@ export class EcranMatch {
     return g;
   }
 
+  /** Halo (niveau 1) ou flamme (niveaux 2 et 3, plus grande au 3, avec des
+   *  étincelles) derrière un joueur fusionné, à la couleur de son équipe.
+   *  (x, y) : pied de la flamme ; `taille` : rayon du pion ou demi-largeur de la figurine. */
+  private feu(g: SVGGElement, camp: 0 | 1, niveau: number, x: number, y: number, taille: number, figurine: boolean): void {
+    const f = svg("g", { class: `match-feu niveau-${niveau}`, transform: `translate(${x} ${y})` }, g);
+    if (niveau === 1) {
+      const r = taille * (figurine ? 1.25 : 2.1);
+      svg("ellipse", { cx: 0, cy: figurine ? -taille * 1.05 : -y, rx: r, ry: figurine ? r * 1.35 : r, fill: `url(#match-halo-feu-${camp})`, class: "match-flamme" }, f);
+      return;
+    }
+    const largeur = taille * (niveau === 3 ? (figurine ? 2.5 : 3.9) : figurine ? 2 : 3);
+    const hauteur = taille * (niveau === 3 ? (figurine ? 3.5 : 6.4) : figurine ? 2.7 : 4.7);
+    svg("path", { d: FORME_FLAMME, fill: `url(#match-feu-${camp})`, class: "match-flamme-forme", transform: `scale(${largeur.toFixed(2)} ${hauteur.toFixed(2)})` }, f);
+    // Cœur clair de la flamme.
+    svg("path", { d: FORME_FLAMME, fill: FEU[camp].coeur, class: "match-flamme-coeur", transform: `scale(${(largeur * 0.5).toFixed(2)} ${(hauteur * 0.55).toFixed(2)})` }, f);
+    if (niveau === 3) {
+      for (let i = 0; i < 3; i++) {
+        svg("circle", { cx: (i - 1) * largeur * 0.28, cy: -hauteur * (0.7 + 0.1 * i), r: Math.max(0.8, taille * 0.12), fill: FEU[camp].coeur, class: `match-etincelle e${i}` }, f);
+      }
+    }
+  }
+
   /** Pion rond (vue « pions ») : couleur du pays pour ton équipe, rouge pour l'adversaire. */
   private pionRond(parent: SVGGElement, camp: 0 | 1, id: string, nom: string): SVGGElement {
     const g = svg("g", { class: `match-rond${camp === 0 ? " nous" : " eux"}` }, parent);
@@ -583,11 +630,10 @@ export class EcranMatch {
     // (12/11, « pas de séparation visuelle forte entre les 2 équipes »).
     const info = this.habillage.infos(id, camp);
     const fusions = Math.min(3, info?.fusions ?? 0);
-    // Fusion (13/11, « en match, les fusions ne se voient plus ») : anneau de la couleur du niveau.
+    // Fusion (14/11) : halo au niveau 1, flamme qui grossit aux niveaux 2 et 3, couleur de l'équipe.
     if (fusions) {
-      // 14/11 : flamme qui palpite autour du pion, et anneau plus épais.
-      svg("circle", { r: RAYON_ROND * 2.2, fill: `url(#match-flamme-${fusions})`, class: "match-flamme" }, g);
-      svg("circle", { r: RAYON_ROND + 3, class: `match-rond-fusion niveau-${fusions}`, stroke: COULEURS_FUSION[fusions] }, g);
+      this.feu(g, camp, fusions, 0, RAYON_ROND * 0.9, RAYON_ROND, false);
+      svg("circle", { r: RAYON_ROND + 2.4, class: `match-rond-fusion niveau-${fusions}`, stroke: FEU[camp].milieu }, g);
     }
     svg("circle", { r: RAYON_ROND, fill: camp === 0 ? BLEU_NOUS : COULEUR_EUX, class: "match-rond-corps" }, g);
     // Style (13/11, « il faut qu'on ait la visibilité ») : petite pastille du pictogramme.
@@ -714,7 +760,7 @@ export class EcranMatch {
           // Nouveau porteur : sa figurine surgit.
           this.figPorteurImage!.setAttribute("href", this.images_[i] ?? "");
           const f = this.habillage.infos(porteur.joueur.id, porteur.camp)?.fusions ?? 0;
-          if (f) this.figPorteurImage!.setAttribute("filter", `url(#match-aura-${Math.min(3, f)})`);
+          if (f) this.figPorteurImage!.setAttribute("filter", `url(#match-aura-${porteur.camp}-${Math.min(3, f)})`);
           else this.figPorteurImage!.removeAttribute("filter");
           this.figPorteurAnim!.style.animation = "none";
           void this.figPorteurAnim!.getBoundingClientRect();
@@ -771,7 +817,9 @@ export class EcranMatch {
         const poste = this.donnees.poste(j.poste.id);
         const r = projeterRect(poste.rect, poste, sim.phases[0], ballon, reg, L, tenues);
         const a = { x: r.x * W, y: (r.y + r.h) * L };
-        svg("rect", { x: this.X(a.x), y: this.Y(a.y), width: r.w * 68 * ECHELLE, height: r.h * 105 * ECHELLE, rx: 4, class: "zone-match" }, this.calqueZones);
+        const xs = [this.X(a.x), this.X(a.x + r.w * W)];
+        const ys = [this.Y(a.y), this.Y(a.y - r.h * L)];
+        svg("rect", { x: Math.min(...xs), y: Math.min(...ys), width: r.w * 68 * ECHELLE, height: r.h * 105 * ECHELLE, rx: 4, class: "zone-match" }, this.calqueZones);
       }
     }
 

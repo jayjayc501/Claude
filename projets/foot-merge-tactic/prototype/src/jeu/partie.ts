@@ -31,7 +31,7 @@ export interface Regles {
   nomsOrdis: string[];
   gainParJournee: number;
   allerRetour: boolean;
-  ordi: { reserveBanc: number; relancesMax: number };
+  ordi: { reserveBanc: number; relancesMax: number; valeurFusion: number };
 }
 
 export interface Membre {
@@ -269,7 +269,29 @@ export class Partie {
       c.budget -= this.regles.relanceCout;
       relances++;
     }
+    this.ordiTitulaires(camp);
     return achats;
+  }
+
+  /** L'ordinateur fait entrer un remplaçant plus fort qu'un titulaire du même
+   *  poste (14/11 : ses joueurs fusionnés restaient sur le banc). */
+  ordiTitulaires(camp: number): void {
+    const c = this.camps[camp]!;
+    const force = (m: Membre) => this.valeur(m.id) + this.regles.ordi.valeurFusion * m.fusions;
+    const remplacants = () => c.effectif.filter((m) => !c.composition.some((p) => p.joueurId === m.id));
+    for (const r of remplacants().sort((a, b) => force(b) - force(a))) {
+      const poste = this.carte(r.id).poste;
+      let pire: Placement | null = null;
+      for (const p of c.composition) {
+        if (p.poste !== poste) continue;
+        const m = c.effectif.find((x) => x.id === p.joueurId)!;
+        if (!pire || force(m) < force(c.effectif.find((x) => x.id === pire!.joueurId)!)) pire = p;
+      }
+      const sortant = pire;
+      if (sortant && force(r) > force(c.effectif.find((x) => x.id === sortant.joueurId)!)) {
+        c.composition = c.composition.map((p) => (p === sortant ? { ...p, joueurId: r.id } : p));
+      }
+    }
   }
 
   /** Équipe de l'ordinateur pour le match (notes avec le bonus de fusion). */

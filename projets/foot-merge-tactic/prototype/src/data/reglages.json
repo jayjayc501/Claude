@@ -26,7 +26,12 @@
         "max": 44
       },
       "suiviLateral": 0.45,
-      "influencePlacement": { "gardien": 0.2, "defense": 0.45, "milieu": 0.7, "attaque": 0.7 },
+      "influencePlacement": {
+        "gardien": 0.2,
+        "defense": 0.45,
+        "milieu": 0.7,
+        "attaque": 0.7
+      },
       "gardien": {
         "distanceDerriereLigneM": 22,
         "minM": 3,
@@ -38,7 +43,12 @@
       "ecartement": 1.2,
       "glissementLateral": 0.35,
       "glissementCoteOppose": 0.3,
-      "surnombre": { "distanceM": 12, "ballonDebut": 0.4, "ballonPlein": 0.75, "proximite": 0.3 },
+      "surnombre": {
+        "distanceM": 12,
+        "ballonDebut": 0.4,
+        "ballonPlein": 0.75,
+        "proximite": 0.3
+      },
       "distanceDefenseBallonM": 15,
       "ligneArriereMinM": 15,
       "ligneArriereMaxM": 55,
@@ -80,9 +90,27 @@
     "forceSeparation": 8,
     "distanceMinAdversaireM": 2.5,
     "variationIndividuelle": 0.06,
-    "respiration": { "amplitudeM": 1.2, "periodeMinS": 6, "periodeMaxS": 11 },
-    "forme": { "vitesseXMS": 4.5, "vitesseYMS": 5, "vitesseReculYMS": 10 },
-    "allure": { "reponseS": 1.1, "reponseRapideS": 0.5, "courseMS": 4.2, "toleranceM": 8, "rattrapageParM": 0.3, "zoneActiveM": 15, "reculUrgentM": 2, "suiviCible": 0.85, "lissageS": 0.4 },
+    "respiration": {
+      "amplitudeM": 1.2,
+      "periodeMinS": 6,
+      "periodeMaxS": 11
+    },
+    "forme": {
+      "vitesseXMS": 4.5,
+      "vitesseYMS": 5,
+      "vitesseReculYMS": 10
+    },
+    "allure": {
+      "reponseS": 1.1,
+      "reponseRapideS": 0.5,
+      "courseMS": 4.2,
+      "toleranceM": 8,
+      "rattrapageParM": 0.3,
+      "zoneActiveM": 15,
+      "reculUrgentM": 2,
+      "suiviCible": 0.85,
+      "lissageS": 0.4
+    },
     "perception": {
       "minS": 0.1,
       "maxS": 0.3,
@@ -105,46 +133,216 @@
     "pressionM": 4,
     "pressingM": 10,
     "presseurs": 2,
-    "sortieDC": { "distanceM": 18, "axeM": 20 },
-    "decisionS": { "min": 1, "max": 1.8 },
-    "premiereDecisionS": { "min": 0.8, "max": 1.4 },
+    "sortieDC": {
+      "distanceM": 18,
+      "axeM": 20
+    },
+    "decisionS": {
+      "min": 1,
+      "max": 1.8
+    },
+    "premiereDecisionS": {
+      "min": 0.8,
+      "max": 1.4
+    },
     "vitessePasseMinMS": 10,
     "vitessePasseMaxMS": 24,
     "vitessePasseParMetre": 0.55,
-    "imprecision": { "baseDeg": 1.5, "parMetreDeg": 0.12, "sousPressionFacteur": 1.8 },
+    "imprecision": {
+      "baseDeg": 1.5,
+      "parMetreDeg": 0.12,
+      "sousPressionFacteur": 1.8
+    },
     "vitesseTirMS": 26,
     "tirDistanceM": 24,
     "seulTirM": 18,
-    "tir": { "contreProba": 0.5, "viseMinM": 1.5, "viseMaxM": 3.4, "erreurBaseM": 1.2, "erreurParMetre": 0.11, "erreurPenaltyM": 0.8, "arretMax": 0.65, "arretMin": 0.2, "arretParMetre": 0.2, "plongeonVitesseMS": 9, "plongeonDureeS": 0.8, "rayonPlongeonM": 1.6, "arretParMetreDistance": 0.02, "paradeProba": 0.4 },
-    "surface": { "profondeurM": 16.5, "demiLargeurM": 20.15 },
+    "tir": {
+      "contreProba": 0.5,
+      "viseMinM": 1.5,
+      "viseMaxM": 3.4,
+      "erreurBaseM": 1.2,
+      "erreurParMetre": 0.11,
+      "erreurPenaltyM": 0.8,
+      "arretMax": 0.65,
+      "arretMin": 0.2,
+      "arretParMetre": 0.2,
+      "plongeonVitesseMS": 9,
+      "plongeonDureeS": 0.8,
+      "rayonPlongeonM": 1.6,
+      "arretParMetreDistance": 0.02,
+      "paradeProba": 0.4
+    },
+    "surface": {
+      "profondeurM": 16.5,
+      "demiLargeurM": 20.15
+    },
     "arretProba": 0.75,
     "dribbleAvanceM": 8,
     "dribbleFacteur": 0.9,
-    "tacle": { "rayonM": 2, "parSeconde": 0.12 },
+    "tacle": {
+      "rayonM": 2,
+      "parSeconde": 0.12
+    },
     "reserveRepriseS": 3,
-    "passeEspace": { "avanceM": 7, "avanceSurAdversaireS": 0.5, "courseMinMS": 2.5 },
-    "contre": { "vitesseMinMS": 13, "probaControle": 0.5, "perteVitesse": 0.35, "angleMinDeg": 35, "angleMaxDeg": 100 },
-    "dribble": { "distanceM": 3.5, "probaTentative": 0.3, "probaReussite": 0.5, "eliminationS": 1.2 },
-    "protection": { "dureeS": 1.2, "facteurTacle": 0.4 },
+    "passeEspace": {
+      "avanceM": 7,
+      "avanceSurAdversaireS": 0.5,
+      "courseMinMS": 2.5
+    },
+    "contre": {
+      "vitesseMinMS": 13,
+      "probaControle": 0.5,
+      "perteVitesse": 0.35,
+      "angleMinDeg": 35,
+      "angleMaxDeg": 100
+    },
+    "dribble": {
+      "distanceM": 3.5,
+      "probaTentative": 0.3,
+      "probaReussite": 0.5,
+      "eliminationS": 1.2
+    },
+    "protection": {
+      "dureeS": 1.2,
+      "facteurTacle": 0.4
+    },
     "zoneDegagementM": 35,
-    "fautes": { "proba": 0.4, "arretPenaltyProba": 0.22 },
+    "fautes": {
+      "proba": 0.4,
+      "arretPenaltyProba": 0.22
+    },
     "horsJeuToleranceM": 0.5,
-    "pauseArretS": { "min": 3.2, "max": 3.8 },
+    "pauseArretS": {
+      "min": 3.2,
+      "max": 3.8
+    },
     "attenteButS": 7,
-    "centre": { "zoneProfondeurM": 28, "ecartAxeM": 12, "proba": 0.55, "dureeS": 1.1, "erreurDeg": 6, "partEnLAir": 0.8 },
-    "degagement": { "zoneM": 22, "longueurMinM": 28, "longueurMaxM": 45, "dureeS": 1.6, "erreurDeg": 12 },
-    "construction": { "boucheM": 14, "baisseSeuil": 7, "largeurM": 18, "bonusLargeur": 2, "temporiseM": 0, "ecartM": 3, "surfaceOuvertM": 3, "surfaceVoieFacteur": 1.2, "surfaceMalus": 2 },
-    "tirLoin": { "probaBase": 0.02, "probaMax": 0.12 },
+    "centre": {
+      "zoneProfondeurM": 28,
+      "ecartAxeM": 12,
+      "proba": 0.55,
+      "dureeS": 1.1,
+      "erreurDeg": 6,
+      "partEnLAir": 0.8
+    },
+    "degagement": {
+      "zoneM": 22,
+      "longueurMinM": 28,
+      "longueurMaxM": 45,
+      "dureeS": 1.6,
+      "erreurDeg": 12
+    },
+    "construction": {
+      "boucheM": 14,
+      "baisseSeuil": 7,
+      "largeurM": 18,
+      "bonusLargeur": 2,
+      "temporiseM": 0,
+      "ecartM": 3,
+      "surfaceOuvertM": 3,
+      "surfaceVoieFacteur": 1.2,
+      "surfaceMalus": 2
+    },
+    "tirLoin": {
+      "probaBase": 0.02,
+      "probaMax": 0.12
+    },
     "reactionPressionS": 0.45,
-    "marquage": { "declenchementM": 32, "zoneM": 24, "demiLargeurM": 22, "rayonM": 15, "distanceM": 1.5, "milieux": true, "zonePressingM": 0 },
+    "marquage": {
+      "declenchementM": 32,
+      "zoneM": 24,
+      "demiLargeurM": 22,
+      "rayonM": 15,
+      "distanceM": 1.5,
+      "milieux": true,
+      "zonePressingM": 0
+    },
     "horsJeuVuProba": 0.15,
-    "contrePressing": { "dureeS": 4, "rayonM": 20, "joueurs": 3, "tacleFois": 1.3, "precipite": 1, "gene": 1 },
-    "contreAttaque": { "dureeS": 5, "bonusProgression": 0.2, "appelsFois": 2 },
-    "gene": { "rayonM": 4, "facteur": 1, "controleRayonM": 2, "controleRate": 0.08 },
-    "jeuLong": { "proba": 0.06, "probaContre": 0.2, "gainMinM": 18, "distanceMinM": 22, "distanceMaxM": 50, "profondeurMaxM": 62, "avanceS": 0.2, "vitesseMS": 20, "erreurDeg": 5 },
+    "contrePressing": {
+      "dureeS": 4,
+      "rayonM": 20,
+      "joueurs": 3,
+      "tacleFois": 1.3,
+      "precipite": 1,
+      "gene": 1
+    },
+    "contreAttaque": {
+      "dureeS": 5,
+      "bonusProgression": 0.2,
+      "appelsFois": 2
+    },
+    "gene": {
+      "rayonM": 4,
+      "facteur": 1,
+      "controleRayonM": 2,
+      "controleRate": 0.08
+    },
+    "jeuLong": {
+      "proba": 0.06,
+      "probaContre": 0.2,
+      "gainMinM": 18,
+      "distanceMinM": 22,
+      "distanceMaxM": 50,
+      "profondeurMaxM": 62,
+      "avanceS": 0.2,
+      "vitesseMS": 20,
+      "erreurDeg": 5
+    },
     "sansBallon": {
-      "soutien": { "joueurs": 2, "rayonM": 28, "distanceM": 12, "rapprochementMaxM": 8, "decalagesM": [3, -3, 6, -6], "reculM": 4 },
-      "appel": { "parSeconde": 0.6, "dureeS": 2.6, "profondeurM": 13, "diagonale": 0.3, "ecartMinM": 2, "ecartMaxM": 14, "avanceBallonM": 6, "zoneM": 25, "suivreRayonM": 14 }
+      "soutien": {
+        "joueurs": 2,
+        "rayonM": 28,
+        "distanceM": 12,
+        "rapprochementMaxM": 8,
+        "decalagesM": [
+          3,
+          -3,
+          6,
+          -6
+        ],
+        "reculM": 4
+      },
+      "appel": {
+        "parSeconde": 0.6,
+        "dureeS": 2.6,
+        "profondeurM": 13,
+        "diagonale": 0.3,
+        "ecartMinM": 2,
+        "ecartMaxM": 14,
+        "avanceBallonM": 6,
+        "zoneM": 25,
+        "suivreRayonM": 14
+      },
+      "montee": {
+        "_note": "14/11 (concepteur : « les latéraux ne montent jamais ; pas tout le temps, mais des fois ils devraient monter ») : quand on attaque d'un côté (porteur à plus de ecartAxeM de l'axe, à plus de zoneProfM de son but), le latéral de ce côté passe à l'extérieur du porteur (dédoublement) : course de dureeS vers un point avanceM devant le ballon, à bordM de la ligne de touche. Un seul latéral à la fois ; à la perte du ballon, il revient au sprint. Chance par seconde, × (1 + bonusPlaceHaut × hauteur de sa case sur le plateau, de 0 à 1) : placé haut, il monte plus souvent. Quand l'ailier de son côté repique, il prend le couloir (surRepiqueProba). Le porteur cherche le latéral qui monte devant le ballon (bonusPasse au choix de la passe).",
+        "parSeconde": 0.3,
+        "dureeS": 5,
+        "zoneProfM": 45,
+        "ecartAxeM": 8,
+        "avanceM": 14,
+        "bordM": 4,
+        "bonusPlaceHaut": 1,
+        "surRepiqueProba": 0.8,
+        "bonusPasse": 4
+      },
+      "secondPoteau": {
+        "_note": "14/11 (concepteur : « les ailiers ont leur couloir, c'est trop robotisé ») : quand le ballon est sur un côté du dernier tiers (porteur à plus de zoneProfM de son but et à plus de ecartAxeM de l'axe), l'ailier du côté opposé rentre vers le second poteau : poteauM de l'axe, devantButM de la ligne de but au plus, jamais hors-jeu.",
+        "zoneProfM": 68,
+        "ecartAxeM": 10,
+        "poteauM": 4,
+        "devantButM": 8
+      }
+    },
+    "repiquer": {
+      "_note": "14/11 (concepteur : « les ailiers jamais repiquent au centre pour aller marquer ») : un ailier (AG, AD) qui a le ballon sur son côté (à plus de ecartAxeM de l'axe), à plus de zoneProfM de son but et à plus de versLigneMinM de la ligne de but, rentre parfois dans l'axe balle au pied (proba à chaque décision, si l'intérieur est libre : aucun adversaire à moins de libreM de sa course) : rentreeM vers l'axe et avanceM vers le but, pendant dureeS, pour tirer ou combiner.",
+      "proba": 0.3,
+      "zoneProfM": 50,
+      "ecartAxeM": 13,
+      "versLigneMinM": 14,
+      "rentreeM": 11,
+      "avanceM": 6,
+      "dureeS": 1.8,
+      "libreM": 2.5
     }
   },
   "possessionSimulee": {

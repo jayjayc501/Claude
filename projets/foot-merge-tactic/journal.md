@@ -712,3 +712,38 @@ Réglage de la cohésion : avec des compatriotes tous en défense, aucun effet m
 **Tests** : 170 verts (nouveaux : `tests/bonus.test.ts`, 9 tests : bonus caché sans toucher la carte, paliers 3 et 5, cohésion et tradition, fusion, moteur identique sans bonus). Empreintes de la partie régénérées (les fusions et les bonus changent la partie) ; les 6 matchs témoins sont inchangés.
 
 **À juger par le concepteur** : la force des bonus en jouant (fusion ×3 qui domine assez ? cohésion et pays à 8 pas trop forts ?), le bandeau, les pictogrammes qui jaillissent, les flammes de fusion. Questions restantes : l'interrupteur « Styles » du match coupe les styles mais pas les pays ni les fusions ; hybrides (fusion de deux joueurs différents) pas encore faits.
+
+## 14/11/2026 (matin) — Stade, flammes de fusion, changement de côté, latéraux et ailiers
+
+**Demandes du concepteur** : fusions de l'ordinateur invisibles en match ; couleurs des fusions (bleu, or, violet) qui risquent de cacher la couleur de l'équipe ; « à la mi-temps, on ne change pas de côté, c'est un peu bizarre » ; « le fond du terrain pourrait être un peu plus joli », « le terrain de jeu est un peu très simple » ; latéraux « trop statiques en arrière, ils ne montent jamais ; pas tout le temps, mais des fois ils devraient monter » ; ailiers qui « jamais repiquent au centre pour aller marquer », « ils ont leur couloir, c'est trop robotisé ». Ordre : « on commence par le terrain », latéraux et ailiers « à la fin ».
+
+**Décisions validées dans la séance** : en match, la fusion est « la flamme de la couleur de l'équipe qui grossit », « au début un halo qui se transforme en flamme » (le bleu, l'or et le violet restent sur l'écran de préparation).
+
+**Ce qui a été fait** (chiffres et rendu en PROPOSITION)
+- **Stade** (`src/ui/stade.ts`, nouveau) : décor peint une seule fois dans une image (pelouse tondue en bandes et en damier, brins d'herbe, usure devant les buts, lumière des projecteurs, ombre de la tribune, herbe plus sombre hors du terrain, panneaux publicitaires inventés sans texte, tribunes avec le public : bleu derrière ton but, rouge derrière celui de l'adversaire, mélangé sur les côtés) ; buts avec filets et drapeaux de coin en SVG. Lignes : arcs de surface, arcs de coin, point central (`dom.ts`, aussi sur l'écran de préparation). Bords du terrain de match : 16 unités sur les côtés, 34 derrière les buts (6 avant), le terrain rapetisse d'environ 5 %.
+- **Fusions en match** (`ecranMatch.ts`) : niveau 1 halo, niveau 2 flamme, niveau 3 grande flamme avec étincelles, en bleu pour toi et en rouge pour l'adversaire (pions et figurines) ; aura et anneau du socle aux couleurs de l'équipe.
+- **Changement de côté** : en 2e mi-temps, l'affichage est retourné (ton équipe attaque vers le bas) ; le moteur ne change pas.
+- **Fusionnés de l'ordinateur** (`partie.ts`, `ordiTitulaires`, `partie.json` → `ordi.valeurFusion` 7) : après chaque mercato, l'ordinateur fait entrer un remplaçant plus fort qu'un titulaire du même poste (force = moyenne des notes + 7 par fusion). Avant, ses joueurs fusionnés restaient sur le banc.
+- **Latéraux et ailiers** (`ballon.ts`, `reglages.json` → `ballon.sansBallon.montee`, `ballon.sansBallon.secondPoteau`, `ballon.repiquer`) : montée du latéral (dédoublement par l'extérieur quand on attaque de son côté dans la moitié adverse ; un seul à la fois, plus souvent s'il est placé haut sur le plateau ; le porteur le cherche ; à la perte du ballon, il revient au sprint) ; repiquage de l'ailier balle au pied vers l'axe quand l'intérieur est libre (le latéral de son côté prend alors le couloir) ; appel de l'ailier opposé au second poteau quand le ballon est sur un côté du dernier tiers. Nouveau script `scripts/mesurer-couloirs.ts`.
+
+**Mesures** (30 matchs de 180 s, Équilibrée contre l'adversaire de démonstration, styles coupés ; par équipe)
+
+| Mesure | Avant | Après |
+|---|---|---|
+| Latéraux : temps dans la moitié adverse | 18 % | 22 % |
+| Latéraux : temps dans le dernier tiers | 0 % | 4 % |
+| Latéraux : ballons touchés dans le dernier tiers | 0,0 | 0,4 |
+| Montées de latéral | 0 | 6,9 |
+| Ailiers : ballons touchés | 11,3 | 10,7 |
+| Ailiers : ballons touchés dans l'axe du dernier tiers | 0,3 | 0,9 |
+| Repiquages d'ailier | 0 | 1,0 |
+| Ailiers : tirs, buts | 0,18 · 0,07 | 0,48 · 0,22 |
+| Tirs et buts (2 équipes, 180 s) | 4,1 · 1,20 | 3,8 · 1,53 |
+
+Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,0 → 5,3 par minute ; possession 11,1 s et 3,9 passes → 10,8 s et 3,5 ; buts 1,15 → 1,30 par 180 s ; vitesse moyenne 3,49 → 3,62 m/s.
+
+Ordinateur (200 parties, `ordiTitulaires`) : équipes avec un fusionné sur le terrain, journées 1 à 3 : 29, 52, 66 % → 29, 54, 71 % ; fusionnés restés sur le banc à la 3e journée : 0,65 → 0,52 par équipe (ceux qui restent sont moins forts que le titulaire de leur poste). Au 1er match, 7 adversaires sur 10 n'ont encore aucun fusionné : c'est ce qui se voyait en jouant.
+
+**Tests** : 173 verts (nouveaux : `tests/couloirs.test.ts`, 2 tests : le latéral monte des fois, seulement quand son équipe a le ballon, et entre dans le dernier tiers ; l'ailier repique vers l'axe, l'ailier opposé attaque le second poteau ; `tests/partie.test.ts` : l'ordinateur fait jouer ses fusionnés). Empreintes régénérées : le moteur a changé (latéraux et ailiers), les matchs ne sont plus les mêmes.
+
+**À juger par le concepteur** : le stade (assez joli ? terrain un peu plus petit), la flamme qui grossit, le changement de côté, les montées des latéraux (assez souvent ? trop ?), les ailiers qui rentrent dans l'axe et vont au second poteau. Les mesures des bonus du 14/11 (nuit) n'ont pas été refaites après ce changement du moteur.

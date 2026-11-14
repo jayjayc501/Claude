@@ -365,7 +365,13 @@ export interface Reglages {
         zoneM: number;
         suivreRayonM: number;
       };
+      /** Montée du latéral (14/11) : voir reglages.json. */
+      montee: { parSeconde: number; dureeS: number; zoneProfM: number; ecartAxeM: number; avanceM: number; bordM: number; bonusPlaceHaut: number; surRepiqueProba: number; bonusPasse: number };
+      /** Appel de l'ailier opposé au second poteau (14/11). */
+      secondPoteau: { zoneProfM: number; ecartAxeM: number; poteauM: number; devantButM: number };
     };
+    /** Repiquage de l'ailier balle au pied (14/11). */
+    repiquer: { proba: number; zoneProfM: number; ecartAxeM: number; versLigneMinM: number; rentreeM: number; avanceM: number; dureeS: number; libreM: number };
   };
   possessionSimulee: {
     dureeMinS: number;

@@ -125,4 +125,26 @@ describe("Partie contre l'ordinateur (13/11)", () => {
     expect(sim.joueurs.length).toBe(22);
     expect(sim.joueurs.every((j) => Number.isFinite(j.pos.x) && Number.isFinite(j.pos.y))).toBe(true);
   });
+
+  test("14/11 : l'ordinateur fait jouer ses fusionnés (aucun remplaçant plus fort qu'un titulaire du même poste)", () => {
+    let fusionnesTitulaires = 0;
+    for (let g = 1; g <= 30; g++) {
+      const p = new Partie(donnees, 300 + g, plan);
+      p.finirDraftOrdis(5, 3);
+      for (let j = 0; j < 3; j++) {
+        if (j > 0) p.nouvelleJournee(5, 3);
+        for (let camp = 1; camp < p.camps.length; camp++) {
+          const c = p.camps[camp]!;
+          expect(c.composition.length).toBe(11);
+          const force = (id: string) => p.valeur(id) + REGLES.ordi.valeurFusion * c.effectif.find((m) => m.id === id)!.fusions;
+          for (const m of c.effectif) {
+            if (c.composition.some((x) => x.joueurId === m.id)) continue;
+            for (const t of c.composition) if (t.poste === p.carte(m.id).poste) expect(force(m.id)).toBeLessThanOrEqual(force(t.joueurId));
+          }
+          fusionnesTitulaires += c.effectif.filter((m) => m.fusions > 0 && c.composition.some((x) => x.joueurId === m.id)).length;
+        }
+      }
+    }
+    expect(fusionnesTitulaires).toBeGreaterThan(0);
+  });
 });

@@ -12,8 +12,9 @@
   "gainParJournee": 10,
   "allerRetour": false,
   "ordi": {
-    "_note": "L'ordinateur garde quelques pièces pour son banc pendant le draft, et relance son mercato au plus 2 fois.",
+    "_note": "L'ordinateur garde quelques pièces pour son banc pendant le draft, et relance son mercato au plus 2 fois. 14/11 : après son mercato, il fait entrer un remplaçant plus fort qu'un titulaire du même poste (un joueur fusionné surtout : sa force = moyenne des notes + valeurFusion par niveau ; avant, ses fusionnés restaient sur le banc).",
     "reserveBanc": 5,
-    "relancesMax": 2
+    "relancesMax": 2,
+    "valeurFusion": 7
   }
 }

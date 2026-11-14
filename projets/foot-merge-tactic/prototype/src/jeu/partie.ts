@@ -27,7 +27,6 @@ export interface Regles {
   offreTaille: number;
   mercatoTaille: number;
   relanceCout: number;
-  bonusFusionParNiveau: number;
   /** Championnat : noms des équipes de l'ordinateur, pièces gagnées à chaque journée. */
   nomsOrdis: string[];
   gainParJournee: number;
@@ -53,13 +52,6 @@ const TACTIQUES_ORDIS = ["EQU", "PRS", "CON", "TIK"];
 export const REGLES = reglesBrut as unknown as Regles;
 export const CATALOGUE = cartesBrut as unknown as { pays: Record<string, { nom: string; couleur: string }>; cartes: Carte[] };
 
-/** Sous-notes après fusion : + bonus par niveau (PROPOSITION, règle des fusions ouverte). */
-export function notesFusionnees(notes: Notes | null, fusions: number, bonus = REGLES.bonusFusionParNiveau): Notes | null {
-  if (!notes || fusions <= 0) return notes;
-  const r = { ...notes };
-  for (const k of Object.keys(r) as (keyof Notes)[]) r[k] = Math.min(99, r[k] + bonus * fusions);
-  return r;
-}
 
 /** Réserve commune : nombre de copies restantes de chaque carte. */
 export class Reserve {
@@ -285,7 +277,8 @@ export class Partie {
     return this.equipeDe(camp, nom);
   }
 
-  /** Équipe d'un camp pour un match (notes avec le bonus de fusion). */
+  /** Équipe d'un camp pour un match : notes de la carte, pays et fusions (14/11 :
+   *  le boost de match des fusions est appliqué par le moteur, sans toucher aux notes). */
   equipeDe(camp: number, nom = this.noms[camp] ?? "Ordinateur"): Equipe {
     const c = this.camps[camp]!;
     return {
@@ -293,7 +286,7 @@ export class Partie {
       nationalite: nom,
       joueurs: c.effectif.map((m) => {
         const k = this.carte(m.id);
-        return { id: k.id, nom: k.nom, postes: [k.poste], style: k.style, notes: notesFusionnees(k.notes, m.fusions, this.regles.bonusFusionParNiveau) };
+        return { id: k.id, nom: k.nom, postes: [k.poste], style: k.style, notes: k.notes, pays: k.pays, fusions: m.fusions };
       }),
       composition: c.composition.map((p) => ({ ...p })),
       // Chaque ordinateur a sa tactique (13/11), pour des adversaires différents.

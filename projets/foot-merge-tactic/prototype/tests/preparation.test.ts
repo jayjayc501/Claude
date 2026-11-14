@@ -85,8 +85,13 @@ describe("écran de préparation", () => {
       { code: "TEC", n: 2 },
       { code: "RAP", n: 1 },
     ]); // 4 titulaires sans style
-    expect(p.palier(4)).toEqual({ prochain: 5, atteint: true });
-    expect(p.palier(2)).toEqual({ prochain: 3, atteint: false });
+    // Paliers (14/11) : styles à 3 et 5 joueurs, pays à 5 et 8.
+    expect(p.palier(4)).toEqual({ prochain: 5, atteint: true, fort: false });
+    expect(p.palier(2)).toEqual({ prochain: 3, atteint: false, fort: false });
+    expect(p.palier(5)).toEqual({ prochain: 5, atteint: true, fort: true });
+    expect(p.palier(4, "pays")).toEqual({ prochain: 5, atteint: false, fort: false });
+    expect(p.palier(6, "pays")).toEqual({ prochain: 8, atteint: true, fort: false });
+    expect(p.palier(8, "pays")).toEqual({ prochain: 8, atteint: true, fort: true });
   });
 
   test("tactique d'équipe : une seule, Équilibrée par défaut", () => {

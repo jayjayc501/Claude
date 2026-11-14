@@ -1,6 +1,7 @@
 {
-  "_note": "PROPOSITION (12/11), à juger en regardant des matchs. Effets des tactiques d'équipe et des styles sur les réglages du moteur (reglages.json). Un nombre remplace la valeur ; {\"fois\": x} la multiplie ; {\"plus\": x} l'ajoute. Ordre : réglages de base, puis tactique, puis paliers de styles atteints. Effets individuels des styles : multiplicateurs (1 = sans effet).",
+  "_note": "Effets des tactiques d'équipe, des styles, des pays et des fusions sur le moteur (reglages.json). Un nombre remplace la valeur ; {\"fois\": x} la multiplie ; {\"plus\": x} l'ajoute. Ordre : réglages de base, puis tactique, puis paliers de styles, puis tradition de pays. Tactiques : PROPOSITION (12/11). 14/11, VALIDÉ par le concepteur : un style ne change pas les notes affichées ; il donne un bonus caché « pas négligeable » (notes : points ajoutés dans le moteur seulement) et un comportement (joueur : multiplicateurs, 1 = sans effet), sans contrepartie ; bonus d'équipe à 3 joueurs du même style (palier), plus fort et bien visible à 5 (palierFort, action signature) ; pays : cohésion à 5 joueurs du même pays sur le terrain, tradition du pays en plus à 8 ; fusion : boost de match caché, le même pour toutes les cartes, sans toucher aux notes affichées, et un joueur fusionné pèse plus dans le jeu. Tous les chiffres : PROPOSITION, à juger en regardant des matchs.",
   "palier": 3,
+  "palierFort": 5,
   "tactiques": {
     "EQU": {},
     "PRS": {
@@ -17,8 +18,12 @@
       "ballon.gene.facteur": 1.8,
       "ballon.gene.controleRayonM": 3,
       "ballon.gene.controleRate": 0.3,
-      "ballon.tacle.parSeconde": { "fois": 1.8 },
-      "ballon.fautes.proba": { "fois": 1.25 }
+      "ballon.tacle.parSeconde": {
+        "fois": 1.8
+      },
+      "ballon.fautes.proba": {
+        "fois": 1.25
+      }
     },
     "GEG": {
       "ballon.contrePressing.dureeS": 7,
@@ -31,8 +36,12 @@
       "ballon.contrePressing.tacleFois": 4,
       "ballon.contrePressing.precipite": 0.5,
       "ballon.contrePressing.gene": 2.2,
-      "ballon.tacle.parSeconde": { "fois": 1.4 },
-      "ballon.fautes.proba": { "fois": 1.15 }
+      "ballon.tacle.parSeconde": {
+        "fois": 1.4
+      },
+      "ballon.fautes.proba": {
+        "fois": 1.15
+      }
     },
     "CON": {
       "projection.defense.ligneDefensive.hauteurMinM": 9,
@@ -84,35 +93,287 @@
   },
   "styles": {
     "REC": {
-      "joueur": { "pressing": 1.6, "tacle": 1.4 },
+      "nom": "Récupérateur",
+      "palierNom": "Contre-pressing",
+      "palierFortNom": "Pressing en meute",
+      "notes": {
+        "duel": 10,
+        "endurance": 10
+      },
+      "joueur": {
+        "pressing": 1.45,
+        "tacle": 1.4
+      },
       "palier": {
-        "ballon.contrePressing.joueurs": { "plus": 1 },
-        "ballon.contrePressing.dureeS": { "plus": 2 }
+        "ballon.contrePressing.joueurs": {
+          "plus": 1
+        },
+        "ballon.contrePressing.dureeS": {
+          "plus": 2
+        },
+        "ballon.contrePressing.tacleFois": {
+          "fois": 1.15
+        },
+        "ballon.gene.facteur": {
+          "fois": 1.15
+        }
+      },
+      "palierFort": {
+        "ballon.contrePressing.joueurs": {
+          "plus": 1
+        },
+        "ballon.contrePressing.dureeS": {
+          "plus": 2
+        },
+        "ballon.contrePressing.tacleFois": {
+          "fois": 1.25
+        },
+        "ballon.gene.facteur": {
+          "fois": 1.3
+        },
+        "ballon.gene.rayonM": {
+          "plus": 1.5
+        },
+        "ballon.gene.controleRate": {
+          "fois": 1.4
+        }
       }
     },
     "TEC": {
-      "joueur": { "imprecision": 0.55, "dribble": 1.35, "protection": 0.6 },
+      "nom": "Technicien",
+      "palierNom": "Conservation",
+      "palierFortNom": "Jeu en une touche",
+      "notes": {
+        "passe": 8,
+        "dribble": 8
+      },
+      "joueur": {
+        "imprecision": 0.6,
+        "dribble": 1.3,
+        "protection": 0.6
+      },
       "palier": {
-        "ballon.construction.baisseSeuil": { "plus": 3 },
-        "ballon.imprecision.sousPressionFacteur": { "fois": 0.8 },
-        "ballon.poidsEspace": { "fois": 1.3 },
-        "ballon.passeMaxM": { "fois": 0.8 },
-        "ballon.seuilPasse": { "plus": -1 }
+        "ballon.construction.baisseSeuil": {
+          "plus": 3
+        },
+        "ballon.imprecision.sousPressionFacteur": {
+          "fois": 0.8
+        },
+        "ballon.poidsEspace": {
+          "fois": 1.3
+        },
+        "ballon.passeMaxM": {
+          "fois": 0.8
+        },
+        "ballon.seuilPasse": {
+          "plus": -1
+        }
+      },
+      "palierFort": {
+        "ballon.decisionS.min": {
+          "fois": 0.85
+        },
+        "ballon.decisionS.max": {
+          "fois": 0.85
+        },
+        "ballon.imprecision.baseDeg": {
+          "fois": 0.7
+        },
+        "ballon.imprecision.sousPressionFacteur": {
+          "fois": 0.8
+        },
+        "ballon.protection.facteurTacle": {
+          "fois": 0.7
+        },
+        "ballon.dribble.probaReussite": {
+          "fois": 1.15
+        }
       }
     },
     "RAP": {
-      "joueur": { "vitesse": 1.08, "dribble": 0.85 },
+      "nom": "Rapide",
+      "palierNom": "Transitions rapides",
+      "palierFortNom": "Contre éclair",
+      "notes": {
+        "acceleration": 8,
+        "pointe": 8
+      },
+      "joueur": {
+        "vitesse": 1.05
+      },
       "palier": {
-        "transition.sprint.dureeMaxS": { "plus": 2 },
-        "ballon.passeEspace.courseMinMS": { "fois": 0.7 }
+        "transition.sprint.dureeMaxS": {
+          "plus": 2
+        },
+        "ballon.passeEspace.courseMinMS": {
+          "fois": 0.7
+        },
+        "ballon.contreAttaque.dureeS": {
+          "plus": 1
+        }
+      },
+      "palierFort": {
+        "transition.sprint.vitesseMS": {
+          "plus": 1
+        },
+        "transition.sprint.dureeMaxS": {
+          "plus": 2
+        },
+        "ballon.contreAttaque.dureeS": {
+          "plus": 2
+        },
+        "ballon.contreAttaque.bonusProgression": {
+          "plus": 0.25
+        },
+        "ballon.contreAttaque.appelsFois": {
+          "fois": 1.5
+        },
+        "ballon.jeuLong.probaContre": {
+          "fois": 1.6
+        }
       }
     },
     "REM": {
-      "joueur": { "tacle": 1.4, "fautes": 0.6, "imprecision": 1.25 },
+      "nom": "Rempart",
+      "palierNom": "Ligne solide",
+      "palierFortNom": "Le mur",
+      "notes": {
+        "duel": 12,
+        "endurance": 4
+      },
+      "joueur": {
+        "tacle": 1.4,
+        "fautes": 0.6
+      },
       "palier": {
-        "projection.defense.ligneDefensive.vitesseReculMS": { "plus": 1.5 },
-        "projection.defense.ligneDefensive.dangerM": { "plus": 4 }
+        "projection.defense.ligneDefensive.vitesseReculMS": {
+          "plus": 1.5
+        },
+        "projection.defense.ligneDefensive.dangerM": {
+          "plus": 4
+        },
+        "ballon.fautes.proba": {
+          "fois": 0.85
+        }
+      },
+      "palierFort": {
+        "projection.defense.ligneDefensive.vitesseReculMS": {
+          "plus": 1.5
+        },
+        "projection.defense.ligneDefensive.dangerM": {
+          "plus": 4
+        },
+        "ballon.tir.contreProba": {
+          "plus": 0.25
+        },
+        "ballon.marquage.distanceM": {
+          "fois": 0.7
+        }
       }
     }
+  },
+  "pays": {
+    "_note": "14/11, VALIDÉ : bonus à 5 joueurs du même pays sur le terrain (cohésion, le même pour tous), et à 8 la tradition du pays en plus. Chiffres : PROPOSITION.",
+    "palier": 5,
+    "palierFort": 8,
+    "cohesion": {
+      "nom": "Cohésion",
+      "notes": {
+        "acceleration": 4,
+        "pointe": 4,
+        "passe": 4,
+        "dribble": 4,
+        "precision": 4,
+        "puissance": 4,
+        "duel": 4,
+        "endurance": 4
+      },
+      "joueur": {
+        "reaction": 1,
+        "imprecisionCompatriote": 0.75
+      }
+    },
+    "traditions": {
+      "FRA": {
+        "nom": "Accélère et dribble",
+        "notes": {
+          "acceleration": 6,
+          "dribble": 6
+        },
+        "equipe": {
+          "ballon.dribble.probaTentative": {
+            "fois": 1.3
+          }
+        }
+      },
+      "ESP": {
+        "nom": "Garde le ballon",
+        "notes": {
+          "passe": 8,
+          "dribble": 6
+        },
+        "equipe": {
+          "ballon.imprecision.sousPressionFacteur": {
+            "fois": 0.8
+          }
+        }
+      },
+      "ENG": {
+        "nom": "Duels et jeu aérien",
+        "notes": {
+          "duel": 6,
+          "puissance": 6
+        },
+        "equipe": {
+          "ballon.centre.proba": {
+            "fois": 1.3
+          },
+          "ballon.tacle.parSeconde": {
+            "fois": 1.15
+          }
+        }
+      },
+      "GER": {
+        "nom": "Récupère vite, ne fatigue pas",
+        "notes": {
+          "endurance": 12,
+          "duel": 4,
+          "passe": 4
+        },
+        "equipe": {
+          "ballon.contrePressing.joueurs": {
+            "plus": 1
+          },
+          "ballon.contrePressing.dureeS": {
+            "plus": 2
+          }
+        }
+      },
+      "ITA": {
+        "nom": "Défend en bloc compact",
+        "notes": {
+          "duel": 8,
+          "precision": 4
+        },
+        "equipe": {
+          "projection.defense.ligneDefensive.vitesseReculMS": {
+            "plus": 1
+          },
+          "projection.defense.ligneDefensive.dangerM": {
+            "plus": 3
+          },
+          "ballon.marquage.distanceM": {
+            "fois": 0.8
+          }
+        }
+      }
+    }
+  },
+  "fusion": {
+    "_note": "14/11, VALIDÉ : la fusion ne touche pas aux notes affichées ; boost de match caché, le même pour toutes les cartes, et le joueur fusionné pèse plus dans le jeu. Chiffres : PROPOSITION, à régler en mesurant (scripts/mesurer-bonus.ts).",
+    "notesParNiveau": 7,
+    "passeVersLuiParNiveau": 1.5,
+    "tentativeParNiveau": 0.3,
+    "tirLoinParNiveau": 0.3
   }
 }

@@ -128,11 +128,29 @@ export class BallonReel {
 
   /** Statistiques de chaque joueur (13/11, pour la note de match), par « camp:id ». */
   readonly statsJoueurs = new Map<string, StatsJoueur>();
+  /** Actions réussies grâce à un style (14/11) : l'écran fait briller le pictogramme
+   *  du joueur. Simple trace : elle ne change rien au jeu. */
+  readonly actionsStyle: { t: number; camp: Camp; id: string; style: string }[] = [];
+  /** Receveur d'une passe dans l'espace ou d'un ballon long (pour le Rapide). */
+  private espacePour: JoueurSim | null = null;
+  /** Passeur d'une passe jouée sous pression (pour le Technicien). */
+  private sousPressionDe: JoueurSim | null = null;
   /** Touche (13/11, « il y a double touche ») : le lanceur ne rejoue pas le
    *  ballon avant qu'un autre joueur l'ait touché. */
   private lanceur: JoueurSim | null = null;
   /** Dernière passe réussie (pour les passes décisives). */
   private passeReussie: { de: JoueurSim; vers: JoueurSim; t: number } | null = null;
+
+  /** Le style du joueur vient de faire la différence (14/11) : on le note pour l'écran. */
+  private styleAgit(j: JoueurSim, styles: string[]): void {
+    const st = j.joueur.style;
+    if (st && styles.includes(st) && this.sim.options.styles) this.actionsStyle.push({ t: this.sim.temps, camp: j.camp, id: j.joueur.id, style: st });
+  }
+
+  /** Niveau de fusion d'un joueur (14/11 : un joueur fusionné pèse plus dans le jeu). */
+  private fusions(j: JoueurSim): number {
+    return j.joueur.fusions ?? 0;
+  }
 
   /** Statistiques d'un joueur (créées à la demande). */
   sj(j: JoueurSim): StatsJoueur {
@@ -404,6 +422,7 @@ export class BallonReel {
     if (this.rng.suivant() >= s.reg(o.camp).ballon.fautes.proba * o.effet.fautes * n) {
       this.stats.tacles[o.camp]++;
       this.sj(o).tacles++;
+      this.styleAgit(o, ["REC", "REM"]);
       this.donner(o);
       return;
     }
@@ -527,7 +546,9 @@ export class BallonReel {
         this.tirer(but);
         return;
       }
-      if (dBut < r.tirDistanceM && Math.abs(p.pos.x - W / 2) < dBut * 0.8 && this.rng.suivant() < r.tirLoin.probaBase + r.tirLoin.probaMax * (1 - dBut / r.tirDistanceM)) {
+      // Un joueur fusionné (14/11) ose plus (× 1 sans fusion : inchangé).
+      const oseTir = 1 + this.fusions(p) * s.influences.fusion.tirLoinParNiveau;
+      if (dBut < r.tirDistanceM && Math.abs(p.pos.x - W / 2) < dBut * 0.8 && this.rng.suivant() < (r.tirLoin.probaBase + r.tirLoin.probaMax * (1 - dBut / r.tirDistanceM)) * oseTir) {
         this.tirer(but);
         return;
       }
@@ -561,7 +582,7 @@ export class BallonReel {
     // parfois de l'éliminer plutôt que de passer.
     const db = r.dribble;
     const devant = adverses.find((o) => o.poste.id !== "G" && dist(o.pos, p.pos) < db.distanceM && (o.pos.y - p.pos.y) * sens > -0.5);
-    const tente = p.poste.ligneDefense === "defense" ? db.probaTentative * 0.25 : p.poste.ligneDefense === "gardien" ? 0 : db.probaTentative;
+    const tente = (p.poste.ligneDefense === "defense" ? db.probaTentative * 0.25 : p.poste.ligneDefense === "gardien" ? 0 : db.probaTentative) * (1 + this.fusions(p) * s.influences.fusion.tentativeParNiveau);
     // Notes : on tente plus souvent le 1 contre 1 quand on a l'avantage (dribble et accélération).
     if (devant && this.rng.suivant() < (tente > 0 ? decaler(tente, this.avantage1c1(p, devant) * PN.unContreUn.poidsTentative) : 0)) {
       this.dribbler(devant, sens);
@@ -640,7 +661,9 @@ export class BallonReel {
         const large = Math.abs(o.vise.x - W / 2) > r.construction.largeurM && (o.vise.y - L / 2) * sens > -10 ? r.construction.bonusLargeur : 0;
         // Notes : on cherche le coéquipier plus rapide que son adversaire direct (passe vers l'avant).
         const vitesse = gain > 0 ? this.avantageVitesse(q, o.vise, adverses) * PN.vitesse.choixPasseParPoint : 0;
-        const sc = gain * poidsProgression + ouvert * r.poidsEspace - dist(p.pos, o.vise) * 0.08 + large - (versSurface ? r.construction.surfaceMalus : 0) + vitesse + this.rng.entre(-2, 2);
+        // Fusions (14/11) : on cherche davantage le joueur fusionné (+ 0 sans fusion).
+        const vedette = this.fusions(q) * s.influences.fusion.passeVersLuiParNiveau;
+        const sc = gain * poidsProgression + ouvert * r.poidsEspace - dist(p.pos, o.vise) * 0.08 + large - (versSurface ? r.construction.surfaceMalus : 0) + vitesse + vedette + this.rng.entre(-2, 2);
         if (sc > score) {
           score = sc;
           meilleur = { q, point: o.point };
@@ -697,6 +720,8 @@ export class BallonReel {
     const point = { x: q.pos.x + q.vit.x * 0.3, y: q.pos.y + q.vit.y * 0.3 };
     this.lober(point, 0.45 + d / 18, 3);
     this.receveur = q;
+    this.espacePour = null;
+    this.sousPressionDe = null;
     this.horsJeu = false;
     this.lanceur = p;
   }
@@ -707,6 +732,8 @@ export class BallonReel {
     const p = this.porteur!;
     const jl = s.reg(p.camp).ballon.jeuLong;
     const d = dist(p.pos, point);
+    this.espacePour = q;
+    this.sousPressionDe = null;
     this.stats.passes[p.camp]++;
     this.sj(p).passes++;
     this.stats.distancePasses[p.camp] += d;
@@ -735,6 +762,8 @@ export class BallonReel {
     this.sj(p).passes++;
     this.lober(point, r.centre.dureeS, r.centre.erreurDeg);
     this.receveur = q;
+    this.espacePour = null;
+    this.sousPressionDe = null;
   }
 
   /** Dégagement : long ballon aérien vers l'avant et le côté. */
@@ -762,6 +791,7 @@ export class BallonReel {
     if (this.rng.suivant() < decaler(Math.min(0.95, db.probaReussite * p.effet.dribble), this.avantage1c1(p, o))) {
       this.stats.dribblesReussis[p.camp]++;
       this.sj(p).dribblesReussis++;
+      this.styleAgit(p, ["TEC", "RAP"]);
       o.freineJusqua = s.temps + db.eliminationS;
       p.sprintJusqua = Math.max(p.sprintJusqua, s.temps + db.eliminationS);
       return;
@@ -804,7 +834,9 @@ export class BallonReel {
     const g = this.sim.reg(p.camp === 0 ? 1 : 0).ballon.gene;
     const dAdv = Math.min(...this.sim.joueurs.filter((o) => o.camp !== p.camp && o.poste.id !== "G").map((o) => dist(o.pos, p.pos)));
     const gene = (presse ? r.imprecision.sousPressionFacteur : 1) * (dAdv < g.rayonM ? g.facteur : 1) * this.contrePresse(p).gene;
-    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * gene * p.effet.imprecision * this.precisionPasse(p) * Math.PI) / 180) * this.rng.entre(-1, 1);
+    // Cohésion d'un pays (14/11) : passe plus précise vers un compatriote (× 1 : inchangé).
+    const compatriote = p.joueur.pays && q.joueur.pays === p.joueur.pays ? p.effet.imprecisionCompatriote : 1;
+    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * gene * p.effet.imprecision * compatriote * this.precisionPasse(p) * Math.PI) / 180) * this.rng.entre(-1, 1);
     const c = Math.cos(erreur);
     const si = Math.sin(erreur);
     this.stats.passes[p.camp]++;
@@ -817,6 +849,8 @@ export class BallonReel {
     const horsJeu = this.estHorsJeu(q);
     this.lancer(((dx * c - dy * si) / n) * v, ((dx * si + dy * c) / n) * v);
     this.receveur = q;
+    this.espacePour = point ? q : null;
+    this.sousPressionDe = presse ? p : null;
     this.horsJeu = horsJeu;
   }
 
@@ -965,7 +999,7 @@ export class BallonReel {
         // sur la trajectoire ne touche le ballon qu'une fois sur deux ; sinon le tir passe.
         if (this.tirEnCours) {
           if (this.tirEvite.has(j)) continue;
-          if (this.rng.suivant() > r.tir.contreProba) {
+          if (this.rng.suivant() > s.reg(j.camp).ballon.tir.contreProba) {
             this.tirEvite.add(j);
             continue;
           }
@@ -1029,6 +1063,9 @@ export class BallonReel {
       }
     }
     if (gagnant === this.receveur) {
+      if (gagnant === this.espacePour) this.styleAgit(gagnant, ["RAP"]);
+      // Passe réussie sous pression : le Technicien a gardé le ballon.
+      if (this.sousPressionDe && this.sousPressionDe.camp === gagnant.camp && this.sousPressionDe !== gagnant) this.styleAgit(this.sousPressionDe, ["TEC"]);
       this.stats.passesReussies[gagnant.camp]++;
       if (this.dernier && this.dernier.camp === gagnant.camp && this.dernier !== gagnant) {
         this.sj(this.dernier).passesReussies++;
@@ -1037,6 +1074,7 @@ export class BallonReel {
     } else if (this.dernier && gagnant.camp !== this.dernier.camp) {
       this.stats.interceptions[gagnant.camp]++;
       this.sj(gagnant).interceptions++;
+      this.styleAgit(gagnant, ["REC", "REM"]);
     }
     this.donner(gagnant);
   }
@@ -1071,6 +1109,7 @@ export class BallonReel {
     const a = Math.atan2(this.vit.y, this.vit.x) + (cote * this.rng.entre(c.angleMinDeg, c.angleMaxDeg) * Math.PI) / 180;
     const nv = v * c.perteVitesse;
     this.stats.contres++;
+    this.styleAgit(j, ["REM"]);
     this.vit = { x: Math.cos(a) * nv, y: Math.sin(a) * nv };
     this.dernier = j;
     this.dernierTemps = this.sim.temps;

@@ -46,7 +46,10 @@ PROFIL = {  # écart à la note moyenne, par poste
     "MC": [-1, -3, 8, 4, 0, -1, 1, 6], "AG": [8, 7, -1, 7, -1, -5, -10, 0], "AD": [8, 7, -1, 7, -1, -5, -10, 0],
     "AC": [2, 2, -6, 2, 12, 8, -2, -4],
 }
-STYLE = {  # accent du style
+# 14/11 (VALIDÉ par le concepteur) : le style ne change plus les notes de la
+# carte ; il donne un bonus caché dans le moteur (data/influences.json).
+# Ancien accent du style, gardé pour mémoire (plus utilisé) :
+STYLE = {  # accent du style (avant le 14/11)
     "RAP": [6, 6, 0, 0, 0, 0, -2, 0], "TEC": [0, 0, 5, 6, 0, 0, -3, 0],
     "REM": [-2, 0, 0, -3, 0, 0, 7, 0], "REC": [0, 0, -1, 0, 0, 0, 4, 6],
 }
@@ -69,7 +72,7 @@ def main():
             notes = None
             if poste != "G":
                 base = NIVEAU[prix] + rng.randint(-1, 1)
-                ecarts = [p + s + n for p, s, n in zip(PROFIL[poste], STYLE.get(style, [0] * 8), NATION[code])]
+                ecarts = [p + n for p, n in zip(PROFIL[poste], NATION[code])]
                 # recentrer : la moyenne des sous-notes reste proche du niveau du prix
                 m = sum(ecarts) / 8
                 notes = {k: max(35, min(95, round(base + e - m + rng.randint(-2, 2)))) for k, e in zip(CLES, ecarts)}

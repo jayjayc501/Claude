@@ -10,7 +10,7 @@ import type { Donnees } from "./donnees";
 import { hauteurLigneDefensiveM, lignesAttaqueM, projeter, type LignesTenues } from "./projection";
 import { BallonReel, statsVides } from "./ballon";
 import { noteMatch } from "./noteMatch";
-import { type EffetJoueur, type Influences, type OptionsInfluences, chargerInfluences, effetJoueur, paliersAtteints, reglagesEquipe } from "./influences";
+import { type EffetJoueur, type Influences, type OptionsInfluences, bonusNotes, chargerInfluences, contextePays, effetJoueur, paliersAtteints, reglagesEquipe } from "./influences";
 import { PARAMETRES_NOTES, notesDe } from "./notes";
 import { Aleatoire } from "./rng";
 import type { Cellule, Equipe, Joueur, Notes, Phase, Placement, PointM, PointNorm, Poste, Reglages } from "./types";
@@ -49,7 +49,10 @@ export interface JoueurSim {
   /** Écart individuel de vitesse et d'accélération, en attendant l'attribut
    *  « vitesse » : deux joueurs ne courent jamais exactement pareil. */
   facteur: number;
-  /** Sous-notes du joueur (référence 65 quand elles manquent). */
+  /** Sous-notes de sa carte (référence 65 quand elles manquent). */
+  notesBase: Notes;
+  /** Sous-notes dans le moteur : celles de sa carte + bonus caché (style,
+   *  tradition de son pays, fusions ; 14/11). Sans bonus : celles de sa carte. */
   notes: Notes;
   /** Vitesse et accélération : écart individuel × notes de pointe et d'accélération × (1 − fatigue). */
   vitesseF: number;
@@ -169,6 +172,7 @@ export class MatchSim {
       depart: { ...pos },
       plongeJusqua: 0,
       facteur,
+      notesBase: notes,
       notes,
       vitesseF: facteur * (1 + (notes.pointe - pn.reference) * pn.vitesse.pointeParPoint),
       accelF: facteur * (1 + (notes.acceleration - pn.reference) * pn.vitesse.accelerationParPoint),
@@ -261,7 +265,21 @@ export class MatchSim {
 
   private recalculerInfluences(): void {
     for (const camp of [0, 1] as const) this.regs[camp] = reglagesEquipe(this.reglages, this.equipes[camp], this.tactiques[camp], this.influences, this.options);
-    for (const j of this.joueurs) j.effet = effetJoueur(j.joueur, this.influences, this.options);
+    const pays = [contextePays(this.equipes[0], this.influences), contextePays(this.equipes[1], this.influences)] as const;
+    const pn = PARAMETRES_NOTES;
+    for (const j of this.joueurs) {
+      const code = j.joueur.pays ?? "";
+      j.effet = effetJoueur(j.joueur, this.influences, this.options, pays[j.camp].cohesion.has(code));
+      // Bonus caché (14/11) : ajouté aux sous-notes du moteur ; la carte ne change pas.
+      const bonus = bonusNotes(j.joueur, this.influences, this.options, pays[j.camp].tradition.has(code), pays[j.camp].cohesion.has(code));
+      const notes = { ...j.notesBase };
+      for (const [k, v] of Object.entries(bonus)) notes[k as keyof Notes] += v ?? 0;
+      j.notes = notes;
+      j.vitesseRepos = j.facteur * (1 + (notes.pointe - pn.reference) * pn.vitesse.pointeParPoint);
+      j.accelRepos = j.facteur * (1 + (notes.acceleration - pn.reference) * pn.vitesse.accelerationParPoint);
+      j.vitesseF = j.vitesseRepos * (1 - j.fatigue);
+      j.accelF = j.accelRepos * (1 - j.fatigue);
+    }
   }
 
   private centre(): PointM {
@@ -396,7 +414,9 @@ export class MatchSim {
     const r = this.reglages.transition.reaction;
     for (const j of this.joueurs) {
       const distance = Math.hypot(j.pos.x - this.ballon.x, j.pos.y - this.ballon.y);
-      j.reagitA = this.temps + r.minS + r.parMetreS * distance + this.rng.entre(0, r.aleaS);
+      // Cohésion d'un pays (14/11) : les compatriotes réagissent plus vite (× 1 : inchangé).
+      const f = j.effet.reaction;
+      j.reagitA = this.temps + r.minS * f + r.parMetreS * distance * f + this.rng.entre(0, r.aleaS) * f;
     }
   }
 

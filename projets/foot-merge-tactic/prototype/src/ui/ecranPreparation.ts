@@ -361,8 +361,8 @@ export class EcranPreparation {
       pays,
       poste: f.poste,
       style: f.style ? { code: f.style, nom: this.prepa.d.styles[f.style] ?? f.style } : null,
-      // Notes après fusion (13/11, « est-ce que les fusions font compter les notes ? »).
-      notes: (place === null && this.prepa.membre(id) ? this.prepa.notesFusion(this.prepa.membre(id)!) : f.notes) ?? null,
+      // Notes de la carte (14/11 : une fusion ne les change plus ; son boost de match est indiqué à part).
+      notes: f.notes ?? null,
       fusions: place === null ? (this.prepa.membre(id)?.fusions ?? 0) : 0,
       bonusFusion: this.prepa.bonusFusion,
       action,
@@ -538,9 +538,9 @@ export class EcranPreparation {
     html("span", { class: "prepa-etiquette" }, col, "Pays");
     for (const p of pays) {
       const couleur = d.deck.find((x) => x.code === p.code)!.couleur;
-      const { prochain, atteint } = this.prepa.palier(p.n);
+      const { prochain, atteint, fort } = this.prepa.palier(p.n, "pays");
       const nom = d.deck.find((x) => x.code === p.code)!.nom;
-      const r = html("div", { class: `prepa-trait${atteint ? " atteint" : ""}`, title: nom, "aria-label": `${nom} : ${p.n} sur ${prochain}` }, col);
+      const r = html("div", { class: `prepa-trait${atteint ? " atteint" : ""}${fort ? " fort" : ""}`, title: nom, "aria-label": `${nom} : ${p.n} sur ${prochain}` }, col);
       const b = html("span", { class: "prepa-badge" }, r, p.code);
       b.style.background = couleur;
       b.style.borderColor = couleur;
@@ -549,9 +549,9 @@ export class EcranPreparation {
     }
     html("span", { class: "prepa-etiquette" }, col, "Style");
     for (const s of styles) {
-      const { prochain, atteint } = this.prepa.palier(s.n);
+      const { prochain, atteint, fort } = this.prepa.palier(s.n, "style");
       const nom = d.styles[s.code] ?? s.code;
-      const r = html("div", { class: `prepa-trait style${atteint ? " atteint" : ""}`, title: nom, "aria-label": `${nom} : ${s.n} sur ${prochain}` }, col);
+      const r = html("div", { class: `prepa-trait style${atteint ? " atteint" : ""}${fort ? " fort" : ""}`, title: nom, "aria-label": `${nom} : ${s.n} sur ${prochain}` }, col);
       const b = html("span", { class: "prepa-badge" }, r);
       b.innerHTML = PICTOS[s.code] ?? s.code;
       const n = html("span", { class: "prepa-nombre" }, r, String(s.n));

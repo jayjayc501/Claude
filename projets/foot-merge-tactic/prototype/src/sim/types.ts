@@ -110,8 +110,12 @@ export interface Joueur {
   postes: string[];
   /** Style de jeu (REC, TEC, RAP, REM) ; absent ou null : aucun style. */
   style?: string | null;
-  /** Sous-notes ; absentes (ou gardien, pour l'instant) : toutes à la référence (65). */
+  /** Sous-notes de la carte (celles qu'on affiche) ; absentes : toutes à la référence (65). */
   notes?: Partial<Notes> | null;
+  /** Pays (FRA, ESP…), pour les bonus de pays (14/11) ; absent : aucun. */
+  pays?: string | null;
+  /** Niveau de fusion (14/11 : boost de match caché, les notes affichées ne changent pas) ; absent : 0. */
+  fusions?: number;
 }
 
 export interface Placement {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { CATALOGUE, Partie, REGLES, Reserve, notesFusionnees } from "../src/jeu/partie";
+import { CATALOGUE, Partie, REGLES, Reserve } from "../src/jeu/partie";
 import { chargerDonnees, chargerEquipes, chargerReglages } from "../src/sim/chargement";
 import { Aleatoire } from "../src/sim/rng";
 import { MatchSim } from "../src/sim/simulation";
@@ -92,14 +92,19 @@ describe("Partie contre l'ordinateur (13/11)", () => {
     }
   });
 
-  test("fusion : +4 par niveau sur chaque sous-note (proposition), 99 au plus", () => {
-    const n = CATALOGUE.cartes.find((c) => c.notes && c.poste !== "G")!.notes!;
-    const f = notesFusionnees(n, 2)!;
-    expect(f.passe).toBe(Math.min(99, n.passe + 2 * REGLES.bonusFusionParNiveau));
-    // Gardien : ses 4 notes montent aussi.
-    const g = CATALOGUE.cartes.find((c) => c.poste === "G")!.notes!;
-    expect(notesFusionnees(g, 1)!.reflexes).toBe(Math.min(99, g.reflexes + REGLES.bonusFusionParNiveau));
-    expect(notesFusionnees(null, 2)).toBeNull();
+  test("fusion (14/11) : les notes de la carte ne changent pas ; l'équipe porte le pays et le niveau de fusion", () => {
+    const p = new Partie(donnees, 5, plan);
+    while (!p.draftFini(0)) {
+      p.ordiChoisir(0);
+      p.ordisChoisissent();
+    }
+    const m = p.camps[0]!.effectif[0]!;
+    m.fusions = 2;
+    const j = p.equipeDe(0).joueurs.find((x) => x.id === m.id)!;
+    const carte = CATALOGUE.cartes.find((c) => c.id === m.id)!;
+    expect(j.notes).toEqual(carte.notes);
+    expect(j.fusions).toBe(2);
+    expect(j.pays).toBe(carte.pays);
   });
 
   test("offre du draft : une vedette (4-5 pièces) quand le poste en a une", () => {

@@ -40,7 +40,9 @@ export interface DonneesPrepa {
   styles: Record<string, string>;
   tactiques: { code: string; nom: string; court?: string; aide: string }[];
   tactique: string;
-  paliers: number[];
+  /** Paliers de bonus (14/11, VALIDÉ) : styles à 3 et 5 joueurs, pays à 5 et 8. */
+  paliersStyles: number[];
+  paliersPays: number[];
   bancMax: number;
   fusionsMax: number;
   budget: number;
@@ -89,6 +91,7 @@ export class Preparation {
   reserve?: { prendre(id: string): void; rendre(id: string): void };
   tirage?: () => (string | null)[];
   relanceCout = 1;
+  /** Boost de match caché d'un niveau de fusion (points sur chaque note, 14/11), pour la fiche. */
   bonusFusion = 0;
 
   constructor(
@@ -122,20 +125,13 @@ export class Preparation {
     return {
       nom: "Votre équipe",
       nationalite: "Plusieurs",
-      joueurs: this.etat.effectif.map((m) => ({ id: m.id, nom: this.fiche(m.id).nom, postes: [this.fiche(m.id).poste], style: this.fiche(m.id).style, notes: this.notesFusion(m) })),
+      // Notes de la carte, pays et fusions (14/11 : le boost des fusions est caché, appliqué par le moteur).
+      joueurs: this.etat.effectif.map((m) => ({ id: m.id, nom: this.fiche(m.id).nom, postes: [this.fiche(m.id).poste], style: this.fiche(m.id).style, notes: this.fiche(m.id).notes ?? null, pays: this.fiche(m.id).pays, fusions: m.fusions })),
       composition: this.etat.composition.map((p) => ({ ...p })),
       tactique: this.etat.tactique,
     };
   }
 
-  /** Notes d'un membre, avec le bonus de ses fusions (PROPOSITION). */
-  notesFusion(m: Membre): Partial<Notes> | null {
-    const n = this.fiche(m.id).notes ?? null;
-    if (!n || !m.fusions || !this.bonusFusion) return n;
-    const r: Partial<Notes> = {};
-    for (const [k, v] of Object.entries(n)) r[k as keyof Notes] = Math.min(99, (v ?? 65) + this.bonusFusion * m.fusions);
-    return r;
-  }
 
   /** Nouveau tirage du mercato, contre `relanceCout` pièces. */
   relancer(): Issue {
@@ -157,10 +153,10 @@ export class Preparation {
     return { pays, styles };
   }
 
-  /** Palier visé (3, 5, 7) et palier atteint. */
-  palier(n: number): { prochain: number; atteint: boolean } {
-    const p = this.d.paliers;
-    return { prochain: p.find((x) => x > n) ?? p[p.length - 1]!, atteint: n >= p[0]! };
+  /** Palier visé et palier atteint (styles : 3 et 5 ; pays : 5 et 8). */
+  palier(n: number, type: "style" | "pays" = "style"): { prochain: number; atteint: boolean; fort: boolean } {
+    const p = type === "pays" ? this.d.paliersPays : this.d.paliersStyles;
+    return { prochain: p.find((x) => x > n) ?? p[p.length - 1]!, atteint: n >= p[0]!, fort: n >= p[p.length - 1]! };
   }
 
   /** La carte du mercato fusionnerait-elle avec un joueur de l'effectif ? */

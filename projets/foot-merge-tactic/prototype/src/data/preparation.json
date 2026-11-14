@@ -20,7 +20,8 @@
     { "code": "TIK", "nom": "Tiki-taka", "aide": "passes courtes, on garde le ballon" }
   ],
   "tactique": "EQU",
-  "paliers": [3, 5, 7],
+  "paliersStyles": [3, 5],
+  "paliersPays": [5, 8],
   "bancMax": 5,
   "fusionsMax": 3,
   "budget": 7,

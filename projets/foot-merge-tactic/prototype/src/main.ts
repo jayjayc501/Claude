@@ -11,6 +11,7 @@ import { GrainesLocales } from "./jeu/graines";
 import { ArbitreLocal } from "./match/arbitreLocal";
 import { CATALOGUE, Partie, REGLES } from "./jeu/partie";
 import { chargerDonnees, chargerEquipes, chargerReglages } from "./sim/chargement";
+import { chargerInfluences } from "./sim/influences";
 import { notesAffichees } from "./sim/notes";
 import type { Equipe } from "./sim/types";
 import { BUSTES } from "./ui/bustes";
@@ -219,7 +220,7 @@ function demarrer(): void {
     prepa.reserve = partie.reserve;
     prepa.tirage = () => partie.tirerMercato();
     prepa.relanceCout = REGLES.relanceCout;
-    prepa.bonusFusion = REGLES.bonusFusionParNiveau;
+    prepa.bonusFusion = chargerInfluences().fusion.notesParNiveau;
     try {
       const t = localStorage.getItem(CLE_TACTIQUE);
       if (t) prepa.choisirTactique(t);

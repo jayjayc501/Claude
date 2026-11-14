@@ -29,6 +29,9 @@
 //                                équipe, puis passes réussies
 //     evenements     liste       { image, texte, a } à chaque changement de l'événement
 //                                de jeu affiché (but, faute, touche… ; a = son instant)
+//     actions        liste       { image, joueur, style } : action réussie grâce au style
+//                                du joueur (version 2, 14/11) ; l'écran fait briller
+//                                son pictogramme
 //   BilanMiTemps : envoyé à la fin de la mi-temps (JSON) : statistiques
 //                  complètes, buteurs, notes et forme des joueurs.
 //
@@ -38,7 +41,8 @@
 import type { StatsBallon } from "../sim/ballon";
 import type { Phase } from "../sim/types";
 
-export const VERSION_FILM = 1;
+/** Version 2 (14/11) : actions des styles dans les morceaux. */
+export const VERSION_FILM = 2;
 /** Colonnes de `etat`. */
 export const ETAT = { porteur: 0, dernier: 1, score0: 2, score1: 3, possession: 4, phase0: 5, phase1: 6, drapeaux: 7, passes0: 8, passes1: 9, reussies0: 10, reussies1: 11 } as const;
 export const COLONNES_ETAT = 12;
@@ -80,6 +84,15 @@ export interface MorceauFilm {
   lignes: Float64Array;
   etat: Int32Array;
   evenements: EvenementFilm[];
+  actions: ActionFilm[];
+}
+
+/** Action réussie grâce au style d'un joueur (tacle, interception, dribble, contre…). */
+export interface ActionFilm {
+  image: number;
+  /** Indice du joueur dans l'en-tête. */
+  joueur: number;
+  style: string;
 }
 
 export interface EvenementFilm {
@@ -105,6 +118,7 @@ export class Film {
   /** Fin de la mi-temps : dernière image, et bilan. */
   bilan: BilanMiTemps | null = null;
   readonly evenements: EvenementFilm[] = [];
+  readonly actions: ActionFilm[] = [];
   private capacite: number;
   temps: Float64Array;
   positions: Float64Array;
@@ -144,6 +158,7 @@ export class Film {
     this.lignes.set(m.lignes.subarray(0, m.n * 2), i * 2);
     this.etat.set(m.etat.subarray(0, m.n * COLONNES_ETAT), i * COLONNES_ETAT);
     this.evenements.push(...m.evenements);
+    this.actions.push(...m.actions);
     this.images = fin;
     this.prevenir();
   }
@@ -162,6 +177,7 @@ export class Film {
       lignes: this.lignes.slice(premiere * 2, (premiere + n) * 2),
       etat: this.etat.slice(premiere * COLONNES_ETAT, (premiere + n) * COLONNES_ETAT),
       evenements: this.evenements.filter((e) => e.image >= premiere && e.image < premiere + n).map((e) => ({ ...e })),
+      actions: this.actions.filter((e) => e.image >= premiere && e.image < premiere + n).map((e) => ({ ...e })),
     };
   }
 
@@ -209,6 +225,7 @@ export interface MorceauJson {
   lignes: (number | null)[];
   etat: number[];
   evenements: EvenementFilm[];
+  actions: ActionFilm[];
 }
 
 export function morceauVersJson(m: MorceauFilm): MorceauJson {
@@ -223,6 +240,7 @@ export function morceauVersJson(m: MorceauFilm): MorceauJson {
     lignes: Array.from(m.lignes.subarray(0, m.n * 2), (x) => (Number.isNaN(x) ? null : x)),
     etat: Array.from(m.etat.subarray(0, m.n * COLONNES_ETAT)),
     evenements: m.evenements.map((e) => ({ ...e })),
+    actions: m.actions.map((e) => ({ ...e })),
   };
 }
 
@@ -237,6 +255,7 @@ export function morceauDepuisJson(j: MorceauJson): MorceauFilm {
     lignes: Float64Array.from(j.lignes, (x) => (x === null ? Number.NaN : x)),
     etat: Int32Array.from(j.etat),
     evenements: j.evenements.map((e) => ({ ...e })),
+    actions: (j.actions ?? []).map((e) => ({ ...e })),
   };
 }
 
@@ -297,6 +316,16 @@ export class LecteurFilm {
   private connus = new Map<string, JoueurVu>();
   private evenementsVus: { texte: string; a: number } | null = null;
   private evenementIndex = -1;
+  /** Actions de style passées depuis la dernière lecture (l'écran les fait briller). */
+  private actionsLues = 0;
+  private actionsEnAttente: { joueur: JoueurVu; style: string }[] = [];
+
+  /** Actions de style vues depuis le dernier appel (14/11). */
+  prendreActions(): { joueur: JoueurVu; style: string }[] {
+    const a = this.actionsEnAttente;
+    this.actionsEnAttente = [];
+    return a;
+  }
 
   /** Nouveau match : on oublie les joueurs du précédent. */
   nouveauMatch(): void {
@@ -320,6 +349,9 @@ export class LecteurFilm {
     });
     this.evenementIndex = -1;
     this.evenementsVus = null;
+    this.actionsLues = 0;
+    this.actionsEnAttente = [];
+    this.image = 0;
     this.lire(0);
   }
 
@@ -337,6 +369,13 @@ export class LecteurFilm {
   lire(k: number): void {
     const f = this.film;
     if (!f || k >= f.images) return;
+    // Actions de style entre l'image affichée et celle-ci (en arrière : aucune).
+    if (k < this.image) this.actionsLues = f.actions.filter((a) => a.image <= k).length;
+    while (this.actionsLues < f.actions.length && f.actions[this.actionsLues]!.image <= k) {
+      const a = f.actions[this.actionsLues++]!;
+      const j = this.vue.joueurs[a.joueur];
+      if (j) this.actionsEnAttente.push({ joueur: j, style: a.style });
+    }
     this.image = k;
     const v = this.vue;
     const nj = v.joueurs.length;

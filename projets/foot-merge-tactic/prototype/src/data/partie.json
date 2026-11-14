@@ -1,11 +1,14 @@
 {
-  "_note": "Règles d'une partie (13/11). Championnat de 4 équipes (toi et 3 ordinateurs, demande du concepteur du 13/11), 10 pièces à chaque journée (proposé par le concepteur), aller simple (3 journées). VALIDÉ : draft des 11 titulaires (on touche un poste, quelques joueurs tirés au hasard, on en choisit un), limité par un budget ; un seul budget pour le draft et le premier mercato, qui remplit le banc ; réserve commune aux équipes ; l'ordinateur fait tout comme le joueur, avec le même budget ; pour l'instant, 2 équipes et un seul match. PROPOSITION : les chiffres ci-dessous. budgetDepart : 50 (13/11, demande du concepteur : « il faut pouvoir faire des fusions » ; 30 puis 40 avant). Offre du draft : chaque joueur du poste a la même chance, avec une vedette (4-5) s'il en reste. offreTaille : 4 (avec 5 joueurs par poste unique, en proposer 5 montrerait toujours les mêmes). bonusFusionParNiveau : points ajoutés à chaque sous-note par niveau de fusion (règle des fusions encore ouverte).",
+  "_note": "Règles d'une partie (13/11). Championnat de 4 équipes (toi et 3 ordinateurs, demande du concepteur du 13/11), 10 pièces à chaque journée (proposé par le concepteur), aller simple (3 journées). VALIDÉ : draft des 11 titulaires (on touche un poste, quelques joueurs tirés au hasard, on en choisit un), limité par un budget ; un seul budget pour le draft et le premier mercato, qui remplit le banc ; réserve commune aux équipes ; l'ordinateur fait tout comme le joueur, avec le même budget ; pour l'instant, 2 équipes et un seul match. PROPOSITION : les chiffres ci-dessous. budgetDepart : 50 (13/11, demande du concepteur : « il faut pouvoir faire des fusions » ; 30 puis 40 avant). Offre du draft : chaque joueur du poste a la même chance, avec une vedette (4-5) s'il en reste. offreTaille : 4 (avec 5 joueurs par poste unique, en proposer 5 montrerait toujours les mêmes). Fusions (14/11, VALIDÉ) : elles ne changent plus les notes de la carte ; leur boost de match est dans influences.json (fusion).",
   "budgetDepart": 50,
   "offreTaille": 4,
   "mercatoTaille": 6,
   "relanceCout": 1,
-  "bonusFusionParNiveau": 4,
-  "nomsOrdis": ["Tigres", "Requins", "Aigles"],
+  "nomsOrdis": [
+    "Tigres",
+    "Requins",
+    "Aigles"
+  ],
   "gainParJournee": 10,
   "allerRetour": false,
   "ordi": {

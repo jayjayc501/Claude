@@ -16,7 +16,8 @@ import type { FournisseurGraines } from "../jeu/graines";
 import { type ArbitreMatch, DUREE_MI_TEMPS_S } from "../match/arbitre";
 import { type BilanMiTemps, type JoueurVu, LecteurFilm, type VueMatch } from "../match/film";
 import type { Donnees } from "../sim/donnees";
-import { type OptionsInfluences, chargerInfluences, paliersAtteints, reglagesEquipe } from "../sim/influences";
+import cartesBrut from "../data/cartes.json";
+import { type OptionsInfluences, type Palier, chargerInfluences, paliersPays, paliersStyles, reglagesEquipe } from "../sim/influences";
 import { projeterRect } from "../sim/projection";
 import type { Equipe, Reglages } from "../sim/types";
 import { BUSTES_ROUGES, CHAMP_ROUGE, GARDIEN_ROUGE } from "./adversaires";
@@ -70,6 +71,11 @@ const ECART_AFFICHAGE: Record<Vue, number> = { pions: 2 * RAYON_ROND + 2, figuri
 const CLE_VUE = "foot-merge-tactic.vue-match.v2";
 /** Tactiques et styles (pour les zones et les paliers affichés). */
 const INFLUENCES = chargerInfluences();
+/** Noms des pays (bonus de pays, 14/11). */
+const PAYS = (cartesBrut as unknown as { pays: Record<string, { nom: string; couleur: string }> }).pays;
+/** Durée d'un éclat de style (ms, à l'écran) ; plus long pour une action signature (palier à 5). */
+const ECLAT_MS = 1300;
+const ECLAT_FORT_MS = 1900;
 /** Durée des annonces, en secondes de jeu simulé (≈ 0,7 s et 1,6 s à l'écran en ×3,5). */
 const ANNONCE_S = 2.5;
 const ANNONCE_BUT_S = 5.5;
@@ -113,6 +119,12 @@ export class EcranMatch {
   /** Mise à jour des listes de tactiques et des interrupteurs (grisés pendant le jeu). */
   private majChoix: (() => void)[] = [];
   private regZones: { cle: string; equipe: Equipe; reg: Reglages } | null = null;
+  /** Éclats des styles (14/11) : pictogramme qui brille au-dessus du joueur quand son style agit. */
+  private calqueEclats!: SVGGElement;
+  private eclats: { g: SVGGElement; joueur: JoueurVu; fin: number }[] = [];
+  /** Styles à leur palier fort (5 joueurs) dans chaque équipe : leurs éclats sont dorés. */
+  private stylesForts: [Set<string>, Set<string>] = [new Set(), new Set()];
+  private bandeau: HTMLElement | null = null;
   private vitesse = VITESSE_PAR_DEFAUT;
   /** Mi-temps en cours et arrêt du jeu (mi-temps, fin du match). */
   private periode: 1 | 2 = 1;
@@ -421,9 +433,10 @@ export class EcranMatch {
     const defs = svg("defs", {}, s);
     const auras: [string, number][][] = [
       [],
-      [["#FFFFFF", 0.7], ["#38E1FF", 1.8], ["#38E1FF", 3.6]],
-      [["#FFFFFF", 0.7], ["#FFC400", 1.8], ["#FFB000", 3.6]],
-      [["#FFFFFF", 0.8], ["#C04BFF", 2.4], ["#FF4FD8", 4.5]],
+      // 14/11 (« les flammes des joueurs fusionnés ne se voyaient plus trop ») : plus larges.
+      [["#FFFFFF", 0.9], ["#38E1FF", 2.6], ["#38E1FF", 5.2]],
+      [["#FFFFFF", 0.9], ["#FFC400", 2.6], ["#FFB000", 5.2]],
+      [["#FFFFFF", 1], ["#C04BFF", 3.2], ["#FF4FD8", 6.4]],
     ];
     // Ballon moderne (12/11, « le ballon n'est pas beau ») : sphère brillante,
     // motif de match bleu et or qui tourne quand il roule, reflet, traînée.
@@ -439,6 +452,11 @@ export class EcranMatch {
     svg("circle", { r: RAYON_BALLON }, clip);
     auras.forEach((ombres, n) => {
       if (!n) return;
+      // Flamme de fusion (14/11) : halo coloré qui palpite derrière le joueur.
+      const fl = svg("radialGradient", { id: `match-flamme-${n}`, cx: "50%", cy: "60%", r: "50%" }, defs);
+      svg("stop", { offset: "0%", "stop-color": COULEURS_FUSION[n]!, "stop-opacity": "0.95" }, fl);
+      svg("stop", { offset: "55%", "stop-color": COULEURS_FUSION[n]!, "stop-opacity": "0.5" }, fl);
+      svg("stop", { offset: "100%", "stop-color": COULEURS_FUSION[n]!, "stop-opacity": "0" }, fl);
       const f = svg("filter", { id: `match-aura-${n}`, x: "-60%", y: "-60%", width: "220%", height: "220%", "color-interpolation-filters": "sRGB" }, defs);
       for (const [c, e] of ombres) svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: e, "flood-color": c, "flood-opacity": 1 }, f);
     });
@@ -513,6 +531,9 @@ export class EcranMatch {
     this.etiquetteFond = svg("rect", { y: -9, height: 15, rx: 7.5 }, this.etiquette);
     this.etiquetteTexte = svg("text", { y: 1.5, "text-anchor": "middle" }, this.etiquette);
 
+    this.calqueEclats = svg("g", { class: "match-eclats" }, s);
+    this.eclats = [];
+
     const cx = W / 2;
     const cy = H / 2;
     this.annonceCadre = svg("g", {}, s);
@@ -532,6 +553,7 @@ export class EcranMatch {
     const info = this.habillage.infos(id, camp);
     const fusions = info?.fusions ?? 0;
     if (image) {
+      if (fusions) svg("ellipse", { cx: 0, cy: -22 * K, rx: 22 * K, ry: 31 * K, fill: `url(#match-flamme-${Math.min(3, fusions)})`, class: "match-flamme" }, g);
       svg("image", {
         href: image,
         x: -24 * K,
@@ -562,8 +584,12 @@ export class EcranMatch {
     const info = this.habillage.infos(id, camp);
     const fusions = Math.min(3, info?.fusions ?? 0);
     // Fusion (13/11, « en match, les fusions ne se voient plus ») : anneau de la couleur du niveau.
-    if (fusions) svg("circle", { r: RAYON_ROND + 2.6, class: `match-rond-fusion niveau-${fusions}`, stroke: COULEURS_FUSION[fusions] }, g);
-    svg("circle", { r: RAYON_ROND, fill: camp === 0 ? BLEU_NOUS : COULEUR_EUX }, g);
+    if (fusions) {
+      // 14/11 : flamme qui palpite autour du pion, et anneau plus épais.
+      svg("circle", { r: RAYON_ROND * 2.2, fill: `url(#match-flamme-${fusions})`, class: "match-flamme" }, g);
+      svg("circle", { r: RAYON_ROND + 3, class: `match-rond-fusion niveau-${fusions}`, stroke: COULEURS_FUSION[fusions] }, g);
+    }
+    svg("circle", { r: RAYON_ROND, fill: camp === 0 ? BLEU_NOUS : COULEUR_EUX, class: "match-rond-corps" }, g);
     // Style (13/11, « il faut qu'on ait la visibilité ») : petite pastille du pictogramme.
     this.pastilleStyle(g, info?.style ?? null, RAYON_ROND * 1.05, -RAYON_ROND * 1.05, 5.4);
     const titre = svg("title", {}, g);
@@ -604,6 +630,7 @@ export class EcranMatch {
   private coupDEnvoi(): void {
     const film = this.arbitre.premiereMiTemps({ options: { ...this.options }, tactiques: [...this.tactiquesForcees] });
     this.lecteur.charger(film);
+    this.afficherBonus();
   }
 
   // ---- Boucle et dessin --------------------------------------------------------
@@ -776,6 +803,25 @@ export class EcranMatch {
     }
     this.annonce.style.display = sim.temps - this.annonceDepuis < this.annonceDuree ? "" : "none";
 
+    // Styles qui agissent (14/11) : le pictogramme du joueur brille un instant au-dessus de lui.
+    for (const a of this.lecteur.prendreActions()) this.eclairer(a.joueur, a.style);
+    if (this.eclats.length) {
+      const maintenant = performance.now();
+      this.eclats = this.eclats.filter((e) => {
+        const i = sim.joueurs.indexOf(e.joueur);
+        const p = pos[i];
+        if (maintenant > e.fin || !p) {
+          e.g.remove();
+          return false;
+        }
+        const enFigurine = this.vue === "figurines" || (this.vue === "action" && this.enAction[i]) || (this.vue === "pions" && e.joueur === porteur);
+        const haut = enFigurine ? 54 * this.k * (e.joueur === porteur ? grand : 1) : RAYON_ROND + 13;
+        // En haut à droite de la tête : le nom du porteur reste lisible.
+        e.g.setAttribute("transform", `translate(${(p.x + 13).toFixed(1)} ${(p.y - haut + 4).toFixed(1)})`);
+        return true;
+      });
+    }
+
     // Tableau de score.
     const score = `${sim.score[0]} – ${sim.score[1]}`;
     if (this.score.textContent !== score) this.score.textContent = score;
@@ -797,6 +843,74 @@ export class EcranMatch {
     }
     if (this.statut.textContent !== texte) this.statut.textContent = texte;
     this.majBord();
+  }
+
+  /** Le style d'un joueur vient d'agir (14/11) : son pictogramme brille au-dessus de lui ;
+   *  doré et plus long quand son équipe a 5 joueurs de ce style (action signature). */
+  private eclairer(joueur: JoueurVu, style: string): void {
+    if (!CORPS_PICTOS[style] || !this.calqueEclats) return;
+    // Un seul éclat à la fois par joueur.
+    for (const e of this.eclats) if (e.joueur === joueur) e.fin = 0;
+    const fort = this.stylesForts[joueur.camp].has(style);
+    const g = svg("g", { class: `match-eclat${fort ? " fort" : ""}${joueur.camp === 0 ? " nous" : " eux"}` }, this.calqueEclats);
+    const anim = svg("g", { class: "match-eclat-anim" }, g);
+    const r = fort ? 10 : 8;
+    svg("circle", { r: r + 4, class: "match-eclat-halo" }, anim);
+    svg("circle", { r, class: "match-eclat-fond" }, anim);
+    const ic = svg("g", { transform: `scale(${(r * 1.45) / 24}) translate(-12 -12)`, class: "match-eclat-picto" }, anim);
+    ic.innerHTML = CORPS_PICTOS[style]!;
+    this.eclats.push({ g, joueur, fin: performance.now() + (fort ? ECLAT_FORT_MS : ECLAT_MS) });
+  }
+
+  /** Bonus actifs d'une équipe (14/11) : paliers de styles (3, et 5 : action
+   *  signature) si les styles sont activés, et paliers de pays (5 : cohésion ; 8 : tradition). */
+  private bonusDe(camp: 0 | 1): { styles: Palier[]; pays: Palier[] } {
+    const e = this.equipesMatch[camp];
+    return { styles: this.options.styles ? paliersStyles(e, e.composition, INFLUENCES) : [], pays: paliersPays(e, e.composition, INFLUENCES) };
+  }
+
+  /** Une pastille de bonus : style (pictogramme) ou pays (sa couleur). */
+  private pastilleBonus(parent: HTMLElement, type: "style" | "pays", p: Palier): void {
+    const b = html("span", { class: `match-palier${p.fort ? " fort" : ""}` }, parent);
+    const ic = html("span", { class: "match-palier-picto" }, b);
+    if (type === "style") {
+      ic.innerHTML = PICTOS[p.code] ?? "";
+      const st = INFLUENCES.styles[p.code]!;
+      html("span", {}, b, `${p.fort ? "★ " : ""}${p.fort ? st.palierFortNom : st.palierNom} · ${this.habillage.styles[p.code] ?? st.nom} ×${p.n}`);
+    } else {
+      ic.textContent = p.code.slice(0, 2);
+      ic.style.background = PAYS[p.code]?.couleur ?? "#1F3A93";
+      ic.style.color = "#fff";
+      const nom = PAYS[p.code]?.nom ?? p.code;
+      const t = INFLUENCES.pays.traditions[p.code];
+      html("span", {}, b, p.fort && t ? `★ ${nom} ×${p.n} · ${t.nom}` : `${INFLUENCES.pays.cohesion.nom} ${nom} ×${p.n}`);
+    }
+  }
+
+  /** Bandeau des bonus au coup d'envoi de chaque mi-temps (14/11, « surtout à 5, il faut que ça soit visible »). */
+  private afficherBonus(): void {
+    this.bandeau?.remove();
+    this.bandeau = null;
+    const bonus = [this.bonusDe(0), this.bonusDe(1)] as const;
+    this.stylesForts = [new Set(bonus[0].styles.filter((p) => p.fort).map((p) => p.code)), new Set(bonus[1].styles.filter((p) => p.fort).map((p) => p.code))];
+    if (!bonus.some((b) => b.styles.length || b.pays.length)) return;
+    const fort = bonus.some((b) => b.styles.some((p) => p.fort) || b.pays.some((p) => p.fort));
+    const d = html("div", { class: `match-bandeau${fort ? " fort" : ""}`, role: "status" }, this.terrain);
+    html("div", { class: "match-bandeau-titre" }, d, "Bonus actifs");
+    ([0, 1] as const).forEach((camp) => {
+      const b = bonus[camp];
+      if (!b.styles.length && !b.pays.length) return;
+      const l = html("div", { class: `match-bandeau-ligne ${camp === 0 ? "nous" : "eux"}` }, d);
+      html("span", { class: "match-bandeau-equipe" }, l, camp === 0 ? this.habillage.nomNous : this.habillage.nomEux);
+      for (const p of b.styles) this.pastilleBonus(l, "style", p);
+      for (const p of b.pays) this.pastilleBonus(l, "pays", p);
+    });
+    d.addEventListener("click", () => d.remove());
+    this.bandeau = d;
+    setTimeout(() => {
+      d.classList.add("part");
+      setTimeout(() => d.remove(), 400);
+    }, fort ? 5200 : 4200);
   }
 
   /** Réglages de ton équipe (tactique et paliers de styles), pour dessiner les zones. */
@@ -859,6 +973,7 @@ export class EcranMatch {
     this.periode = 2;
     this.enPause = false;
     for (const f of this.majChoix) f();
+    this.afficherBonus();
   }
 
   /** Panneau de statistiques sur le terrain (mi-temps, fin du match). */
@@ -1086,16 +1201,12 @@ export class EcranMatch {
       html("span", { class: "eux" }, v, c);
     }
     const p = html("div", { class: "match-paliers" }, b);
-    html("span", { class: "match-carte-titre" }, p, "Paliers de styles");
-    // Styles dont le palier est atteint par ton équipe sur le terrain (vide si les styles sont coupés).
-    const paliers = this.options.styles ? paliersAtteints(this.equipesMatch[0], this.equipesMatch[0].composition, INFLUENCES) : [];
+    html("span", { class: "match-carte-titre" }, p, "Tes bonus");
+    // Paliers atteints par ton équipe sur le terrain (14/11) : styles (3 et 5) et pays (5 et 8).
+    const bonus = this.bonusDe(0);
     if (!this.options.styles) html("span", { class: "match-discret" }, p, "styles coupés");
-    else if (!paliers.length) html("span", { class: "match-discret" }, p, "aucun (3 joueurs du même style)");
-    for (const code of paliers) {
-      const badge = html("span", { class: "match-palier" }, p);
-      const ic = html("span", { class: "match-palier-picto" }, badge);
-      ic.innerHTML = PICTOS[code] ?? "";
-      html("span", {}, badge, this.habillage.styles[code] ?? code);
-    }
+    if (!bonus.styles.length && !bonus.pays.length) html("span", { class: "match-discret" }, p, "aucun (3 joueurs du même style, 5 du même pays)");
+    for (const x of bonus.styles) this.pastilleBonus(p, "style", x);
+    for (const x of bonus.pays) this.pastilleBonus(p, "pays", x);
   }
 }

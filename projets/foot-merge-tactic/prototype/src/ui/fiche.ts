@@ -18,7 +18,7 @@ export interface InfoFiche {
   style: { code: string; nom: string } | null;
   notes: Partial<Notes> | null;
   fusions: number;
-  /** Points ajoutés à chaque note par les fusions (déjà comptés dans `notes`). */
+  /** Boost de match d'un niveau de fusion (14/11 : caché, les notes affichées ne changent pas). */
   bonusFusion?: number;
   /** Bouton en bas de la fiche (13/11 : « Recruter » depuis le mercato). */
   action?: { libelle: string; piece: boolean; possible: boolean; faire: () => void };
@@ -93,7 +93,7 @@ export function ouvrirFiche(info: InfoFiche): void {
     s.append(info.style.nom);
   } else html("span", { class: "fiche-puce terne" }, puces, "Sans style");
   if (info.fusions > 0) {
-    const f = html("span", { class: "fiche-puce fusion" }, puces, `Fusion ${info.fusions}${info.bonusFusion ? ` · +${info.bonusFusion * info.fusions} partout` : ""}`);
+    const f = html("span", { class: "fiche-puce fusion" }, puces, `Fusion ${"★".repeat(Math.min(3, info.fusions))}${info.bonusFusion ? ` · boost de match +${info.bonusFusion * info.fusions}` : ""}`);
     f.style.setProperty("--aura", AURA[Math.min(3, info.fusions)] ?? AURA[3]!);
   }
 

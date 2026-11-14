@@ -167,12 +167,15 @@ class Enregistreur {
   private suivante = 0;
   /** Dernier événement enregistré (undefined : aucun encore dans ce film). */
   private dernierEv: { texte: string; a: number } | null | undefined = undefined;
+  /** Actions de style déjà recopiées (celles des mi-temps précédentes sont sautées). */
+  private actionsVues: number;
 
   constructor(
     private readonly sim: MatchSim,
     private readonly film: Film,
   ) {
     this.nj = film.entete.joueurs.length;
+    this.actionsVues = sim.balle?.actionsStyle.length ?? 0;
     this.m = this.nouveau();
   }
 
@@ -188,6 +191,7 @@ class Enregistreur {
       lignes: new Float64Array(c * 2),
       etat: new Int32Array(c * COLONNES_ETAT),
       evenements: [],
+      actions: [],
     };
   }
 
@@ -234,6 +238,12 @@ class Enregistreur {
       m.evenements.push(note);
       this.dernierEv = ev ? { texte: ev.texte, a: ev.a } : null;
     }
+    // Actions réussies grâce à un style depuis l'image précédente (14/11).
+    while (this.actionsVues < b.actionsStyle.length) {
+      const a = b.actionsStyle[this.actionsVues++]!;
+      const joueur = s.joueurs.findIndex((j) => j.camp === a.camp && j.joueur.id === a.id);
+      if (joueur >= 0) m.actions.push({ image: this.suivante, joueur, style: a.style });
+    }
     m.n++;
     this.suivante++;
   }
@@ -253,6 +263,7 @@ class Enregistreur {
       lignes: m.lignes.slice(0, m.n * 2),
       etat: m.etat.slice(0, m.n * COLONNES_ETAT),
       evenements: m.evenements,
+      actions: m.actions,
     });
     this.m = this.nouveau();
   }

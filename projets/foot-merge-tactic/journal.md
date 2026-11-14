@@ -671,3 +671,44 @@ Concepteur : « Tu penses quoi, on a passé un cap ? » — « Pas totalement ma
 **Remarqué en passant, non corrigé** (rien ne devait changer) : après un détour par l'écran de préparation à la mi-temps, le gros bouton du haut affiche encore « ▶ 2e mi-temps » pendant la 2e mi-temps (au lieu de « ❚❚ Pause ») ; il redevient juste au premier toucher. C'était déjà le cas avant.
 
 **À juger par le concepteur** : la version de test sur son téléphone (page séparée : https://claude.ai/artifact/5AP8h49wchEwgmtjy8YR6a ; la page habituelle du prototype n'a pas été touchée) ; la pull request (changement de structure, à fusionner seulement avec son accord). Pour le réseau, plus tard : alléger le film (binaire, compression, ou positions arrondies au centimètre — ce dernier point changerait l'affichage d'un cheveu, donc à décider) ; faire passer aussi les matchs des ordinateurs par l'arbitre ; bloquer le changement d'onglet en plein match.
+
+## 14/11/2026 (nuit) — Styles, pays et fusions en bonus caché
+
+**Demandes du concepteur** : styles « pas sur la note, mais un bonus caché qui est quand même pas négligeable », « c'est un bonus, donc pas de contrepartie » ; paliers d'équipe à 3 et « encore plus fort » à 5, « bien visible » (bandeau) ; 5 joueurs par style seulement dans le catalogue ; pays : avantage à 5 joueurs d'un même pays, « un double à 8 » ; fusion : « ça apporte pas grand-chose… il faut un impact qui se voit réellement », sans notes à 100 (collection future à la Clash Royale) ; flammes des joueurs fusionnés plus visibles. « Je valide tout… tu peux envoyer du lourd. »
+
+**Décisions validées dans la séance** : voir « Styles, pays et fusions (14/11) » dans `CLAUDE.md` (styles en bonus caché sans contrepartie, paliers 3 et 5, pays 5 et 8, fusion en boost de match caché, ligne « Fusion ★★ : boost de match » sur la fiche).
+
+**Ce qui a été fait** (chiffres en PROPOSITION, tous dans `src/data/influences.json`)
+- Bonus caché : ajouté aux sous-notes du moteur seulement (`notesBase` gardées pour la carte) ; `bonusNotes`, `effetJoueur`, `contextePays`, `paliersStyles`, `paliersPays` dans `src/sim/influences.ts` ; recalcul dans `simulation.ts`. Sans bonus, le moteur donne exactement les mêmes matchs (6 empreintes témoins identiques au bit près).
+- Styles : Récupérateur duel +10 endurance +10, Technicien passe +8 dribble +8, Rapide accélération +8 pointe +8, Rempart duel +12 endurance +4 ; comportements gardés, contreparties retirées. Palier à 3 (bonus d'équipe d'avant), à 5 (Pressing en meute, Jeu en une touche, Contre éclair, Le mur). Notes des cartes : l'accent de style retiré (`scripts/generer-cartes.py`, 20 cartes changées ; tableau des 60 cartes mis à jour).
+- Pays : cohésion à 5 (+4 caché sur les 8 sous-notes de champ, passes entre compatriotes ×0,75 d'imprécision) ; tradition à 8 (France accélération et dribble +6, plus de dribbles ; Espagne passe +8 dribble +6, passes sous pression plus sûres ; Angleterre duel et puissance +6, plus de centres et de tacles ; Allemagne endurance +12, contre-pressing renforcé ; Italie duel +8, ligne plus prudente, marquage serré). Réactions plus rapides des compatriotes essayées puis retirées (elles faisaient perdre : 30 % de victoires).
+- Fusion : +7 caché par niveau sur toutes les notes (gardien compris) ; coéquipiers qui le cherchent plus (+1,5 au choix de la passe par niveau), +30 % de dribbles et de tirs de loin par niveau. L'ancien +4 visible par niveau est retiré (`partie.json`, `partie.ts`).
+- Visibilité : bandeau « Bonus actifs » au coup d'envoi de chaque mi-temps (doré au palier fort), pictogramme du style qui jaillit au-dessus du joueur quand son style fait la différence (film version 2 : actions des styles), « Tes bonus » au tableau de bord, compteurs de la préparation /3 puis /5 et /5 puis /8. Flammes de fusion : un style CSS (`.match-rond.eux circle`) repeignait leur anneau ; corrigé, aura plus large.
+- Nouveau script : `scripts/mesurer-bonus.ts [avant|apres] [graines] [filtre]`, chaque graine jouée des deux côtés du terrain (sinon un côté gagne plus souvent : 27 % contre 53 % au témoin).
+
+**Mesures** (80 matchs complets par ligne : 40 graines × 2 côtés, l'équipe A avec le bonus contre la même sans ; « avant » = règles du 13/11 avec le +4 visible des fusions et les notes de style dans les cartes)
+
+| Configuration | Avant : V / N / D | Après : V / N / D | Après : buts A – B |
+|---|---|---|---|
+| témoin (aucun bonus) | 39 / 23 / 39 | 39 / 23 / 39 | 1,09 – 1,09 |
+| fusion ×1 (ailier) | 38 / 24 / 39 | 45 / 23 / 33 | 1,26 – 1,07 |
+| fusion ×2 | 35 / 28 / 38 | 45 / 31 / 24 | 1,30 – 0,97 |
+| fusion ×3 | 39 / 29 / 33 | 49 / 23 / 29 | 1,19 – 0,86 |
+| Récupérateur ×3 / ×5 | 41 / 35 | 39 / 54 | ×5 : 1,19 – 0,64 |
+| Technicien ×3 / ×5 | 44 / 49 | 48 / 51 | ×5 : 1,31 – 0,78 |
+| Rapide ×3 / ×5 | 44 / 44 | 48 / 50 | ×5 : 1,32 – 0,91 |
+| Rempart ×3 / ×5 | 26 / 41 | 41 / 43 | ×5 : 1,16 – 0,95 |
+| France ×5 (cohésion) | — | 45 / 41 / 14 | 1,44 – 1,04 |
+| France ×8 (cohésion + tradition) | — | 60 / 16 / 24 | 1,66 – 0,86 |
+| Espagne ×8 | — | 56 / 26 / 18 | 1,73 – 0,95 |
+| Angleterre ×8 | — | 63 / 26 / 11 | 1,77 – 0,86 |
+| Allemagne ×8 | — | 60 / 30 / 10 | 1,73 – 0,89 |
+| Italie ×8 | — | 61 / 25 / 14 | 1,81 – 0,78 |
+
+(Lignes des styles : % de victoires à 3 / à 5.) Ailier fusionné ×3, par match : 15,9 ballons touchés au lieu de 12,1 ; 0,50 tir au lieu de 0,20 ; 11,9 dribbles tentés réussis à 92 % au lieu de 2,9 à 51 %.
+
+Réglage de la cohésion : avec des compatriotes tous en défense, aucun effet mesurable ; répartis sur le terrain (cas réel), +6 partout donnait 60 % de victoires à 5 et jusqu'à 85 % à 8 (France) : ramené à +4, traditions de la France et de l'Angleterre baissées.
+
+**Tests** : 170 verts (nouveaux : `tests/bonus.test.ts`, 9 tests : bonus caché sans toucher la carte, paliers 3 et 5, cohésion et tradition, fusion, moteur identique sans bonus). Empreintes de la partie régénérées (les fusions et les bonus changent la partie) ; les 6 matchs témoins sont inchangés.
+
+**À juger par le concepteur** : la force des bonus en jouant (fusion ×3 qui domine assez ? cohésion et pays à 8 pas trop forts ?), le bandeau, les pictogrammes qui jaillissent, les flammes de fusion. Questions restantes : l'interrupteur « Styles » du match coupe les styles mais pas les pays ni les fusions ; hybrides (fusion de deux joueurs différents) pas encore faits.

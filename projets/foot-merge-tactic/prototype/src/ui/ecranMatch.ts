@@ -85,26 +85,44 @@ const ANNONCE_S = 2.5;
 const ANNONCE_BUT_S = 5.5;
 const VITESSE_PAR_DEFAUT = 3.5;
 const COULEUR_EUX = "#C2413D";
-/** Couleur de chaque niveau de fusion (1 bleu, 2 or, 3 violet), comme sur la préparation. */
-/** Fusion en match (14/11, concepteur : « la flamme de la couleur de l'équipe qui
- *  grossit », « au début un halo qui se transforme en flamme ») : niveau 1 = halo,
- *  2 = flamme, 3 = grande flamme avec étincelles, en bleu pour toi et en rouge pour
- *  l'adversaire. Le bleu, l'or et le violet des niveaux restent sur l'écran de préparation. */
+/** Fusion en match (14/11 après-midi, proposition « M2 » choisie par le concepteur
+ *  sur la page des propositions visuelles) : niveau 1 = contour lumineux qui suit la
+ *  forme du joueur et quelques étincelles, sans feu ; 2 = un feu réaliste apparaît
+ *  derrière le joueur ; 3 = grand feu, flammes sur les côtés et braises. Bleu pour
+ *  toi, rouge orangé pour l'adversaire. Le bleu, l'or et le violet des niveaux
+ *  restent sur l'écran de préparation. */
 const FEU = [
-  { coeur: "#E6EEFF", milieu: "#5B8CFF", bord: "#2D5BD8" },
-  { coeur: "#FFE6E1", milieu: "#FF6B5E", bord: "#C2413D" },
+  { fonce: "#132F86", main: "#2F6BFF", vif: "#5FA0FF", clair: "#CFE3FF" },
+  { fonce: "#7E1710", main: "#E2402A", vif: "#FF7B3D", clair: "#FFE0B0" },
 ] as const;
-/** Flamme dessinée de 0 (base) à -1 (pointe), largeur de -0,5 à 0,5. */
-const FORME_FLAMME =
-  "M 0 0 C -0.42 0 -0.55 -0.3 -0.42 -0.52 C -0.34 -0.66 -0.36 -0.8 -0.24 -0.95 C -0.2 -0.8 -0.1 -0.74 -0.04 -0.7 " +
-  "C -0.06 -0.84 0.02 -0.94 0.08 -1 C 0.12 -0.86 0.2 -0.8 0.26 -0.74 C 0.3 -0.8 0.32 -0.86 0.34 -0.9 " +
-  "C 0.5 -0.66 0.56 -0.36 0.44 -0.18 C 0.34 -0.04 0.2 0 0 0 Z";
-
-/** La flamme à sa taille, coordonnées calculées (14/11 : pas de `transform` SVG
- *  sur un élément animé en CSS, que certains navigateurs de téléphone ignorent). */
-function cheminFlamme(largeur: number, hauteur: number): string {
-  let i = 0;
-  return FORME_FLAMME.replace(/-?\d+(\.\d+)?/g, (n) => (Number(n) * (i++ % 2 === 0 ? largeur : hauteur)).toFixed(2));
+/** Flamme dans une boîte de 40 × 60, pied en bas au centre : bord sombre, milieu
+ *  vif, cœur blanc chaud. Chaque couche ondule à son rythme (CSS), la matière
+ *  ondule comme un feu (filtre de turbulence). Pas de `transform` SVG sur ces
+ *  éléments animés en CSS (14/11 : certains navigateurs de téléphone l'ignorent). */
+const FLAMME = {
+  bord: "M20 59 C9 59 4 51 5 42 C6 35 10 31 10 24 C13 28 14 31 16 32 C15 23 18 14 24 5 C24 14 28 19 30 25 C31 22 32 20 32 16 C36 24 37 33 35 42 C34 52 29 59 20 59 Z",
+  milieu: "M20 59 C12 59 9 53 10 46 C11 40 14 37 15 31 C17 35 18 37 19 38 C19 31 22 25 25 18 C26 26 29 30 30 36 C31 42 31 49 29 53 C27 57 24 59 20 59 Z",
+  coeur: "M20 59 C15 59 13 55 14 50 C15 46 17 44 18 40 C19 43 20 44 21 45 C22 42 23 40 23 36 C26 42 27 47 26 51 C25 56 23 59 20 59 Z",
+};
+/** Pictogramme du style en match (14/11 après-midi, proposition « P3 » choisie) :
+ *  dans le pion (blanc), ou sur une plaque de la couleur du style posée sur le socle
+ *  de la figurine. */
+const COULEUR_STYLE: Record<string, { fond: string; picto: string }> = {
+  REC: { fond: "#E8742A", picto: "#FFFFFF" },
+  TEC: { fond: "#2F7DE1", picto: "#FFFFFF" },
+  RAP: { fond: "#F2C200", picto: "#3A2A00" },
+  REM: { fond: "#2E9E5B", picto: "#FFFFFF" },
+};
+/** Repères d'un joueur pour l'effet de fusion (unités SVG, origine au centre du
+ *  pion ou du socle) : pied du feu, haut du joueur, taille de référence, largeur,
+ *  montée et rayon des braises. */
+interface ReperesFeu {
+  base: number;
+  haut: number;
+  taille: number;
+  larg: number;
+  monte: number;
+  braise: number;
 }
 const BANDES = 12;
 
@@ -469,20 +487,38 @@ export class EcranMatch {
     svg("stop", { offset: "100%", "stop-color": "#FFFFFF", "stop-opacity": "0.75" }, queue);
     const clip = svg("clipPath", { id: "match-ballon-clip" }, defs);
     svg("circle", { r: RAYON_BALLON }, clip);
-    // Fusion (14/11) : halo, flamme et aura aux couleurs de chaque équipe.
+    // Fusion (14/11 après-midi, « M2 ») : dégradés, matière du feu et contour
+    // lumineux, aux couleurs de chaque équipe.
+    const degrade = (type: "linearGradient" | "radialGradient", id: string, arrets: [number, string, number][]): void => {
+      const d = type === "linearGradient" ? svg(type, { id, x1: "0", y1: "1", x2: "0", y2: "0" }, defs) : svg(type, { id, cx: "50%", cy: "50%", r: "50%" }, defs);
+      for (const [o, c, op] of arrets) svg("stop", { offset: o, "stop-color": c, "stop-opacity": op }, d);
+    };
     FEU.forEach((feu, camp) => {
-      const halo = svg("radialGradient", { id: `match-halo-feu-${camp}`, cx: "50%", cy: "50%", r: "50%" }, defs);
-      svg("stop", { offset: "0%", "stop-color": feu.coeur, "stop-opacity": "1" }, halo);
-      svg("stop", { offset: "55%", "stop-color": feu.milieu, "stop-opacity": "0.9" }, halo);
-      svg("stop", { offset: "100%", "stop-color": feu.bord, "stop-opacity": "0" }, halo);
-      const flamme = svg("linearGradient", { id: `match-feu-${camp}`, x1: "0", y1: "1", x2: "0", y2: "0" }, defs);
-      svg("stop", { offset: "0%", "stop-color": feu.coeur, "stop-opacity": "0.95" }, flamme);
-      svg("stop", { offset: "45%", "stop-color": feu.milieu, "stop-opacity": "1" }, flamme);
-      svg("stop", { offset: "100%", "stop-color": feu.bord, "stop-opacity": "0.6" }, flamme);
+      degrade("linearGradient", `match-feu-bord-${camp}`, [[0, feu.fonce, 0.95], [0.45, feu.main, 0.85], [0.8, feu.vif, 0.35], [1, feu.vif, 0]]);
+      degrade("linearGradient", `match-feu-milieu-${camp}`, [[0, feu.vif, 1], [0.55, feu.clair, 0.9], [1, "#FFFFFF", 0]]);
+      degrade("linearGradient", `match-feu-coeur-${camp}`, [[0, "#FFFFFF", 1], [0.7, "#FFFFFF", 0.85], [1, feu.clair, 0]]);
+      degrade("radialGradient", `match-feu-lueur-${camp}`, [[0, feu.vif, 1], [0.55, feu.main, 0.53], [1, feu.main, 0]]);
+      degrade("radialGradient", `match-feu-contour-${camp}`, [[0, feu.vif, 0.95], [0.5, feu.vif, 0.9], [0.62, feu.vif, 0.55], [1, feu.vif, 0]]);
+      degrade("radialGradient", `match-feu-braise-${camp}`, [[0, "#FFFFFF", 1], [0.3, feu.clair, 1], [0.6, feu.vif, 0.7], [1, feu.vif, 0]]);
+      // Matière du feu : une texture qui ondule déforme la flamme ; lueur de la
+      // couleur de l'équipe autour (unités de la boîte 40 × 60 de la flamme).
+      const m = svg("filter", { id: `match-feu-matiere-${camp}`, x: "-40%", y: "-30%", width: "180%", height: "160%", "color-interpolation-filters": "sRGB" }, defs);
+      const bruit = svg("feTurbulence", { type: "fractalNoise", baseFrequency: "0.09 0.045", numOctaves: 2, seed: 3 + 4 * camp, result: "bruit" }, m);
+      svg("animate", { attributeName: "baseFrequency", dur: "1.4s", values: "0.09 0.045;0.1 0.07;0.09 0.045", repeatCount: "indefinite" }, bruit);
+      svg("feDisplacementMap", { in: "SourceGraphic", in2: "bruit", scale: 11, xChannelSelector: "R", yChannelSelector: "G", result: "feu" }, m);
+      svg("feGaussianBlur", { in: "feu", stdDeviation: 0.35, result: "net" }, m);
+      svg("feGaussianBlur", { in: "feu", stdDeviation: 2.5, result: "flou" }, m);
+      svg("feFlood", { "flood-color": feu.main, result: "teinte" }, m);
+      svg("feComposite", { in: "teinte", in2: "flou", operator: "in", result: "lueur" }, m);
+      const fusion = svg("feMerge", {}, m);
+      svg("feMergeNode", { in: "lueur" }, fusion);
+      svg("feMergeNode", { in: "net" }, fusion);
+      // Contour lumineux des figurines : trait net clair, puis lueur vive (plus large au niveau 3).
       for (let n = 1; n <= 3; n++) {
-        const f = svg("filter", { id: `match-aura-${camp}-${n}`, x: "-60%", y: "-60%", width: "220%", height: "220%", "color-interpolation-filters": "sRGB" }, defs);
-        svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: 0.9, "flood-color": "#FFFFFF", "flood-opacity": 1 }, f);
-        svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: 1.6 + n, "flood-color": feu.milieu, "flood-opacity": 1 }, f);
+        const f = svg("filter", { id: `match-aura-${camp}-${n}`, x: "-40%", y: "-40%", width: "180%", height: "180%", "color-interpolation-filters": "sRGB" }, defs);
+        svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: 0.62 * K, "flood-color": feu.clair, "flood-opacity": 1 }, f);
+        svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: 0.62 * K, "flood-color": feu.clair, "flood-opacity": 1 }, f);
+        svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: (n === 3 ? 3.7 : 2.7) * K, "flood-color": feu.vif, "flood-opacity": 1 }, f);
       }
     });
 
@@ -584,22 +620,24 @@ export class EcranMatch {
     svg("ellipse", { cx: 0, cy: 0, rx: 17 * K, ry: 5 * K, class: "match-socle" }, g);
     const info = this.habillage.infos(id, camp);
     const fusions = info?.fusions ?? 0;
+    const niveau = Math.min(3, fusions);
+    // Repères de la figurine (image de 48 × 49 au-dessus du socle).
+    const reperes: ReperesFeu = { base: 2.7 * K, haut: -44.4 * K, taille: 35.6 * K, larg: 46 * K, monte: 39 * K, braise: 5 * K };
     if (image) {
-      if (fusions) this.feu(g, camp, Math.min(3, fusions), 0, 0, 20 * K, true);
+      if (niveau) this.feu(g, camp, niveau, reperes, 2.1, 2.8);
       svg("image", {
         href: image,
         x: -24 * K,
         y: -48 * K,
         width: 48 * K,
         height: 49 * K,
-        filter: fusions ? `url(#match-aura-${camp}-${Math.min(3, fusions)})` : undefined,
+        filter: niveau ? `url(#match-aura-${camp}-${niveau})` : undefined,
       }, g);
       // Avant de l'anneau redessiné par-dessus : socle à la couleur de
-      // l'équipe (bleu ou rouge, comme le maillot), la flamme (aura) autour de
-      // la figurine garde la couleur de la fusion (12/11).
+      // l'équipe (bleu ou rouge, comme le maillot).
       svg("path", { d: `M ${-17 * K} 0 A ${17 * K} ${5 * K} 0 0 0 ${17 * K} 0`, class: "match-socle" }, g);
-      if (fusions) svg("path", { d: `M ${-17 * K} 0 A ${17 * K} ${5 * K} 0 0 0 ${17 * K} 0`, class: "match-socle-fusion", stroke: FEU[camp].milieu }, g);
-      this.pastilleStyle(g, info?.style ?? null, 13 * K, -10 * K, 5.5 * Math.max(0.8, K));
+      this.plaqueStyle(g, info?.style ?? null, K);
+      if (niveau) this.braisesFusion(g, camp, niveau, reperes, 2.8);
     } else {
       svg("circle", { cy: -14, r: 9, fill: camp === 0 ? "#3563C0" : COULEUR_EUX, stroke: "#fff", "stroke-width": 1.5 }, g);
     }
@@ -608,33 +646,58 @@ export class EcranMatch {
     return g;
   }
 
-  /** Halo (niveau 1) ou flamme (niveaux 2 et 3, plus grande au 3, avec des
-   *  étincelles) derrière un joueur fusionné, à la couleur de son équipe.
-   *  (x, y) : pied de la flamme ; `taille` : rayon du pion ou demi-largeur de la figurine. */
-  private feu(g: SVGGElement, camp: 0 | 1, niveau: number, x: number, y: number, taille: number, figurine: boolean): void {
-    // Crescendo (14/11, « les halos sont trop visibles, les flammes pas assez ; il
-    // faut un crescendo entre 1, 2 et 3 ») : 1 = halo ; 2 = halo + flamme ;
-    // 3 = halo plus grand + grande flamme double + étincelles. Pas de
-    // transformation SVG sur les éléments animés (14/11 midi).
-    const f = svg("g", { class: `match-feu niveau-${niveau}`, transform: `translate(${x} ${y})` }, g);
-    const r = taille * (figurine ? [0, 1.15, 1.3, 1.5] : [0, 2, 2.3, 2.7])[niveau]!;
-    const cy = figurine ? -taille * 1.05 : -y;
-    const ry = figurine ? r * 1.3 : r;
-    svg("ellipse", { cx: 0, cy, rx: r, ry, fill: `url(#match-halo-feu-${camp})`, class: "match-flamme" }, f);
-    svg("ellipse", { cx: 0, cy, rx: r * 0.72, ry: ry * 0.72, class: "match-halo-anneau", stroke: FEU[camp].coeur }, f);
+  /** Feu derrière un joueur fusionné (« M2 », 14/11 après-midi) : rien au niveau 1
+   *  (contour lumineux et étincelles seulement) ; au 2, une flamme réaliste ; au 3,
+   *  une lueur au sol, deux flammes sur les côtés et une grande flamme.
+   *  `k2`, `k3` : hauteur de la flamme en tailles de référence, niveaux 2 et 3. */
+  private feu(g: SVGGElement, camp: 0 | 1, niveau: number, r: ReperesFeu, k2: number, k3: number): void {
     if (niveau < 2) return;
-    const grand = niveau === 3;
-    const largeur = taille * (figurine ? (grand ? 3 : 2.3) : grand ? 4.4 : 3.3);
-    const hauteur = taille * (figurine ? (grand ? 4.4 : 3.3) : grand ? 8.6 : 6.2);
-    svg("path", { d: cheminFlamme(largeur, hauteur), fill: `url(#match-feu-${camp})`, class: "match-flamme-forme" }, f);
-    if (grand) svg("path", { d: cheminFlamme(largeur * 0.75, hauteur * 0.8), fill: `url(#match-feu-${camp})`, class: "match-flamme-forme deux" }, f);
-    // Cœur clair de la flamme.
-    svg("path", { d: cheminFlamme(largeur * 0.45, hauteur * 0.5), fill: FEU[camp].coeur, class: "match-flamme-coeur" }, f);
-    if (grand) {
-      for (let i = 0; i < 4; i++) {
-        svg("circle", { cx: (i - 1.5) * largeur * 0.22, cy: -hauteur * (0.65 + 0.09 * i), r: Math.max(1.1, taille * 0.15), fill: FEU[camp].coeur, class: `match-etincelle e${i % 3}` }, f);
-      }
+    const f = svg("g", { class: `match-feu niveau-${niveau}` }, g);
+    const h = r.taille * (niveau === 3 ? k3 : k2);
+    if (niveau === 3) {
+      svg("ellipse", { cx: 0, cy: r.base - 0.3 * h, rx: 0.5 * h, ry: 0.4 * h, fill: `url(#match-feu-lueur-${camp})`, class: "match-feu-lueur" }, f);
+      for (const cote of [-1, 1]) this.flamme(f, camp, cote * r.larg * 0.36, r.base - 0.07 * h, 0.41 * h, false);
     }
+    this.flamme(f, camp, 0, r.base, h, true);
+  }
+
+  /** Une flamme de hauteur `h`, pied en (x, y) ; `complete` : avec sa couche sombre du bord. */
+  private flamme(g: SVGGElement, camp: 0 | 1, x: number, y: number, h: number, complete: boolean): void {
+    const l = (h * 40) / 60;
+    const boite = svg("svg", { x: x - l / 2, y: y - h, width: l, height: h, viewBox: "0 0 40 60", overflow: "visible", class: "match-flamme-boite" }, g);
+    const matiere = svg("g", { filter: `url(#match-feu-matiere-${camp})` }, boite);
+    if (complete) svg("path", { d: FLAMME.bord, fill: `url(#match-feu-bord-${camp})`, class: "match-flamme-a" }, matiere);
+    svg("path", { d: FLAMME.milieu, fill: `url(#match-feu-milieu-${camp})`, class: "match-flamme-b" }, matiere);
+    svg("path", { d: FLAMME.coeur, fill: `url(#match-feu-coeur-${camp})`, class: "match-flamme-c" }, matiere);
+  }
+
+  /** Étincelles qui montent (devant le joueur) : 3 au-dessus de lui au niveau 1,
+   *  aucune au 2, 9 braises dans le feu au 3. */
+  private braisesFusion(g: SVGGElement, camp: 0 | 1, niveau: number, r: ReperesFeu, k3: number): void {
+    if (niveau === 2) return;
+    const h = r.taille * k3;
+    const [nb, y, etendue] = niveau === 1 ? [3, r.haut + 0.3 * r.taille, 0.9 * r.larg] : [9, r.base - 0.45 * h, (h * 40) / 60];
+    const f = svg("g", { class: "match-feu" }, g);
+    for (let i = 0; i < nb; i++) {
+      svg("circle", {
+        cx: ((((i * 41) % 17) - 8) / 8) * (etendue / 2),
+        cy: y,
+        r: r.braise,
+        fill: `url(#match-feu-braise-${camp})`,
+        class: "match-braise",
+        style: `--monte: ${(-r.monte).toFixed(1)}px; animation-delay: ${((i * 0.37) % 1.5).toFixed(2)}s`,
+      }, f);
+    }
+  }
+
+  /** Plaque du style posée sur le socle de la figurine (« P3 », 14/11 après-midi). */
+  private plaqueStyle(g: SVGGElement, style: string | null, K: number): void {
+    if (!style || !CORPS_PICTOS[style] || !COULEUR_STYLE[style]) return;
+    const c = COULEUR_STYLE[style]!;
+    const p = svg("g", { class: "match-style" }, g);
+    svg("rect", { x: -11.5 * K, y: -3.1 * K, width: 23 * K, height: 11.6 * K, rx: 5.7 * K, fill: c.fond, "stroke-width": 1.4 * K, class: "match-plaque-fond" }, p);
+    const ic = svg("g", { transform: `translate(0 ${2.7 * K}) scale(${(8.5 * K) / 24}) translate(-12 -12)`, class: "match-plaque-picto", style: `color: ${c.picto}` }, p);
+    ic.innerHTML = CORPS_PICTOS[style]!;
   }
 
   /** Pion rond (vue « pions ») : couleur du pays pour ton équipe, rouge pour l'adversaire. */
@@ -643,27 +706,27 @@ export class EcranMatch {
     // Couleur d'équipe (bleu / rouge) : la séparation entre les deux équipes prime
     // (12/11, « pas de séparation visuelle forte entre les 2 équipes »).
     const info = this.habillage.infos(id, camp);
-    const fusions = Math.min(3, info?.fusions ?? 0);
-    // Fusion (14/11) : halo au niveau 1, flamme qui grossit aux niveaux 2 et 3, couleur de l'équipe.
-    if (fusions) {
-      this.feu(g, camp, fusions, 0, RAYON_ROND * 0.9, RAYON_ROND, false);
-      svg("circle", { r: RAYON_ROND + 2.4, class: `match-rond-fusion niveau-${fusions}`, stroke: FEU[camp].milieu }, g);
+    const niveau = Math.min(3, info?.fusions ?? 0);
+    const R = RAYON_ROND;
+    const reperes: ReperesFeu = { base: 0.45 * R, haut: -R, taille: 2 * R, larg: 2 * R, monte: 3.1 * R, braise: 0.45 * R };
+    // Fusion (« M2 », 14/11 après-midi) : feu derrière (niveaux 2 et 3), contour
+    // lumineux du pion (lueur vive et anneau clair) à tous les niveaux.
+    if (niveau) {
+      this.feu(g, camp, niveau, reperes, 2.3, 3.3);
+      svg("circle", { r: R * (niveau === 3 ? 2.35 : 2.05), fill: `url(#match-feu-contour-${camp})` }, g);
+      svg("circle", { r: R + 1.7, fill: "none", stroke: FEU[camp].clair, "stroke-width": 1.2 }, g);
     }
-    svg("circle", { r: RAYON_ROND, fill: camp === 0 ? BLEU_NOUS : COULEUR_EUX, class: "match-rond-corps" }, g);
-    // Style (13/11, « il faut qu'on ait la visibilité ») : petite pastille du pictogramme.
-    this.pastilleStyle(g, info?.style ?? null, RAYON_ROND * 1.05, -RAYON_ROND * 1.05, 5.4);
+    svg("circle", { r: R, fill: camp === 0 ? BLEU_NOUS : COULEUR_EUX, class: "match-rond-corps" }, g);
+    // Style (« P3 », 14/11 après-midi) : le pictogramme dans le pion, en blanc.
+    const style = info?.style ?? null;
+    if (style && CORPS_PICTOS[style]) {
+      const ic = svg("g", { transform: `scale(${(1.15 * R) / 24}) translate(-12 -12)`, class: "match-rond-picto" }, g);
+      ic.innerHTML = CORPS_PICTOS[style]!;
+    }
+    if (niveau) this.braisesFusion(g, camp, niveau, reperes, 3.3);
     const titre = svg("title", {}, g);
     titre.textContent = nom;
     return g;
-  }
-
-  /** Pastille ronde du style (même pictogramme que sur la préparation). */
-  private pastilleStyle(g: SVGGElement, style: string | null, x: number, y: number, r: number): void {
-    if (!style || !CORPS_PICTOS[style]) return;
-    const p = svg("g", { transform: `translate(${x} ${y})`, class: "match-style" }, g);
-    svg("circle", { r, class: "match-style-fond" }, p);
-    const ic = svg("g", { transform: `scale(${(r * 1.5) / 24}) translate(-12 -12)`, class: "match-style-picto" }, p);
-    ic.innerHTML = CORPS_PICTOS[style]!;
   }
 
   private majCommandes(): void {

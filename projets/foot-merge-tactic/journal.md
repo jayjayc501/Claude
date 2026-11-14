@@ -799,3 +799,22 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 **Tests** : 177 verts (nouveaux : charnière centrale dans `tests/couloirs.test.ts` ; revente avec une fusion dans `tests/preparation.test.ts`). Trois tests statistiques passaient juste sous leur seuil après le changement (89 % pour 90 %, et 3 buts contre 2 pour le test du gardien sur 10 petits matchs) : leurs échantillons ont été agrandis (transitions sur 12 graines au lieu de 8 ; gardien sur 24 matchs de 180 s au lieu de 10 de 120 s), sans toucher aux seuils. Empreintes régénérées (le placement des défenseurs centraux a changé).
 
 **À juger par le concepteur** : la charnière en match ; le crescendo halo, flamme, grande flamme.
+
+## 14/11/2026 (après-midi) — Fusions et pictogrammes de style en match, choisis sur propositions visuelles
+
+**Demandes du concepteur** : « Tes picto/halo/flamme sont nuls. Fais-moi plusieurs propositions visuelles avant de remodifier. » Page de propositions (Design) : https://claude.ai/artifact/2CKAhmJXogvSfgW8VYV5Bg (fusions A à F, pictos P1 à P4, puis flammes E1 à E4, puis mélanges M1 et M2). La flamme E « fait un peu enfantin » ; il hésite entre E2 (feu réaliste) et E4 (silhouette embrasée), mais le niveau 1 ne se voit pas, « et si tu le montres trop, on n'aura pas de différence avec le niveau 2 ».
+
+**Décisions validées dans la séance**
+- Pictogrammes de style en match : **P3** (« le P3 est pas mal ») : dans le pion, en blanc ; sur une plaque de la couleur du style posée sur le socle de la figurine.
+- Fusions en match : **M2** (« ok pour M2 ») : un signe différent à chaque niveau. 1 = contour lumineux qui suit la forme du joueur et quelques étincelles, sans feu ; 2 = feu réaliste derrière le joueur ; 3 = grand feu, flammes sur les côtés et braises.
+
+**Ce qui a été fait** (tailles et couleurs en PROPOSITION, reprises de la page des propositions)
+- `src/ui/ecranMatch.ts` : nouvelles couleurs de feu (`FEU` : sombre, principal, vif, clair ; bleu pour toi, rouge orangé pour l'adversaire) ; flamme en trois couches dans une boîte de 40 × 60 (`FLAMME`), dessinée dans un `<svg>` imbriqué pour que les dégradés et le filtre `match-feu-matiere-<camp>` (turbulence animée qui fait onduler la matière, lueur de l'équipe) gardent la même échelle à toutes les tailles ; `feu()` (flammes des niveaux 2 et 3, lueur au sol au 3), `flamme()`, `braisesFusion()` (3 étincelles au 1, 9 braises au 3) ; contour lumineux : filtre `match-aura-<camp>-<n>` refait (trait clair net et lueur vive, à l'échelle de la vue) sur les figurines, lueur en dégradé et anneau clair autour des pions ; `plaqueStyle()` et picto dans le pion (`COULEUR_STYLE` : Récupérateur orange, Technicien bleu, Rapide jaune, Rempart vert). Ancien halo, ancienne flamme et pastille sombre retirés.
+- `src/style.css` : animations des couches de flamme, de la lueur et des braises ; règles de l'ancien halo retirées.
+- Moteur inchangé. L'écran de préparation garde ses pastilles et ses couleurs de niveau (bleu, or, violet).
+
+**Vérification** : captures au format téléphone, vues Pions et Figurines, avec des niveaux de fusion forcés sur une copie de la page pour voir 0, 1, 2 et 3 dans les deux équipes ; aucune erreur JavaScript ; 60 images par seconde dans Chrome sur ordinateur (le filtre de turbulence est le plus coûteux : à surveiller sur un vrai téléphone).
+
+**Tests** : 177 verts (aucun nouveau : changement d'affichage seulement ; empreintes inchangées).
+
+**À juger par le concepteur** : le rendu en match (niveau 1 assez visible, crescendo 1 → 2 → 3, lisibilité des pictos dans les pions et sur les plaques) et la fluidité sur son téléphone.

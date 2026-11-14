@@ -388,10 +388,6 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-rond.nous .match-rond-corps { stroke: #fff; stroke-width: 2.2; }
 .match-rond.eux .match-rond-corps { stroke: #6E1A17; stroke-width: 2.2; }
 .match-rond { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)); }
-.match-rond-fusion { fill: none; stroke-width: 3.2; }
-/* Flamme de fusion (14/11, « ça ne se voyait plus trop ») : halo qui palpite. */
-.match-flamme { animation: match-flamme 0.9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 65%; pointer-events: none; }
-@keyframes match-flamme { from { opacity: 0.55; transform: scale(0.88); } to { opacity: 1; transform: scale(1.1); } }
 /* Éclat d'un style qui agit (14/11) : le pictogramme saute au-dessus du joueur. */
 .match-eclat { pointer-events: none; }
 .match-eclat-anim { animation: match-eclat 1.3s ease-out forwards; transform-box: fill-box; transform-origin: 50% 100%; }
@@ -414,23 +410,9 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-bandeau-ligne.eux .match-bandeau-equipe { color: #C2413D; }
 @keyframes match-bandeau { from { opacity: 0; transform: translateY(-14px) scale(0.96); } to { opacity: 1; transform: none; } }
 .match-palier.fort { background: linear-gradient(90deg, #8A5A00, #C98A00); box-shadow: 0 0 0 2px #FFD34D; }
-@media (prefers-reduced-motion: reduce) { .match-flamme, .match-eclat-anim, .match-flamme-forme, .match-flamme-coeur, .match-etincelle { animation: none; } }
-.match-rond-fusion.niveau-1 { stroke-width: 2; }
-.match-rond-fusion.niveau-2 { stroke-width: 2.8; }
-.match-rond-fusion.niveau-3 { stroke-width: 3.4; }
+@media (prefers-reduced-motion: reduce) { .match-eclat-anim { animation: none; } }
 /* Flamme de fusion (14/11) : elle danse depuis sa base ; étincelles qui montent au niveau 3. */
 .match-feu { pointer-events: none; }
-.match-flamme-forme { animation: match-feu 0.7s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
-.match-flamme-coeur { opacity: 0.75; animation: match-feu 0.55s ease-in-out infinite alternate-reverse; transform-box: fill-box; transform-origin: 50% 100%; }
-@keyframes match-feu { from { transform: scale(0.92, 0.86); } to { transform: scale(1.05, 1.08); } }
-.match-halo-anneau { fill: none; stroke-width: 2.4; opacity: 1; animation: match-flamme 0.9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; pointer-events: none; }
-.match-etincelle { animation: match-etincelle 1.1s ease-out infinite; transform-box: fill-box; transform-origin: center; }
-.match-etincelle.e1 { animation-delay: 0.35s; }
-.match-etincelle.e2 { animation-delay: 0.7s; }
-@keyframes match-etincelle { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-9px); } }
-.match-socle-fusion { fill: none; stroke-width: 3; }
-.match-style-fond { fill: #2B2F36; stroke: #fff; stroke-width: 1; }
-.match-style-picto { fill: none; stroke: #fff; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; color: #fff; }
 .match-surgit { animation: match-surgit 0.3s cubic-bezier(0.2, 1.5, 0.4, 1); transform-box: fill-box; transform-origin: 50% 100%; }
 .match-fig-action { transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes match-surgit { from { transform: scale(0.3); opacity: 0.2; } to { transform: scale(1); opacity: 1; } }
@@ -627,11 +609,23 @@ svg.drapeau { display: inline-block; flex: none; border-radius: 2px; box-shadow:
 .fiche-puce.vente { display: inline-flex; align-items: center; gap: 4px; }
 .fiche-piece.petite { width: 13px; height: 13px; }
 
-/* Halo de fusion (14/11) : il palpite doucement ; la flamme fait le crescendo (niveaux 2 et 3). */
-.match-feu .match-flamme { animation: match-halo-feu 0.9s ease-in-out infinite alternate; }
-@keyframes match-halo-feu { from { opacity: 0.55; transform: scale(0.9); } to { opacity: 0.9; transform: scale(1.06); } }
-.match-feu .match-halo-anneau { stroke-width: 1.4; opacity: 0.7; }
-.match-feu.niveau-3 .match-halo-anneau { stroke-width: 2; opacity: 0.9; }
-.match-flamme-forme { filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.8)); }
-.match-flamme-forme.deux { animation-duration: 0.5s; animation-direction: alternate-reverse; }
-@media (prefers-reduced-motion: reduce) { .match-feu .match-flamme { animation: none; } }
+
+/* Fusion en match (14/11 après-midi, « M2 » choisi par le concepteur) : contour
+   lumineux et étincelles (niveau 1), feu réaliste (2), grand feu et braises (3). */
+.match-flamme-boite { overflow: visible; pointer-events: none; }
+.match-flamme-a, .match-flamme-b, .match-flamme-c { transform-box: fill-box; transform-origin: 50% 100%; }
+.match-flamme-a { animation: match-flamme-a 1.15s ease-in-out infinite alternate; }
+@keyframes match-flamme-a { from { transform: scale(1, 0.95) skewX(-1.5deg); } to { transform: scale(1.03, 1.04) skewX(1.5deg); } }
+.match-flamme-b { animation: match-flamme-b 0.8s ease-in-out infinite alternate; }
+@keyframes match-flamme-b { from { transform: scale(0.96, 1.05) skewX(2deg); } to { transform: scale(1.03, 0.93) skewX(-2deg); } }
+.match-flamme-c { animation: match-flamme-c 0.55s ease-in-out infinite alternate; }
+@keyframes match-flamme-c { from { transform: scale(1, 0.9); } to { transform: scale(0.97, 1.08); } }
+.match-feu-lueur { animation: match-feu-lueur 1.3s ease-in-out infinite alternate; }
+@keyframes match-feu-lueur { from { opacity: 0.55; } to { opacity: 0.95; } }
+.match-braise { animation: match-braise 1.5s ease-out infinite; }
+@keyframes match-braise { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(var(--monte)); } }
+/* Pictogramme du style (« P3 ») : blanc dans le pion, sur une plaque colorée sur le socle. */
+.match-rond-picto { fill: none; stroke: #fff; color: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.match-plaque-fond { stroke: #fff; }
+.match-plaque-picto { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+@media (prefers-reduced-motion: reduce) { .match-flamme-a, .match-flamme-b, .match-flamme-c, .match-feu-lueur, .match-braise { animation: none; } }

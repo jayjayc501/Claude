@@ -155,7 +155,7 @@
       var c = lignes && lignes[0];
       if (!c) { montrer('introuvable'); return; }
       var jours = Math.max(0, c.jours || 0);
-      document.getElementById('pseudo').textContent = '@' + c.pseudo;
+      document.getElementById('pseudo').textContent = c.auteur || ('@' + c.pseudo);
       document.getElementById('jours').textContent = String(jours);
       document.getElementById('jours').setAttribute('font-size', String(jours).length > 3 ? '42' : '52');
       document.getElementById('bulle').setAttribute('aria-label', jours + (jours > 1 ? ' jours' : ' jour'));

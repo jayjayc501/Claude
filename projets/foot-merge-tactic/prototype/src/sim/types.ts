@@ -171,6 +171,8 @@ export interface Reglages {
     };
     attaque: {
       ecartement: number;
+      /** Écart des défenseurs centraux avec le ballon (14/11 : charnière proche de l'axe). */
+      resserrementDC: number;
       glissementLateral: number;
       /** Part du glissement pour les joueurs de côté du côté opposé au ballon (ils gardent la largeur). */
       glissementCoteOppose: number;

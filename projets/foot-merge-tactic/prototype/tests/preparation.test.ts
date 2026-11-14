@@ -113,4 +113,13 @@ describe("écran de préparation", () => {
     if (!un) return;
     expect(p.prixVente(un.id)).toBe(0);
   });
+
+  test("14/11 : la fusion se garde à la revente (carte à 3, une fusion : 6 payées, revendue 5)", () => {
+    const p = nouvelle();
+    const m = p.etat.effectif[0]!;
+    const prix = p.fiche(m.id).prix;
+    p.etat = { ...p.etat, effectif: p.etat.effectif.map((x) => (x.id === m.id ? { ...x, fusions: 1 } : x)) };
+    expect(p.prixVente(m.id)).toBe(prix * 2 - 1);
+    if (prix === 3) expect(p.prixVente(m.id)).toBe(5);
+  });
 });

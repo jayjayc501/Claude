@@ -627,7 +627,11 @@ svg.drapeau { display: inline-block; flex: none; border-radius: 2px; box-shadow:
 .fiche-puce.vente { display: inline-flex; align-items: center; gap: 4px; }
 .fiche-piece.petite { width: 13px; height: 13px; }
 
-/* Halo de fusion niveau 1 (14/11, « je ne vois toujours pas les halos ») : il palpite plus fort. */
-.match-feu.niveau-1 .match-flamme { animation: match-halo-feu 0.8s ease-in-out infinite alternate; }
-@keyframes match-halo-feu { from { opacity: 0.7; transform: scale(0.82); } to { opacity: 1; transform: scale(1.12); } }
-@media (prefers-reduced-motion: reduce) { .match-feu.niveau-1 .match-flamme { animation: none; } }
+/* Halo de fusion (14/11) : il palpite doucement ; la flamme fait le crescendo (niveaux 2 et 3). */
+.match-feu .match-flamme { animation: match-halo-feu 0.9s ease-in-out infinite alternate; }
+@keyframes match-halo-feu { from { opacity: 0.55; transform: scale(0.9); } to { opacity: 0.9; transform: scale(1.06); } }
+.match-feu .match-halo-anneau { stroke-width: 1.4; opacity: 0.7; }
+.match-feu.niveau-3 .match-halo-anneau { stroke-width: 2; opacity: 0.9; }
+.match-flamme-forme { filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.8)); }
+.match-flamme-forme.deux { animation-duration: 0.5s; animation-direction: alternate-reverse; }
+@media (prefers-reduced-motion: reduce) { .match-feu .match-flamme { animation: none; } }

@@ -68,8 +68,8 @@ function projeterDefense(
   const yM = ligneDef + ecart + decalageM;
   const largeur = d.largeurLigneM[poste.ligneDefense];
   const centreBlocM = LARGEUR_M / 2 + (ballonXM - LARGEUR_M / 2) * d.suiviLateral;
-  // Les défenseurs centraux restent proches l'un de l'autre (12 à 14 m) : ce
-  // sont les latéraux qui tiennent la largeur (référence §6 et §9.1).
+  // Les défenseurs centraux restent proches l'un de l'autre (une dizaine de mètres,
+  // 14/11) : ce sont les latéraux qui tiennent la largeur (référence §6 et §9.1).
   const resserre = poste.id === "DC" ? d.resserrementDC : 1;
   const xM = centreBlocM + (base.x - 0.5) * largeur * resserre;
   return { x: xM / LARGEUR_M, y: yM / longueurM };
@@ -114,7 +114,10 @@ function projeterAttaque(
   const cote = poste.id === "DG" || poste.id === "DD" || poste.id === "AG" || poste.id === "AD";
   const oppose = cote && (base.x - 0.5) * (ballon.x - 0.5) < 0;
   const glisse = a.glissementLateral * (oppose ? a.glissementCoteOppose : 1);
-  const x = 0.5 + (base.x - 0.5) * a.ecartement + (ballon.x - 0.5) * glisse * suivi;
+  // Charnière centrale (14/11, « une charnière très très proche ») : avec le ballon
+  // aussi, les défenseurs centraux restent près de l'axe ; les latéraux tiennent la largeur.
+  const resserre = poste.id === "DC" ? a.resserrementDC : 1;
+  const x = 0.5 + (base.x - 0.5) * a.ecartement * resserre + (ballon.x - 0.5) * glisse * suivi;
   const { arriereM, avantM } = lignesAttaqueM(ballon, reglages, longueurM, tenues.ligneAdverseM);
 
   if (poste.ligneDefense === "gardien") {

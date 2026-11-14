@@ -705,7 +705,8 @@ describe.each(PLATEAUX)("réalisme (référence football), plateau %s", (plateau
     recupAuButM: number;
   }
   function transitions(mesurer: (x: InstantTransition) => void) {
-    for (const graine of [1, 2, 3, 4, 5, 6, 7, 8]) {
+    // 14/11 : 12 graines (8 avant) : des parts mesurées au pourcent près demandent un échantillon plus large.
+    for (const graine of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {
       const m = nouveauMatch(graine);
       m.demarrer();
       m.definirMode("auto");

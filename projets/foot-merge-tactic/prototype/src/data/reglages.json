@@ -20,7 +20,7 @@
         "attaque": 40
       },
       "ecartMinDansLigneM": 6,
-      "resserrementDC": 0.65,
+      "resserrementDC": 0.42,
       "largeurLigneBornesM": {
         "min": 39,
         "max": 44
@@ -61,14 +61,16 @@
         "distanceDerriereLigneM": 20,
         "minM": 4,
         "maxM": 16
-      }
+      },
+      "resserrementDC": 0.42
     },
     "limites": {
       "xMin": 0.03,
       "xMax": 0.97,
       "yMin": 0.01,
       "yMax": 0.92
-    }
+    },
+    "_noteCharniere": "14/11 (concepteur : « il faut une charnière très très proche ; on ne joue jamais avec des défenseurs centraux proches des latéraux ») : les cases gauche, centre et droite des DC ne s'écartent que de resserrementDC fois la largeur normale, avec et sans le ballon (avant : 0,65 sans le ballon, rien avec : 29 m entre les deux DC en possession). Les latéraux tiennent la largeur."
   },
   "transition": {
     "reaction": {

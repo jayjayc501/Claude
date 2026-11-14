@@ -75,4 +75,30 @@ describe("couloirs (14/11)", () => {
     expect(versAxe).toBe(repiquages);
     expect(secondPoteau).toBeGreaterThan(0);
   });
+
+  test("14/11 : charnière centrale proche, avec et sans le ballon, loin des latéraux", () => {
+    const somme = { attaque: { ecart: 0, lat: 0, n: 0 }, defense: { ecart: 0, lat: 0, n: 0 } };
+    for (let g = 1; g <= 4; g++) {
+      const m = new MatchSim(donnees, reglages, [effectif, adversaire], 200 + g, true);
+      m.definirOptions({ tactiques: true, styles: false });
+      m.demarrer();
+      for (let t = 0; t < 120; t += reglages.pasDeTempsS) {
+        m.pas();
+        for (const camp of [0, 1] as const) {
+          const dc = m.joueurs.filter((j) => j.camp === camp && j.poste.id === "DC").sort((a, b) => a.pos.x - b.pos.x);
+          const lat = m.joueurs.filter((j) => j.camp === camp && (j.poste.id === "DG" || j.poste.id === "DD"));
+          if (dc.length < 2 || !lat.length) continue;
+          const p = dc[0]!.phase === "attaque" ? somme.attaque : somme.defense;
+          p.ecart += dc[dc.length - 1]!.pos.x - dc[0]!.pos.x;
+          p.lat += Math.min(...dc.map((d) => Math.min(...lat.map((l) => Math.abs(l.pos.x - d.pos.x)))));
+          p.n++;
+        }
+      }
+    }
+    // Avant le 14/11 : 29 m entre les DC avec le ballon, 9 m du latéral le plus proche.
+    expect(somme.attaque.ecart / somme.attaque.n).toBeLessThan(20);
+    expect(somme.defense.ecart / somme.defense.n).toBeLessThan(14);
+    expect(somme.attaque.lat / somme.attaque.n).toBeGreaterThan(12);
+    expect(somme.defense.lat / somme.defense.n).toBeGreaterThan(12);
+  });
 });

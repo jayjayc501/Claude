@@ -477,8 +477,8 @@ export class EcranMatch {
       svg("stop", { offset: "100%", "stop-color": feu.bord, "stop-opacity": "0" }, halo);
       const flamme = svg("linearGradient", { id: `match-feu-${camp}`, x1: "0", y1: "1", x2: "0", y2: "0" }, defs);
       svg("stop", { offset: "0%", "stop-color": feu.coeur, "stop-opacity": "0.95" }, flamme);
-      svg("stop", { offset: "40%", "stop-color": feu.milieu, "stop-opacity": "0.95" }, flamme);
-      svg("stop", { offset: "100%", "stop-color": feu.bord, "stop-opacity": "0.15" }, flamme);
+      svg("stop", { offset: "45%", "stop-color": feu.milieu, "stop-opacity": "1" }, flamme);
+      svg("stop", { offset: "100%", "stop-color": feu.bord, "stop-opacity": "0.6" }, flamme);
       for (let n = 1; n <= 3; n++) {
         const f = svg("filter", { id: `match-aura-${camp}-${n}`, x: "-60%", y: "-60%", width: "220%", height: "220%", "color-interpolation-filters": "sRGB" }, defs);
         svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: 0.9, "flood-color": "#FFFFFF", "flood-opacity": 1 }, f);
@@ -612,24 +612,27 @@ export class EcranMatch {
    *  étincelles) derrière un joueur fusionné, à la couleur de son équipe.
    *  (x, y) : pied de la flamme ; `taille` : rayon du pion ou demi-largeur de la figurine. */
   private feu(g: SVGGElement, camp: 0 | 1, niveau: number, x: number, y: number, taille: number, figurine: boolean): void {
-    // 14/11 (« je ne vois toujours pas les halos ou les flammes ») : plus grands, plus
-    // lumineux, et sans transformation SVG sur les éléments animés.
+    // Crescendo (14/11, « les halos sont trop visibles, les flammes pas assez ; il
+    // faut un crescendo entre 1, 2 et 3 ») : 1 = halo ; 2 = halo + flamme ;
+    // 3 = halo plus grand + grande flamme double + étincelles. Pas de
+    // transformation SVG sur les éléments animés (14/11 midi).
     const f = svg("g", { class: `match-feu niveau-${niveau}`, transform: `translate(${x} ${y})` }, g);
-    if (niveau === 1) {
-      const r = taille * (figurine ? 1.65 : 3.2);
-      const cy = figurine ? -taille * 1.05 : -y;
-      svg("ellipse", { cx: 0, cy, rx: r, ry: figurine ? r * 1.3 : r, fill: `url(#match-halo-feu-${camp})`, class: "match-flamme" }, f);
-      svg("ellipse", { cx: 0, cy, rx: r * 0.72, ry: (figurine ? r * 1.3 : r) * 0.72, class: "match-halo-anneau", stroke: FEU[camp].coeur }, f);
-      return;
-    }
-    const largeur = taille * (niveau === 3 ? (figurine ? 2.9 : 4.4) : figurine ? 2.3 : 3.4);
-    const hauteur = taille * (niveau === 3 ? (figurine ? 4 : 7.2) : figurine ? 3.1 : 5.4);
+    const r = taille * (figurine ? [0, 1.15, 1.3, 1.5] : [0, 2, 2.3, 2.7])[niveau]!;
+    const cy = figurine ? -taille * 1.05 : -y;
+    const ry = figurine ? r * 1.3 : r;
+    svg("ellipse", { cx: 0, cy, rx: r, ry, fill: `url(#match-halo-feu-${camp})`, class: "match-flamme" }, f);
+    svg("ellipse", { cx: 0, cy, rx: r * 0.72, ry: ry * 0.72, class: "match-halo-anneau", stroke: FEU[camp].coeur }, f);
+    if (niveau < 2) return;
+    const grand = niveau === 3;
+    const largeur = taille * (figurine ? (grand ? 3 : 2.3) : grand ? 4.4 : 3.3);
+    const hauteur = taille * (figurine ? (grand ? 4.4 : 3.3) : grand ? 8.6 : 6.2);
     svg("path", { d: cheminFlamme(largeur, hauteur), fill: `url(#match-feu-${camp})`, class: "match-flamme-forme" }, f);
+    if (grand) svg("path", { d: cheminFlamme(largeur * 0.75, hauteur * 0.8), fill: `url(#match-feu-${camp})`, class: "match-flamme-forme deux" }, f);
     // Cœur clair de la flamme.
-    svg("path", { d: cheminFlamme(largeur * 0.5, hauteur * 0.55), fill: FEU[camp].coeur, class: "match-flamme-coeur" }, f);
-    if (niveau === 3) {
-      for (let i = 0; i < 3; i++) {
-        svg("circle", { cx: (i - 1) * largeur * 0.28, cy: -hauteur * (0.7 + 0.1 * i), r: Math.max(1, taille * 0.14), fill: FEU[camp].coeur, class: `match-etincelle e${i}` }, f);
+    svg("path", { d: cheminFlamme(largeur * 0.45, hauteur * 0.5), fill: FEU[camp].coeur, class: "match-flamme-coeur" }, f);
+    if (grand) {
+      for (let i = 0; i < 4; i++) {
+        svg("circle", { cx: (i - 1.5) * largeur * 0.22, cy: -hauteur * (0.65 + 0.09 * i), r: Math.max(1.1, taille * 0.15), fill: FEU[camp].coeur, class: `match-etincelle e${i % 3}` }, f);
       }
     }
   }

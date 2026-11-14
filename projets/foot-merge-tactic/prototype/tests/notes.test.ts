@@ -51,9 +51,10 @@ describe("Notes des joueurs", () => {
   test("gardien : un bon gardien encaisse moins qu'un mauvais (mêmes matchs)", () => {
     let bon = 0;
     let mauvais = 0;
-    for (let g = 1; g <= 10; g++) {
-      bon += jouer(adversaire, avecGardien(effectif, 88), g, 120).score[0];
-      mauvais += jouer(adversaire, avecGardien(effectif, 42), g, 120).score[0];
+    // 14/11 : 24 matchs de 180 s (10 de 120 s avant) : avec 2 ou 3 buts en tout, le hasard décidait.
+    for (let g = 1; g <= 24; g++) {
+      bon += jouer(adversaire, avecGardien(effectif, 88), g, 180).score[0];
+      mauvais += jouer(adversaire, avecGardien(effectif, 42), g, 180).score[0];
     }
     expect(bon).toBeLessThan(mauvais);
   });

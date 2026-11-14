@@ -777,3 +777,25 @@ Ordinateur (200 parties, `ordiTitulaires`) : équipes avec un fusionné sur le t
 **À juger par le concepteur** : la visibilité des halos ; la vente d'une carte à 1 pièce (0 ou 1 pièce ?).
 
 **Décision (14/11, 10 h 45)** : une carte à 1 pièce se revend 0 (« et 0 pour l'instant »).
+
+## 14/11/2026 (fin de matinée, suite) — Revente des fusionnés, crescendo des fusions, charnière centrale
+
+**Demandes du concepteur** : « un joueur qui a fusionné, il cumule : s'il valait 3, une fusion, ça fait 6, il se revend à 5 » ; « les halos sont trop visibles, les flammes pas assez ; il faut un crescendo entre le 1, 2, 3 de fusion » ; « les défenseurs centraux, souvent quand il y en a deux, ils sont trop excentrés ; il faut une charnière très très proche ; ça ne joue jamais au foot avec des défenseurs centraux proches des latéraux ».
+
+**Ce qui a été fait**
+- **Revente** : c'était déjà la règle depuis midi (prix payé, copies fusionnées comprises, moins 1) ; nouveau test avec l'exemple du concepteur (carte à 3, une fusion : revendue 5).
+- **Crescendo des fusions** (`ecranMatch.ts`, `style.css`) : niveau 1 = halo seul, plus doux (il palpitait trop fort) ; niveau 2 = halo + flamme nettement plus haute que le joueur ; niveau 3 = halo plus grand + grande flamme double + 4 étincelles. Flammes plus opaques jusqu'en haut, avec un liseré clair.
+- **Charnière centrale** (`projection.ts`, `reglages.json` → `projection.defense.resserrementDC` 0,65 → 0,42 et nouveau `projection.attaque.resserrementDC` 0,42) : les cases gauche, centre et droite des défenseurs centraux s'écartent beaucoup moins de l'axe, avec et sans le ballon (avant, rien ne les resserrait avec le ballon). Nouveau script `scripts/mesurer-charniere.ts`.
+
+**Mesures** (12 matchs de 180 s, Équilibrée contre l'adversaire de démonstration)
+
+| Phase | Écart entre les DC | DC – latéral le plus proche |
+|---|---|---|
+| Avec le ballon | 28,9 → 15,2 m | 9,1 → 16,1 m |
+| Sans le ballon | 17,0 → 11,2 m | 11,9 → 15,1 m |
+
+Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 par minute ; buts 1,30 → 1,40 par 180 s ; possession 10,8 → 11,5 s.
+
+**Tests** : 177 verts (nouveaux : charnière centrale dans `tests/couloirs.test.ts` ; revente avec une fusion dans `tests/preparation.test.ts`). Trois tests statistiques passaient juste sous leur seuil après le changement (89 % pour 90 %, et 3 buts contre 2 pour le test du gardien sur 10 petits matchs) : leurs échantillons ont été agrandis (transitions sur 12 graines au lieu de 8 ; gardien sur 24 matchs de 180 s au lieu de 10 de 120 s), sans toucher aux seuils. Empreintes régénérées (le placement des défenseurs centraux a changé).
+
+**À juger par le concepteur** : la charnière en match ; le crescendo halo, flamme, grande flamme.

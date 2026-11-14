@@ -197,6 +197,23 @@ function demarrer(): void {
       match.lancerSecondeMiTemps();
     },
     nouvelle: () => nouvellePartie(),
+    // Équipe automatique (14/11) : nouvelle partie, ton équipe est faite toute seule
+    // (titulaires et banc, fusions pour la haute qualité), puis les ordinateurs draftent.
+    autoPossible: () => championnat.journee === 0 && !miTemps,
+    auto: (qualite) => {
+      nouvellePartie();
+      const b = partie.equipeAuto(0, qualite, prepa.d.bancMax, prepa.d.fusionsMax);
+      finDraft();
+      synchroniser();
+      preparation.rendre();
+      const paliers = b.paliers.map((x) => x.replace(/^([A-Z]{3}) /, (_, s: string) => `${prepa.d.styles[s] ?? s} `));
+      preparation.signaler(
+        `Équipe ${qualite === "haute" ? "haute qualité" : "moyenne"} : note moyenne ${b.moyenne.toFixed(0)}, ${b.depense} pièces dépensées, ${b.banc} remplaçants` +
+          (b.fusions ? `, ${b.fusions} fusion${b.fusions > 1 ? "s" : ""}` : "") +
+          (paliers.length ? ` · ${paliers.join(", ")}` : "") +
+          ". Rappuie pour une autre.",
+      );
+    },
   };
 
   function nouvellePartie(): void {

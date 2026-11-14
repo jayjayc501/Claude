@@ -147,4 +147,39 @@ describe("Partie contre l'ordinateur (13/11)", () => {
     }
     expect(fusionnesTitulaires).toBeGreaterThan(0);
   });
+
+  test("14/11 : équipe auto haute qualité et moyenne (budget, 11 titulaires à leur poste, banc, qualité)", () => {
+    let haute = 0;
+    let moyenne = 0;
+    const equipes = new Set<string>();
+    for (let g = 1; g <= 6; g++) {
+      for (const q of ["haute", "moyenne"] as const) {
+        const p = new Partie(donnees, 500 + g, plan);
+        const b = p.equipeAuto(0, q, 5, 3);
+        const c = p.camps[0]!;
+        expect(c.composition.length).toBe(11);
+        expect(c.budget).toBeGreaterThanOrEqual(0);
+        expect(b.depense + c.budget).toBe(REGLES.budgetDepart);
+        expect(b.banc).toBe(REGLES.auto.bancMin);
+        for (const pl of c.composition) expect(p.carte(pl.joueurId).poste).toBe(pl.poste);
+        const depense = c.effectif.reduce((s, m) => s + p.carte(m.id).prix * (1 + m.fusions), 0);
+        expect(depense).toBe(b.depense);
+        if (q === "haute") {
+          haute += b.moyenne;
+          equipes.add(c.composition.map((x) => x.joueurId).sort().join());
+        } else {
+          moyenne += b.moyenne;
+          expect(b.fusions).toBe(0);
+        }
+        // Les ordinateurs finissent leur draft après.
+        p.finirDraftOrdis(5, 3);
+        for (let k = 1; k < p.camps.length; k++) expect(p.camps[k]!.composition.length).toBe(11);
+      }
+    }
+    // Haute qualité : bien au-dessus ; moyenne : « pas nul, moyenne » (cartes à 2 ou 3 pièces : 64 à 71).
+    expect(haute / 6).toBeGreaterThan(74);
+    expect(moyenne / 6).toBeGreaterThan(63);
+    expect(moyenne / 6).toBeLessThan(70);
+    expect(equipes.size).toBeGreaterThan(1); // plusieurs cas
+  });
 });

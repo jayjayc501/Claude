@@ -5,6 +5,7 @@
 // Règles : data/partie.json ; cartes : data/cartes.json.
 
 import cartesBrut from "../data/cartes.json";
+import influencesBrut from "../data/influences.json";
 import reglesBrut from "../data/partie.json";
 import type { Donnees } from "../sim/donnees";
 import { JOUEURS_SUR_LE_TERRAIN, nombreAuPoste, occupant, placer } from "../sim/placement";
@@ -32,6 +33,20 @@ export interface Regles {
   gainParJournee: number;
   allerRetour: boolean;
   ordi: { reserveBanc: number; relancesMax: number; valeurFusion: number };
+  /** Équipe automatique (14/11) : voir partie.json. */
+  auto: {
+    bancMin: number;
+    restarts: number;
+    ecartMax: number;
+    styleJoueur: number;
+    palierStyle: number;
+    palierStyleFort: number;
+    cohesionParJoueur: number;
+    tradition: number;
+    valeurFusion: number;
+    prixMoyenne: [number, number];
+    prixBancMoyenne: [number, number];
+  };
 }
 
 export interface Membre {
@@ -46,6 +61,25 @@ export interface Camp {
 }
 
 export type Resultat = { ok: true; message: string } | { ok: false; erreur: string };
+
+/** Qualité de l'équipe automatique (14/11). */
+export type QualiteAuto = "haute" | "moyenne";
+
+/** Bilan d'une équipe automatique, pour le message affiché. */
+export interface BilanAuto {
+  moyenne: number;
+  depense: number;
+  banc: number;
+  fusions: number;
+  paliers: string[];
+}
+
+const PALIERS = influencesBrut as unknown as { palier: number; palierFort: number; pays: { palier: number; palierFort: number } };
+
+/** Cartes encore dans la réserve qui passent le filtre. */
+function idsDisponibles(p: Partie, filtre: (k: Carte) => boolean): string[] {
+  return Object.values(p.cartes).filter((k) => filtre(k) && p.reserve.reste(k.id) > 0).map((k) => k.id);
+}
 
 const TACTIQUES_ORDIS = ["EQU", "PRS", "CON", "TIK"];
 
@@ -236,6 +270,143 @@ export class Partie {
   nouvelleJournee(bancMax: number, fusionsMax: number): void {
     for (const c of this.camps) c.budget += this.regles.gainParJournee;
     for (let c = 1; c < this.camps.length; c++) this.ordiMercato(bancMax, fusionsMax, c);
+  }
+
+  /** Valeur estimée d'un onze (titulaires), bonus cachés compris (14/11) :
+   *  moyenne des notes de chacun, style, paliers de style et de pays. */
+  valeurOnze(ids: string[]): number {
+    const a = this.regles.auto;
+    let v = 0;
+    const styles = new Map<string, number>();
+    const pays = new Map<string, number>();
+    for (const id of ids) {
+      const k = this.carte(id);
+      v += this.valeur(id);
+      if (k.style) {
+        v += a.styleJoueur;
+        styles.set(k.style, (styles.get(k.style) ?? 0) + 1);
+      }
+      pays.set(k.pays, (pays.get(k.pays) ?? 0) + 1);
+    }
+    for (const n of styles.values()) v += (n >= PALIERS.palier ? a.palierStyle : 0) + (n >= PALIERS.palierFort ? a.palierStyleFort : 0);
+    for (const n of pays.values()) v += (n >= PALIERS.pays.palier ? a.cohesionParJoueur * n : 0) + (n >= PALIERS.pays.palierFort ? a.tradition : 0);
+    return v;
+  }
+
+  /** Équipe automatique d'un camp, au début de la partie (14/11, demande du
+   *  concepteur : « optimisé de haute qualité » ou « qualité moyenne, pas nul »).
+   *  Titulaires dans la formation de l'ordinateur, banc, fusions (haute qualité). */
+  equipeAuto(camp: number, qualite: QualiteAuto, bancMax: number, fusionsMax: number): BilanAuto {
+    const a = this.regles.auto;
+    const c = this.camps[camp]!;
+    const slots = this.planOrdi;
+    const candidats = slots.map((s) => idsDisponibles(this, (k) => k.poste === s.poste));
+    const prix = (ids: string[]) => ids.reduce((t, id) => t + this.carte(id).prix, 0);
+    let onze: string[];
+    if (qualite === "haute") {
+      const budget = c.budget - a.bancMin;
+      // Goûts du jour : un petit écart au hasard sur chaque carte (± ecartMax / 2),
+      // pour que deux équipes auto ne soient pas toujours les mêmes, toutes très bonnes.
+      const gout = new Map(Object.keys(this.cartes).map((id) => [id, this.rng.entre(-a.ecartMax / 2, a.ecartMax / 2)]));
+      const note = (ids: string[]) => this.valeurOnze(ids) + ids.reduce((t, id) => t + gout.get(id)!, 0);
+      const trouvees: { ids: string[]; v: number }[] = [];
+      for (let r = 0; r < a.restarts; r++) {
+        // Départ au hasard, abordable : des cartes à 1 ou 2 pièces, parfois tournées vers un pays.
+        const paysVise = this.rng.suivant() < 0.5 ? Object.keys(CATALOGUE.pays)[this.rng.entier(Object.keys(CATALOGUE.pays).length)] : null;
+        const ids: string[] = [];
+        for (const liste of candidats) {
+          const libres = liste.filter((id) => !ids.includes(id));
+          const pays = libres.filter((id) => this.carte(id).pays === paysVise && this.carte(id).prix <= 3);
+          const bon = libres.filter((id) => this.carte(id).prix <= 2);
+          const choix = pays.length ? pays : bon.length ? bon : libres;
+          ids.push(choix[this.rng.entier(choix.length)]!);
+        }
+        if (prix(ids) > budget) continue;
+        // Amélioration case par case tant qu'on gagne quelque chose.
+        let v = note(ids);
+        for (let passe = 0, mieux = true; mieux && passe < 8; passe++) {
+          mieux = false;
+          for (let i = 0; i < ids.length; i++) {
+            for (const id of candidats[i]!) {
+              if (id === ids[i] || ids.includes(id)) continue;
+              const essai = ids.slice();
+              essai[i] = id;
+              if (prix(essai) > budget) continue;
+              const ve = note(essai);
+              if (ve > v + 1e-9) {
+                ids[i] = id;
+                v = ve;
+                mieux = true;
+              }
+            }
+          }
+        }
+        if (!trouvees.some((t) => t.ids.join() === ids.join())) trouvees.push({ ids, v });
+      }
+      trouvees.sort((x, y) => y.v - x.v);
+      onze = trouvees[0]!.ids;
+    } else {
+      onze = [];
+      for (const liste of candidats) {
+        const libres = liste.filter((id) => !onze.includes(id));
+        const moyens = libres.filter((id) => this.carte(id).prix >= a.prixMoyenne[0] && this.carte(id).prix <= a.prixMoyenne[1]);
+        const choix = moyens.length ? moyens : libres;
+        onze.push(choix[this.rng.entier(choix.length)]!);
+      }
+    }
+    // Titulaires : par les règles du draft (budget, cases, gardien en dernier).
+    slots.forEach((s, i) => {
+      const r = this.choisir(camp, s.poste, s.cellule, onze[i]!);
+      if (!r.ok) throw new Error(`Équipe auto : ${r.erreur}`);
+    });
+    // Banc : un défenseur, un milieu, un attaquant (puis d'autres), les meilleurs au prix visé.
+    const lignes = [["DC", "DG", "DD"], ["MC"], ["AG", "AD", "BU"]];
+    const [pMin, pMax] = qualite === "haute" ? [1, 1] : a.prixBancMoyenne;
+    let banc = 0;
+    for (let i = 0; i < a.bancMin && banc < bancMax; i++) {
+      const ligne = lignes[i % lignes.length]!;
+      const possibles = idsDisponibles(this, (k) => ligne.includes(k.poste) && k.prix >= pMin && k.prix <= pMax && k.prix <= c.budget).filter((id) => !c.effectif.some((m) => m.id === id));
+      if (!possibles.length) continue;
+      const id = qualite === "haute" ? possibles.sort((x, y) => this.valeur(y) - this.valeur(x))[0]! : possibles[this.rng.entier(possibles.length)]!;
+      this.reserve.prendre(id);
+      c.budget -= this.carte(id).prix;
+      c.effectif.push({ id, fusions: 0 });
+      banc++;
+    }
+    // Haute qualité : le reste en fusions de titulaires (+ valeurFusion caché par niveau, le plus rentable d'abord).
+    let fusions = 0;
+    if (qualite === "haute") {
+      for (;;) {
+        const options = c.effectif
+          .filter((m) => c.composition.some((p) => p.joueurId === m.id) && m.fusions < fusionsMax && this.reserve.reste(m.id) > 0 && this.carte(m.id).prix <= c.budget)
+          .sort((x, y) => a.valeurFusion / this.carte(y.id).prix - a.valeurFusion / this.carte(x.id).prix || this.valeur(y.id) - this.valeur(x.id));
+        const m = options[0];
+        if (!m) break;
+        this.reserve.prendre(m.id);
+        c.budget -= this.carte(m.id).prix;
+        m.fusions++;
+        fusions++;
+      }
+    }
+    // Bilan.
+    const paliers: string[] = [];
+    const compte = (cle: (id: string) => string | null) => {
+      const n = new Map<string, number>();
+      for (const id of onze) {
+        const k = cle(id);
+        if (k) n.set(k, (n.get(k) ?? 0) + 1);
+      }
+      return n;
+    };
+    for (const [p, n] of compte((id) => this.carte(id).pays)) if (n >= PALIERS.pays.palier) paliers.push(`${CATALOGUE.pays[p]?.nom ?? p} ×${n}`);
+    for (const [st, n] of compte((id) => this.carte(id).style)) if (n >= PALIERS.palier) paliers.push(`${st} ×${n}`);
+    return {
+      moyenne: onze.reduce((t, id) => t + this.valeur(id), 0) / onze.length,
+      depense: this.regles.budgetDepart - c.budget,
+      banc,
+      fusions,
+      paliers,
+    };
   }
 
   /** Cartes du mercato (tous postes, copies comprises). */

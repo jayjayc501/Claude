@@ -747,3 +747,18 @@ Ordinateur (200 parties, `ordiTitulaires`) : équipes avec un fusionné sur le t
 **Tests** : 173 verts (nouveaux : `tests/couloirs.test.ts`, 2 tests : le latéral monte des fois, seulement quand son équipe a le ballon, et entre dans le dernier tiers ; l'ailier repique vers l'axe, l'ailier opposé attaque le second poteau ; `tests/partie.test.ts` : l'ordinateur fait jouer ses fusionnés). Empreintes régénérées : le moteur a changé (latéraux et ailiers), les matchs ne sont plus les mêmes.
 
 **À juger par le concepteur** : le stade (assez joli ? terrain un peu plus petit), la flamme qui grossit, le changement de côté, les montées des latéraux (assez souvent ? trop ?), les ailiers qui rentrent dans l'axe et vont au second poteau. Les mesures des bonus du 14/11 (nuit) n'ont pas été refaites après ce changement du moteur.
+
+## 14/11/2026 (fin de matinée) — Équipe automatique
+
+**Demande du concepteur** : « un bouton pour générer automatiquement un mercato, mais optimisé de haute qualité, et un autre de qualité moyenne. Pas nul, hein, moyenne. Comme ça, j'ai pas à m'embêter au début, je peux générer plusieurs cas. »
+
+**Ce qui a été fait** (règles en PROPOSITION, chiffres dans `partie.json` → `auto`)
+- Deux boutons « Équipe auto » : « ★★★ Haute qualité » et « ★★ Moyenne », pendant le draft et au mercato d'avant le premier match (à la place du classement, encore vide, pour que le mercato reste visible). Chaque appui relance une partie avec ton équipe déjà faite (titulaires dans la formation de l'ordinateur, banc de 3), puis les ordinateurs font leur draft ; on peut jouer tout de suite. Un message résume l'équipe (note moyenne, pièces dépensées, remplaçants, fusions, paliers).
+- **Haute qualité** (`Partie.equipeAuto`, `valeurOnze`) : joueurs pris dans toute la réserve (pas seulement les offres du draft), même budget de 50 ; titulaires choisis pour la meilleure valeur (moyenne des notes) plus les bonus cachés estimés (style, paliers de style à 3 et 5, cohésion à 5 compatriotes, tradition à 8), 3 pièces gardées pour le banc ; recherche : 40 départs au hasard puis amélioration case par case, avec un petit « goût du jour » au hasard pour que les équipes changent ; banc de 3 joueurs à 1 pièce (défense, milieu, attaque) ; le reste en fusions de titulaires.
+- **Moyenne** : titulaires tirés au hasard parmi les cartes à 2 ou 3 pièces, banc de 3 joueurs à 1 ou 2 pièces, sans fusion ; environ 20 pièces restent pour le mercato.
+
+**Mesures** (8 parties) : haute qualité, note moyenne des titulaires 75,3 à 76,4, 48 ou 49 pièces dépensées, 0 à 2 fusions, toujours un palier de pays à 5 et un ou deux paliers de style (Italie, France ou Espagne ×5 ; Technicien, Rapide ou Récupérateur ×3 ou ×5) ; moyenne : 65 à 68 (cartes à 2 pièces : 64 en moyenne, à 3 pièces : 71), 28 à 33 pièces. Calcul : moins de 0,1 s.
+
+**Tests** : 174 verts (nouveau : `tests/partie.test.ts`, équipe auto : budget, 11 titulaires à leur poste, banc, qualité, plusieurs cas).
+
+**À juger par le concepteur** : les deux niveaux (assez fort ? vraiment moyen ?), la place des boutons. Remarque : l'équipe auto pioche dans toute la réserve, ce que le draft normal ne permet pas (outil de test).

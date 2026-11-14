@@ -16,5 +16,25 @@
     "reserveBanc": 5,
     "relancesMax": 2,
     "valeurFusion": 7
+  },
+  "auto": {
+    "_note": "14/11 (concepteur : « un bouton pour générer automatiquement un mercato, optimisé de haute qualité, et un autre de qualité moyenne ; pas nul, moyenne ; comme ça j'ai pas à m'embêter au début, je peux générer plusieurs cas ») : l'équipe auto prend ses joueurs dans toute la réserve (pas seulement les offres du draft), avec le même budget et la même formation que l'ordinateur. Haute qualité : titulaires choisis pour la meilleure valeur (moyenne des notes) plus les bonus cachés estimés (styleJoueur par joueur avec un style, paliers de style 3 et 5, cohésion par compatriote à 5, tradition à 8), en gardant bancMin pièces pour le banc ; puis banc de bancMin joueurs à 1 pièce (défense, milieu, attaque) et le reste en fusions de titulaires. Recherche : restarts départs au hasard, puis amélioration case par case ; pour varier, chaque carte reçoit un petit « goût du jour » au hasard (± ecartMax / 2 points) pendant la recherche. Moyenne : titulaires tirés au hasard parmi les cartes à 2 ou 3 pièces, banc de bancMin joueurs à 1 ou 2 pièces, sans fusion.",
+    "bancMin": 3,
+    "restarts": 40,
+    "ecartMax": 6,
+    "styleJoueur": 2,
+    "palierStyle": 10,
+    "palierStyleFort": 20,
+    "cohesionParJoueur": 4,
+    "tradition": 12,
+    "valeurFusion": 7,
+    "prixMoyenne": [
+      2,
+      3
+    ],
+    "prixBancMoyenne": [
+      1,
+      2
+    ]
   }
 }

@@ -613,3 +613,11 @@ svg.drapeau { display: inline-block; flex: none; border-radius: 2px; box-shadow:
 .prepa-groupe.champ .prepa-equipe { min-height: 30px; padding: 2px 4px; }
 .champ-sous { white-space: nowrap; }
 .champ-resultats { margin: 0 2px 2px; font-size: 10.5px; font-weight: 600; color: #4A5A50; }
+
+/* Équipe automatique (14/11) : deux boutons au début de la partie. */
+.auto-ligne { display: flex; align-items: center; gap: 6px; margin: 4px 2px 2px; }
+.auto-titre { font-size: 11px; font-weight: 800; color: #4A5A50; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+.auto-bouton { flex: 1; font: inherit; font-size: 12px; font-weight: 800; border-radius: 999px; min-height: 30px; padding: 0 8px; cursor: pointer; white-space: nowrap; border: 2px solid transparent; }
+.auto-bouton.haute { background: #FFC400; color: #3A2A00; box-shadow: 0 2px 0 #C99400; }
+.auto-bouton.moyenne { background: #fff; color: #3563C0; border-color: #3563C0; }
+.auto-bouton:active { transform: translateY(1px); }

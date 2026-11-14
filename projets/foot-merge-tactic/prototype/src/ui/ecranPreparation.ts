@@ -71,6 +71,10 @@ export interface ControlePartie {
   miTemps(): { score: [number, number]; joueur(id: string): { forme: number; note: number } | null } | null;
   jouer(): void;
   nouvelle(): void;
+  /** Équipe automatique (14/11) : nouvelle partie, titulaires et banc choisis tout seuls. */
+  auto?(qualite: "haute" | "moyenne"): void;
+  /** Les boutons d'équipe automatique sont proposés (début de partie, avant le premier match). */
+  autoPossible?(): boolean;
 }
 
 // Gardien : une case en double losange (deux hexagones fusionnés), sous le DC central.
@@ -416,6 +420,7 @@ export class EcranPreparation {
     html("span", { class: "prepa-nombre" }, budget, String(this.prepa.etat.budget));
     this.boutonNouvelle(tete);
     this.rendreEtapes(parent, 1, n);
+    this.rendreAuto(parent);
     if (p.aGarder() > 0) html("span", { class: "prepa-discret" }, parent, `Garde au moins ${p.aGarder()} pièce${p.aGarder() > 1 ? "s" : ""} pour finir ton équipe ; le reste servira au banc.`);
   }
 
@@ -437,6 +442,9 @@ export class EcranPreparation {
       j.addEventListener("click", () => this.partie!.jouer());
     }
     this.boutonNouvelle(tete);
+    // Avant le premier match, le classement est à zéro partout : à sa place, les
+    // boutons d'équipe automatique (14/11), pour que le mercato reste visible.
+    if (this.partie!.auto && (this.partie!.autoPossible?.() ?? false)) return this.rendreAuto(parent);
     // Classement (4 équipes) : toi en bleu, ton prochain adversaire en rouge.
     const groupe = html("div", { class: "prepa-groupe champ" }, parent);
     ch.classement.forEach((e, i) => {
@@ -448,6 +456,20 @@ export class EcranPreparation {
       html("span", { class: "prepa-equipe-pts" }, n, `${e.points} pt${e.points > 1 ? "s" : ""} · ${e.diff > 0 ? "+" : ""}${e.diff}`);
     });
     if (ch.resultats.length) html("div", { class: "champ-resultats" }, parent, ch.resultats.join("  ·  "));
+  }
+
+  /** Équipe automatique (14/11, concepteur : « comme ça, j'ai pas à m'embêter au
+   *  début, je peux générer plusieurs cas ») : chaque bouton relance une partie
+   *  avec une équipe déjà faite, très forte ou moyenne. */
+  private rendreAuto(parent: HTMLElement): void {
+    const p = this.partie;
+    if (!p?.auto || !(p.autoPossible?.() ?? false)) return;
+    const l = html("div", { class: "auto-ligne" }, parent);
+    html("span", { class: "auto-titre" }, l, "Équipe auto");
+    for (const [q, texte] of [["haute", "★★★ Haute qualité"], ["moyenne", "★★ Moyenne"]] as const) {
+      const b = html("button", { type: "button", class: `auto-bouton ${q}` }, l, texte);
+      b.addEventListener("click", () => p.auto!(q));
+    }
   }
 
   /** Mi-temps (13/11) : déplacer ses joueurs, faire des changements, voir la fatigue. */

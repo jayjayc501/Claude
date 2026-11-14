@@ -16,17 +16,30 @@ import { couleurs, polices } from '../../lib/theme';
 const LONGUEUR_MAX = 200;
 
 const IDEES: { label: string; debut: string }[] = [
-  { label: 'Potes', debut: 'Je parie que ' },
+  { label: 'Potes', debut: 'Je te parie que ' },
+  { label: 'Amours', debut: 'Ces deux-là vont ' },
+  { label: 'Famille', debut: 'À Noël, tonton va encore ' },
   { label: 'Sport', debut: 'Ce week-end, ' },
-  { label: 'Séries', debut: 'Dans la prochaine saison, ' },
-  { label: 'Famille', debut: 'À Noël, ' },
-  { label: 'Lycée', debut: "Avant la fin de l'année, " },
+  { label: 'Boulot', debut: 'Le prochain pot de départ, ce sera celui de ' },
+];
+
+// Exemples affichés dans la zone de saisie (un au hasard à chaque ouverture).
+const EXEMPLES = [
+  'Thomas va encore oublier mon anniversaire.',
+  'Le groupe WhatsApp de la famille va exploser avant le réveillon.',
+  'Mon coloc ne fera pas la vaisselle de toute la semaine.',
+  'Léa va adopter un chat. Puis un deuxième.',
+  'Papa va s\'endormir devant le film avant la 10e minute.',
+  'Il va pleuvoir pile le jour du barbecue.',
+  'Le prof va nous coller un contrôle surprise lundi.',
+  'Ces deux-là vont finir ensemble avant l\'été.',
 ];
 
 export default function Ecrire() {
   const router = useRouter();
   const [chargement, setChargement] = useState(true);
-  const [pseudo, setPseudo] = useState('');
+  const [prenom, setPrenom] = useState('');
+  const [exemple] = useState(() => EXEMPLES[Math.floor(Math.random() * EXEMPLES.length)]);
   const [phraseDuJour, setPhraseDuJour] = useState<Phrase | null>(null);
   const [texte, setTexte] = useState('');
   const [envoi, setEnvoi] = useState(false);
@@ -35,14 +48,14 @@ export default function Ecrire() {
 
   const charger = useCallback(async () => {
     const [profil, duJour] = await Promise.all([
-      supabase.from('profils').select('pseudo').maybeSingle(),
+      supabase.from('profils').select('pseudo, prenom').maybeSingle(),
       supabase
         .from('phrases')
         .select('id, texte, scellee_le, jour, revelee_le, lien')
         .eq('jour', aujourdhuiParis())
         .maybeSingle(),
     ]);
-    setPseudo(profil.data?.pseudo ?? '');
+    setPrenom(profil.data?.prenom || profil.data?.pseudo || '');
     setPhraseDuJour((duJour.data as Phrase | null) ?? null);
     setChargement(false);
   }, []);
@@ -92,7 +105,7 @@ export default function Ecrire() {
     <SafeAreaView style={styles.page} edges={['top']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.contenu} keyboardShouldPersistTaps="handled">
-          <EnTete pseudo={pseudo} disponible={!phraseDuJour} />
+          <EnTete prenom={prenom} disponible={!phraseDuJour} />
 
           {phraseDuJour ? (
             <DejaScelle phrase={phraseDuJour} />
@@ -108,7 +121,7 @@ export default function Ecrire() {
                   accessibilityLabelledBy="etiquette-prediction"
                   value={texte}
                   onChangeText={setTexte}
-                  placeholder="Mon frère va se faire larguer avant l'été."
+                  placeholder={exemple}
                   placeholderTextColor={couleurs.bordureForte}
                   multiline
                   maxLength={LONGUEUR_MAX}
@@ -156,14 +169,14 @@ export default function Ecrire() {
   );
 }
 
-function EnTete({ pseudo, disponible }: { pseudo: string; disponible: boolean }) {
+function EnTete({ prenom, disponible }: { prenom: string; disponible: boolean }) {
   return (
     <View style={styles.enTete}>
       <View style={styles.salut}>
         <View style={styles.avatar} accessibilityElementsHidden importantForAccessibility="no">
-          <Text style={styles.avatarTexte}>{(pseudo[0] ?? '?').toUpperCase()}</Text>
+          <Text style={styles.avatarTexte}>{(prenom[0] ?? '?').toUpperCase()}</Text>
         </View>
-        <Text style={styles.salutTexte}>Salut {pseudo}</Text>
+        <Text style={styles.salutTexte}>Salut {prenom}</Text>
       </View>
       <View style={[styles.dispo, !disponible && styles.dispoVide]}>
         <Text style={[styles.dispoTexte, !disponible && { color: couleurs.texteDoux }]}>

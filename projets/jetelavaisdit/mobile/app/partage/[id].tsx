@@ -19,6 +19,7 @@ export default function Partage() {
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [auteur, setAuteur] = useState('');
 
   useEffect(() => {
     supabase
@@ -27,6 +28,19 @@ export default function Partage() {
       .eq('id', id)
       .single()
       .then(({ data }) => setPhrase(data as Phrase));
+    supabase
+      .from('profils')
+      .select('pseudo, prenom, nom')
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        // Même règle que sur la carte : « Prénom N. », sinon le prénom, sinon le pseudo.
+        setAuteur(
+          data.prenom && data.nom
+            ? `${data.prenom} ${data.nom.charAt(0).toUpperCase()}.`
+            : data.prenom || data.pseudo,
+        );
+      });
   }, [id]);
 
   async function partager() {
@@ -85,7 +99,9 @@ export default function Partage() {
           </View>
           <View style={styles.carteRose}>
             <Text style={styles.phrase}>« {phrase.texte} »</Text>
-            <Text style={styles.date}>Scellée le {formaterDate(phrase.scellee_le, true)}</Text>
+            <Text style={styles.date}>
+              {auteur ? `Par ${auteur} · ` : ''}Scellée le {formaterDate(phrase.scellee_le, true)}
+            </Text>
           </View>
           <Text style={styles.slogan}>
             regarde.{'\n'}je te l'avais <Text style={{ color: couleurs.vert }}>dit.</Text>

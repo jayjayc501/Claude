@@ -818,3 +818,23 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 **Tests** : 177 verts (aucun nouveau : changement d'affichage seulement ; empreintes inchangées).
 
 **À juger par le concepteur** : le rendu en match (niveau 1 assez visible, crescendo 1 → 2 → 3, lisibilité des pictos dans les pions et sur les plaques) et la fluidité sur son téléphone.
+
+## 15/11/2026 (nuit) — Écrans épurés : plus d'onglets ni d'outils de test en match
+
+**Contexte** : séance de conception du 14/11 après-midi sur la suite (connexion, 1 contre 1 entre amis, méta à la Clash Royale), puis revue des écrans un par un sur captures au format téléphone.
+
+**Décisions validées dans la séance** (14/11 après-midi et 15/11)
+- Prochain chantier : **1 contre 1 entre amis par un lien** (WhatsApp), sans compte Claude pour l'ami (« ça c'est pas possible pour tester »), **match calculé sur un serveur** et envoyé aux deux écrans ; au lancement, choix du mode **Championnat (test)** ou **1 contre 1**, avec possibilité de changer ; en 1 contre 1, **10 minutes** pour faire son équipe, un seul match, pas de mercato après.
+- Site public dans un **dépôt GitHub séparé** (`FootMergTactic`, créé par le concepteur), pour ne pas toucher au site jetelavaisdit.
+- Revue des écrans (15/11) : « enlève en haut le Jouer match ou Préparation ; tu mets juste un gros Jouer le match en haut » ; retirer l'encart des ordinateurs qui draftent (« on imagine bien ») ; en match, « tu laisses que Action », pas de « Coup d'envoi » (« ça sera commencé directement »), pas de vitesse ni de zones, « le bouton son, il faut le laisser », « les tactiques de l'équipe, il faut les remonter en haut », « tu peux libérer ce qui est en dessous de la page ».
+
+**Ce qui a été fait**
+- `src/main.ts` : onglets « Préparation / Match » retirés.
+- `src/ui/ecranPreparation.ts` : gros bouton « Jouer le match ▶ » en haut (grisé tant qu'il manque des titulaires, « 2e mi-temps ▶ » à la mi-temps) ; petits boutons « Jouer ▶ » et « 2e mi-temps ▶ » de l'en-tête retirés ; encart « Les 3 ordinateurs draftent aussi » retiré.
+- `src/ui/ecranMatch.ts` : le match démarre dès l'ouverture de l'écran (le toucher sur « Jouer le match » sert aussi à autoriser le son) ; vue Action seule ; boutons Coup d'envoi/Pause, vitesse (×3,5 gardé), zones, nouveau match et choix de vue retirés ; tactiques des deux équipes en haut, sous le score, avec le bouton du son (🔊/🔇) ; sous le terrain, plus d'interrupteurs, de tableau de bord ni de note. Les panneaux de mi-temps et de fin gardent leurs boutons.
+- `src/style.css` : `.partie-jouer-gros`, `.match-son`. `scripts/capture/mi-temps.js` suit le nouveau bouton.
+- Moteur inchangé.
+
+**Tests** : 177 verts (empreintes identiques).
+
+**À juger par le concepteur** : le reste des écrans (mi-temps, fin de match, journée suivante) ; la tactique de l'adversaire reste modifiable à la mi-temps (outil de test ?) ; ligne « Les ordinateurs ont fait leur mercato » sous le mercato.

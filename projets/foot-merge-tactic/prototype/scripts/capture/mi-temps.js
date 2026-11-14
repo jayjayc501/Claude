@@ -1,5 +1,5 @@
 new Promise((r) => {
-  document.querySelector('.partie-jouer-mini').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  document.querySelector('.partie-jouer-gros').dispatchEvent(new MouseEvent('click', { bubbles: true }));
   setTimeout(() => {
     const b = [...document.querySelectorAll('button')].find((x) => x.textContent.includes("Coup d'"));
     b && b.dispatchEvent(new MouseEvent('click', { bubbles: true }));

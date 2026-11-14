@@ -36,12 +36,9 @@ const MARGE_Y = 34;
 /** Trois rendus à comparer (12/11) : pions ronds et seul le porteur en
  *  figurine ; toutes les figurines en petit ; « Action » : les joueurs proches
  *  du ballon en figurines, les autres en pions (remplace la caméra, 12/11). */
+/* 15/11, concepteur : « tu laisses que Action, tu enlèves le reste » : le choix
+ * de vue n'est plus affiché ; les rendus Pions et Figurines restent dans le code. */
 type Vue = "pions" | "figurines" | "action";
-const VUES: { id: Vue; nom: string }[] = [
-  { id: "action", nom: "Action" },
-  { id: "pions", nom: "Pions" },
-  { id: "figurines", nom: "Figurines" },
-];
 /** Largeur d'une figurine (unités SVG) ; repère de la maquette : 48 × 53, socle en 24,47. */
 /** (12/11 : bustes ramenés à la même hauteur visible, un peu plus petits ; tailles relevées de 6 %.) */
 const LARGEUR_FIG: Record<Vue, number> = { pions: 36, figurines: 28, action: 32 };
@@ -72,7 +69,6 @@ const BLEU_NOUS = "#3563C0";
 const VEDETTE_MIN_S = 0.7;
 /** Écart minimal à l'écran entre deux pions ou figurines (unités SVG), selon la vue. */
 const ECART_AFFICHAGE: Record<Vue, number> = { pions: 2 * RAYON_ROND + 2, figurines: 18, action: 2 * RAYON_ROND + 3 };
-const CLE_VUE = "foot-merge-tactic.vue-match.v2";
 /** Tactiques et styles (pour les zones et les paliers affichés). */
 const INFLUENCES = chargerInfluences();
 /** Noms des pays (bonus de pays, 14/11). */
@@ -184,14 +180,7 @@ export class EcranMatch {
   private tactiquesForcees: [string | null, string | null] = [null, null];
 
   private pions: SVGGElement[] = [];
-  private vue: Vue = (() => {
-    try {
-      const v = localStorage.getItem(CLE_VUE);
-      return v === "figurines" || v === "pions" ? v : "action";
-    } catch {
-      return "pions";
-    }
-  })();
+  private vue: Vue = "action";
   /** Échelle des figurines : LARGEUR_FIG / 48. */
   private k = LARGEUR_FIG.pions / 48;
   private svgTerrain!: SVGSVGElement;
@@ -217,7 +206,6 @@ export class EcranMatch {
   /** Joueur mis en vedette (porteur, ou dernier à avoir touché le ballon pendant une passe). */
   private vedette: JoueurVu | null = null;
   private vedetteDepuis = -Infinity;
-  private boutonsVue: HTMLButtonElement[] = [];
   private calquePions!: SVGGElement;
   private calqueFigs: SVGGElement | null = null;
   /** Dernier ordre de profondeur appliqué (indices des joueurs). */
@@ -244,7 +232,6 @@ export class EcranMatch {
   private annonceDuree = 0;
   private dernierEvenement = -1;
   private boutonJouer!: HTMLButtonElement;
-  private boutonZones!: HTMLButtonElement;
   private derniereMajBord = 0;
 
   constructor(
@@ -284,6 +271,11 @@ export class EcranMatch {
     if (!reprise || !this.lecteur.film || this.arret === "fin") {
       this.tactiquesForcees = [null, null]; // la tactique choisie en préparation s'applique
       this.nouveauMatch();
+      // Plus de bouton « Coup d'envoi » (15/11, concepteur : « ça sera commencé
+      // directement ») : le toucher sur « Jouer le match » lance le match et le son.
+      activer();
+      this.coupDEnvoi();
+      this.majCommandes();
     }
     this.dernier = performance.now();
     requestAnimationFrame((t) => this.boucle(t));
@@ -336,9 +328,11 @@ export class EcranMatch {
     this.barreNous = html("span", { class: "nous" }, barre);
     html("span", { class: "eux" }, barre);
 
-    // Commandes principales, juste au-dessus du terrain.
-    const cmd = html("div", { class: "match-commandes" }, r);
-    this.boutonJouer = html("button", { type: "button", class: "match-jouer" }, cmd);
+    // 15/11, concepteur : plus de « Coup d'envoi », de pause, de vitesse, de zones
+    // ni de choix de vue ; on garde le son, et les tactiques montent en haut.
+    // Le bouton principal n'est plus affiché : les panneaux de mi-temps et de fin
+    // (« 2e mi-temps », « Continuer ») s'en servent toujours.
+    this.boutonJouer = html("button", { type: "button", class: "match-jouer" });
     this.boutonJouer.addEventListener("click", () => {
       activer(); // le son ne peut démarrer qu'après un geste
       if (this.arret === "mi-temps") this.secondeMiTemps();
@@ -351,58 +345,8 @@ export class EcranMatch {
       else this.enPause = !this.enPause;
       this.majCommandes();
     });
-    const nouveau = html("button", { type: "button", class: "match-puce", "aria-label": "Nouveau match" }, cmd, "↺ Nouveau");
-    if (h.finMatch) nouveau.style.display = "none"; // championnat : pas de match rejoué
-    nouveau.addEventListener("click", () => {
-      this.graines.matchRegardeFini();
-      this.nouveauMatch();
-    });
-    const vitesses = [0.5, 1, 2, 3, 3.5, 4];
-    const libelle = () => `×${String(this.vitesse).replace(".", ",")}`;
-    const bVitesse = html("button", { type: "button", class: "match-puce", "aria-label": "Vitesse" }, cmd, libelle());
-    bVitesse.addEventListener("click", () => {
-      this.vitesse = vitesses[(vitesses.indexOf(this.vitesse) + 1) % vitesses.length]!;
-      bVitesse.textContent = libelle();
-    });
-    const bSon = html("button", { type: "button", class: "match-puce", "aria-label": "Son" }, cmd, estMuet() ? "Muet" : "Son");
-    bSon.addEventListener("click", () => {
-      activer();
-      bSon.textContent = basculerMuet() ? "Muet" : "Son";
-    });
-    this.boutonZones = html("button", { type: "button", class: "match-puce" }, cmd, "Zones");
-    this.boutonZones.addEventListener("click", () => {
-      this.zonesVisibles = !this.zonesVisibles;
-      this.majCommandes();
-      this.dessiner();
-    });
 
-    const vues = html("div", { class: "match-vues", role: "group", "aria-label": "Rendu du terrain" }, r);
-    html("span", { class: "match-vues-titre" }, vues, "Vue");
-    this.boutonsVue = VUES.map((v) => {
-      const b = html("button", { type: "button", class: "match-vue" }, vues, v.nom);
-      b.addEventListener("click", () => {
-        if (this.vue === v.id) return;
-        this.vue = v.id;
-        try {
-          localStorage.setItem(CLE_VUE, v.id);
-        } catch {
-          // stockage indisponible : sans conséquence
-        }
-        this.construireTerrain();
-        if (this.arret) this.montrerStats();
-        this.majCommandes();
-        this.dessiner();
-      });
-      return b;
-    });
-
-    this.statut = html("p", { class: "match-statut", role: "status" }, r);
-
-    // Terrain.
-    this.terrain = html("div", { class: "match-terrain" }, r);
-    this.construireTerrain();
-
-    // Tactiques et interrupteurs : avant le coup d'envoi et à la mi-temps (13/11 au soir).
+    // Tactiques des deux équipes (modifiables à la mi-temps) et bouton du son.
     this.majChoix = [];
     const tac = html("div", { class: "match-tactiques" }, r);
     ([h.nomNous, h.nomEux] as const).forEach((qui, camp) => {
@@ -431,30 +375,22 @@ export class EcranMatch {
       l.addEventListener("maj", maj);
       this.majChoix.push(maj);
     });
-    const inter = html("div", { class: "match-interrupteurs" }, r);
-    for (const cle of ["tactiques", "styles"] as const) {
-      const b = html("button", { type: "button", class: "match-interrupteur" }, inter);
-      const maj = () => {
-        const on = this.options[cle];
-        b.classList.toggle("actif", on);
-        b.setAttribute("aria-pressed", String(on));
-        b.textContent = cle === "tactiques" ? `Tactiques ${on ? "activées" : "coupées"}` : `Styles ${on ? "activés" : "coupés"}`;
-        b.disabled = this.enJeu;
-      };
-      maj();
-      this.majChoix.push(maj);
-      b.addEventListener("click", () => {
-        if (this.enJeu) return;
-        this.options = { ...this.options, [cle]: !this.options[cle] };
-        maj();
-        for (const l of tac.querySelectorAll("label")) l.dispatchEvent(new Event("maj"));
-        this.majBord(true);
-      });
-    }
+    const bSon = html("button", { type: "button", class: "match-son", "aria-label": "Son" }, tac, estMuet() ? "🔇" : "🔊");
+    bSon.addEventListener("click", () => {
+      activer();
+      bSon.textContent = basculerMuet() ? "🔇" : "🔊";
+    });
 
-    // Tableau de bord.
-    this.bord = html("div", { class: "match-bord" }, r);
-    html("p", { class: "match-note" }, r, "Tactiques et styles : proposition à juger en regardant le match. Coupe-les ou change de tactique avant le coup d'envoi ou à la mi-temps pour voir la différence.");
+    this.statut = html("p", { class: "match-statut", role: "status" }, r);
+
+    // Terrain.
+    this.terrain = html("div", { class: "match-terrain" }, r);
+    this.construireTerrain();
+
+    // Sous le terrain (15/11, concepteur : « tu peux libérer ce qui est en dessous ») :
+    // plus d'interrupteurs « Tactiques / Styles », de tableau de bord ni de note.
+    // Le tableau de bord n'est plus affiché (élément hors de la page).
+    this.bord = html("div", { class: "match-bord" });
 
     this.majCommandes();
     this.dessiner();
@@ -738,14 +674,6 @@ export class EcranMatch {
       : enJeu ? "❚❚ Pause"
       : "▶ Reprendre";
     this.boutonJouer.classList.toggle("en-jeu", enJeu);
-    this.boutonZones.classList.toggle("actif", this.zonesVisibles);
-    VUES.forEach((v, i) => {
-      const b = this.boutonsVue[i];
-      if (!b) return;
-      b.classList.toggle("actif", v.id === this.vue);
-      b.setAttribute("aria-pressed", String(v.id === this.vue));
-    });
-    this.boutonZones.setAttribute("aria-pressed", String(this.zonesVisibles));
     for (const f of this.majChoix) f();
   }
 
@@ -1305,6 +1233,7 @@ export class EcranMatch {
   /** Tableau de bord : possession, passes réussies, lignes défensives, paliers de styles. */
   private majBord(force = false): void {
     const sim = this.instant;
+    if (!this.bord.isConnected) return; // plus affiché depuis le 15/11
     if (!force && performance.now() - this.derniereMajBord < 500) return;
     this.derniereMajBord = performance.now();
     const st = sim.balle;

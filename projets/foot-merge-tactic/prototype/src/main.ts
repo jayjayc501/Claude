@@ -52,10 +52,8 @@ function demarrer(): void {
   const adversaire = (): number => championnat.adversaire(0) ?? 1;
 
   const app = document.getElementById("app")!;
-  const entete = html("header", { class: "entete" }, app);
-  const onglets = html("nav", { class: "onglets" }, entete);
-  const ongletPrepa = html("button", { type: "button", class: "onglet onglet-actif" }, onglets, "Préparation");
-  const ongletMatch = html("button", { type: "button", class: "onglet" }, onglets, "Match");
+  // Plus d'onglets « Préparation / Match » (15/11, concepteur) : on passe au match
+  // par le gros bouton en haut de la préparation, et on en revient par « Continuer ».
   const contenu = html("main", {}, app);
 
   const equipes = (): [Equipe, Equipe] => [{ ...prepa.equipe(), nom: "Toi", nationalite: "Toi" }, partie.equipeDe(adversaire())];
@@ -265,8 +263,6 @@ function demarrer(): void {
       preparation.signaler(partie.draftFini(0) ? "Il faut 11 joueurs sur le terrain avant de jouer." : "Termine d'abord ton draft : 11 titulaires.", true);
       return;
     }
-    ongletPrepa.classList.toggle("onglet-actif", ecran === "preparation");
-    ongletMatch.classList.toggle("onglet-actif", ecran === "match");
     if (ecran === "match" && championnat.fini) return;
     if (ecran === "match") {
       habillage.nomEux = partie.noms[adversaire()] ?? "Ordinateur";
@@ -280,8 +276,6 @@ function demarrer(): void {
     window.scrollTo({ top: 0 });
   }
 
-  ongletPrepa.addEventListener("click", () => montrer("preparation"));
-  ongletMatch.addEventListener("click", () => montrer("match"));
   nouvellePartie();
 }
 

@@ -121,6 +121,15 @@ Maquette de l'écran de préparation sur claude.ai : https://claude.ai/artifact/
 - [PROPOSITION, gardée dans la maquette] Mercato de 6 joueurs sur une rangée, budget dans le titre du mercato ; poste écrit sous le buste ; revente en glissant le joueur vers le mercato.
 - Les images de joueurs de la maquette viennent de Kling (environ 14 crédits) : ce sont des références, pas les visuels du jeu. Elles contiennent de petits logos et numéros à retirer.
 
+### Jeu en ligne et écrans épurés (14/11 après-midi et 15/11)
+- **Prochain chantier : 1 contre 1 entre amis par un lien** (envoyé sur WhatsApp), ouvrable dans le navigateur de n'importe quel téléphone ou PC, **sans compte Claude** pour l'ami (« ça c'est pas possible pour tester »). **Le match est calculé sur un serveur** et envoyé aux deux écrans (l'arbitre serveur reste à écrire ; l'arbitre et le film du 13/11 sont faits pour ça).
+- **Au lancement, deux modes** : **Championnat (test)** (comme aujourd'hui : draft, mercato, 3 journées) ou **1 contre 1** ; on peut changer de mode. En 1 contre 1 : **10 minutes** pour faire son équipe, un seul match, pas de mercato après (« ça répond à ta question sur le mercato »). La connexion Google/Apple viendra avec la collection (paquets, niveaux), pas pour ce test.
+- **Hébergement** : un **dépôt GitHub séparé, `FootMergTactic`**, créé par le concepteur pour publier le jeu (le dépôt `Claude` publie déjà jetelavaisdit). Le code reste dans `Claude`. Au 15/11, l'application GitHub de Claude n'a pas encore accès à ce dépôt.
+- **Revue des écrans (15/11)**, sur captures, écran par écran : le concepteur dit ce qu'il retire (outils de test) :
+  - préparation : **plus d'onglets « Préparation / Match »** ; **un gros bouton « Jouer le match » en haut** (« ou Prêt » en 1 contre 1) ; plus d'encart « les ordinateurs draftent aussi » (« on imagine bien ») ; écran inchangé en 1 contre 1 ;
+  - match : **vue Action seule** (« tu laisses que Action ») ; **pas de « Coup d'envoi »**, le match démarre directement ; **pas de vitesse ni de zones** ; **le bouton du son reste** ; **les tactiques des équipes montent en haut** ; **plus rien sous le terrain** (interrupteurs, tableau de bord, note). Remplace les commandes de comparaison du 12/11 (vues, interrupteurs, tableau de bord).
+  - reste à revoir par le concepteur : mi-temps, fin de match, journée suivante.
+
 ### Priorités immédiates (concepteur, 11/11)
 - Un moteur jouable ; pouvoir choisir les joueurs qui jouent et les placer ; un jeu équilibré ; un rendu intéressant.
 - Les fusions viennent après le moteur.
@@ -350,7 +359,7 @@ Détail des anciens points dans `docs/historique-etat.md`. Encore actifs :
 - Coordonnées **normalisées** dans le repère de chaque équipe (x de 0 à 1 sur la largeur, y de 0, sa ligne de but, à 1, la ligne adverse). L'équipe adverse utilise la symétrie. Les cases se déduisent du plateau choisi (hexagones ou carrés), décrit rangée par rangée dans `postes.json`.
 - Un match ne dépend que des deux équipes (joueurs, placements), des choix d'avant le coup d'envoi et de la mi-temps, et de la graine : utile pour les tests, et pour que le serveur simule plus tard les matchs en direct (arbitre et film en place depuis le 13/11 au soir).
 - Validation visuelle : Claude vérifie la page dans un navigateur au format téléphone (captures, thèmes clair et sombre), puis la publie comme page claude.ai. Lien du prototype 1 : https://claude.ai/artifact/B86yGS9jR47LwubdEiL5EN (privé au concepteur jusqu'à ce qu'il le partage). Republier la même page à chaque version.
-- GitHub Pages sert l'app jetelavaisdit : ne pas y publier le prototype sans regrouper les deux sites.
+- GitHub Pages du dépôt `Claude` sert l'app jetelavaisdit : le jeu sera publié depuis le dépôt séparé `FootMergTactic` (15/11).
 
 ## Façon de travailler sur ce projet
 
@@ -391,6 +400,7 @@ Laboratoire de tests, construit en même temps que le moteur :
 
 Historique détaillé : `journal.md` (par jour) et `docs/historique-etat.md` (anciennes entrées).
 
+- **15/11 (nuit) : écrans épurés après la revue du concepteur** (177 tests verts ; commit sur `main`) : gros bouton « Jouer le match » à la place des onglets, encart des ordinateurs retiré ; en match, démarrage direct, vue Action seule, tactiques et son en haut, plus rien sous le terrain. Moteur inchangé. **Prochaines étapes** : finir la revue (mi-temps, fin, journée suivante) ; puis le **1 contre 1 en ligne** (choix du mode au lancement, salon par lien, 10 min pour l'équipe, arbitre serveur sur Supabase, film allégé, site sur le dépôt `FootMergTactic` une fois l'accès donné). Point à mesurer d'abord : temps de calcul d'une mi-temps face à la limite des fonctions Supabase (2 s de calcul par requête selon leur documentation).
 - **14/11 (après-midi) : fusions et pictos de style en match refaits d'après les propositions visuelles choisies** (177 tests verts ; commit sur `main`) : fusions « M2 » (contour lumineux et étincelles, puis feu réaliste, puis grand feu avec braises), pictos « P3 » (dans le pion, plaque colorée sur le socle). Moteur inchangé. **À juger : le rendu en match et la fluidité sur le téléphone** (le feu réaliste est l'effet le plus coûteux).
 - **14/11 (fin de matinée, suite) : crescendo des fusions, charnière centrale** (177 tests verts ; commit sur `main`). Halo au niveau 1, flamme au 2, grande flamme double et étincelles au 3 ; défenseurs centraux resserrés (15 m entre eux avec le ballon au lieu de 29, 16 m du latéral au lieu de 9). Revente des fusionnés : déjà cumulée (test ajouté). **À juger : la charnière en match, le crescendo.**
 - **14/11 (midi) : halos de fusion visibles, fiche du mercato, prix de vente** (175 tests verts ; commit sur `main`). La fiche d'un joueur du mercato se refermait aussitôt au toucher (corrigé). Halos (niveau 1, le cas le plus courant) plus grands et plus lumineux ; flammes plus grandes et dessinées sans transformation SVG animée. Prix de vente = prix payé moins 1 (fiche et revente). **À juger : la visibilité des halos.** Carte à 1 pièce revendue 0 : validé (« et 0 pour l'instant »).

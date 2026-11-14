@@ -354,7 +354,9 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
   20% { transform: translate(calc(var(--derive) * 0.3), -90px) rotate(calc(var(--tour) * 0.3)); }
   100% { opacity: 0; transform: translate(var(--derive), 260px) rotate(var(--tour)); }
 }
-.match-tactiques { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.match-tactiques { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; }
+/* Bouton du son, au bout de la ligne des tactiques (15/11). */
+.match-son { font-size: 18px; line-height: 1; width: 40px; min-height: 36px; border: 0; border-radius: 10px; background: #fff; cursor: pointer; }
 .match-pilule { position: relative; display: flex; align-items: baseline; gap: 6px; background: #fff; border-radius: 10px; padding: 7px 26px 7px 10px; min-width: 0; border-left: 4px solid #3563C0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2316201A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; cursor: pointer; }
 .match-pilule.eux { border-left-color: #C2413D; }
 .match-pilule.coupee { opacity: 0.45; }
@@ -563,6 +565,9 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .offre-carte.refus { animation: offre-refus 0.35s ease; }
 @keyframes offre-refus { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
 .partie-jouer-mini { flex: none; height: 34px; padding: 0 14px; border: 0; border-radius: 12px; font: inherit; font-size: 15px; font-weight: 900; color: #fff; background: linear-gradient(180deg, #4F8BEB, #2459C6); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2); cursor: pointer; }
+/* Gros bouton en haut de la préparation, à la place des onglets (15/11). */
+.partie-jouer-gros { display: block; width: 100%; height: 46px; margin: 0 0 8px; border: 0; border-radius: 14px; font: inherit; font-size: 19px; font-weight: 900; color: #fff; background: linear-gradient(180deg, #4F8BEB, #2459C6); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2); cursor: pointer; }
+.partie-jouer-gros:disabled { background: #DCE2DE; color: #6B7A70; box-shadow: none; cursor: default; }
 .partie-jouer-mini:disabled { background: #DCE2DE; color: #6B7A70; box-shadow: none; cursor: default; }
 /* 13/11 : tout l'écran de préparation sur une page de téléphone. */
 .draft-progres { height: 6px; margin: 4px 0 2px; }

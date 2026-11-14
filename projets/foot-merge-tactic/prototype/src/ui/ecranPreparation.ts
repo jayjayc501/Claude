@@ -393,6 +393,7 @@ export class EcranPreparation {
     c.replaceChildren();
     const draft = this.partie?.enDraft() ?? false;
     const mt = this.partie?.miTemps() ?? null;
+    if (this.partie) this.rendreGrosBouton(c, mt !== null);
     if (draft) this.rendreEnteteDraft(c);
     else if (mt) this.rendreEnteteMiTemps(c, mt.score);
     else if (this.partie) this.rendreEnteteMercato(c);
@@ -402,7 +403,7 @@ export class EcranPreparation {
     const terrain = html("div", { class: "prepa-terrain" }, milieu);
     this.rendreTactique(terrain);
     this.rendrePlateau(terrain);
-    if (draft) return this.rendreOrdi(c);
+    if (draft) return;
     this.rendreBanc(c);
     if (mt) return; // mi-temps : pas de mercato
     this.rendreMercato(c);
@@ -438,10 +439,6 @@ export class EcranPreparation {
     } else {
       html("span", { class: "prepa-h mt-titre" }, t, `Journée ${ch.journee}/${ch.total}`);
       html("span", { class: "prepa-sous champ-sous" }, t, ch.prochain ? `contre ${ch.prochain}` : "");
-      // Le bouton du match reste en haut, toujours visible (13/11).
-      const pret = this.prepa.pret();
-      const j = html("button", { type: "button", class: "partie-jouer-mini", disabled: !pret, title: pret ? "Jouer le match" : "Il faut 11 titulaires" }, tete, "Jouer ▶");
-      j.addEventListener("click", () => this.partie!.jouer());
     }
     this.boutonNouvelle(tete);
     // Avant le premier match, le classement est à zéro partout : à sa place, les
@@ -480,8 +477,6 @@ export class EcranPreparation {
     const t = html("div", { class: "prepa-titre" }, tete);
     html("span", { class: "prepa-h mt-titre" }, t, `Mi-temps ${score[0]}–${score[1]}`);
     html("span", { class: "prepa-sous" }, t, "Glisse pour déplacer ou remplacer");
-    const j = html("button", { type: "button", class: "partie-jouer-mini", disabled: !this.prepa.pret() }, tete, "2e mi-temps ▶");
-    j.addEventListener("click", () => this.partie!.jouer());
     const l = html("div", { class: "mt-legende" }, parent);
     html("span", { class: "mt-forme-ex" }, l);
     l.append("Forme (fatigue)");
@@ -504,21 +499,16 @@ export class EcranPreparation {
     b.addEventListener("click", () => this.partie!.nouvelle());
   }
 
-  /** Draft : ce que l'ordinateur a déjà pris dans la réserve commune. */
-  private rendreOrdi(parent: HTMLElement): void {
-    const o = this.partie!.ordi();
-    const b = html("div", { class: "draft-ordi" }, parent);
-    const t = html("div", { class: "draft-ordi-tete" }, b);
-    html("span", {}, t, "Les 3 ordinateurs draftent aussi");
-    html("span", {}, t, `${o.titulaires}/11`);
-    const l = html("div", { class: "draft-ordi-liste" }, b);
-    if (!o.choix.length) html("span", { class: "draft-ordi-vide" }, l, "Ils choisissent après toi, dans la même réserve de cartes.");
-    for (const c of o.choix) {
-      const e = html("span", { class: "draft-ordi-carte" }, l);
-      e.style.setProperty("--pays", c.couleur);
-      html("b", {}, e, libellePoste(c.poste));
-      e.append(`${c.nom} · ${c.prix}`);
-    }
+  /** Gros bouton en haut de l'écran (15/11, concepteur : « tu mets juste un gros
+   *  jouer le match, en haut ») ; à la place des onglets « Préparation / Match ».
+   *  Grisé tant que les 11 titulaires ne sont pas en place ; « 2e mi-temps » à la mi-temps.
+   *  (L'encart « Les 3 ordinateurs draftent aussi » est retiré le même jour : « on imagine bien ».) */
+  private rendreGrosBouton(parent: HTMLElement, miTemps: boolean): void {
+    if (this.partie!.championnat().fini) return;
+    const pret = this.prepa.pret();
+    const texte = miTemps ? "2e mi-temps ▶" : "Jouer le match ▶";
+    const b = html("button", { type: "button", class: "partie-jouer-gros", disabled: !pret, title: pret ? texte : "Il faut 11 titulaires" }, parent, texte);
+    b.addEventListener("click", () => this.partie!.jouer());
   }
 
   /** Bouton pour lancer le match une fois les 11 titulaires en place. */

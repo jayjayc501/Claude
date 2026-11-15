@@ -5,8 +5,8 @@
 // Déploiement : voir serveur/README.md (verify_jwt désactivé : la fonction vérifie
 // elle-même le jeton de chaque joueur).
 
-const SOURCE = "https://raw.githubusercontent.com/jayjayc501/Claude/__COMMIT__/projets/foot-merge-tactic/prototype/serveur/moteur.js";
-const EMPREINTE = "__EMPREINTE__";
+const SOURCE = "https://raw.githubusercontent.com/jayjayc501/Claude/da1ffb6927a2766c05fe294429b36f4f6306f44e/projets/foot-merge-tactic/prototype/serveur/moteur.js";
+const EMPREINTE = "84a1d77f7e632e0a593570b169ce897dc55310346311421d68c9fa62de406062";
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "content-type, apikey, authorization, x-client-info" };
 

@@ -1,0 +1,5 @@
+{
+  "_note": "1 contre 1 en ligne (15/11) : adresse de la fonction serveur (projet Supabase foot-merge-tactic ; pas de clé, la fonction vérifie elle-même le jeton de chaque joueur) et adresse publique du jeu (dépôt FootMergTactic, GitHub Pages), utilisée pour le lien quand la page n'est pas ouverte depuis un site.",
+  "fonction": "https://jcbqeoyygozmtixlorvf.supabase.co/functions/v1/partie",
+  "site": "https://jayjayc501.github.io/FootMergTactic/"
+}

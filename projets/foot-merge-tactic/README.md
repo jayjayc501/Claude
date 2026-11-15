@@ -35,6 +35,22 @@ bun run construire            # fabrique dist/index.html
 navigateur. La version en ligne est publiée par Claude sous forme de page
 claude.ai (lien dans la discussion et dans `CLAUDE.md`).
 
+### 1 contre 1 en ligne (15/11)
+
+Premier écran → « Créer une partie » : lien à envoyer (WhatsApp, copier, partager).
+L'ami l'ouvre dans son navigateur, sans compte ; chacun a 10 minutes pour faire son
+équipe, le match est calculé par le serveur (fonction Supabase `partie`) et regardé
+en même temps sur les deux téléphones, mi-temps comprise. Serveur et déploiement :
+`prototype/serveur/README.md`. Site public : la page `dist/index.html`, publiée dans
+le dépôt `FootMergTactic` par `prototype/scripts/publier-site.sh <clone>`.
+
+Essai sans Supabase (deux navigateurs, serveur local) :
+
+```sh
+bun run construire && bun run scripts/serveur-local.ts 8787
+python3 scripts/capture/un-contre-un.py "http://127.0.0.1:8787/?serveur=http://127.0.0.1:8787/api" /tmp/1c1
+```
+
 ### Où régler quoi
 
 - `prototype/src/data/postes.json` : les postes (maximum de joueurs, ligne défensive) et les deux plateaux. Un plateau se lit comme un dessin : une ligne par rangée, **de la plus basse (près de son but) à la plus haute (ligne médiane)** ; chaque case vaut `"POSTE"` ou `"POSTE:RÔLE"` (par exemple `"MC:MOC"`), `""` = pas de case. En hexagones, une rangée d'une case de moins est décalée d'une demi-case.

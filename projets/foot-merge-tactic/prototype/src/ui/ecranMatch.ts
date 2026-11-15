@@ -141,6 +141,20 @@ export interface HabillageMatch {
   /** Championnat (13/11) : fin du match, avec le score (toi, l'adversaire). Sans
    *  elle, la fin du match propose un nouveau match. */
   finMatch?: (score: [number, number]) => void;
+  /** 1 contre 1 en ligne (15/11) : le film se lit à l'heure du serveur (les deux
+   *  téléphones voient la même image au même moment) ; à la mi-temps, « Prêt »
+   *  prévient le serveur, la reprise vient de lui. */
+  enLigne?: {
+    /** Heure du serveur (ms). */
+    maintenant(): number;
+    /** Heure du serveur où la période commence (première image après le coup d'envoi). */
+    debut(periode: 1 | 2): number;
+    /** Fin du temps de mi-temps (ms, heure du serveur), si elle est connue. */
+    finMiTemps(): number | null;
+    /** « Prêt » à la mi-temps (changements envoyés). */
+    pret(): void;
+    estPret(): boolean;
+  };
 }
 
 export class EcranMatch {
@@ -341,6 +355,11 @@ export class EcranMatch {
     this.boutonJouer = html("button", { type: "button", class: "match-jouer" });
     this.boutonJouer.addEventListener("click", () => {
       activer(); // le son ne peut démarrer qu'après un geste
+      if (this.arret === "mi-temps" && this.habillage.enLigne) {
+        if (!this.habillage.enLigne.estPret()) this.habillage.enLigne.pret();
+        this.montrerStats();
+        return;
+      }
       if (this.arret === "mi-temps") this.secondeMiTemps();
       else if (this.arret === "fin") {
         this.graines.matchRegardeFini();
@@ -365,8 +384,12 @@ export class EcranMatch {
         o.selected = t.code === this.tactiques[camp];
       }
       const maj = () => {
+        // 1 contre 1 : la tactique de l'adversaire est celle que le serveur a jouée.
+        if (this.habillage.enLigne && camp === 1) sel.value = this.tactiques[1];
         valeur.textContent = h.tactiques.find((t) => t.code === sel.value)?.nom ?? sel.value;
-        sel.disabled = !this.options.tactiques || this.enJeu;
+        const en = this.habillage.enLigne;
+        // 1 contre 1 : seule ta tactique se change, à la mi-temps, avant d'être prêt.
+        sel.disabled = !this.options.tactiques || this.enJeu || (!!en && (camp === 1 || !this.instant.demarre || en.estPret()));
         l.classList.toggle("coupee", !this.options.tactiques);
         l.classList.toggle("figee", this.enJeu);
       };
@@ -697,8 +720,9 @@ export class EcranMatch {
     if (!this.actif) return;
     const ecoule = Math.min(0.1, (t - this.dernier) / 1000);
     this.dernier = t;
+    if (this.habillage.enLigne) this.avancerEnLigne();
     // 15/11 : le jeu attend la fin du bandeau des bonus (montré au milieu, avant l'engagement).
-    if (this.instant.demarre && !this.enPause && !this.arret && t >= this.attenteBonus) {
+    else if (this.instant.demarre && !this.enPause && !this.arret && t >= this.attenteBonus) {
       this.reserve += ecoule * this.vitesse;
       const dt = this.reglages.pasDeTempsS;
       let n = 0;
@@ -722,6 +746,45 @@ export class EcranMatch {
     }
     this.dessiner();
     requestAnimationFrame((t2) => this.boucle(t2));
+  }
+
+  /** 1 contre 1 en ligne (15/11) : l'image à montrer se déduit de l'heure du serveur
+   *  (début de la période + temps écoulé × vitesse de lecture). Un téléphone en
+   *  retard (onglet en arrière-plan, page rouverte) rattrape sans bruit. */
+  private avancerEnLigne(): void {
+    const en = this.habillage.enLigne!;
+    if (this.arret === "mi-temps") this.majReprise();
+    if (!this.instant.demarre || this.arret) return;
+    const dt = this.reglages.pasDeTempsS;
+    const cible = Math.floor((((en.maintenant() - en.debut(this.periode)) / 1000) * this.vitesse) / dt);
+    let n = 0;
+    while (this.lecteur.image < cible && n < 3000) {
+      const k = this.lecteur.image + 1;
+      if (!this.lecteur.disponible(k)) break;
+      this.lecteur.lire(k);
+      if (cible - k < 8) this.ecouterBallon(dt);
+      n++;
+      if (k === this.lecteur.derniere) {
+        this.finDePeriode();
+        break;
+      }
+    }
+  }
+
+  /** 1 contre 1 : temps qui reste avant la reprise, sur le panneau de mi-temps. */
+  private majReprise(): void {
+    const el = this.panneau?.querySelector(".match-reprise");
+    const en = this.habillage.enLigne;
+    if (!el || !en) return;
+    const fin = en.finMiTemps();
+    const s = fin === null ? null : Math.max(0, Math.ceil((fin - en.maintenant()) / 1000));
+    const texte = s === null ? "" : en.estPret() ? `En attente de ton ami · reprise au plus tard dans ${s} s` : `Reprise dans ${s} s (plus tôt si vous êtes prêts tous les deux)`;
+    if (el.textContent !== texte) el.textContent = texte;
+  }
+
+  /** Tactique choisie sur l'écran du match pour un camp (null : celle de l'équipe). */
+  tactiqueForcee(camp: 0 | 1): string | null {
+    return this.tactiquesForcees[camp];
   }
 
   /** Sons qui suivent le ballon (15/11, « une ambiance qui varie suivant le ballon ») :
@@ -1056,6 +1119,11 @@ export class EcranMatch {
     return j ? { forme: j.forme, note: j.note } : null;
   }
 
+  /** 1 contre 1 : redessine le panneau de mi-temps (bouton « Prêt », temps restant). */
+  majMiTemps(): void {
+    if (this.arret === "mi-temps") this.montrerStats();
+  }
+
   /** Lance la 2e mi-temps (depuis l'écran de préparation). */
   lancerSecondeMiTemps(): void {
     if (this.arret === "mi-temps") this.secondeMiTemps();
@@ -1064,17 +1132,19 @@ export class EcranMatch {
   /** Deuxième mi-temps : l'adversaire engage, chacun regagne sa place. Les
    *  changements faits à la mi-temps (places, remplaçants) s'appliquent. */
   private secondeMiTemps(): void {
-    const e = this.equipes()[0];
+    const [e, f] = this.equipes();
     // L'arbitre applique les choix (places, remplaçants, tactique) et calcule la 2e mi-temps
     // à partir de l'état exact de la fin de la 1re.
     const film = this.arbitre.secondeMiTemps({ options: { ...this.options }, tactiques: [...this.tactiquesForcees], equipe0: e });
     this.debutPeriode = this.instant.temps;
     this.lecteur.charger(film);
     if (film.entete.equipeChangee) {
-      this.equipesMatch = [e, this.equipesMatch[1]];
+      // 1 contre 1 : l'adversaire a pu changer lui aussi.
+      this.equipesMatch = [e, this.habillage.enLigne ? f : this.equipesMatch[1]];
       this.construireTerrain();
     }
     if (e.tactique && !this.tactiquesForcees[0]) this.tactiques[0] = e.tactique;
+    if (this.habillage.enLigne) this.tactiques = [film.entete.tactiques[0], film.entete.tactiques[1]];
     this.panneau?.remove();
     this.panneau = null;
     this.arret = null;
@@ -1153,8 +1223,14 @@ export class EcranMatch {
       const c = html("button", { type: "button", class: "match-changements" }, carte, "⇄ Changements, places, fatigue");
       c.addEventListener("click", () => this.habillage.changements!());
     } else if (this.arret === "mi-temps") html("p", { class: "match-panneau-aide" }, carte, "Tu peux changer ta tactique sous le terrain avant de reprendre.");
-    const b = html("button", { type: "button", class: "match-jouer" }, carte, this.arret === "fin" ? (this.habillage.finMatch ? "Continuer ▶" : "↺ Nouveau match") : "▶ 2e mi-temps");
+    const en = this.arret === "mi-temps" ? this.habillage.enLigne : undefined;
+    const texteBouton = this.arret === "fin" ? (this.habillage.finMatch ? "Continuer ▶" : "↺ Nouveau match") : en ? (en.estPret() ? "✓ Prêt" : "Prêt ▶") : "▶ 2e mi-temps";
+    const b = html("button", { type: "button", class: "match-jouer", disabled: !!en?.estPret() }, carte, texteBouton);
     b.addEventListener("click", () => this.boutonJouer.click());
+    if (en) {
+      html("p", { class: "match-panneau-aide match-reprise", "aria-live": "polite" }, carte);
+      this.majReprise();
+    }
     this.panneau = p;
   }
 

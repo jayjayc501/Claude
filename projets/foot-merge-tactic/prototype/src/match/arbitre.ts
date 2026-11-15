@@ -13,6 +13,9 @@ import type { Film } from "./film";
 
 /** Une mi-temps : 180 s de jeu simulé (environ 51 s à l'écran en vitesse ×3,5). */
 export const DUREE_MI_TEMPS_S = 180;
+/** Vitesse de lecture du film à l'écran (temps de jeu par seconde affichée). Le
+ *  serveur du 1 contre 1 s'en sert pour savoir quand une mi-temps finit à l'écran. */
+export const VITESSE_LECTURE = 3.5;
 
 /** Choix faits sur l'écran du match (avant le coup d'envoi ou à la mi-temps). */
 export interface ChoixEcran {
@@ -26,6 +29,8 @@ export interface ChoixEcran {
  *  changements faits sur l'écran de préparation (places, remplaçants, tactique). */
 export interface ChoixMiTemps extends ChoixEcran {
   equipe0: Equipe;
+  /** 1 contre 1 en ligne (15/11) : l'équipe adverse après ses changements ; absente : inchangée. */
+  equipe1?: Equipe;
 }
 
 export interface ArbitreMatch {

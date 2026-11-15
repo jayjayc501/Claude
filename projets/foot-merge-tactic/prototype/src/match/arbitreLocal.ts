@@ -78,12 +78,19 @@ export class ArbitreLocal implements ArbitreMatch {
       if (t) sim.definirTactique(camp as 0 | 1, t);
     });
     // Changements faits sur l'écran de préparation (places, remplaçants), puis tactique de l'équipe.
-    const e = choix.equipe0;
-    const avant = sim.joueurs.filter((j) => j.camp === 0).map((j) => `${j.joueur.id}@${j.placement.poste}${j.placement.cellule}`).sort().join();
-    const apres = e.composition.map((p) => `${p.joueurId}@${p.poste}${p.cellule}`).sort().join();
-    const changee = avant !== apres;
-    if (changee) sim.changerEquipe(0, e);
-    if (e.tactique && !choix.tactiques[0]) sim.definirTactique(0, e.tactique);
+    // 1 contre 1 en ligne (15/11) : l'adversaire peut lui aussi changer (equipe1).
+    let changee = false;
+    for (const camp of [0, 1] as const) {
+      const e = camp === 0 ? choix.equipe0 : choix.equipe1;
+      if (!e) continue;
+      const avant = sim.joueurs.filter((j) => j.camp === camp).map((j) => `${j.joueur.id}@${j.placement.poste}${j.placement.cellule}`).sort().join();
+      const apres = e.composition.map((p) => `${p.joueurId}@${p.poste}${p.cellule}`).sort().join();
+      if (avant !== apres) {
+        sim.changerEquipe(camp, e);
+        changee = true;
+      }
+      if (e.tactique && !choix.tactiques[camp]) sim.definirTactique(camp, e.tactique);
+    }
     // L'adversaire engage la 2e mi-temps.
     sim.commencerPeriode();
     sim.balle?.coupDEnvoi(1, "2e mi-temps");

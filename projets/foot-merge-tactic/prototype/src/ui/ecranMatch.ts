@@ -13,7 +13,7 @@
 // prendra la place de l'arbitre local sans rien changer ici.
 
 import type { FournisseurGraines } from "../jeu/graines";
-import { type ArbitreMatch, DUREE_MI_TEMPS_S } from "../match/arbitre";
+import { type ArbitreMatch, DUREE_MI_TEMPS_S, VITESSE_LECTURE } from "../match/arbitre";
 import { type BilanMiTemps, type JoueurVu, LecteurFilm, type VueMatch } from "../match/film";
 import type { Donnees } from "../sim/donnees";
 import cartesBrut from "../data/cartes.json";
@@ -79,7 +79,7 @@ const ECLAT_FORT_MS = 1900;
 /** Durée des annonces, en secondes de jeu simulé (≈ 0,7 s et 1,6 s à l'écran en ×3,5). */
 const ANNONCE_S = 2.5;
 const ANNONCE_BUT_S = 5.5;
-const VITESSE_PAR_DEFAUT = 3.5;
+const VITESSE_PAR_DEFAUT = VITESSE_LECTURE;
 const COULEUR_EUX = "#C2413D";
 /** Fusion en match (14/11 après-midi, proposition « M2 » choisie par le concepteur
  *  sur la page des propositions visuelles) : niveau 1 = contour lumineux qui suit la

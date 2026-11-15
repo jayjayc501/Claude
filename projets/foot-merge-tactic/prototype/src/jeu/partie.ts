@@ -33,6 +33,8 @@ export interface Regles {
   gainParJournee: number;
   allerRetour: boolean;
   ordi: { reserveBanc: number; relancesMax: number; valeurFusion: number };
+  /** 1 contre 1 en ligne (15/11). */
+  enLigne: { dureeEquipesS: number; dureeMiTempsS: number; margeDebutS: number; margeRepriseS: number; graceS: number; sondageMs: number; qualiteAuto: QualiteAuto; attenteAmiH: number };
   /** Équipe automatique (14/11) : voir partie.json. */
   auto: {
     bancMin: number;

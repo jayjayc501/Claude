@@ -26,7 +26,7 @@ import { BUSTES_BLEUS } from "./equipeBleue";
 import { dessinerLignes, html, svg } from "./dom";
 import { dessinerButsEtDrapeaux, imageStade } from "./stade";
 import { CORPS_PICTOS, PICTOS } from "./pictos";
-import { activer, basculerMuet, estMuet, jouer } from "./son";
+import { activer, arreterAmbiance, basculerMuet, demarrerAmbiance, estMuet, frappe, intensiteAmbiance, jouer, occasion } from "./son";
 
 const ECHELLE = 5; // unités SVG par mètre
 // 14/11 : place pour l'herbe autour, les panneaux et les tribunes (6 avant) ;
@@ -231,7 +231,11 @@ export class EcranMatch {
   private annonceDepuis = -Infinity;
   private annonceDuree = 0;
   private dernierEvenement = -1;
+  /** Sons (15/11) : vitesse du ballon à l'image d'avant, « ooh » attendu (temps de jeu). */
+  private sonBallon: { x: number; y: number; v: number; ooh: number | null; score: number; n: number } | null = null;
   private boutonJouer!: HTMLButtonElement;
+  /** Instant (performance.now) avant lequel le jeu attend : bandeau des bonus (15/11). */
+  private attenteBonus = 0;
   private derniereMajBord = 0;
 
   constructor(
@@ -277,12 +281,14 @@ export class EcranMatch {
       this.coupDEnvoi();
       this.majCommandes();
     }
+    demarrerAmbiance();
     this.dernier = performance.now();
     requestAnimationFrame((t) => this.boucle(t));
   }
 
   fermer(): void {
     this.actif = false;
+    arreterAmbiance();
   }
 
   private nouveauMatch(): void {
@@ -691,7 +697,8 @@ export class EcranMatch {
     if (!this.actif) return;
     const ecoule = Math.min(0.1, (t - this.dernier) / 1000);
     this.dernier = t;
-    if (this.instant.demarre && !this.enPause && !this.arret) {
+    // 15/11 : le jeu attend la fin du bandeau des bonus (montré au milieu, avant l'engagement).
+    if (this.instant.demarre && !this.enPause && !this.arret && t >= this.attenteBonus) {
       this.reserve += ecoule * this.vitesse;
       const dt = this.reglages.pasDeTempsS;
       let n = 0;
@@ -704,6 +711,7 @@ export class EcranMatch {
           break;
         }
         this.lecteur.lire(k);
+        this.ecouterBallon(dt);
         this.reserve -= dt;
         n++;
         if (k === this.lecteur.derniere) {
@@ -714,6 +722,45 @@ export class EcranMatch {
     }
     this.dessiner();
     requestAnimationFrame((t2) => this.boucle(t2));
+  }
+
+  /** Sons qui suivent le ballon (15/11, « une ambiance qui varie suivant le ballon ») :
+   *  frappe quand le ballon part d'un coup, « ooh » si une frappe forte passe près du
+   *  but sans but, ambiance plus forte près des buts. Seuils en PROPOSITION. */
+  private ecouterBallon(dt: number): void {
+    const v = this.instant;
+    const x = v.ballon.x; // en mètres (terrain de 68 × 105)
+    const y = v.ballon.y;
+    const score = v.score[0] + v.score[1];
+    const s = this.sonBallon;
+    if (!s || !v.demarre) {
+      this.sonBallon = { x, y, v: 0, ooh: null, score, n: 0 };
+      return;
+    }
+    const vitesse = Math.hypot(x - s.x, y - s.y) / dt;
+    const versBut = Math.min(Math.hypot(x - 34, y), Math.hypot(x - 34, 105 - y));
+    if (vitesse < 45 && vitesse - s.v > 6 && vitesse > 8) {
+      frappe((vitesse - 8) / 22);
+      // Frappe forte vers un but proche : on guette l'occasion pendant 2 s de jeu.
+      const butVise = y < 52.5 ? 0 : 105;
+      const versLeBut = (y - s.y) * (butVise - y) > 0;
+      if (vitesse > 18 && versBut < 32 && versLeBut) s.ooh = v.temps + 2;
+    }
+    const e = v.balle?.evenement;
+    if (e && e.a !== this.dernierEvenement && (e.texte === "But !" || e.texte === "Arrêt")) s.ooh = null; // ils ont leur propre son
+    if (s.ooh !== null) {
+      // « Ooh » si le ballon frôle le but (ligne de but à moins de 14 m du centre) sans y entrer.
+      if (score !== s.score || v.temps > s.ooh) s.ooh = null;
+      else if ((y < 2 || y > 103) && Math.abs(x - 34) < 14) {
+        occasion();
+        s.ooh = null;
+      }
+    }
+    if (++s.n % 8 === 0) intensiteAmbiance(1 - (versBut - 12) / 38);
+    s.x = x;
+    s.y = y;
+    s.v = vitesse;
+    s.score = score;
   }
 
   private dessiner(): void {
@@ -959,12 +1006,19 @@ export class EcranMatch {
       for (const p of b.styles) this.pastilleBonus(l, "style", p);
       for (const p of b.pays) this.pastilleBonus(l, "pays", p);
     });
-    d.addEventListener("click", () => d.remove());
-    this.bandeau = d;
-    setTimeout(() => {
+    // 15/11, concepteur : le bandeau cachait le but. Il s'affiche au milieu du terrain
+    // avant l'engagement, le jeu attend qu'il parte (un toucher le fait partir plus tôt).
+    const duree = fort ? 3600 : 2800;
+    this.attenteBonus = performance.now() + duree + 350;
+    const partir = () => {
+      if (!d.isConnected || d.classList.contains("part")) return;
       d.classList.add("part");
-      setTimeout(() => d.remove(), 400);
-    }, fort ? 5200 : 4200);
+      this.attenteBonus = Math.min(this.attenteBonus, performance.now() + 350);
+      setTimeout(() => d.remove(), 350);
+    };
+    d.addEventListener("click", partir);
+    this.bandeau = d;
+    setTimeout(partir, duree);
   }
 
   /** Réglages de ton équipe (tactique et paliers de styles), pour dessiner les zones. */

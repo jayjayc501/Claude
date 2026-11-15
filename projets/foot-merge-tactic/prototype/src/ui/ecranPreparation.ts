@@ -405,7 +405,7 @@ export class EcranPreparation {
     const terrain = html("div", { class: "prepa-terrain" }, milieu);
     this.rendreTactique(terrain);
     this.rendrePlateau(terrain);
-    if (draft) return;
+    if (draft) return this.rendreAttenteDraft(c);
     this.rendreBanc(c);
     if (mt) return; // mi-temps : pas de mercato
     this.rendreMercato(c);
@@ -511,7 +511,8 @@ export class EcranPreparation {
   }
 
   private boutonNouvelle(parent: HTMLElement): void {
-    const b = html("button", { type: "button", class: "partie-nouvelle", "aria-label": "Nouvelle partie", title: "Nouvelle partie" }, parent, "↺");
+    // 15/11 : ⌂ ramène au premier écran (choix du mode : championnat ou 1 contre 1).
+    const b = html("button", { type: "button", class: "partie-nouvelle", "aria-label": "Accueil : changer de mode", title: "Accueil" }, parent, "⌂");
     b.addEventListener("click", () => this.partie!.nouvelle());
   }
 
@@ -768,6 +769,28 @@ export class EcranPreparation {
       o.selected = t.code === actuelle.code;
     }
     choix.addEventListener("change", () => this.afficherIssue(this.prepa.choisirTactique(choix.value)));
+  }
+
+  /** Pendant le draft, le banc et le mercato sont déjà là, vides (15/11, concepteur :
+   *  « il faudrait que la zone du mercato soit déjà blanche, mais déjà présente »),
+   *  pour que l'écran ne change pas de forme à la fin du draft. Rien n'y est actif. */
+  private rendreAttenteDraft(parent: HTMLElement): void {
+    const b = html("div", { class: "prepa-banc attente" }, parent);
+    const t = html("div", { class: "prepa-banc-titre" }, b);
+    html("span", { class: "prepa-gras" }, t, "Banc");
+    html("span", { class: "prepa-discret" }, t, `0/${this.prepa.d.bancMax}`);
+    const places = html("div", { class: "prepa-places" }, b);
+    for (let i = 0; i < this.prepa.d.bancMax; i++) {
+      const v = html("div", { class: "prepa-place" }, places);
+      html("div", { class: "prepa-vide" }, v);
+      html("span", { class: "prepa-discret" }, v, "vide");
+    }
+    const m = html("div", { class: "prepa-mercato attente" }, parent);
+    const tm = html("div", { class: "prepa-mercato-tete" }, m);
+    html("span", { class: "prepa-h petit" }, html("div", { class: "prepa-titre" }, tm), "Mercato");
+    html("div", { class: "prepa-discret prepa-aide" }, m, "S'ouvre à la fin du draft, pour remplir ton banc");
+    const cartes = html("div", { class: "prepa-cartes" }, m);
+    for (let i = 0; i < 6; i++) html("div", { class: "prepa-carte vide", "aria-hidden": "true" }, cartes);
   }
 
   private rendreBanc(parent: HTMLElement): void {

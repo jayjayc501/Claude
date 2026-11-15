@@ -15,6 +15,11 @@ const resultat = await Bun.build({
       // Images PNG et WebP incluses dans la page (le chargeur « dataurl » de Bun les rend vides).
       name: "images-en-data-url",
       setup(b) {
+        // Sons MP3 inclus dans la page (15/11).
+        b.onLoad({ filter: /\.mp3$/ }, ({ path }) => ({
+          contents: `export default ${JSON.stringify(`data:audio/mpeg;base64,${readFileSync(path).toString("base64")}`)};`,
+          loader: "js",
+        }));
         b.onLoad({ filter: /\.(png|webp)$/ }, ({ path }) => ({
           contents: `export default ${JSON.stringify(`data:image/${path.endsWith(".webp") ? "webp" : "png"};base64,${readFileSync(path).toString("base64")}`)};`,
           loader: "js",

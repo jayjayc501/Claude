@@ -281,10 +281,10 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-ligne-score { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
 .match-equipe { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .match-equipe.eux { justify-content: flex-end; }
-.match-avatar { width: 26px; height: 26px; flex: none; border-radius: 50%; color: #fff; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.match-avatar { width: 30px; height: 30px; flex: none; border-radius: 50%; color: #fff; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 .match-equipe.nous .match-avatar { background: #3563C0; }
 .match-equipe.eux .match-avatar { background: #C2413D; }
-.match-nom { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.match-nom { font-size: 18px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .match-centre { display: flex; flex-direction: column; align-items: center; line-height: 1.05; }
 .match-score { font-size: 28px; font-weight: 800; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
 .match-chrono { font-size: 11px; font-weight: 700; color: #4A5A50; background: #EEF1EC; border-radius: 999px; padding: 1px 8px; margin-top: 2px; font-variant-numeric: tabular-nums; }
@@ -298,7 +298,7 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-puce.actif { border-color: #3563C0; color: #3563C0; }
 .match-statut { margin: 0 4px; font-size: 12px; font-weight: 600; color: #4A5A50; min-height: 1.3em; }
 .match-terrain { position: relative; }
-.match-terrain > svg { width: 100%; display: block; touch-action: manipulation; user-select: none; max-height: calc(100dvh - 142px); } /* 15/11 : le terrain prend la hauteur qui reste */
+.match-terrain > svg { width: 100%; display: block; touch-action: manipulation; user-select: none; max-height: calc(100dvh - 146px); } /* 15/11 : le terrain prend la hauteur qui reste */
 .match-pelouse { fill: #4E9A5A; }
 .match-bande { fill: #58A564; }
 .match-lignes .pelouse { fill: transparent; }
@@ -402,15 +402,16 @@ svg.prepa-plateau { width: 100%; display: block; touch-action: manipulation; use
 .match-eclat.fort .match-eclat-halo { fill: #FFC400; opacity: 0.7; }
 .match-eclat-picto { fill: none; stroke: #fff; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; color: #fff; }
 /* Bandeau des bonus au coup d'envoi (14/11). */
-.match-bandeau { position: absolute; left: 8px; right: 8px; top: 10px; z-index: 4; background: rgba(255, 255, 255, 0.96); color: #1E2A22; border-radius: 14px; padding: 8px 10px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); animation: match-bandeau 0.45s cubic-bezier(0.2, 1.4, 0.4, 1); display: flex; flex-direction: column; gap: 5px; }
+/* 15/11 : au milieu du terrain, avant l'engagement (il cachait le but en haut). */
+.match-bandeau { position: absolute; left: 14px; right: 14px; top: 50%; transform: translateY(-50%); z-index: 4; background: rgba(255, 255, 255, 0.94); color: #1E2A22; border-radius: 14px; padding: 7px 9px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); animation: match-bandeau 0.45s cubic-bezier(0.2, 1.4, 0.4, 1); display: flex; flex-direction: column; gap: 5px; }
 .match-bandeau.fort { border: 2px solid #FFC400; box-shadow: 0 0 0 3px rgba(255, 196, 0, 0.35), 0 6px 18px rgba(0, 0, 0, 0.25); }
-.match-bandeau.part { opacity: 0; transform: translateY(-8px); transition: opacity 0.35s, transform 0.35s; }
+.match-bandeau.part { opacity: 0; transform: translateY(-50%) scale(0.92); transition: opacity 0.35s, transform 0.35s; }
 .match-bandeau-titre { font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #5A6470; }
 .match-bandeau-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
 .match-bandeau-equipe { font-weight: 800; font-size: 13px; min-width: 44px; }
 .match-bandeau-ligne.nous .match-bandeau-equipe { color: #3563C0; }
 .match-bandeau-ligne.eux .match-bandeau-equipe { color: #C2413D; }
-@keyframes match-bandeau { from { opacity: 0; transform: translateY(-14px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes match-bandeau { from { opacity: 0; transform: translateY(-50%) scale(0.85); } to { opacity: 1; transform: translateY(-50%); } }
 .match-palier.fort { background: linear-gradient(90deg, #8A5A00, #C98A00); box-shadow: 0 0 0 2px #FFD34D; }
 @media (prefers-reduced-motion: reduce) { .match-eclat-anim { animation: none; } }
 /* Flamme de fusion (14/11) : elle danse depuis sa base ; étincelles qui montent au niveau 3. */
@@ -634,3 +635,23 @@ svg.drapeau { display: inline-block; flex: none; border-radius: 2px; box-shadow:
 .match-plaque-fond { stroke: #fff; }
 .match-plaque-picto { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 @media (prefers-reduced-motion: reduce) { .match-flamme-a, .match-flamme-b, .match-flamme-c, .match-feu-lueur, .match-braise { animation: none; } }
+/* 15/11 : banc et mercato déjà présents pendant le draft, vides et inactifs ; cartes vides plus basses pour que l'écran tienne. */
+.prepa-mercato.attente .prepa-carte.vide { min-height: 0; height: 34px; }
+.prepa-mercato.attente .prepa-aide { margin-bottom: 2px; }
+
+/* Premier écran : choix du mode de jeu (15/11). */
+.accueil { max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; padding: 8px 4px; color: #16201A; }
+.accueil-tete { text-align: center; padding: 18px 0 6px; }
+.accueil-ballon { font-size: 44px; line-height: 1; }
+.accueil-titre { margin: 8px 0 2px; font-size: 28px; font-weight: 900; letter-spacing: -0.01em; }
+.accueil-sous { margin: 0; font-size: 14px; font-weight: 600; color: #4A5A50; }
+.accueil-carte { background: #fff; border-radius: 18px; padding: 14px 14px 16px; box-shadow: 0 2px 0 #DCE2DE; display: flex; flex-direction: column; gap: 8px; }
+.accueil-carte-titre { font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+.accueil-carte-texte { margin: 0; font-size: 14px; color: #3A4A40; line-height: 1.4; }
+.accueil-badge { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #7A4B00; background: #FFE9A8; border-radius: 999px; padding: 2px 8px; }
+.accueil-ligne { display: flex; gap: 8px; }
+.accueil-ligne .accueil-bouton { flex: 1; }
+.accueil-bouton { height: 48px; border: 0; border-radius: 14px; font: inherit; font-size: 18px; font-weight: 900; color: #fff; background: linear-gradient(180deg, #4F8BEB, #2459C6); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2); cursor: pointer; }
+.accueil-bouton.secondaire { background: #fff; color: #2459C6; box-shadow: inset 0 0 0 2px #2459C6; }
+.accueil-bouton:disabled { background: #DCE2DE; color: #6B7A70; box-shadow: none; cursor: default; }
+.accueil-note { margin: 0; font-size: 12px; color: #6B7A70; }

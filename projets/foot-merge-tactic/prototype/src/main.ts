@@ -16,6 +16,7 @@ import { notesAffichees } from "./sim/notes";
 import type { Equipe } from "./sim/types";
 import { BUSTES } from "./ui/bustes";
 import { html } from "./ui/dom";
+import { EcranAccueil } from "./ui/ecranAccueil";
 import { EcranMatch } from "./ui/ecranMatch";
 import { type ControlePartie, EcranPreparation } from "./ui/ecranPreparation";
 import { ouvrirFiche } from "./ui/fiche";
@@ -194,7 +195,7 @@ function demarrer(): void {
       montrer("match", true);
       match.lancerSecondeMiTemps();
     },
-    nouvelle: () => nouvellePartie(),
+    nouvelle: () => montrerAccueil(), // ⌂ : retour au choix du mode (15/11)
     // Équipe automatique (14/11) : nouvelle partie, ton équipe est faite toute seule
     // (titulaires et banc, fusions pour la haute qualité), puis les ordinateurs draftent.
     autoPossible: () => championnat.journee === 0 && !miTemps,
@@ -276,7 +277,14 @@ function demarrer(): void {
     window.scrollTo({ top: 0 });
   }
 
-  nouvellePartie();
+  // Premier écran : choix du mode de jeu (15/11).
+  const accueil = new EcranAccueil({ championnat: () => nouvellePartie() });
+  function montrerAccueil(): void {
+    match.fermer();
+    contenu.replaceChildren(accueil.racine);
+    window.scrollTo({ top: 0 });
+  }
+  montrerAccueil();
 }
 
 demarrer();

@@ -860,3 +860,20 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 **Tests** : 177 verts. Moteur inchangé.
 
 **À juger par le concepteur** : sur son téléphone, plus de défilement ? taille du plateau quand il rétrécit.
+
+## 15/11/2026 (fin de matinée) — Draft sans saut d'écran, bandeau des bonus au milieu, vrais sons, premier écran
+
+**Demandes du concepteur** : « c'est bizarre qu'une fois qu'on a fait le draft, ça s'arrange ; il faudrait que la zone du mercato soit déjà blanche, mais déjà présente » ; pendant le match, noms des équipes plus gros (réponse à la question : « les noms des équipes ») ; « l'histoire des bonus, ça cache le but […] si c'est avant le match, c'est au milieu » ; « les sons sont quand même pas terribles, et une ambiance qui varie suivant le ballon, ça peut être pas mal » ; « tu m'as pas fait le lien […] il fallait qu'on choisisse si on faisait un match de poule ou un lien pour faire un match 1 contre 1 ; sur le premier écran, propose quelque chose ».
+
+**Décisions validées dans la séance** : site du 1 contre 1 sur le dépôt `FootMergTactic` (attendre l'accès) ; **nouveau projet Supabase** pour le serveur ; noms des équipes plus gros en match.
+
+**Ce qui a été fait** (rendu et chiffres en PROPOSITION)
+- `ecranPreparation.ts` : pendant le draft, banc et mercato déjà affichés, vides et inactifs (`rendreAttenteDraft`, cartes vides basses pour tenir en 700 px).
+- `ecranMatch.ts` : bandeau « Bonus actifs » **au milieu du terrain, avant l'engagement** ; le jeu attend qu'il parte (2,8 s, 3,6 s si palier fort ; un toucher le fait partir) ; noms et pastilles des équipes plus gros (18 px).
+- **Sons** (`src/ui/son.ts`, sons dans `src/sons/`) : vrais sons générés avec ElevenLabs (flux « Foot Merge Tactic · sons du match », environ 900 crédits), téléchargés par le nouveau workflow `foot-merge-sons.yml` (liste `sons/a-telecharger.txt`, originaux dans `sons/brut/`), découpés et compressés en MP3 mono 64 kb/s (245 Ko en tout) : **ambiance de stade en boucle**, plus forte quand le ballon approche d'un but ; **frappe** quand le ballon part d'un coup (plus forte pour un tir) ; **« ooh »** sur un arrêt ou une frappe forte qui frôle le but ; **clameur** sur un but ; **sifflet** court (faute, hors-jeu, engagement) ou long (mi-temps, fin). Plus de sifflet sur les touches, six mètres et corners. Mesure (40 s d'écran, Chrome sans fenêtre) : 62 frappes, 3 « ooh », 3 sifflets, 2 clameurs.
+- **Premier écran** (`src/ui/ecranAccueil.ts`) : choix du mode, **Championnat** (jouable) ou **1 contre 1 avec un ami** (marqué « Bientôt », boutons « Créer une partie » et « Rejoindre » grisés). Le bouton ⌂ de la préparation (à la place de ↺) ramène à ce choix.
+- **Serveur du 1 contre 1, préparation** : projet Supabase `foot-merge-tactic` créé (id `jcbqeoyygozmtixlorvf`, Paris, offre gratuite). `scripts/mesurer-arbitre.ts` : une mi-temps se calcule en 250 à 450 ms (bun), le film d'une mi-temps pèse 5,2 Mo en JSON, 2,2 Mo compressé. Limites des fonctions Supabase : 2 s de calcul par requête d'après leur documentation (une autre page dit 200 ms) ; le film devra être allégé avant de passer par le réseau.
+
+**Tests** : 177 verts ; moteur inchangé. Écrans en 390 × 700 : draft, mercato et match tiennent sans défiler.
+
+**À juger par le concepteur** : les sons (volume de l'ambiance, fréquence des frappes, « ooh »), le bandeau au milieu, le premier écran.

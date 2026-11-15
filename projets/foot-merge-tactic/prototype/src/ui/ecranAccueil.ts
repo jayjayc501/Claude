@@ -3,13 +3,16 @@
 // premier écran, propose quelque chose ») : choix du mode de jeu. On y revient par
 // le bouton ⌂ de la préparation, pour changer de mode.
 //
-// Le 1 contre 1 en ligne est en construction : le match sera calculé sur un serveur
-// (Supabase) et le jeu publié sur un site public (dépôt FootMergTactic).
+// 1 contre 1 en ligne (15/11) : « Créer une partie » donne un lien à envoyer ;
+// « Rejoindre » accepte le lien ou le code reçu (l'ami peut aussi ouvrir le lien).
 
 import { html } from "./dom";
 
 export interface ActionsAccueil {
   championnat(): void;
+  creer(): void;
+  /** Lien ou code de la partie reçue. */
+  rejoindre(lienOuCode: string): void;
 }
 
 export class EcranAccueil {
@@ -30,12 +33,23 @@ export class EcranAccueil {
     b1.addEventListener("click", () => actions.championnat());
 
     const duel = html("div", { class: "accueil-carte duel" }, r);
-    const t = html("div", { class: "accueil-carte-titre" }, duel, "🤝 1 contre 1 avec un ami");
-    html("span", { class: "accueil-badge" }, t, "Bientôt");
+    html("div", { class: "accueil-carte-titre" }, duel, "🤝 1 contre 1 avec un ami");
     html("p", { class: "accueil-carte-texte" }, duel, "Crée une partie et envoie le lien sur WhatsApp. Chacun fait son équipe en 10 minutes, puis vous regardez le même match en même temps.");
     const l = html("div", { class: "accueil-ligne" }, duel);
-    html("button", { type: "button", class: "accueil-bouton", disabled: true }, l, "Créer une partie");
-    html("button", { type: "button", class: "accueil-bouton secondaire", disabled: true }, l, "Rejoindre");
-    html("p", { class: "accueil-note" }, duel, "En construction : le match sera calculé sur un serveur et le jeu aura sa propre adresse.");
+    const creer = html("button", { type: "button", class: "accueil-bouton" }, l, "Créer une partie");
+    creer.addEventListener("click", () => actions.creer());
+    const rej = html("button", { type: "button", class: "accueil-bouton secondaire" }, l, "Rejoindre");
+    // Rejoindre : coller le lien ou taper le code reçu.
+    const zone = html("form", { class: "accueil-rejoindre", hidden: true }, duel);
+    const saisie = html("input", { type: "text", class: "accueil-champ", placeholder: "Lien ou code de la partie", autocomplete: "off", autocapitalize: "off", spellcheck: "false", "aria-label": "Lien ou code de la partie" }, zone);
+    html("button", { type: "submit", class: "accueil-bouton petit" }, zone, "OK");
+    rej.addEventListener("click", () => {
+      zone.hidden = false;
+      saisie.focus();
+    });
+    zone.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (saisie.value.trim()) actions.rejoindre(saisie.value.trim());
+    });
   }
 }

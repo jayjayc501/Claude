@@ -655,3 +655,18 @@ svg.drapeau { display: inline-block; flex: none; border-radius: 2px; box-shadow:
 .accueil-bouton.secondaire { background: #fff; color: #2459C6; box-shadow: inset 0 0 0 2px #2459C6; }
 .accueil-bouton:disabled { background: #DCE2DE; color: #6B7A70; box-shadow: none; cursor: default; }
 .accueil-note { margin: 0; font-size: 12px; color: #6B7A70; }
+
+/* 1 contre 1 en ligne (15/11) : rejoindre, écran d'attente et lien à envoyer. */
+.accueil-rejoindre { display: flex; gap: 8px; }
+.accueil-rejoindre[hidden] { display: none; }
+.accueil-champ { flex: 1; min-width: 0; height: 44px; border: 2px solid #C9D3CC; border-radius: 12px; padding: 0 12px; font: inherit; font-size: 15px; color: #16201A; background: #fff; }
+.accueil-bouton.petit { height: 44px; padding: 0 16px; font-size: 16px; }
+.salon-titre { font-size: 24px; }
+.salon-lien { background: #F1F5F2; border: 1px dashed #9FB1A5; border-radius: 12px; padding: 10px 12px; font-size: 14px; font-weight: 700; color: #1E3A2A; word-break: break-all; user-select: all; }
+.accueil-bouton.salon-whatsapp { display: flex; align-items: center; justify-content: center; text-decoration: none; background: linear-gradient(180deg, #3DDC6F, #1DA851); }
+.salon-attente { margin: 4px 0 0; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #2C3D33; }
+.salon-tourne { display: inline-block; animation: salon-tourne 1.6s linear infinite; }
+@keyframes salon-tourne { to { transform: rotate(360deg); } }
+.salon-erreur { color: #8E2A27; font-weight: 700; }
+.prepa-chrono.un-contre-un { align-self: center; margin: 2px auto 0; width: max-content; }
+.match-reprise { font-weight: 700; }

@@ -877,3 +877,29 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 **Tests** : 177 verts ; moteur inchangé. Écrans en 390 × 700 : draft, mercato et match tiennent sans défiler.
 
 **À juger par le concepteur** : les sons (volume de l'ambiance, fréquence des frappes, « ooh »), le bandeau au milieu, le premier écran.
+
+## 15/11/2026 (midi) — 1 contre 1 en ligne, de bout en bout
+
+**Demandes du concepteur** : « on fait le 1 contre 1 en ligne, un lot qui fonctionne de bout en bout. Depuis le premier écran, « Créer une partie » donne un lien à envoyer sur WhatsApp. Mon ami l'ouvre dans son navigateur, sans compte. Chacun a 10 minutes pour faire son équipe. Le match est calculé sur le serveur Supabase et on le regarde tous les deux en même temps, mi-temps comprise. Site public : dépôt FootMergTactic. Ne t'arrête que quand on peut jouer une partie entière à deux. »
+
+**Décisions validées dans la séance** (questions posées avant de partir) : **tirage du draft différent pour chacun** ; **mi-temps en ligne : 1 minute** pour les changements (reprise plus tôt si les deux sont prêts) ; **branche et pull request** pour ce lot (pas de commit direct sur `main`) ; site **seulement dans `FootMergTactic`**, rien dans le dépôt `Claude` (« tu vas pas mélanger de projet, fais-moi un truc propre, bien séparé »).
+
+**Ce qui a été fait** (branche `en-ligne-1c1` ; chiffres en PROPOSITION dans `partie.json` → `enLigne`)
+- **Serveur** (`src/enligne/serveur.ts`) : partie par lien (code de 8 lettres), jeton secret par joueur, états `attente → equipes → calcul1 → mt1 → calcul2 → mt2 → fini`. 10 min pour l'équipe ; une équipe manquante à la fin du chrono est faite automatiquement (qualité moyenne). Équipes **refaites et vérifiées par le serveur** à partir du catalogue (`src/enligne/equipes.ts` : 11 titulaires à leur poste, cases, banc, fusions, budget 50 ; à la mi-temps, même effectif). Le serveur calcule chaque mi-temps avec l'arbitre (`ArbitreLocal`, sans affichage) ; pour la 2e, il rejoue la 1re (même graine, même match au bit près) puis applique les changements **des deux équipes** (`ChoixMiTemps.equipe1`, nouveau ; le championnat ne change pas, empreintes identiques). Un seul calcul même si les deux téléphones demandent en même temps (verrou par version). Coup d'envoi 8 s après la fin du calcul (`margeDebutS`), reprise 6 s après (`margeRepriseS`).
+- **Film réseau** (`src/enligne/filmReseau.ts`) : binaire en float32 + gzip, **0,9 Mo par mi-temps** (5,2 Mo en JSON) ; écart au plus 0,01 mm sur une position (un pixel du terrain ≈ 17 cm), le match ne change pas. **Vue de l'invité** : terrain retourné d'un demi-tour, camps échangés : chacun se voit en bleu, en bas, comme l'hôte.
+- **Supabase** (projet `foot-merge-tactic`) : fonction `partie` (`serveur/fonction/index.ts`, `verify_jwt` désactivé, la fonction vérifie les jetons) qui charge le serveur construit (`serveur/moteur.js`, 127 Ko, `scripts/construire-serveur.ts`) depuis GitHub **à un commit précis, empreinte SHA-256 vérifiée** ; table `parties` (RLS, aucune politique : seule la fonction y touche) ; films dans le compartiment privé `films`. Procédure dans `serveur/README.md`. Table vide du premier essai renommée `parties_essai_15_11` ; fonction `essai` retirée (410).
+- **Téléphone** : premier écran avec « Créer une partie » et « Rejoindre » (lien ou code) ; écran d'attente avec le lien (**Envoyer sur WhatsApp**, Copier, Partager) ; ouvrir le lien (`…#p=code`) fait rejoindre directement, rouvrir la page garde sa place ; préparation habituelle (draft, mercato, équipe automatique) avec le **chrono** sous le gros bouton **« Prêt ▶ »** ; à 2,5 s de la fin, le draft est complété comme le ferait l'ordinateur et l'équipe envoyée ; écran du match inchangé, mais **lu à l'heure du serveur** (`HabillageMatch.enLigne` : chaque téléphone cale son horloge sur le serveur et montre l'image de cet instant ; un téléphone en retard rattrape) ; mi-temps : panneau avec « Prêt ▶ » et le temps restant, changements sur l'écran de préparation, tactique de l'adversaire affichée telle que jouée. Draft commun aux deux modes (`src/ui/draft.ts`), contrôleur du 1 contre 1 dans `src/ui/unContreUn.ts`.
+
+**Mesures**
+| | |
+|---|---|
+| Calcul de la 1re mi-temps sur Supabase (chargement du moteur compris) + dépôt du film | 0,96 s |
+| 2e mi-temps (1re rejouée + 2e) + dépôt | 0,95 s |
+| Film d'une mi-temps | 904 Ko (JSON : 5,2 Mo) |
+| Partie entière à deux navigateurs (serveur local) | chrono et score identiques sur les deux écrans (vus chacun de son côté) à 12 s, à la mi-temps, en 2e mi-temps et à la fin (3–0 / 0–3) |
+
+**Tests** : 187 verts (nouveaux : `tests/enligne.test.ts`, 9 tests : film réseau, vue de l'invité, équipes refusées, partie entière sur le serveur avec horloge simulée, équipe automatique à la fin du chrono, mi-temps sans réponse, un seul calcul pour deux demandes ; `tests/serveurPaquet.test.ts` : le fichier construit répond comme le code source). Parcours à deux navigateurs : `scripts/capture/un-contre-un.py`.
+
+**Site public (15/11, 17 h 45)** : le dépôt `FootMergTactic` n'existait pas encore ; le concepteur l'a créé (public, avec README), l'accès « All repositories » de l'application Claude était déjà en place, puis il a activé GitHub Pages (main, racine). Jeu publié (version 64afc32 de la branche) : **https://jayjayc501.github.io/FootMergTactic/** (publication GitHub terminée avec succès). Le chemin navigateur → Supabase n'a pu être vérifié que depuis la base (l'environnement de Claude ne joint pas Supabase) : la vraie première partie sur deux téléphones reste à faire.
+
+**À juger par le concepteur** : le déroulé (lien, attente, 10 min, « Prêt », coup d'envoi, mi-temps d'1 minute, fin) ; les marges avant le coup d'envoi (8 s) et la reprise (6 s) ; le fait que chacun se voie en bleu, en bas.

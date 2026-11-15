@@ -75,6 +75,13 @@ export interface ControlePartie {
   auto?(qualite: "haute" | "moyenne"): void;
   /** Les boutons d'équipe automatique sont proposés (début de partie, avant le premier match). */
   autoPossible?(): boolean;
+  /** 1 contre 1 (15/11) : temps restant (« 7:42 »), affiché en haut et mis à jour par majChrono(). */
+  chrono?(): string | null;
+  /** 1 contre 1 : titre et sous-titre de l'en-tête après le draft (à la place de la journée de championnat). */
+  titre?(): { titre: string; sous: string };
+  /** 1 contre 1 : texte du gros bouton (« Prêt ▶ ») et s'il est encore actif (équipe pas encore envoyée). */
+  libelleJouer?(miTemps: boolean): string;
+  jouerActif?(): boolean;
 }
 
 // Gardien : une case en double losange (deux hexagones fusionnés), sous le DC central.
@@ -448,7 +455,11 @@ export class EcranPreparation {
     const ch = this.partie!.championnat();
     const tete = html("div", { class: "draft-tete" }, parent);
     const t = html("div", { class: "prepa-titre" }, tete);
-    if (ch.fini) {
+    const titre = this.partie!.titre?.();
+    if (titre) {
+      html("span", { class: "prepa-h mt-titre" }, t, titre.titre);
+      html("span", { class: "prepa-sous champ-sous" }, t, titre.sous);
+    } else if (ch.fini) {
       const premier = ch.classement[0];
       html("span", { class: "prepa-h" }, t, "Championnat terminé");
       html("span", { class: "prepa-sous" }, t, premier ? (premier.toi ? "Tu es champion ! 🏆" : `Champion : ${premier.nom}`) : "");
@@ -521,11 +532,27 @@ export class EcranPreparation {
    *  Grisé tant que les 11 titulaires ne sont pas en place ; « 2e mi-temps » à la mi-temps.
    *  (L'encart « Les 3 ordinateurs draftent aussi » est retiré le même jour : « on imagine bien ».) */
   private rendreGrosBouton(parent: HTMLElement, miTemps: boolean): void {
-    if (this.partie!.championnat().fini) return;
-    const pret = this.prepa.pret();
-    const texte = miTemps ? "2e mi-temps ▶" : "Jouer le match ▶";
+    const p = this.partie!;
+    if (p.championnat().fini) return;
+    const pret = this.prepa.pret() && (p.jouerActif?.() ?? true);
+    const texte = p.libelleJouer?.(miTemps) ?? (miTemps ? "2e mi-temps ▶" : "Jouer le match ▶");
     const b = html("button", { type: "button", class: "partie-jouer-gros", disabled: !pret, title: pret ? texte : "Il faut 11 titulaires" }, parent, texte);
-    b.addEventListener("click", () => this.partie!.jouer());
+    b.addEventListener("click", () => p.jouer());
+    // 1 contre 1 (15/11) : le temps qui reste, juste sous le bouton.
+    const ch = p.chrono?.();
+    if (ch) {
+      const z = html("div", { class: "prepa-chrono un-contre-un", "aria-live": "off" }, parent);
+      z.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M9 2h6"></path></svg>';
+      html("span", { class: "prepa-chrono-texte" }, z, ch);
+    }
+  }
+
+  /** 1 contre 1 (15/11) : met à jour le temps restant sans redessiner l'écran. */
+  majChrono(): void {
+    const t = this.contenu.querySelector(".prepa-chrono-texte");
+    const ch = this.partie?.chrono?.();
+    if (t && ch) t.textContent = ch;
   }
 
   private rendreEntete(parent: HTMLElement): void {

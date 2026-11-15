@@ -12,20 +12,17 @@ import { ArbitreLocal } from "./match/arbitreLocal";
 import { CATALOGUE, Partie, REGLES } from "./jeu/partie";
 import { chargerDonnees, chargerEquipes, chargerReglages } from "./sim/chargement";
 import { chargerInfluences } from "./sim/influences";
-import { notesAffichees } from "./sim/notes";
 import type { Equipe } from "./sim/types";
-import { BUSTES } from "./ui/bustes";
 import { html } from "./ui/dom";
 import { EcranAccueil } from "./ui/ecranAccueil";
 import { EcranMatch } from "./ui/ecranMatch";
+import { UnContreUn, idDepuis } from "./ui/unContreUn";
 import { type ControlePartie, EcranPreparation } from "./ui/ecranPreparation";
-import { ouvrirFiche } from "./ui/fiche";
 import { inscrireImages } from "./ui/imagesCatalogue";
-import { ouvrirOffre } from "./ui/offreDraft";
-import { type DonneesPrepa, type Fiche, Preparation, donneesPrepa, libellePoste } from "./ui/preparation";
+import { ouvrirCaseDraft } from "./ui/draft";
+import { type DonneesPrepa, type Fiche, Preparation, donneesPrepa } from "./ui/preparation";
 
 const CLE_TACTIQUE = "foot-merge-tactic.tactique.v1";
-const NOMS_POSTE: Record<string, string> = { G: "gardien", DC: "défenseur central", DG: "latéral gauche", DD: "latéral droit", MC: "milieu", AG: "ailier gauche", AD: "ailier droit", AC: "buteur" };
 
 function demarrer(): void {
   const reglages = chargerReglages();
@@ -109,12 +106,6 @@ function demarrer(): void {
     prepa.etat = { ...prepa.etat, effectif: c.effectif.map((m) => ({ ...m })), composition: c.composition.map((p) => ({ ...p })), budget: c.budget };
   }
 
-  function voirFiche(id: string): void {
-    const k = partie.carte(id);
-    const p = CATALOGUE.pays[k.pays]!;
-    ouvrirFiche({ id, nom: k.nom, pays: { code: k.pays, nom: p.nom, couleur: p.couleur }, poste: k.poste, style: k.style ? { code: k.style, nom: prepa.d.styles[k.style] ?? k.style } : null, notes: k.notes, fusions: 0 });
-  }
-
   function finDraft(): void {
     partie.finirDraftOrdis(prepa.d.bancMax, prepa.d.fusionsMax);
     prepa.etat = { ...prepa.etat, mercato: partie.tirerMercato() };
@@ -124,36 +115,17 @@ function demarrer(): void {
     enDraft: () => !partie.draftFini(0),
     casePermise: (poste, cellule) => partie.casePermise(0, poste, cellule),
     aGarder: () => partie.aGarder(0),
-    ouvrirCase: (poste, cellule) => {
-      const ids = offres.get(poste) ?? partie.offre(0, poste);
-      offres.set(poste, ids);
-      const max = partie.camps[0]!.budget - partie.aGarder(0);
-      ouvrirOffre({
-        titre: `Choisis ton ${NOMS_POSTE[poste] ?? libellePoste(poste)}`,
-        sousTitre: `Budget : ${partie.camps[0]!.budget} pièces · tu peux dépenser jusqu'à ${max} ici`,
-        cartes: ids.map((id) => {
-          const k = partie.carte(id);
-          const p = CATALOGUE.pays[k.pays]!;
-          return {
-            id,
-            nom: k.nom,
-            pays: { code: k.pays, nom: p.nom, couleur: p.couleur },
-            poste: k.poste,
-            style: k.style ? { code: k.style, nom: prepa.d.styles[k.style] ?? k.style } : null,
-            prix: k.prix,
-            notes: notesAffichees({ id, nom: k.nom, postes: [k.poste], notes: k.notes }),
-            image: BUSTES[id] ?? "",
-            abordable: k.prix <= max,
-            copies: partie.reserve.reste(id),
-          };
-        }),
-        voirFiche,
-        choisir: (id) => {
-          const r = partie.choisir(0, poste, cellule, id);
-          if (!r.ok) return preparation.signaler(r.erreur, true);
-          offres = new Map();
+    ouvrirCase: (poste, cellule) =>
+      ouvrirCaseDraft({
+        partie,
+        prepa,
+        preparation,
+        offres,
+        poste,
+        cellule,
+        choisi: (texte) => {
           const pris = partie.ordisChoisissent();
-          let message = r.message + (pris.length ? ` Les ordinateurs prennent ${pris.map((x) => partie.carte(x.id).nom).join(", ")}.` : "");
+          let message = texte + (pris.length ? ` Les ordinateurs prennent ${pris.map((x) => partie.carte(x.id).nom).join(", ")}.` : "");
           if (partie.draftFini(0)) {
             finDraft();
             message = "Draft terminé ! Complète ton banc au mercato avec ce qui te reste.";
@@ -162,8 +134,7 @@ function demarrer(): void {
           preparation.rendre();
           preparation.signaler(message);
         },
-      });
-    },
+      }),
     ordi: () => {
       const ordis = partie.camps.slice(1);
       return {
@@ -277,14 +248,28 @@ function demarrer(): void {
     window.scrollTo({ top: 0 });
   }
 
+  // 1 contre 1 en ligne (15/11) : partie par un lien, match calculé sur le serveur.
+  const unContreUn = new UnContreUn({ donnees, reglages, contenu, planOrdi, deck, fiches, couleurs, accueil: () => montrerAccueil() });
+
   // Premier écran : choix du mode de jeu (15/11).
-  const accueil = new EcranAccueil({ championnat: () => nouvellePartie() });
+  const accueil = new EcranAccueil({
+    championnat: () => nouvellePartie(),
+    creer: () => void unContreUn.creer(),
+    rejoindre: (texte) => {
+      const id = idDepuis(texte);
+      if (id) void unContreUn.rejoindre(id);
+    },
+  });
   function montrerAccueil(): void {
+    unContreUn.quitter();
     match.fermer();
     contenu.replaceChildren(accueil.racine);
     window.scrollTo({ top: 0 });
   }
-  montrerAccueil();
+  // Lien reçu (…#p=code) : on rejoint directement la partie.
+  const recu = idDepuis(location.hash);
+  if (recu) void unContreUn.rejoindre(recu);
+  else montrerAccueil();
 }
 
 demarrer();

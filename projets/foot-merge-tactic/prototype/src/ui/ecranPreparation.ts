@@ -126,6 +126,7 @@ export class EcranPreparation {
     this.racine = html("section", { class: "prepa" });
     this.contenu = html("div", { class: "prepa-contenu" }, this.racine);
     this.toast = html("div", { class: "prepa-toast", role: "status", "aria-live": "polite" }, this.racine);
+    window.addEventListener("resize", () => this.ajusterHauteur());
     this.rendre();
   }
 
@@ -391,6 +392,7 @@ export class EcranPreparation {
   rendre(): void {
     const c = this.contenu;
     c.replaceChildren();
+    requestAnimationFrame(() => this.ajusterHauteur());
     const draft = this.partie?.enDraft() ?? false;
     const mt = this.partie?.miTemps() ?? null;
     if (this.partie) this.rendreGrosBouton(c, mt !== null);
@@ -407,7 +409,21 @@ export class EcranPreparation {
     this.rendreBanc(c);
     if (mt) return; // mi-temps : pas de mercato
     this.rendreMercato(c);
-    if (this.partie) this.rendreJouer(c);
+    // (15/11 : plus de ligne « Les ordinateurs ont fait leur mercato ».)
+  }
+
+  /** L'écran doit tenir sur la hauteur du téléphone sans défiler (13/11, puis
+   *  15/11 : « les écrans sont encore trop hauts ») : s'il dépasse, le plateau
+   *  rétrécit d'autant (jusqu'à 240 px de haut au plus petit). */
+  ajusterHauteur(): void {
+    if (!this.racine.isConnected) return;
+    const plateau = this.contenu.querySelector<SVGSVGElement>("svg.prepa-plateau");
+    if (!plateau) return;
+    plateau.style.maxHeight = "";
+    const exces = document.documentElement.scrollHeight - window.innerHeight;
+    if (exces <= 0) return;
+    const h = plateau.getBoundingClientRect().height;
+    plateau.style.maxHeight = `${Math.max(240, Math.floor(h - exces))}px`;
   }
 
   /** Draft : titre, budget, progression ; touche une case pour recruter. */
@@ -509,12 +525,6 @@ export class EcranPreparation {
     const texte = miTemps ? "2e mi-temps ▶" : "Jouer le match ▶";
     const b = html("button", { type: "button", class: "partie-jouer-gros", disabled: !pret, title: pret ? texte : "Il faut 11 titulaires" }, parent, texte);
     b.addEventListener("click", () => this.partie!.jouer());
-  }
-
-  /** Bouton pour lancer le match une fois les 11 titulaires en place. */
-  private rendreJouer(parent: HTMLElement): void {
-    const o = this.partie!.ordi();
-    html("p", { class: "prepa-discret" }, parent, `Les ordinateurs ont fait leur mercato : ${o.banc} remplaçant${o.banc > 1 ? "s" : ""} en tout.`);
   }
 
   private rendreEntete(parent: HTMLElement): void {

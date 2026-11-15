@@ -381,7 +381,8 @@ export class EcranMatch {
       bSon.textContent = basculerMuet() ? "🔇" : "🔊";
     });
 
-    this.statut = html("p", { class: "match-statut", role: "status" }, r);
+    // 15/11 : plus de phrase qui explique le jeu (« ça sert à rien ») ; élément hors de la page.
+    this.statut = html("p", { class: "match-statut", role: "status" });
 
     // Terrain.
     this.terrain = html("div", { class: "match-terrain" }, r);

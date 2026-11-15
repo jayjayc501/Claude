@@ -838,3 +838,25 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 **Tests** : 177 verts (empreintes identiques).
 
 **À juger par le concepteur** : le reste des écrans (mi-temps, fin de match, journée suivante) ; la tactique de l'adversaire reste modifiable à la mi-temps (outil de test ?) ; ligne « Les ordinateurs ont fait leur mercato » sous le mercato.
+
+## 15/11/2026 (matin) — Écrans à la hauteur du téléphone
+
+**Demandes du concepteur** : « les écrans sont encore trop hauts » ; « pendant le match, enlève le texte qui explique ce qui se passe, ça sert à rien » ; la ligne « Les ordinateurs ont fait leur mercato » est retirée avec (réponse à la question de la veille).
+
+**Ce qui a été fait** (rendu en PROPOSITION)
+- `src/ui/ecranMatch.ts` : plus de phrase d'état au-dessus du terrain (« Tu as le ballon · ton équipe monte »).
+- `src/ui/ecranPreparation.ts` : plus de ligne « Les ordinateurs ont fait leur mercato » ; `ajusterHauteur()` : si l'écran dépasse la hauteur de la fenêtre, le plateau rétrécit d'autant (240 px au plus petit), après chaque rendu et à chaque redimensionnement.
+- `src/style.css` : marges de la page 6 px (bas : 40 → 6) ; gros bouton 42 px ; tableau de score et cadre du match plus serrés ; le terrain du match prend la hauteur qui reste (`max-height: calc(100dvh - 142px)`) ; compteurs de pays et de styles plus serrés ; classement collé à l'en-tête.
+
+**Mesures** (hauteur de la page, fenêtre de 390 px de large)
+
+| Écran | Avant (fenêtre 750) | Fenêtre 750 | Fenêtre 700 | Fenêtre 650 |
+|---|---|---|---|---|
+| Draft | 838 | 750 | 700 | 650 |
+| Banc et mercato (journée 1) | 838 | 750 | 700 | 677 |
+| Match, mi-temps, fin | 802 à 820 | 750 | 700 | 650 |
+| Journée suivante (classement) | 866 | — | 700 environ | — |
+
+**Tests** : 177 verts. Moteur inchangé.
+
+**À juger par le concepteur** : sur son téléphone, plus de défilement ? taille du plateau quand il rétrécit.

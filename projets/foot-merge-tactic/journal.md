@@ -903,3 +903,5 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 **Site public (15/11, 17 h 45)** : le dépôt `FootMergTactic` n'existait pas encore ; le concepteur l'a créé (public, avec README), l'accès « All repositories » de l'application Claude était déjà en place, puis il a activé GitHub Pages (main, racine). Jeu publié (version 64afc32 de la branche) : **https://jayjayc501.github.io/FootMergTactic/** (publication GitHub terminée avec succès). Le chemin navigateur → Supabase n'a pu être vérifié que depuis la base (l'environnement de Claude ne joint pas Supabase) : la vraie première partie sur deux téléphones reste à faire.
 
 **À juger par le concepteur** : le déroulé (lien, attente, 10 min, « Prêt », coup d'envoi, mi-temps d'1 minute, fin) ; les marges avant le coup d'envoi (8 s) et la reprise (6 s) ; le fait que chacun se voie en bleu, en bas.
+
+**Fin de séance (15/11, 17 h 51)** : premier essai du concepteur sur le site public (« ça a l'air bien fonctionné ») ; pull request n° 13 fusionnée sur `main` à sa demande ; page claude.ai du prototype republiée.

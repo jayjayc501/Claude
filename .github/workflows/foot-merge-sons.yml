@@ -1,0 +1,39 @@
+# Foot Merge Tactic : télécharge les sons générés avec ElevenLabs (l'environnement de
+# Claude ne peut pas joindre leurs serveurs). Liste « nom URL » dans
+# projets/foot-merge-tactic/sons/a-telecharger.txt ; chaque son est ajouté tel quel
+# au dépôt dans sons/brut/ (le découpage et la compression se font ensuite).
+name: foot-merge-sons
+
+on:
+  push:
+    branches: [main]
+    paths: ['projets/foot-merge-tactic/sons/a-telecharger.txt']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  telecharger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Télécharger
+        working-directory: projets/foot-merge-tactic/sons
+        run: |
+          mkdir -p brut
+          while read -r nom url; do
+            [ -z "$nom" ] && continue
+            case "$nom" in \#*) continue ;; esac
+            [ -f "brut/$nom" ] && continue
+            curl -sSfL --retry 3 "$url" -o "brut/$nom" && ls -l "brut/$nom"
+          done < a-telecharger.txt
+      - name: Ajouter au dépôt
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add projets/foot-merge-tactic/sons/brut
+          git commit -m "Foot Merge Tactic : sons ElevenLabs téléchargés" || exit 0
+          git pull --rebase
+          git push

@@ -10,7 +10,8 @@ footballeurs.
 
 ## Fichiers
 
-- `CLAUDE.md` : contexte de travail pour Claude (décisions validées, propositions, questions ouvertes, feuille de route).
+- `CLAUDE.md` : contexte de travail pour Claude, court (le jeu en bref, façon de travailler, carte du code, état du moment).
+- `docs/decisions.md`, `docs/propositions.md`, `docs/questions-ouvertes.md` : décisions validées, propositions en cours, questions ouvertes ; `docs/historique-etat.md` : ce qui a été remplacé.
 - `docs/dossier-conception.md` : dossier de conception complet, document de référence (décisions récentes au §20).
 - `journal.md` : historique des étapes et des résultats de tests.
 - `prototype/` : prototype web (TypeScript).

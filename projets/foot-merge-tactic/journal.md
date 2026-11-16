@@ -905,3 +905,17 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 **À juger par le concepteur** : le déroulé (lien, attente, 10 min, « Prêt », coup d'envoi, mi-temps d'1 minute, fin) ; les marges avant le coup d'envoi (8 s) et la reprise (6 s) ; le fait que chacun se voie en bleu, en bas.
 
 **Fin de séance (15/11, 17 h 51)** : premier essai du concepteur sur le site public (« ça a l'air bien fonctionné ») ; pull request n° 13 fusionnée sur `main` à sa demande ; page claude.ai du prototype republiée.
+
+## 17/11/2026 (nuit) — Mémoire du projet allégée (prompt A4 de l'audit du 16/11)
+
+**Demande du concepteur** : prompt A4 tel quel (« Réorganise-le SANS perdre une seule décision »).
+
+**Ce qui a été fait** (aucun changement de code)
+- `CLAUDE.md` du projet : 442 → 83 lignes (95 Ko → 13 Ko) : le jeu en bref, les trois statuts, la façon de travailler, la carte du code, l'état du moment, des liens.
+- Nouveaux fichiers : `docs/decisions.md` (décisions [VALIDÉ] en vigueur, 15 thèmes), `docs/propositions.md`, `docs/questions-ouvertes.md` ; `docs/historique-etat.md` complété (décisions et propositions remplacées, questions tranchées, ancien « État » copié tel quel).
+- Décisions du 16/11 des trois fichiers d'audit reportées (durée à 30 s, fusion plus forte, hybrides mis de côté, tournoi en ligne avec IA, collection, chacun son mercato, pays au choix, constats du code).
+- Ligne du projet dans le `CLAUDE.md` de la racine raccourcie ; `README.md` mis à jour.
+
+**Vérification** : relecture croisée par script de l'ancien fichier (hors « État ») : 125 citations du concepteur, 81 chiffres avec unité, 124 noms de fichiers, 5 adresses et 290 puces comparés aux nouveaux fichiers. Seuls restent des titres de sections et des chemins écrits plus courts.
+
+**À juger par le concepteur** : la proposition de mise à jour du skill `foot-merge-tactic-etape` (nouveaux chemins).

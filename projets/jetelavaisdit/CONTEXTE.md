@@ -45,17 +45,16 @@ Valeurs publiques (URL Supabase, clé `sb_publishable_…`) : déjà dans `mobil
 - Mes phrases, partage d'un lien, page web de la carte.
 - APK Android installable (fabriqué par EAS).
 
-**En attente — à faire en premier dans la prochaine session :**
-1. **Deux migrations NON appliquées sur Supabase, à appliquer ensemble et dans l'ordre** :
-   - `supabase/migrations/20261114120000_noms_et_jours.sql` : prénom / nom de l'auteur (« Jérôme J. » sur la carte) et **bug des jours** corrigé (la carte comptait jusqu'au premier envoi → « 0 jour » ; elle compte maintenant jusqu'à aujourd'hui).
-   - `supabase/migrations/20261117120000_prefixe_jtlad.sql` (17/11) : base mutualisée, tout ce qui est à « Je te l'avais dit » prend le préfixe `jtlad_` (tables, index, contraintes, fonctions). Données, droits et RLS conservés. Testé sur un PostgreSQL local imitant Supabase (parcours complet : inscription, modération, scellement, envoi, carte, droits).
-   - Méthode : le propriétaire colle le script combiné (les deux fichiers dans une seule transaction, envoyé dans la conversation du 17/11 ; à défaut, coller les deux fichiers l'un après l'autre) dans **Supabase › SQL Editor › Run** et confirme l'avertissement « destructive » (`drop function`). Si l'erreur `relation "public.profils" does not exist` apparaît, c'est que c'est déjà fait.
-   - ⚠️ Les outils Supabase `apply_migration` / `execute_sql` en écriture demandent une confirmation que l'app du propriétaire **annule automatiquement**. Les requêtes en lecture seule fonctionnent.
-   - Les deux déclencheurs sur `auth.users` sont renommés en `jtlad_…` seulement si Supabase l'autorise (`auth.users` n'appartient pas au rôle `postgres`) ; sinon ils gardent leur nom (`profil_a_l_inscription`, `noms_a_la_connexion`) mais appellent bien les fonctions `jtlad_…`. À vérifier après application.
-2. **Pull request #16 (« préfixe jtlad_ ») à fusionner juste après le script SQL** : elle contient #7 (image de démarrage + icône Android) et #12 (prénom, jours, textes plus fun) et fait appeler `jtlad_…` par l'app et la carte. La fusionner suffit ; fermer ensuite #7 et #12. Entre le script SQL et la fusion, la version web et la carte en ligne ne marchent pas : enchaîner les deux.
-3. **APK à refabriquer après la fusion** (workflow `jetelavaisdit-apk.yml`) : l'APK installé et le dernier APK fabriqué (#12) appellent les anciens noms et cessent de marcher dès le script SQL.
+**Fait le 17/11 vers 15 h 45 :**
+- Base mutualisée : le propriétaire a renommé le projet Supabase `claude_projets` et collé le script SQL (migrations `20261114120000_noms_et_jours.sql` + `20261117120000_prefixe_jtlad.sql` en une transaction). Vérifié : tables et fonctions en `jtlad_…`, données intactes (2 profils, 1 phrase, 18 mots), carte publique « Jérome J. / 7 j ».
+- Les deux déclencheurs sur `auth.users` **gardent leur nom** (`profil_a_l_inscription`, `noms_a_la_connexion` : Supabase refuse de les renommer) et appellent bien `jtlad_creer_profil` / `jtlad_completer_noms`.
+- Pull request #16 fusionnée (contient #7 et #12, marquées fusionnées) ; version web mise en ligne ; nouvel APK lancé sur EAS.
 
-**Données en base (17/11)** : 2 comptes, 1 phrase scellée et envoyée.
+**En attente — à faire en premier dans la prochaine session :**
+1. **Installer le nouvel APK** (fabriqué le 17/11 après la fusion de #16 ; lien dans les journaux du run `jetelavaisdit-apk` (`APK : https://…`) ou sur expo.dev › Builds). L'ancien APK appelle les anciens noms et **ne marche plus**.
+2. Vérifier sur le téléphone : connexion Google, sceller, envoyer, carte avec prénom et bon nombre de jours.
+
+**Données en base (17/11)** : 2 comptes (1 avec prénom / nom repris de Google), 1 phrase scellée et envoyée.
 
 ## Leçons apprises (pièges déjà rencontrés)
 
@@ -65,11 +64,12 @@ Valeurs publiques (URL Supabase, clé `sb_publishable_…`) : déjà dans `mobil
 - **EAS / APK** : Node 22 obligatoire dans GitHub Actions ; `expo-splash-screen` exige une image ; la file d'attente gratuite d'Expo peut dépasser 45 minutes ; le lien de l'APK apparaît dans les journaux du run (`APK : https://…`) et sur expo.dev › Builds.
 - **Installation Android** : si « Application non installée », désactiver temporairement Play Protect.
 - **Environnement de Claude** : pas d'accès npm ni à expo.dev / supabase.co depuis le terminal ; on vérifie via GitHub Actions (build + typecheck), un PostgreSQL local pour tester le SQL, et l'outil Supabase en lecture.
+- **Base mutualisée** : `auth.users` appartient à `supabase_auth_admin` ; le rôle `postgres` peut créer un déclencheur dessus mais pas le renommer → toujours le nommer avec le préfixe de l'appli dès sa création.
 - **Règles du dépôt** : modification de code existant → branche + pull request ; le propriétaire dit « fusionne » pour valider.
 
 ## Prochaines étapes possibles
 
-1. Appliquer le script SQL, fusionner #16, refabriquer l'APK, vérifier prénom et jours sur la carte.
+1. Installer le nouvel APK, vérifier prénom et jours sur la carte.
 2. Image au format story (Instagram) à partager depuis l'app.
 3. Notifications de rappel (« Il y a 6 mois, tu as scellé… Ça s'est réalisé ? »).
 4. Modération par IA.

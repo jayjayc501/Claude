@@ -5,6 +5,7 @@
 import type { Camp, JoueurSim } from "../simulation";
 import type { PointM } from "../types";
 import type { BallonReel } from "../ballon";
+import { preparerEngagement } from "./arrets";
 import { DEMI_BUT_M } from "./outils";
 import { statsJoueur } from "./stats";
 
@@ -71,7 +72,7 @@ function ligneDeBut(b: BallonReel, x: number, y: number): void {
   const marqueur: Camp = y >= L ? 0 : 1;
   if (Math.abs(x - W / 2) <= DEMI_BUT_M) {
     compterBut(b, marqueur);
-    b.preparerEngagement(marqueur === 0 ? 1 : 0, "But !");
+    preparerEngagement(b, marqueur === 0 ? 1 : 0, "But !");
     return;
   }
   b.stats.sorties++;

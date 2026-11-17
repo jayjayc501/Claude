@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { chargerDonnees, chargerEquipes, chargerReglages } from "../src/sim/chargement";
 import { MatchSim } from "../src/sim/simulation";
+import { passer } from "../src/sim/ballon/gestes";
 
 const donnees = chargerDonnees();
 const reglages = chargerReglages();
@@ -128,7 +129,7 @@ describe("ballon réel : arrêts de jeu (lot B)", () => {
     m.ballon = { ...p.pos };
     b.porteur = p;
     b.reserve = null;
-    (b as unknown as { passer(q: unknown): void }).passer(q);
+    passer(b, q);
     for (let i = 0; i < 5 * 30 && b.stats.horsJeu[0] === 0; i++) m.pas();
     expect(b.stats.horsJeu[0]).toBe(1);
     expect(m.possession).toBe(1);

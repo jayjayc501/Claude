@@ -12,6 +12,8 @@ import type { PointM } from "./types";
 import { DEMI_BUT_M, avantBouche, avantage1c1, avantageVitesse, contrePresse, depuisRecuperation, dist, distSegment, fusions, portee, precisionPasse } from "./ballon/outils";
 import { conduire, dansSurface, estHorsJeu, rouler } from "./ballon/physique";
 import { pointInterception, reprendre } from "./ballon/controle";
+import { attendreEngagement, eloigner, eloignerEngagement, jouerRemiseEnJeu, placerPartenaire, placerPendantArret, placerPourEngagement, preparerEngagement, viderSurface } from "./ballon/arrets";
+import { centrer, degager, dribbler, jouerLong, passer, suivrePlongeon, tirer } from "./ballon/gestes";
 import { type StatsBallon, type StatsJoueur, noterStyle, statsBallonVides, statsJoueur } from "./ballon/stats";
 
 export { type StatsBallon, type StatsJoueur, statsVides } from "./ballon/stats";
@@ -148,109 +150,12 @@ export class BallonReel {
   /** Coup d'envoi d'une nouvelle période (2e mi-temps) : comme après un but,
    *  chacun regagne sa place de départ, puis `camp` engage. */
   coupDEnvoi(camp: Camp, texte: string): void {
-    this.preparerEngagement(camp, texte);
-  }
-
-  /** But : ballon au centre, les deux équipes regagnent leur camp ; l'engagement
-   *  a lieu quand tout le monde y est (10 s au plus). */
-  preparerEngagement(camp: Camp, texte: string): void {
-    const s = this.sim;
-    this.remettre({ x: s.donnees.largeurM / 2, y: s.donnees.longueurM / 2 }, camp, null, texte);
-    this.reserve = null;
-    // Après un but, on laisse le temps à l'annonce (et à la joie) avant de réengager.
-    this.engagement = { camp, depuis: s.temps, minS: texte === "But !" ? s.reglages.ballon.attenteButS : 2 };
-  }
-
-  /** Six mètres : les adversaires sortent de la surface. */
-  viderSurface(camp: Camp): void {
-    const L = this.sim.donnees.longueurM;
-    const bord = this.sim.reglages.ballon.surface.profondeurM + 1.5;
-    for (const o of this.sim.joueurs) {
-      if (o.camp === camp) continue;
-      if (dansSurface(this, o.cible, camp)) o.cible = { x: o.cible.x, y: camp === 0 ? bord : L - bord };
-    }
-  }
-
-  /** Coup franc : les adversaires se tiennent à 9,15 m du ballon (touche : 2 m). */
-  eloigner(camp: Camp, rayon = 9.5): void {
-    const b = this.sim.ballon;
-    for (const o of this.sim.joueurs) {
-      if (o.camp === camp) continue;
-      const d = dist(o.cible, b);
-      if (d >= rayon) continue;
-      const ux = d > 0.1 ? (o.cible.x - b.x) / d : 0;
-      const uy = d > 0.1 ? (o.cible.y - b.y) / d : camp === 0 ? 1 : -1;
-      o.cible = { x: b.x + ux * rayon, y: b.y + uy * rayon };
-    }
-  }
-
-  /** Coup d'envoi : les adversaires restent dans leur moitié, hors du rond central. */
-  eloignerEngagement(camp: Camp): void {
-    const s = this.sim;
-    const b = s.ballon;
-    const L = s.donnees.longueurM;
-    const sens = camp === 0 ? 1 : -1; // côté de la moitié adverse
-    for (const o of s.joueurs) {
-      if (o.camp === camp) continue;
-      let c = { x: o.cible.x, y: sens > 0 ? Math.max(o.cible.y, L / 2 + 0.5) : Math.min(o.cible.y, L / 2 - 0.5) };
-      const d = dist(c, b);
-      if (d < 9.5) {
-        const ux = d > 0.1 ? (c.x - b.x) / d : 0;
-        const uy = Math.max(0.3, Math.abs(d > 0.1 ? (c.y - b.y) / d : 1)) * sens;
-        const n = Math.hypot(ux, uy);
-        c = { x: b.x + (ux / n) * 9.5, y: b.y + (uy / n) * 9.5 };
-      }
-      o.cible = c;
-    }
-  }
-
-  /** Joueur qui engage : le joueur de champ de l'équipe le plus proche du centre. */
-  engageur(): JoueurSim {
-    const s = this.sim;
-    const camp = this.engagement!.camp;
-    return s.joueurs
-      .filter((j) => j.camp === camp && j.poste.id !== "G")
-      .reduce((a, b) => (dist(a.depart, s.ballon) <= dist(b.depart, s.ballon) ? a : b));
-  }
-
-  /** Coéquipier qui se place à côté du ballon pour l'engagement (12/11 :
-   *  « les engagements sont nuls : une passe en arrière à personne »). */
-  partenaire(camp: Camp, kicker: JoueurSim): JoueurSim | undefined {
-    const s = this.sim;
-    const centre = { x: s.donnees.largeurM / 2, y: s.donnees.longueurM / 2 };
-    return s.joueurs
-      .filter((j) => j.camp === camp && j !== kicker && j.poste.id !== "G")
-      .sort((a, b) => dist(a.depart, centre) - dist(b.depart, centre))[0];
-  }
-
-  /** Place du partenaire : 4 m à côté du ballon, un pas dans son camp. */
-  placerPartenaire(camp: Camp, kicker: JoueurSim): void {
-    const s = this.sim;
-    const q = this.partenaire(camp, kicker);
-    if (!q) return;
-    const W = s.donnees.largeurM;
-    const L = s.donnees.longueurM;
-    const cote = q.depart.x < W / 2 ? -1 : 1;
-    q.cible = { x: W / 2 + cote * 4, y: L / 2 + (camp === 0 ? -1.5 : 1.5) };
-    q.auBallon = true;
-    const depuis = this.placePartenaire?.joueur === q ? this.placePartenaire.depuis : s.temps;
-    this.placePartenaire = { joueur: q, point: { ...q.cible }, depuis };
+    preparerEngagement(this, camp, texte);
   }
 
   pas(dt: number): void {
     if (this.engagement) {
-      const s = this.sim;
-      const L = s.donnees.longueurM;
-      const kicker = this.engageur();
-      const partenaire = this.partenaire(this.engagement.camp, kicker);
-      const enPlace =
-        dist(kicker.pos, s.ballon) < 1.5 &&
-        s.joueurs.every((j) => j === kicker || j === partenaire || ((j.camp === 0 ? j.pos.y <= L / 2 + 0.5 : j.pos.y >= L / 2 - 0.5) && dist(j.pos, j.depart) < 3));
-      if ((enPlace && s.temps - this.engagement.depuis > this.engagement.minS) || s.temps - this.engagement.depuis > 10) {
-        const camp = this.engagement.camp;
-        this.engagement = null;
-        this.remettre({ ...s.ballon }, camp, "engagement", "Engagement");
-      }
+      attendreEngagement(this);
       return;
     }
     if (this.porteur) {
@@ -334,102 +239,20 @@ export class BallonReel {
     // Contre-attaque : juste après la récupération, on cherche l'avant.
     const poidsProgression = r.poidsProgression + (depuisRecuperation(this, p.camp) < r.contreAttaque.dureeS ? r.contreAttaque.bonusProgression : 0);
 
-    if (this.arrete === "touche") {
-      // Touche (13/11, « ils donnent le ballon à l'adversaire collé ») : passe à la main
-      // vers un coéquipier démarqué (adversaire à plus de 3 m, ligne de passe libre),
-      // à moins de 22 m. Personne de libre : on attend un peu (3 s au plus) qu'un
-      // coéquipier se démarque, puis on joue le moins marqué.
-      let choix: JoueurSim | null = null;
-      let mieux = -Infinity;
-      let libre = false;
-      for (const q of s.joueurs) {
-        if (q === p || q.camp !== p.camp || q.poste.id === "G") continue;
-        const d = dist(p.pos, q.pos);
-        if (d < 4 || d > 22) continue;
-        const marque = Math.min(...adverses.map((a) => dist(a.pos, q.pos)));
-        const coupe = adverses.some((a) => distSegment(a.pos, p.pos, q.pos) < 1.8 && dist(a.pos, q.pos) > 1);
-        const ok = marque >= 3 && !coupe;
-        const sc = (ok ? 10 : 0) + Math.min(8, marque) - d * 0.1 - (coupe ? 4 : 0) + this.rng.entre(-1, 1);
-        if (sc > mieux) {
-          mieux = sc;
-          choix = q;
-          libre = ok;
-        }
-      }
-      const attente = this.evenement ? s.temps - this.evenement.a : 99;
-      if ((!choix || !libre) && attente < 3 + s.reglages.ballon.pauseArretS.max) {
-        this.decisionA = s.temps + 0.3;
-        return;
-      }
-      this.arrete = null;
-      if (choix) {
-        this.lancerTouche(p, choix);
-        return;
-      }
-    }
-    if (this.arrete === "coupFranc") this.arrete = null; // le tireur joue normalement (passe, tir à portée)
-    if (this.arrete === "sixMetres") {
-      // Six mètres : on attend que les adversaires soient sortis de la surface (5 s au plus).
-      const encore = adverses.some((o) => dansSurface(this, o.pos, p.camp));
-      if (encore && this.evenement && s.temps - this.evenement.a < 5) {
-        this.decisionA = s.temps + 0.2;
-        return;
-      }
-      this.arrete = null;
-    }
-    if (this.arrete === "engagement" && dist(p.pos, { x: s.donnees.largeurM / 2, y: s.donnees.longueurM / 2 }) > 4) {
-      this.arrete = null; // loin du point central : ce n'est plus un engagement
-      this.placePartenaire = null;
-    }
-    if (this.arrete === "engagement") {
-      // Engagement : on attend que le partenaire soit à côté du ballon et les
-      // adversaires hors du rond (6 s au plus), puis passe au partenaire ou en retrait.
-      const pp = this.placePartenaire?.joueur.camp === p.camp ? this.placePartenaire : null;
-      const rondOccupe = adverses.some((o) => dist(o.pos, p.pos) < 9);
-      if (pp && (dist(pp.joueur.pos, pp.point) > 1.5 || rondOccupe) && s.temps - pp.depuis < 6) {
-        this.decisionA = s.temps + 0.2;
-        return;
-      }
-      this.arrete = null;
-      this.placePartenaire = null;
-      // Le plus souvent au partenaire placé à côté, sinon à un milieu en retrait.
-      let choix: JoueurSim | undefined = pp && dist(pp.joueur.pos, p.pos) < 8 && this.rng.suivant() < 0.85 ? pp.joueur : undefined;
-      if (!choix) {
-        const options = s.joueurs
-          .filter((q) => q !== p && q.camp === p.camp && q.poste.id !== "G")
-          .map((q) => ({ q, d: dist(p.pos, q.pos), recul: (p.pos.y - q.pos.y) * sens }))
-          .filter((o) => o.d > 2 && o.d < 28 && o.recul > 1)
-          .sort((a, b) => a.d - b.d);
-        choix = options[0]?.q;
-      }
-      if (choix) {
-        this.passer(choix, false, null, false); // dans ses pieds
-        return;
-      }
-    }
-    if (this.arrete === "penalty") {
-      this.arrete = null;
-      this.tirer(but, true);
-      return;
-    }
-    if (this.arrete === "corner") {
-      this.arrete = null;
-      this.centrer(but, sens);
-      return;
-    }
+    if (jouerRemiseEnJeu(this, adverses, but, sens)) return;
 
     // Tir : dans la surface, on tire toujours (jamais de passe en retrait) ;
     // plus loin mais à portée et pas trop excentré, on tire parfois.
     if (p.poste.id !== "G") {
       const dansSurface = Math.abs(sens === 1 ? L - p.pos.y : p.pos.y) <= r.surface.profondeurM && Math.abs(p.pos.x - W / 2) <= r.surface.demiLargeurM;
       if (dansSurface) {
-        this.tirer(but);
+        tirer(this, but);
         return;
       }
       // Un joueur fusionné (14/11) ose plus (× 1 sans fusion : inchangé).
       const oseTir = 1 + fusions(p) * s.influences.fusion.tirLoinParNiveau;
       if (dBut < r.tirDistanceM && Math.abs(p.pos.x - W / 2) < dBut * 0.8 && this.rng.suivant() < (r.tirLoin.probaBase + r.tirLoin.probaMax * (1 - dBut / r.tirDistanceM)) * oseTir) {
-        this.tirer(but);
+        tirer(this, but);
         return;
       }
     }
@@ -443,7 +266,7 @@ export class BallonReel {
       return avant > 0.5 && avant < dBut && Math.abs(o.pos.x - p.pos.x) < 4 + avant * 0.3;
     });
     if (p.poste.id !== "G" && libreDevant && pression >= r.pressionM) {
-      if (dBut < r.seulTirM) this.tirer(but);
+      if (dBut < r.seulTirM) tirer(this, but);
       else this.decisionA = Math.min(this.decisionA, s.temps + 0.3); // il lève la tête souvent : tir dès qu'il est à portée
       return;
     }
@@ -453,7 +276,7 @@ export class BallonReel {
     const versLigne = sens === 1 ? L - p.pos.y : p.pos.y;
     if (p.poste.id !== "G" && versLigne < c.zoneProfondeurM && Math.abs(p.pos.x - W / 2) > c.ecartAxeM && this.rng.suivant() < c.proba) {
       if (s.joueurs.some((q) => q.camp === p.camp && q !== p && dansSurface(this, q.pos, q.camp === 0 ? 1 : 0))) {
-        this.centrer(but, sens);
+        centrer(this, but, sens);
         return;
       }
     }
@@ -484,7 +307,7 @@ export class BallonReel {
     const tente = (p.poste.ligneDefense === "defense" ? db.probaTentative * 0.25 : p.poste.ligneDefense === "gardien" ? 0 : db.probaTentative) * (1 + fusions(p) * s.influences.fusion.tentativeParNiveau);
     // Notes : on tente plus souvent le 1 contre 1 quand on a l'avantage (dribble et accélération).
     if (devant && this.rng.suivant() < (tente > 0 ? decaler(tente, avantage1c1(p, devant) * PN.unContreUn.poidsTentative) : 0)) {
-      this.dribbler(devant, sens);
+      dribbler(this, devant, sens);
       return;
     }
 
@@ -510,7 +333,7 @@ export class BallonReel {
         if (!choixJL || gain > choixJL.gain) choixJL = { q, point, gain };
       }
       if (choixJL) {
-        this.jouerLong(choixJL.q, choixJL.point);
+        jouerLong(this, choixJL.q, choixJL.point);
         return;
       }
     }
@@ -577,7 +400,7 @@ export class BallonReel {
     const bouche = avantBouche(this, p);
     const seuil = bouche ? r.seuilPasse - r.construction.baisseSeuil : r.seuilPasse;
     if (meilleur && (p.poste.id === "G" || presse || score > seuil)) {
-      this.passer(meilleur.q, presse, meilleur.point);
+      passer(this, meilleur.q, presse, meilleur.point);
       return;
     }
     if (!presse) return; // rien d'ouvert : il continue de conduire
@@ -585,124 +408,14 @@ export class BallonReel {
     // Pressé sans solution sûre : dégagement dans son tiers, sinon il protège.
     const deSonBut = sens === 1 ? p.pos.y : L - p.pos.y;
     if (deSonBut < r.degagement.zoneM && p.poste.id !== "G") {
-      this.degager(sens);
+      degager(this, sens);
       return;
     }
     if (fuite && deSonBut < r.zoneDegagementM) {
-      this.passer(fuite, presse); // dégagement
+      passer(this, fuite, presse); // dégagement
       return;
     }
     this.protegeJusqua = s.temps + r.protection.dureeS;
-  }
-
-  /** Ballon aérien vers un point, dosé pour y arriver en T secondes. */
-  lober(point: PointM, T: number, angleErreurDeg = 0): void {
-    const r = this.sim.reglages.ballon;
-    const b = this.sim.ballon;
-    const d = dist(b, point) || 1;
-    const k = r.frottementParS;
-    const v = Math.min(30, (k * d) / (1 - Math.exp(-k * T)));
-    const e = (this.rng.entre(-1, 1) * angleErreurDeg * precisionPasse(this.porteur) * Math.PI) / 180;
-    const ux = (point.x - b.x) / d;
-    const uy = (point.y - b.y) / d;
-    this.lancer((ux * Math.cos(e) - uy * Math.sin(e)) * v, (ux * Math.sin(e) + uy * Math.cos(e)) * v);
-    this.airDebut = this.sim.temps;
-    this.airJusqua = this.sim.temps + T * r.centre.partEnLAir;
-  }
-
-  /** Touche : lancer à la main, en l'air, dans les pieds du coéquipier (pas de
-   *  hors-jeu). Personne ne peut couper le ballon à la sortie des mains. */
-  lancerTouche(p: JoueurSim, q: JoueurSim): void {
-    const d = dist(p.pos, q.pos);
-    this.stats.passes[p.camp]++;
-    statsJoueur(this, p).passes++;
-    this.stats.distancePasses[p.camp] += d;
-    // Un peu devant le receveur s'il court, sinon dans ses pieds.
-    const point = { x: q.pos.x + q.vit.x * 0.3, y: q.pos.y + q.vit.y * 0.3 };
-    this.lober(point, 0.45 + d / 18, 3);
-    this.receveur = q;
-    this.espacePour = null;
-    this.sousPressionDe = null;
-    this.horsJeu = false;
-    this.lanceur = p;
-  }
-
-  /** Ballon long aérien vers un coéquipier (jeu long, contre-attaque). */
-  jouerLong(q: JoueurSim, point: PointM): void {
-    const s = this.sim;
-    const p = this.porteur!;
-    const jl = s.reg(p.camp).ballon.jeuLong;
-    const d = dist(p.pos, point);
-    this.espacePour = q;
-    this.sousPressionDe = null;
-    this.stats.passes[p.camp]++;
-    statsJoueur(this, p).passes++;
-    this.stats.distancePasses[p.camp] += d;
-    this.stats.passesLongues[p.camp]++;
-    const gainPasse = (point.y - p.pos.y) * (p.camp === 0 ? 1 : -1);
-    this.stats.gainPasses[p.camp] += gainPasse;
-    if (gainPasse >= 5) this.stats.passesAvant[p.camp]++;
-    const horsJeu = estHorsJeu(this, q);
-    this.lober(point, d / jl.vitesseMS + 0.4, jl.erreurDeg);
-    this.receveur = q;
-    this.horsJeu = horsJeu;
-  }
-
-  /** Centre aérien vers un coéquipier de la surface (ou le point de penalty). */
-  centrer(but: PointM, sens: number): void {
-    const s = this.sim;
-    const r = s.reglages.ballon;
-    const p = this.porteur!;
-    const cibles = s.joueurs.filter((q) => q.camp === p.camp && q !== p && q.poste.id !== "G" && dansSurface(this, q.pos, q.camp === 0 ? 1 : 0));
-    const q = cibles.length ? cibles[this.rng.entier(cibles.length)]! : null;
-    const point = q
-      ? { x: q.pos.x + this.rng.entre(-2, 2), y: q.pos.y + this.rng.entre(-2, 2) }
-      : { x: but.x + this.rng.entre(-6, 6), y: but.y - sens * this.rng.entre(6, 12) };
-    this.stats.centres[p.camp]++;
-    this.stats.passes[p.camp]++;
-    statsJoueur(this, p).passes++;
-    this.lober(point, r.centre.dureeS, r.centre.erreurDeg);
-    this.receveur = q;
-    this.espacePour = null;
-    this.sousPressionDe = null;
-  }
-
-  /** Dégagement : long ballon aérien vers l'avant et le côté. */
-  degager(sens: number): void {
-    const s = this.sim;
-    const g = s.reglages.ballon.degagement;
-    const p = this.porteur!;
-    const W = s.donnees.largeurM;
-    const cote = p.pos.x < W / 2 ? 1 : -1;
-    const x = cote === 1 ? this.rng.entre(1, 18) : W - this.rng.entre(1, 18);
-    const y = p.pos.y + sens * this.rng.entre(g.longueurMinM, g.longueurMaxM);
-    this.stats.degagements[p.camp]++;
-    this.lober({ x, y }, g.dureeS, g.erreurDeg);
-  }
-
-  /** 1 contre 1 : réussi, l'adversaire est éliminé et le porteur accélère ;
-   *  raté, l'adversaire prend le ballon ou le ballon part libre. */
-  dribbler(o: JoueurSim, sens: number): void {
-    const s = this.sim;
-    const p = this.porteur!;
-    const db = s.reg(p.camp).ballon.dribble;
-    this.stats.dribbles[p.camp]++;
-    statsJoueur(this, p).dribbles++;
-    // Notes : dribble et accélération du porteur contre duel et accélération du défenseur.
-    if (this.rng.suivant() < decaler(Math.min(0.95, db.probaReussite * p.effet.dribble), avantage1c1(p, o))) {
-      this.stats.dribblesReussis[p.camp]++;
-      statsJoueur(this, p).dribblesReussis++;
-      noterStyle(this, p, ["TEC", "RAP"]);
-      o.freineJusqua = s.temps + db.eliminationS;
-      p.sprintJusqua = Math.max(p.sprintJusqua, s.temps + db.eliminationS);
-      return;
-    }
-    if (this.rng.suivant() < 0.5) {
-      this.duelGagne(o);
-    } else {
-      const a = this.rng.entre(-Math.PI, Math.PI);
-      this.lancer(Math.cos(a) * 5, Math.sin(a) * 5 + sens * 2);
-    }
   }
 
   lancer(vx: number, vy: number): void {
@@ -712,96 +425,6 @@ export class BallonReel {
     this.porteur = null;
     this.vit = { x: vx, y: vy };
     this.arret = "?";
-  }
-
-  passer(q: JoueurSim, presse = false, point: PointM | null = null, anticipe = true): void {
-    const p = this.porteur!;
-    const r = this.sim.reg(p.camp).ballon;
-    const d = dist(p.pos, point ?? q.pos);
-    let v = Math.min(r.vitessePasseMaxMS, r.vitessePasseMinMS + r.vitessePasseParMetre * d);
-    if (point) {
-      // Passe dans l'espace : dosée pour arriver au point quand le receveur y arrive.
-      const k = r.frottementParS;
-      const T = dist(q.pos, point) / (this.sim.reglages.mouvement.vitesseMaxMS * q.vitesseF) + 0.3;
-      v = Math.max(8, Math.min(r.vitessePasseMaxMS, (k * d) / (1 - Math.exp(-k * T))));
-    }
-    const t = d / v;
-    const a = anticipe ? t * 0.8 : 0;
-    const cible = point ?? { x: q.pos.x + q.vit.x * a, y: q.pos.y + q.vit.y * a };
-    const dx = cible.x - this.sim.ballon.x;
-    const dy = cible.y - this.sim.ballon.y;
-    const n = Math.hypot(dx, dy) || 1;
-    // Passe jouée sous pression : moins précise ; une équipe qui presse gêne de plus loin.
-    const g = this.sim.reg(p.camp === 0 ? 1 : 0).ballon.gene;
-    const dAdv = Math.min(...this.sim.joueurs.filter((o) => o.camp !== p.camp && o.poste.id !== "G").map((o) => dist(o.pos, p.pos)));
-    const gene = (presse ? r.imprecision.sousPressionFacteur : 1) * (dAdv < g.rayonM ? g.facteur : 1) * contrePresse(this, p).gene;
-    // Cohésion d'un pays (14/11) : passe plus précise vers un compatriote (× 1 : inchangé).
-    const compatriote = p.joueur.pays && q.joueur.pays === p.joueur.pays ? p.effet.imprecisionCompatriote : 1;
-    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * gene * p.effet.imprecision * compatriote * precisionPasse(p) * Math.PI) / 180) * this.rng.entre(-1, 1);
-    const c = Math.cos(erreur);
-    const si = Math.sin(erreur);
-    this.stats.passes[p.camp]++;
-    statsJoueur(this, p).passes++;
-    this.stats.distancePasses[p.camp] += d;
-    const gainPasse = ((point ?? q.pos).y - p.pos.y) * (p.camp === 0 ? 1 : -1);
-    this.stats.gainPasses[p.camp] += gainPasse;
-    if (gainPasse >= 5) this.stats.passesAvant[p.camp]++;
-    if (d >= 25) this.stats.passesLongues[p.camp]++;
-    const horsJeu = estHorsJeu(this, q);
-    this.lancer(((dx * c - dy * si) / n) * v, ((dx * si + dy * c) / n) * v);
-    this.receveur = q;
-    this.espacePour = point ? q : null;
-    this.sousPressionDe = presse ? p : null;
-    this.horsJeu = horsJeu;
-  }
-
-  /** Tir : vise un coin, loin du gardien ; l'erreur grandit avec la distance.
-   *  Le gardien plonge vers le point où le ballon passe à sa hauteur ; il a
-   *  d'autant plus de chances d'arrêter que ce point est proche de lui. */
-  tirer(but: PointM, penalty = false): void {
-    const s = this.sim;
-    const r = s.reglages.ballon;
-    const t = r.tir;
-    const p = this.porteur!;
-    const gardien = s.joueurs.find((j) => j.camp !== p.camp && j.poste.id === "G");
-    const cote = gardien ? (gardien.pos.x > but.x ? -1 : 1) : this.rng.suivant() < 0.5 ? -1 : 1;
-    const vise = but.x + cote * this.rng.entre(t.viseMinM, t.viseMaxM);
-    // Notes : la précision réduit l'erreur de visée, la puissance accélère le tir.
-    const ecartPrecision = p.notes.precision - PN.reference;
-    const precision = ecartPrecision === 0 ? 1 : Math.exp(-ecartPrecision * PN.tir.erreurParPoint);
-    const erreur = (penalty ? t.erreurPenaltyM : t.erreurBaseM + t.erreurParMetre * dist(p.pos, but)) * precision;
-    const cible = { x: vise + this.rng.entre(-erreur, erreur), y: but.y };
-    const dx = cible.x - s.ballon.x;
-    const dy = cible.y - s.ballon.y;
-    const n = Math.hypot(dx, dy) || 1;
-    const vTir = r.vitesseTirMS * (1 + (p.notes.puissance - PN.reference) * PN.tir.puissanceParPoint);
-    this.stats.tirs[p.camp]++;
-    statsJoueur(this, p).tirs++;
-    if (Math.abs(cible.x - but.x) <= DEMI_BUT_M) statsJoueur(this, p).tirsCadres++;
-    this.lancer((dx / n) * vTir, (dy / n) * vTir);
-    this.tirEnCours = true;
-    this.tirEvite.clear();
-    this.tirPenalty = penalty;
-    this.plongeon = null;
-    if (!gardien) return;
-    // Point de passage du ballon à la hauteur du gardien.
-    const k = Math.abs(dy) > 1e-6 ? (gardien.pos.y - s.ballon.y) / dy : 0;
-    const point = { x: s.ballon.x + dx * Math.max(0, Math.min(1, k)), y: gardien.pos.y };
-    const g = gardien.notes;
-    const pg = PN.gardien;
-    // Placement (13/11) : un gardien bien placé ferme l'angle, il a moins à couvrir.
-    const ecart = Math.abs(point.x - gardien.pos.x) * Math.max(0.6, Math.min(1.4, 1 - (g.placement - PN.reference) * pg.placementParPoint));
-    const distTir = dist(s.ballon, but);
-    const loin = t.arretParMetreDistance * Math.max(0, distTir - 11); // de loin, le gardien a le temps
-    const base = penalty ? r.fautes.arretPenaltyProba : Math.max(t.arretMin, Math.min(0.95, t.arretMax - t.arretParMetre * Math.max(0, ecart - 0.5) + loin));
-    // Notes : réflexes du gardien contre la puissance du tireur ; de près (face-à-face),
-    // ses sorties contre le dribble du tireur (13/11).
-    let ecartNotes = (g.reflexes - p.notes.puissance) * PN.tir.poidsPuissanceArret * pg.poidsReflexes;
-    if (!penalty && distTir < pg.sortiesDistanceM) ecartNotes += (g.sorties - p.notes.dribble) * pg.poidsSorties;
-    const proba = decaler(base, ecartNotes);
-    this.arret = Math.abs(cible.x - but.x) > DEMI_BUT_M ? "non" : this.rng.suivant() < proba ? "oui" : "non";
-    this.plongeon = { gardien, point };
-    gardien.plongeJusqua = s.temps + t.plongeonDureeS;
   }
 
   // --- Ballon libre -------------------------------------------------------
@@ -1055,17 +678,10 @@ export class BallonReel {
     const vMax = s.reglages.mouvement.vitesseMaxMS;
     for (const x of s.joueurs) x.auBallon = false;
     if (this.engagement) {
-      for (const j of s.joueurs) j.cible = { ...j.depart };
-      const kicker = this.engageur();
-      kicker.cible = { x: s.ballon.x, y: s.ballon.y - (kicker.camp === 0 ? 0.8 : -0.8) };
-      this.placerPartenaire(this.engagement.camp, kicker);
-      this.eloignerEngagement(this.engagement.camp); // adversaires dans leur moitié, hors du rond
+      placerPourEngagement(this);
       return;
     }
-    if (this.tirEnCours && this.plongeon) {
-      this.plongeon.gardien.cible = { ...this.plongeon.point };
-      this.plongeon.gardien.auBallon = true;
-    }
+    suivrePlongeon(this);
 
     if (this.porteur) {
       const p = this.porteur;
@@ -1105,19 +721,7 @@ export class BallonReel {
           this.decisionA = s.temps + rp.reactionPressionS;
         }
       }
-      if (this.arrete === "engagement") {
-        this.placerPartenaire(p.camp, p); // un coéquipier à côté pour recevoir l'engagement
-        this.eloignerEngagement(p.camp); // adversaires hors du rond (9,15 m) tant que l'engagement n'est pas joué
-        return;
-      }
-      if (this.arrete === "sixMetres") {
-        this.viderSurface(p.camp);
-        return;
-      }
-      if (this.arrete === "coupFranc") {
-        this.eloigner(p.camp);
-        return;
-      }
+      if (placerPendantArret(this, p)) return;
       this.jeuSansBallon(p);
       const defense: Camp = p.camp === 0 ? 1 : 0;
       const rd = s.reg(defense).ballon; // pressing selon la tactique de l'équipe qui défend
@@ -1180,13 +784,13 @@ export class BallonReel {
       if (this.receveur) nombre = camp === this.receveur.camp ? 0 : 2;
       else if (this.reserve && this.reserve.camp !== camp) {
         nombre = 0;
-        if (this.arrete === "coupFranc") this.eloigner(this.reserve.camp);
-        if (this.arrete === "touche") this.eloigner(this.reserve.camp, 2.5);
-        if (this.arrete === "engagement") this.eloignerEngagement(this.reserve.camp);
+        if (this.arrete === "coupFranc") eloigner(this, this.reserve.camp);
+        if (this.arrete === "touche") eloigner(this, this.reserve.camp, 2.5);
+        if (this.arrete === "engagement") eloignerEngagement(this, this.reserve.camp);
       }
       else if (this.reserve && this.tireur) {
         nombre = 0;
-        if (this.arrete === "sixMetres") this.viderSurface(this.tireur.camp);
+        if (this.arrete === "sixMetres") viderSurface(this, this.tireur.camp);
         this.tireur.cible = { ...s.ballon };
         this.tireur.auBallon = true;
       }
@@ -1199,7 +803,7 @@ export class BallonReel {
         j.auBallon = true;
       }
       // Coup d'envoi : pendant que l'un va au ballon, un coéquipier se place à côté.
-      if (this.arrete === "engagement" && this.reserve?.camp === camp && proches[0]) this.placerPartenaire(camp, proches[0].j);
+      if (this.arrete === "engagement" && this.reserve?.camp === camp && proches[0]) placerPartenaire(this, camp, proches[0].j);
     }
   }
 }

@@ -14,6 +14,7 @@ import { conduire, dansSurface, estHorsJeu, rouler } from "./ballon/physique";
 import { pointInterception, reprendre } from "./ballon/controle";
 import { attendreEngagement, eloigner, eloignerEngagement, jouerRemiseEnJeu, placerPartenaire, placerPendantArret, placerPourEngagement, preparerEngagement, viderSurface } from "./ballon/arrets";
 import { defendrePorteur, marquer, tacler } from "./ballon/defense";
+import { jeuSansBallon, lancerMontee, suivreMontee } from "./ballon/sansBallon";
 import { centrer, degager, dribbler, jouerLong, passer, suivrePlongeon, tirer } from "./ballon/gestes";
 import { type StatsBallon, type StatsJoueur, noterStyle, statsBallonVides, statsJoueur } from "./ballon/stats";
 
@@ -248,7 +249,7 @@ export class BallonReel {
         this.repique = { joueur: p, fin: s.temps + rq.dureeS, point };
         this.stats.repiquages[p.camp]++;
         this.decisionA = s.temps + rq.dureeS * 0.8;
-        this.lancerMontee(p.camp, cote, true);
+        lancerMontee(this, p.camp, cote, true);
         return;
       }
     }
@@ -415,163 +416,8 @@ export class BallonReel {
    *  destinataire va au ballon, les plus proches des deux équipes le disputent. */
   surcharger(): void {
     this.surchargerBallon();
-    this.suivreMontee();
+    suivreMontee(this);
     if (!this.engagement && !this.arrete) for (const camp of [0, 1] as const) marquer(this, camp);
-  }
-
-  jeuSansBallon(p: JoueurSim): void {
-    const s = this.sim;
-    const sb = s.reg(p.camp).ballon.sansBallon;
-    const W = s.donnees.largeurM;
-    const L = s.donnees.longueurM;
-    const sens = p.camp === 0 ? 1 : -1;
-    const prof = (y: number) => (sens === 1 ? y : L - y); // profondeur vers le but adverse
-    const adverses = s.joueurs.filter((o) => o.camp !== p.camp);
-    const ap = sb.appel;
-
-    // Fin de l'appel : temps écoulé, autre porteur d'une autre équipe, ou hors-jeu sans ballon.
-    if (this.appel && (s.temps > this.appel.fin || this.appel.joueur.camp !== p.camp || this.appel.joueur === p)) this.appel = null;
-    const avantDernier = adverses.map((o) => prof(o.pos.y)).sort((a, b) => b - a)[1] ?? L;
-    if (this.appel && prof(this.appel.joueur.pos.y) > avantDernier + 2 && this.receveur !== this.appel.joueur) this.appel = null;
-
-    // Nouvel appel : le porteur a du temps, dans la moitié de terrain qui compte.
-    const enContre = depuisRecuperation(this, p.camp) < s.reg(p.camp).ballon.contreAttaque.dureeS;
-    const pressé = !enContre && adverses.some((o) => o.poste.id !== "G" && dist(o.pos, p.pos) < s.reglages.ballon.pressionM * 1.5);
-    const frequence = ap.parSeconde * (enContre ? s.reg(p.camp).ballon.contreAttaque.appelsFois : 1);
-    const dt = s.temps - this.dernierTirageAppel;
-    this.dernierTirageAppel = s.temps;
-    if (!this.appel && !pressé && !this.arrete && p.poste.id !== "G" && prof(p.pos.y) > ap.zoneM && L - prof(p.pos.y) > 20 && this.rng.suivant() < frequence * dt) {
-      const candidats = s.joueurs.filter((q) => {
-        if (q.camp !== p.camp || q === p || q.poste.id === "G" || q.auBallon) return false;
-        if (q.poste.ligneDefense !== "attaque" && !(q.poste.id === "AG" || q.poste.id === "AD" || q.poste.id === "MC")) return false;
-        const ecart = avantDernier - prof(q.pos.y);
-        return ecart >= ap.ecartMinM && ecart <= ap.ecartMaxM && prof(q.pos.y) - prof(p.pos.y) >= ap.avanceBallonM;
-      });
-      // Le plus libre (le plus loin de son adversaire le plus proche), et le plus
-      // rapide face à son adversaire (notes, 12/11 : « la vitesse, c'est super important »).
-      const libreDe = (q: JoueurSim) => Math.min(...adverses.map((o) => dist(o.pos, q.pos))) + avantageVitesse(q, q.pos, adverses) * PN.vitesse.appelParPoint;
-      const q = candidats.sort((a, b) => libreDe(b) - libreDe(a))[0];
-      if (q) {
-        const yBut = sens === 1 ? L : 0;
-        const profPoint = Math.min(avantDernier + ap.profondeurM, L - 6);
-        const point = { x: Math.min(W - 3, Math.max(3, q.pos.x + (W / 2 - q.pos.x) * ap.diagonale)), y: yBut - sens * (L - profPoint) };
-        this.appel = { joueur: q, fin: s.temps + ap.dureeS, point };
-        this.decisionA = Math.min(this.decisionA, s.temps + 0.35); // le porteur lève la tête
-      }
-    }
-    if (this.appel && this.receveur !== this.appel.joueur) {
-      const q = this.appel.joueur;
-      q.cible = { ...this.appel.point };
-      q.sprintJusqua = Math.max(q.sprintJusqua, this.appel.fin);
-      // Le défenseur le plus proche suit l'appel, côté but.
-      const suiveur = adverses
-        .filter((o) => o.poste.ligneDefense === "defense" && !o.auBallon && dist(o.pos, q.pos) < ap.suivreRayonM)
-        .sort((a, b) => dist(a.pos, q.pos) - dist(b.pos, q.pos))[0];
-      if (suiveur) {
-        suiveur.cible = { x: q.pos.x + (W / 2 - q.pos.x) * 0.15, y: q.pos.y + sens * 2.5 };
-        suiveur.auBallon = true;
-        suiveur.sprintJusqua = Math.max(suiveur.sprintJusqua, this.appel.fin);
-      }
-    }
-
-    // Montée du latéral (14/11, « les latéraux ne montent jamais ») : quand on
-    // attaque d'un côté dans la moitié adverse, le latéral de ce côté passe à
-    // l'extérieur du porteur. Un seul à la fois ; à la perte du ballon, il revient
-    // au sprint (transition), c'est le prix à payer (référence §6).
-    const mo = sb.montee;
-    if (this.montee && (s.temps > this.montee.fin || this.montee.joueur.camp !== p.camp || this.montee.joueur === p)) this.montee = null;
-    const dtM = s.temps - this.dernierTirageMontee;
-    this.dernierTirageMontee = s.temps;
-    if (!this.montee && !this.arrete && p.poste.id !== "G" && prof(p.pos.y) > mo.zoneProfM && Math.abs(p.pos.x - W / 2) > mo.ecartAxeM) {
-      const lat = this.lateralDuCote(p.camp, Math.sign(p.pos.x - W / 2));
-      if (lat && this.rng.suivant() < mo.parSeconde * dtM * (1 + mo.bonusPlaceHaut * this.hauteurCase(lat))) this.lancerMontee(p.camp, Math.sign(p.pos.x - W / 2), false);
-    }
-
-    // Appel au second poteau (14/11, « les ailiers ont leur couloir, c'est trop
-    // robotisé ») : ballon sur un côté du dernier tiers, l'ailier opposé rentre
-    // vers le second poteau, sans se mettre hors-jeu.
-    const sp = sb.secondPoteau;
-    if (!this.arrete && prof(p.pos.y) > sp.zoneProfM && Math.abs(p.pos.x - W / 2) > sp.ecartAxeM) {
-      const coteBallon = Math.sign(p.pos.x - W / 2);
-      const profPoint = Math.min(L - sp.devantButM, avantDernier - 0.5);
-      for (const q of s.joueurs) {
-        if (q.camp !== p.camp || q === p || q.auBallon || this.appel?.joueur === q || this.montee?.joueur === q) continue;
-        if ((q.poste.id !== "AG" && q.poste.id !== "AD") || Math.sign(q.cible.x - W / 2) === coteBallon) continue;
-        if (prof(q.cible.y) > profPoint) continue;
-        q.cible = { x: W / 2 - coteBallon * sp.poteauM, y: sens === 1 ? profPoint : L - profPoint };
-      }
-    }
-
-    // Soutien : ouvrir une ligne de passe pour les plus proches.
-    const so = sb.soutien;
-    const libre = (a: PointM, b: PointM) => !adverses.some((o) => distSegment(o.pos, a, b) < s.reglages.ballon.voieLibreM + 0.5);
-    const proches = s.joueurs
-      .filter((q) => q.camp === p.camp && q !== p && q.poste.id !== "G" && !q.auBallon && this.appel?.joueur !== q && this.montee?.joueur !== q && dist(q.cible, p.pos) < so.rayonM)
-      .sort((a, b) => dist(a.cible, p.pos) - dist(b.cible, p.pos))
-      .slice(0, so.joueurs);
-    for (const q of proches) {
-      // Triangles : le soutien se rapproche du porteur (sans le coller).
-      const dq = dist(q.cible, p.pos);
-      if (dq > so.distanceM) {
-        const k = Math.min(so.rapprochementMaxM, dq - so.distanceM) / dq;
-        q.cible = { x: q.cible.x + (p.pos.x - q.cible.x) * k, y: q.cible.y + (p.pos.y - q.cible.y) * k };
-      }
-      if (libre(p.pos, q.cible)) continue;
-      const dx = q.cible.x - p.pos.x;
-      const dy = q.cible.y - p.pos.y;
-      const n = Math.hypot(dx, dy) || 1;
-      const px = -dy / n;
-      const py = dx / n;
-      const essais = [...so.decalagesM.map((k) => ({ x: q.cible.x + px * k, y: q.cible.y + py * k })), { x: q.cible.x, y: q.cible.y - sens * so.reculM }];
-      const bon = essais.find((e) => e.x > 2 && e.x < W - 2 && libre(p.pos, e) && Math.min(...adverses.map((o) => dist(o.pos, e))) > 3);
-      if (bon) q.cible = bon;
-    }
-  }
-
-  /** Le latéral qui monte garde sa course tant que son équipe a le ballon,
-   *  passes comprises (sinon, ballon en l'air, il revenait vers sa place). */
-  suivreMontee(): void {
-    const mo = this.montee;
-    if (!mo) return;
-    const s = this.sim;
-    if (this.engagement || this.arrete || s.temps > mo.fin || s.possession !== mo.joueur.camp) {
-      this.montee = null;
-      return;
-    }
-    if (this.porteur === mo.joueur || this.receveur === mo.joueur) return;
-    mo.joueur.cible = { ...mo.point };
-    mo.joueur.sprintJusqua = Math.max(mo.joueur.sprintJusqua, mo.fin);
-  }
-
-  /** Latéral (DG ou DD) d'une équipe du côté `cote` (signe de x − largeur/2). */
-  lateralDuCote(camp: Camp, cote: number): JoueurSim | undefined {
-    const W = this.sim.donnees.largeurM;
-    return this.sim.joueurs.find((q) => q.camp === camp && (q.poste.id === "DG" || q.poste.id === "DD") && Math.sign(q.cible.x - W / 2) === cote && q !== this.porteur);
-  }
-
-  /** Hauteur de la case d'un joueur parmi celles de son poste : 0 la plus basse, 1 la plus haute. */
-  hauteurCase(j: JoueurSim): number {
-    const ys = j.poste.cases.map((c) => c.centre.y);
-    const min = Math.min(...ys);
-    const max = Math.max(...ys);
-    return max > min ? (j.cellule.centre.y - min) / (max - min) : 0;
-  }
-
-  /** Lance la montée du latéral du côté `cote` (14/11). Sur un repiquage de
-   *  l'ailier, il prend le couloir le plus souvent (surRepiqueProba). */
-  lancerMontee(camp: Camp, cote: number, surRepique: boolean): void {
-    const s = this.sim;
-    const mo = s.reg(camp).ballon.sansBallon.montee;
-    if (this.montee || !this.porteur) return;
-    if (surRepique && this.rng.suivant() > mo.surRepiqueProba) return;
-    const lat = this.lateralDuCote(camp, cote);
-    if (!lat) return;
-    const W = s.donnees.largeurM;
-    const L = s.donnees.longueurM;
-    const sens = camp === 0 ? 1 : -1;
-    const y = Math.min(L - 6, Math.max(6, this.porteur.pos.y + sens * mo.avanceM));
-    this.montee = { joueur: lat, fin: s.temps + mo.dureeS, point: { x: cote > 0 ? W - mo.bordM : mo.bordM, y } };
-    this.stats.montees[camp]++;
   }
 
   surchargerBallon(): void {
@@ -626,7 +472,7 @@ export class BallonReel {
         }
       }
       if (placerPendantArret(this, p)) return;
-      this.jeuSansBallon(p);
+      jeuSansBallon(this, p);
       defendrePorteur(this, p);
       return;
     }

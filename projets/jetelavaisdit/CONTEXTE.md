@@ -48,10 +48,10 @@ Valeurs publiques (URL Supabase, clé `sb_publishable_…`) : déjà dans `mobil
 **Fait le 17/11 vers 15 h 45 :**
 - Base mutualisée : le propriétaire a renommé le projet Supabase `claude_projets` et collé le script SQL (migrations `20261114120000_noms_et_jours.sql` + `20261117120000_prefixe_jtlad.sql` en une transaction). Vérifié : tables et fonctions en `jtlad_…`, données intactes (2 profils, 1 phrase, 18 mots), carte publique « Jérome J. / 7 j ».
 - Les deux déclencheurs sur `auth.users` **gardent leur nom** (`profil_a_l_inscription`, `noms_a_la_connexion` : Supabase refuse de les renommer) et appellent bien `jtlad_creer_profil` / `jtlad_completer_noms`.
-- Pull request #16 fusionnée (contient #7 et #12, marquées fusionnées) ; version web mise en ligne ; nouvel APK lancé sur EAS.
+- Pull request #16 fusionnée (contient #7 et #12, marquées fusionnées) ; version web mise en ligne ; nouvel APK fabriqué (lien ci-dessous).
 
 **En attente — à faire en premier dans la prochaine session :**
-1. **Installer le nouvel APK** (fabriqué le 17/11 après la fusion de #16 ; lien dans les journaux du run `jetelavaisdit-apk` (`APK : https://…`) ou sur expo.dev › Builds). L'ancien APK appelle les anciens noms et **ne marche plus**.
+1. **Installer le nouvel APK** (fabriqué le 17/11 après la fusion de #16, prêt vers 16 h 55 après environ 1 h 10 de file Expo) : https://expo.dev/artifacts/eas/yaTwe4oP5XzRmzfEtWZm6CcSBuWTqh4gCkz2YtLDl2Y.apk — lien valable environ deux semaines. L'installer par-dessus l'ancien, qui appelle les anciens noms et **ne marche plus**.
 2. Vérifier sur le téléphone : connexion Google, sceller, envoyer, carte avec prénom et bon nombre de jours.
 
 **Données en base (17/11)** : 2 comptes (1 avec prénom / nom repris de Google), 1 phrase scellée et envoyée.

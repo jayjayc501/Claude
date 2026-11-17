@@ -618,23 +618,18 @@ svg.drapeau { display: inline-block; flex: none; border-radius: 2px; box-shadow:
 
 /* Fusion en match (14/11 après-midi, « M2 » choisi par le concepteur) : contour
    lumineux et étincelles (niveau 1), feu réaliste (2), grand feu et braises (3). */
-.match-flamme-boite { overflow: visible; pointer-events: none; }
-.match-flamme-a, .match-flamme-b, .match-flamme-c { transform-box: fill-box; transform-origin: 50% 100%; }
-.match-flamme-a { animation: match-flamme-a 1.15s ease-in-out infinite alternate; }
-@keyframes match-flamme-a { from { transform: scale(1, 0.95) skewX(-1.5deg); } to { transform: scale(1.03, 1.04) skewX(1.5deg); } }
-.match-flamme-b { animation: match-flamme-b 0.8s ease-in-out infinite alternate; }
-@keyframes match-flamme-b { from { transform: scale(0.96, 1.05) skewX(2deg); } to { transform: scale(1.03, 0.93) skewX(-2deg); } }
-.match-flamme-c { animation: match-flamme-c 0.55s ease-in-out infinite alternate; }
-@keyframes match-flamme-c { from { transform: scale(1, 0.9); } to { transform: scale(0.97, 1.08); } }
-.match-feu-lueur { animation: match-feu-lueur 1.3s ease-in-out infinite alternate; }
-@keyframes match-feu-lueur { from { opacity: 0.55; } to { opacity: 0.95; } }
+/* Feu en images (17/11) : une bande de 12 images qui défile en 1,2 s (scripts/generer-feu.py). */
+.match-feu-bande { animation: match-feu-2 1.2s steps(12) infinite; }
+.match-feu-bande.niveau-3 { animation-name: match-feu-3; }
+@keyframes match-feu-2 { to { transform: translateX(-1080px); } }
+@keyframes match-feu-3 { to { transform: translateX(-1788px); } }
 .match-braise { animation: match-braise 1.5s ease-out infinite; }
 @keyframes match-braise { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(var(--monte)); } }
 /* Pictogramme du style (« P3 ») : blanc dans le pion, sur une plaque colorée sur le socle. */
 .match-rond-picto { fill: none; stroke: #fff; color: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .match-plaque-fond { stroke: #fff; }
 .match-plaque-picto { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-@media (prefers-reduced-motion: reduce) { .match-flamme-a, .match-flamme-b, .match-flamme-c, .match-feu-lueur, .match-braise { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .match-feu-bande, .match-braise { animation: none; } }
 /* 15/11 : banc et mercato déjà présents pendant le draft, vides et inactifs ; cartes vides plus basses pour que l'écran tienne. */
 .prepa-mercato.attente .prepa-carte.vide { min-height: 0; height: 34px; }
 .prepa-mercato.attente .prepa-aide { margin-bottom: 2px; }

@@ -994,3 +994,23 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 Avec 3 joueurs fusionnés par équipe, au ralenti ×4 : turbulence figée 25 ; sans la matière du feu (filtre) 31 ; sans le contour lumineux 23 ; **sans le feu ni les braises 58**. C'est le feu qui coûte : ses flammes animées et ses braises, en plus de son filtre.
 
 **À trancher par le concepteur** : la solution (voir sa réponse dans la conversation).
+
+## 17/11/2026 (16 h) — A2 : le feu des fusions en images pré-dessinées
+
+**Demande du concepteur** : solution 1, « tu peux faire de belles images tout seul ou avec Kling, mais que ça soit joli et que ça rende bien ».
+
+**Ce qui a été fait** (branche `a2-ecran-match`)
+- `scripts/generer-feu.py` dessine le feu « M2 » image par image dans Chrome : mêmes formes et mêmes couleurs, matière qui ondule (bruit doux qui monte, boucle parfaite), halo de la couleur de l'équipe, lueur au sol et braises qui montent au hasard au niveau 3 (avant : une rangée de points). Pas de Kling : à 40 pixels, il faut le style des figurines et un fond transparent. Bandes de 12 images bouclant en 1,2 s, 2 niveaux × 2 équipes : `src/images/feu/`, 226 Ko (la page passe de 3,2 à 3,5 Mo).
+- `ecranMatch.ts` : le feu est une image qui défile (CSS `steps`), chaque feu partant d'une image différente de la boucle ; plus de filtre ni de flammes animées. Les braises du niveau 3 sont dans les images ; les étincelles du niveau 1 ne changent pas. Au niveau 3, les pions prennent la même bande que les figurines (flammes de côté un peu plus écartées).
+
+**Mesures** (images par seconde, médiane / pire seconde, 15 s de match)
+| Joueurs fusionnés niveau 3 par équipe, ralenti | Avant | Après |
+|---|---|---|
+| 3, ×4 | 26 / 16 | 60 / 50 |
+| 3, ×6 | 15 / 7 | 55 / 35 |
+| 11, normal | 18 / 15 | 60 / 58 |
+| 11, ×4 | 7 / 6 | 50 / 40 |
+
+**Tests** : 189 verts.
+
+**À juger par le concepteur** : le nouveau feu sur son téléphone (page claude.ai republiée).

@@ -26,6 +26,10 @@ import { BUSTES_BLEUS } from "./equipeBleue";
 import { dessinerLignes, html, svg } from "./dom";
 import { dessinerButsEtDrapeaux, imageStade } from "./stade";
 import { CORPS_PICTOS, PICTOS } from "./pictos";
+import FEU_0_2 from "../images/feu/feu-0-2.webp";
+import FEU_0_3 from "../images/feu/feu-0-3.webp";
+import FEU_1_2 from "../images/feu/feu-1-2.webp";
+import FEU_1_3 from "../images/feu/feu-1-3.webp";
 import { activer, arreterAmbiance, basculerMuet, demarrerAmbiance, estMuet, frappe, intensiteAmbiance, jouer, occasion } from "./son";
 
 const ECHELLE = 5; // unités SVG par mètre
@@ -91,15 +95,17 @@ const FEU = [
   { fonce: "#132F86", main: "#2F6BFF", vif: "#5FA0FF", clair: "#CFE3FF" },
   { fonce: "#7E1710", main: "#E2402A", vif: "#FF7B3D", clair: "#FFE0B0" },
 ] as const;
-/** Flamme dans une boîte de 40 × 60, pied en bas au centre : bord sombre, milieu
- *  vif, cœur blanc chaud. Chaque couche ondule à son rythme (CSS), la matière
- *  ondule comme un feu (filtre de turbulence). Pas de `transform` SVG sur ces
- *  éléments animés en CSS (14/11 : certains navigateurs de téléphone l'ignorent). */
-const FLAMME = {
-  bord: "M20 59 C9 59 4 51 5 42 C6 35 10 31 10 24 C13 28 14 31 16 32 C15 23 18 14 24 5 C24 14 28 19 30 25 C31 22 32 20 32 16 C36 24 37 33 35 42 C34 52 29 59 20 59 Z",
-  milieu: "M20 59 C12 59 9 53 10 46 C11 40 14 37 15 31 C17 35 18 37 19 38 C19 31 22 25 25 18 C26 26 29 30 30 36 C31 42 31 49 29 53 C27 57 24 59 20 59 Z",
-  coeur: "M20 59 C15 59 13 55 14 50 C15 46 17 44 18 40 C19 43 20 44 21 45 C22 42 23 40 23 36 C26 42 27 47 26 51 C25 56 23 59 20 59 Z",
-};
+/** Feu en images pré-dessinées (17/11, A2) : scripts/generer-feu.py dessine le
+ *  feu « M2 » image par image (flammes qui ondulent, braises qui montent) en une
+ *  bande de 12 images qui boucle en 1,2 s ; le match la fait défiler (CSS). Le feu
+ *  calculé à chaque image coûtait la moitié de la fluidité sur un téléphone moyen.
+ *  Cadre de la bande en hauteurs de flamme : largeur, hauteur, pied au-dessus du bas. */
+const BANDES_FEU = {
+  2: { images: [FEU_0_2, FEU_1_2], px: [90, 140], cadre: [0.9, 1.4, 0.15] },
+  3: { images: [FEU_0_3, FEU_1_3], px: [149, 192], cadre: [1.2, 1.55, 0.2] },
+} as const;
+const IMAGES_FEU = 12;
+const BOUCLE_FEU_S = 1.2;
 /** Pictogramme du style en match (14/11 après-midi, proposition « P3 » choisie) :
  *  dans le pion (blanc), ou sur une plaque de la couleur du style posée sur le socle
  *  de la figurine. */
@@ -187,6 +193,8 @@ export class EcranMatch {
   private zonesVisibles = false;
   private actif = false;
   private dernier = 0;
+  /** Feux dessinés depuis le début (chacun part d'une autre image de la boucle). */
+  private feuxDessines = 0;
   private reserve = 0;
   /** Tactiques et styles actifs (gardés d'un match à l'autre). */
   private options: OptionsInfluences = { tactiques: true, styles: true };
@@ -453,32 +461,15 @@ export class EcranMatch {
     svg("stop", { offset: "100%", "stop-color": "#FFFFFF", "stop-opacity": "0.75" }, queue);
     const clip = svg("clipPath", { id: "match-ballon-clip" }, defs);
     svg("circle", { r: RAYON_BALLON }, clip);
-    // Fusion (14/11 après-midi, « M2 ») : dégradés, matière du feu et contour
-    // lumineux, aux couleurs de chaque équipe.
+    // Fusion (14/11 après-midi, « M2 ») : dégradés des étincelles et contour
+    // lumineux, aux couleurs de chaque équipe (le feu est en images : BANDES_FEU).
     const degrade = (type: "linearGradient" | "radialGradient", id: string, arrets: [number, string, number][]): void => {
       const d = type === "linearGradient" ? svg(type, { id, x1: "0", y1: "1", x2: "0", y2: "0" }, defs) : svg(type, { id, cx: "50%", cy: "50%", r: "50%" }, defs);
       for (const [o, c, op] of arrets) svg("stop", { offset: o, "stop-color": c, "stop-opacity": op }, d);
     };
     FEU.forEach((feu, camp) => {
-      degrade("linearGradient", `match-feu-bord-${camp}`, [[0, feu.fonce, 0.95], [0.45, feu.main, 0.85], [0.8, feu.vif, 0.35], [1, feu.vif, 0]]);
-      degrade("linearGradient", `match-feu-milieu-${camp}`, [[0, feu.vif, 1], [0.55, feu.clair, 0.9], [1, "#FFFFFF", 0]]);
-      degrade("linearGradient", `match-feu-coeur-${camp}`, [[0, "#FFFFFF", 1], [0.7, "#FFFFFF", 0.85], [1, feu.clair, 0]]);
-      degrade("radialGradient", `match-feu-lueur-${camp}`, [[0, feu.vif, 1], [0.55, feu.main, 0.53], [1, feu.main, 0]]);
       degrade("radialGradient", `match-feu-contour-${camp}`, [[0, feu.vif, 0.95], [0.5, feu.vif, 0.9], [0.62, feu.vif, 0.55], [1, feu.vif, 0]]);
       degrade("radialGradient", `match-feu-braise-${camp}`, [[0, "#FFFFFF", 1], [0.3, feu.clair, 1], [0.6, feu.vif, 0.7], [1, feu.vif, 0]]);
-      // Matière du feu : une texture qui ondule déforme la flamme ; lueur de la
-      // couleur de l'équipe autour (unités de la boîte 40 × 60 de la flamme).
-      const m = svg("filter", { id: `match-feu-matiere-${camp}`, x: "-40%", y: "-30%", width: "180%", height: "160%", "color-interpolation-filters": "sRGB" }, defs);
-      const bruit = svg("feTurbulence", { type: "fractalNoise", baseFrequency: "0.09 0.045", numOctaves: 2, seed: 3 + 4 * camp, result: "bruit" }, m);
-      svg("animate", { attributeName: "baseFrequency", dur: "1.4s", values: "0.09 0.045;0.1 0.07;0.09 0.045", repeatCount: "indefinite" }, bruit);
-      svg("feDisplacementMap", { in: "SourceGraphic", in2: "bruit", scale: 11, xChannelSelector: "R", yChannelSelector: "G", result: "feu" }, m);
-      svg("feGaussianBlur", { in: "feu", stdDeviation: 0.35, result: "net" }, m);
-      svg("feGaussianBlur", { in: "feu", stdDeviation: 2.5, result: "flou" }, m);
-      svg("feFlood", { "flood-color": feu.main, result: "teinte" }, m);
-      svg("feComposite", { in: "teinte", in2: "flou", operator: "in", result: "lueur" }, m);
-      const fusion = svg("feMerge", {}, m);
-      svg("feMergeNode", { in: "lueur" }, fusion);
-      svg("feMergeNode", { in: "net" }, fusion);
       // Contour lumineux des figurines : trait net clair, puis lueur vive (plus large au niveau 3).
       for (let n = 1; n <= 3; n++) {
         const f = svg("filter", { id: `match-aura-${camp}-${n}`, x: "-40%", y: "-40%", width: "180%", height: "180%", "color-interpolation-filters": "sRGB" }, defs);
@@ -612,35 +603,35 @@ export class EcranMatch {
     return g;
   }
 
-  /** Feu derrière un joueur fusionné (« M2 », 14/11 après-midi) : rien au niveau 1
-   *  (contour lumineux et étincelles seulement) ; au 2, une flamme réaliste ; au 3,
-   *  une lueur au sol, deux flammes sur les côtés et une grande flamme.
-   *  `k2`, `k3` : hauteur de la flamme en tailles de référence, niveaux 2 et 3. */
+  /** Feu derrière un joueur fusionné (« M2 », 14/11 après-midi ; en images depuis
+   *  le 17/11) : rien au niveau 1 (contour lumineux et étincelles seulement) ; au 2,
+   *  une flamme ; au 3, une lueur au sol, deux flammes sur les côtés, une grande
+   *  flamme et des braises. `k2`, `k3` : hauteur de la flamme en tailles de
+   *  référence, niveaux 2 et 3. Chaque feu part d'une image différente de la
+   *  boucle, pour que les feux ne battent pas ensemble. */
   private feu(g: SVGGElement, camp: 0 | 1, niveau: number, r: ReperesFeu, k2: number, k3: number): void {
     if (niveau < 2) return;
+    const n = niveau >= 3 ? 3 : 2;
+    const b = BANDES_FEU[n];
+    const h = r.taille * (n === 3 ? k3 : k2);
     const f = svg("g", { class: `match-feu niveau-${niveau}` }, g);
-    const h = r.taille * (niveau === 3 ? k3 : k2);
-    if (niveau === 3) {
-      svg("ellipse", { cx: 0, cy: r.base - 0.3 * h, rx: 0.5 * h, ry: 0.4 * h, fill: `url(#match-feu-lueur-${camp})`, class: "match-feu-lueur" }, f);
-      for (const cote of [-1, 1]) this.flamme(f, camp, cote * r.larg * 0.36, r.base - 0.07 * h, 0.41 * h, false);
-    }
-    this.flamme(f, camp, 0, r.base, h, true);
+    const boite = svg("svg", {
+      x: (-b.cadre[0] * h) / 2,
+      y: r.base - (b.cadre[1] - b.cadre[2]) * h,
+      width: b.cadre[0] * h,
+      height: b.cadre[1] * h,
+      viewBox: `0 0 ${b.px[0]} ${b.px[1]}`,
+      preserveAspectRatio: "none",
+      overflow: "hidden",
+    }, f);
+    const depart = ((this.feuxDessines++ * 5) % IMAGES_FEU) * (BOUCLE_FEU_S / IMAGES_FEU);
+    svg("image", { href: b.images[camp], width: b.px[0] * IMAGES_FEU, height: b.px[1], class: `match-feu-bande niveau-${n}`, style: `animation-delay: -${depart.toFixed(2)}s` }, boite);
   }
 
-  /** Une flamme de hauteur `h`, pied en (x, y) ; `complete` : avec sa couche sombre du bord. */
-  private flamme(g: SVGGElement, camp: 0 | 1, x: number, y: number, h: number, complete: boolean): void {
-    const l = (h * 40) / 60;
-    const boite = svg("svg", { x: x - l / 2, y: y - h, width: l, height: h, viewBox: "0 0 40 60", overflow: "visible", class: "match-flamme-boite" }, g);
-    const matiere = svg("g", { filter: `url(#match-feu-matiere-${camp})` }, boite);
-    if (complete) svg("path", { d: FLAMME.bord, fill: `url(#match-feu-bord-${camp})`, class: "match-flamme-a" }, matiere);
-    svg("path", { d: FLAMME.milieu, fill: `url(#match-feu-milieu-${camp})`, class: "match-flamme-b" }, matiere);
-    svg("path", { d: FLAMME.coeur, fill: `url(#match-feu-coeur-${camp})`, class: "match-flamme-c" }, matiere);
-  }
-
-  /** Étincelles qui montent (devant le joueur) : 3 au-dessus de lui au niveau 1,
-   *  aucune au 2, 9 braises dans le feu au 3. */
+  /** Étincelles qui montent (devant le joueur) : 3 au-dessus de lui au niveau 1
+   *  (aux niveaux 2 et 3, les braises sont dans les images du feu). */
   private braisesFusion(g: SVGGElement, camp: 0 | 1, niveau: number, r: ReperesFeu, k3: number): void {
-    if (niveau === 2) return;
+    if (niveau !== 1) return;
     const h = r.taille * k3;
     const [nb, y, etendue] = niveau === 1 ? [3, r.haut + 0.3 * r.taille, 0.9 * r.larg] : [9, r.base - 0.45 * h, (h * 40) / 60];
     const f = svg("g", { class: "match-feu" }, g);

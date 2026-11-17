@@ -926,3 +926,15 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 - `prototype/dist/index.html` est retiré du dépôt (`.gitignore`).
 
 **À juger par le concepteur** : la proposition de mise à jour du skill `foot-merge-tactic-etape` (nouveaux chemins).
+
+## 17/11/2026 (10 h) — Plus de son dans la page claude.ai : corrigé
+
+**Remarque du concepteur** : « J'ai l'impression qu'il n'y a plus de son pendant le match. »
+
+**Cause** : `src/ui/son.ts` chargeait les sons inclus dans la page (adresses `data:audio/mpeg;base64,…`) avec `fetch`, et la page claude.ai interdit `fetch`, même vers une adresse `data:`. Le site public (GitHub Pages) n'est pas touché. Sans lien avec le découpage de `ballon.ts`.
+
+**Ce qui a été fait** : les sons inclus sont décodés directement (`octetsInclus`), sans `fetch`. Commit direct sur `main`, reporté sur la branche de la pull request n° 14, page claude.ai republiée.
+
+**Vérification** : page ouverte dans Chrome avec une politique de sécurité comme celle des pages claude.ai, match lancé : 0 son chargé sur 6 avant, 6 sur 6 après (6 sur 6 aussi sans cette politique).
+
+**À juger par le concepteur** : le son revient dans la page claude.ai.

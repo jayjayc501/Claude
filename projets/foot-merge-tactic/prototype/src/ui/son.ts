@@ -44,12 +44,23 @@ export function activer(): void {
   }
 }
 
+/** Octets d'un son inclus dans la page (adresse data:…;base64), décodés sans
+ *  fetch : la page claude.ai interdit fetch, même vers une adresse data:, et le
+ *  match y restait muet (17/11). */
+function octetsInclus(url: string): ArrayBuffer {
+  const bin = atob(url.slice(url.indexOf(",") + 1));
+  const octets = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) octets[i] = bin.charCodeAt(i);
+  return octets.buffer;
+}
+
 async function charger(): Promise<void> {
   const c = ctx!;
   await Promise.all(
     (Object.keys(FICHIERS) as NomSon[]).map(async (nom) => {
       try {
-        const octets = await (await fetch(FICHIERS[nom])).arrayBuffer();
+        const url = FICHIERS[nom];
+        const octets = url.startsWith("data:") ? octetsInclus(url) : await (await fetch(url)).arrayBuffer();
         tampons[nom] = await c.decodeAudioData(octets);
       } catch {
         // son illisible sur ce navigateur : on s'en passe

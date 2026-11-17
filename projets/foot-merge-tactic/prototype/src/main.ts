@@ -1,0 +1,275 @@
+// Point d'entrée de la page (13/11) : un championnat contre 3 ordinateurs.
+// 1. Draft des 11 titulaires (toucher une case, choisir parmi les joueurs tirés
+//    au hasard), avec un budget ; les ordinateurs draftent en même temps, dans
+//    la même réserve de cartes, avec le même budget.
+// 2. Premier mercato pour le banc (le budget qui reste), relances, fusions.
+// 3. Championnat de 4 équipes : à chaque journée, ton match (regardé), l'autre
+//    match (simulé), le classement, puis un mercato avec les pièces gagnées.
+
+import { Championnat, jouerMatch } from "./jeu/championnat";
+import { GrainesLocales } from "./jeu/graines";
+import { ArbitreLocal } from "./match/arbitreLocal";
+import { CATALOGUE, Partie, REGLES } from "./jeu/partie";
+import { chargerDonnees, chargerEquipes, chargerReglages } from "./sim/chargement";
+import { chargerInfluences } from "./sim/influences";
+import type { Equipe } from "./sim/types";
+import { html } from "./ui/dom";
+import { EcranAccueil } from "./ui/ecranAccueil";
+import { EcranMatch } from "./ui/ecranMatch";
+import { UnContreUn, idDepuis } from "./ui/unContreUn";
+import { type ControlePartie, EcranPreparation } from "./ui/ecranPreparation";
+import { inscrireImages } from "./ui/imagesCatalogue";
+import { ouvrirCaseDraft } from "./ui/draft";
+import { type DonneesPrepa, type Fiche, Preparation, donneesPrepa } from "./ui/preparation";
+
+const CLE_TACTIQUE = "foot-merge-tactic.tactique.v1";
+
+function demarrer(): void {
+  const reglages = chargerReglages();
+  const donnees = chargerDonnees("hexagones");
+  // Toutes les graines viennent d'ici (13/11 au soir) ; plus tard, d'un serveur.
+  const graines = new GrainesLocales();
+  const { adversaire: adversaireDemo } = chargerEquipes(donnees);
+  inscrireImages(CATALOGUE.cartes);
+  // Formation de l'ordinateur : celle de l'adversaire de démonstration, gardien en dernier.
+  const planOrdi = [...adversaireDemo.composition.filter((p) => p.poste !== "G"), ...adversaireDemo.composition.filter((p) => p.poste === "G")].map((p) => ({ poste: p.poste, cellule: p.cellule }));
+  const deck = Object.entries(CATALOGUE.pays).map(([code, p]) => ({ code, nom: p.nom, couleur: p.couleur }));
+  const fiches: Record<string, Fiche> = Object.fromEntries(CATALOGUE.cartes.map((c) => [c.id, { nom: c.nom, pays: c.pays, poste: c.poste, style: c.style, prix: c.prix, notes: c.notes }]));
+  const couleurs = Object.fromEntries(deck.map((p) => [p.code, p.couleur]));
+
+  let partie!: Partie;
+  let prepa!: Preparation;
+  let preparation!: EcranPreparation;
+  /** Joueurs proposés par poste, gardés jusqu'au prochain choix (fermer la fenêtre ne relance pas le tirage). */
+  let offres = new Map<string, string[]>();
+  /** Mi-temps en cours : l'écran de préparation sert aux changements (13/11). */
+  let miTemps = false;
+  let championnat!: Championnat;
+  /** Résultats de la dernière journée jouée (affichés sous le classement). */
+  let resultats: string[] = [];
+  const adversaire = (): number => championnat.adversaire(0) ?? 1;
+
+  const app = document.getElementById("app")!;
+  // Plus d'onglets « Préparation / Match » (15/11, concepteur) : on passe au match
+  // par le gros bouton en haut de la préparation, et on en revient par « Continuer ».
+  const contenu = html("main", {}, app);
+
+  const equipes = (): [Equipe, Equipe] => [{ ...prepa.equipe(), nom: "Toi", nationalite: "Toi" }, partie.equipeDe(adversaire())];
+  const habillage = {
+    nomNous: "Toi",
+    nomEux: "Ordinateur",
+    changements: () => {
+      miTemps = true;
+      montrer("preparation");
+    },
+    finMatch: (score: [number, number]) => finJournee(score),
+    tactiques: donneesPrepa().tactiques,
+    styles: donneesPrepa().styles,
+    infos: (id: string, camp: 0 | 1 = 0) => {
+      const f = prepa.d.joueurs[id];
+      if (!f) return undefined;
+      // Fusions : celles de ton effectif, ou celles de l'ordinateur pour ses joueurs.
+      const fusions = camp === 0 ? (prepa.membre(id)?.fusions ?? 0) : (partie.camps[adversaire()]!.effectif.find((m) => m.id === id)?.fusions ?? 0);
+      return { couleur: couleurs[f.pays] ?? "#1F3A93", style: f.style, fusions };
+    },
+  };
+  // Le match est calculé par l'arbitre (13/11 au soir) : sur le téléphone aujourd'hui, par un serveur plus tard.
+  const match = new EcranMatch(donnees, reglages, equipes, habillage, graines, new ArbitreLocal(donnees, reglages));
+
+  /** Fin de ton match : l'autre match de la journée est simulé, le classement avance,
+   *  chacun gagne ses pièces et les ordinateurs font leur mercato (13/11). */
+  function finJournee(score: [number, number]): void {
+    const adv = adversaire();
+    championnat.enregistrer(0, adv, score);
+    for (const r of championnat.rencontres) {
+      if (r.score) continue;
+      r.score = jouerMatch(donnees, reglages, [partie.equipeDe(r.a), partie.equipeDe(r.b)], graines.matchSimule(championnat.journee, r.a));
+    }
+    resultats = championnat.rencontres.map((r) => `${partie.noms[r.a]} ${r.score![0]}–${r.score![1]} ${partie.noms[r.b]}`);
+    championnat.suivante();
+    let message = `Journée finie : ${resultats.join(" · ")}.`;
+    if (!championnat.fini) {
+      partie.nouvelleJournee(prepa.d.bancMax, prepa.d.fusionsMax);
+      prepa.etat = { ...prepa.etat, budget: prepa.etat.budget + REGLES.gainParJournee, mercato: partie.tirerMercato() };
+      message += ` +${REGLES.gainParJournee} pièces pour le mercato.`;
+    } else {
+      const premier = championnat.classement()[0]!;
+      message = premier.camp === 0 ? "Tu es champion ! 🏆" : `Championnat terminé : ${premier.nom} est champion.`;
+    }
+    montrer("preparation");
+    preparation.signaler(message);
+  }
+
+  /** Recopie l'équipe du draft (toi) dans l'écran de préparation. */
+  function synchroniser(): void {
+    const c = partie.camps[0]!;
+    prepa.etat = { ...prepa.etat, effectif: c.effectif.map((m) => ({ ...m })), composition: c.composition.map((p) => ({ ...p })), budget: c.budget };
+  }
+
+  function finDraft(): void {
+    partie.finirDraftOrdis(prepa.d.bancMax, prepa.d.fusionsMax);
+    prepa.etat = { ...prepa.etat, mercato: partie.tirerMercato() };
+  }
+
+  const controle: ControlePartie = {
+    enDraft: () => !partie.draftFini(0),
+    casePermise: (poste, cellule) => partie.casePermise(0, poste, cellule),
+    aGarder: () => partie.aGarder(0),
+    ouvrirCase: (poste, cellule) =>
+      ouvrirCaseDraft({
+        partie,
+        prepa,
+        preparation,
+        offres,
+        poste,
+        cellule,
+        choisi: (texte) => {
+          const pris = partie.ordisChoisissent();
+          let message = texte + (pris.length ? ` Les ordinateurs prennent ${pris.map((x) => partie.carte(x.id).nom).join(", ")}.` : "");
+          if (partie.draftFini(0)) {
+            finDraft();
+            message = "Draft terminé ! Complète ton banc au mercato avec ce qui te reste.";
+          }
+          synchroniser();
+          preparation.rendre();
+          preparation.signaler(message);
+        },
+      }),
+    ordi: () => {
+      const ordis = partie.camps.slice(1);
+      return {
+        titulaires: Math.min(...ordis.map((c) => c.composition.length)),
+        banc: ordis.reduce((n, c) => n + c.effectif.length - c.composition.length, 0),
+        choix: [...partie.choixOrdi].reverse().slice(0, 9).map(({ camp, id }) => {
+          const k = partie.carte(id);
+          return { nom: `${k.nom} (${partie.noms[camp]})`, poste: k.poste, prix: k.prix, couleur: couleurs[k.pays] ?? "#3A4A40", pays: k.pays };
+        }),
+      };
+    },
+    championnat: () => {
+      const adv = championnat.fini ? null : adversaire();
+      return {
+        journee: Math.min(championnat.journees.length, championnat.journee + 1),
+        total: championnat.journees.length,
+        fini: championnat.fini,
+        prochain: adv === null ? null : (partie.noms[adv] ?? null),
+        classement: championnat.classement().map((l) => ({ nom: l.nom, points: l.points, joues: l.joues, diff: l.pour - l.contre, toi: l.camp === 0, prochain: l.camp === adv })),
+        resultats,
+      };
+    },
+    miTemps: () => (miTemps ? { score: match.scoreActuel, joueur: (id) => match.infosJoueur(id) } : null),
+    jouer: () => {
+      if (championnat.fini) return;
+      if (!miTemps) return montrer("match");
+      // Mi-temps : on revient au match en cours, les changements s'appliquent.
+      miTemps = false;
+      montrer("match", true);
+      match.lancerSecondeMiTemps();
+    },
+    nouvelle: () => montrerAccueil(), // ⌂ : retour au choix du mode (15/11)
+    // Équipe automatique (14/11) : nouvelle partie, ton équipe est faite toute seule
+    // (titulaires et banc, fusions pour la haute qualité), puis les ordinateurs draftent.
+    autoPossible: () => championnat.journee === 0 && !miTemps,
+    auto: (qualite) => {
+      nouvellePartie();
+      const b = partie.equipeAuto(0, qualite, prepa.d.bancMax, prepa.d.fusionsMax);
+      finDraft();
+      synchroniser();
+      preparation.rendre();
+      const paliers = b.paliers.map((x) => x.replace(/^([A-Z]{3}) /, (_, s: string) => `${prepa.d.styles[s] ?? s} `));
+      preparation.signaler(
+        `Équipe ${qualite === "haute" ? "haute qualité" : "moyenne"} : note moyenne ${b.moyenne.toFixed(0)}, ${b.depense} pièces dépensées, ${b.banc} remplaçants` +
+          (b.fusions ? `, ${b.fusions} fusion${b.fusions > 1 ? "s" : ""}` : "") +
+          (paliers.length ? ` · ${paliers.join(", ")}` : "") +
+          ". Rappuie pour une autre.",
+      );
+    },
+  };
+
+  function nouvellePartie(): void {
+    miTemps = false;
+    partie = new Partie(donnees, graines.partie(), planOrdi);
+    championnat = new Championnat(partie.noms, REGLES.allerRetour);
+    resultats = [];
+    offres = new Map();
+    const d: DonneesPrepa = {
+      ...donneesPrepa(),
+      deck,
+      joueurs: fiches,
+      effectif: [],
+      composition: [],
+      mercato: [],
+      budget: REGLES.budgetDepart,
+      chrono: "",
+      groupe: { nom: "Championnat", match: "Toi contre 3 ordinateurs", equipes: [] },
+    };
+    prepa = new Preparation(donnees, d);
+    prepa.reserve = partie.reserve;
+    prepa.tirage = () => partie.tirerMercato();
+    prepa.relanceCout = REGLES.relanceCout;
+    prepa.bonusFusion = chargerInfluences().fusion.notesParNiveau;
+    try {
+      const t = localStorage.getItem(CLE_TACTIQUE);
+      if (t) prepa.choisirTactique(t);
+    } catch {
+      // stockage indisponible : tactique par défaut
+    }
+    preparation = new EcranPreparation(
+      prepa,
+      () => {
+        // Pendant le draft, on peut déplacer ses titulaires : la partie suit.
+        if (!partie.draftFini(0)) partie.camps[0]!.composition = prepa.etat.composition.map((p) => ({ ...p }));
+        try {
+          localStorage.setItem(CLE_TACTIQUE, prepa.etat.tactique);
+        } catch {
+          // stockage indisponible : sans conséquence
+        }
+      },
+      controle,
+    );
+    montrer("preparation");
+  }
+
+  function montrer(ecran: "preparation" | "match", reprise = miTemps): void {
+    if (ecran === "match" && !prepa.pret()) {
+      preparation.signaler(partie.draftFini(0) ? "Il faut 11 joueurs sur le terrain avant de jouer." : "Termine d'abord ton draft : 11 titulaires.", true);
+      return;
+    }
+    if (ecran === "match" && championnat.fini) return;
+    if (ecran === "match") {
+      habillage.nomEux = partie.noms[adversaire()] ?? "Ordinateur";
+      contenu.replaceChildren(match.racine);
+      match.ouvrir(reprise);
+    } else {
+      match.fermer();
+      preparation.rendre();
+      contenu.replaceChildren(preparation.racine);
+    }
+    window.scrollTo({ top: 0 });
+  }
+
+  // 1 contre 1 en ligne (15/11) : partie par un lien, match calculé sur le serveur.
+  const unContreUn = new UnContreUn({ donnees, reglages, contenu, planOrdi, deck, fiches, couleurs, accueil: () => montrerAccueil() });
+
+  // Premier écran : choix du mode de jeu (15/11).
+  const accueil = new EcranAccueil({
+    championnat: () => nouvellePartie(),
+    creer: () => void unContreUn.creer(),
+    rejoindre: (texte) => {
+      const id = idDepuis(texte);
+      if (id) void unContreUn.rejoindre(id);
+    },
+  });
+  function montrerAccueil(): void {
+    unContreUn.quitter();
+    match.fermer();
+    contenu.replaceChildren(accueil.racine);
+    window.scrollTo({ top: 0 });
+  }
+  // Lien reçu (…#p=code) : on rejoint directement la partie.
+  const recu = idDepuis(location.hash);
+  if (recu) void unContreUn.rejoindre(recu);
+  else montrerAccueil();
+}
+
+demarrer();

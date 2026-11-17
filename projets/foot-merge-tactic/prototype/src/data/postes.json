@@ -1,0 +1,129 @@
+{
+  "terrain": {
+    "longueur": 105,
+    "largeur": 68
+  },
+  "roles": {
+    "G": "Gardien",
+    "DC": "Défenseur central",
+    "DG": "Latéral gauche",
+    "DD": "Latéral droit",
+    "MDC": "Milieu défensif",
+    "MC": "Milieu central",
+    "MOC": "Milieu offensif",
+    "AG": "Ailier gauche",
+    "AD": "Ailier droit",
+    "AC": "Attaquant"
+  },
+  "postes": [
+    {
+      "id": "G",
+      "nom": "Gardien",
+      "ligneDefense": "gardien",
+      "max": 1,
+      "suiviBallon": 0.3
+    },
+    {
+      "id": "DC",
+      "nom": "Défenseur central",
+      "ligneDefense": "defense",
+      "max": 3
+    },
+    {
+      "id": "DG",
+      "nom": "Latéral gauche",
+      "ligneDefense": "defense",
+      "max": 1,
+      "maxProvisoire": true
+    },
+    {
+      "id": "DD",
+      "nom": "Latéral droit",
+      "ligneDefense": "defense",
+      "max": 1,
+      "maxProvisoire": true
+    },
+    {
+      "id": "MC",
+      "nom": "Milieu central",
+      "ligneDefense": "milieu",
+      "max": 4,
+      "maxProvisoire": true
+    },
+    {
+      "id": "AG",
+      "nom": "Côté gauche",
+      "ligneDefense": "milieu",
+      "max": 1
+    },
+    {
+      "id": "AD",
+      "nom": "Côté droit",
+      "ligneDefense": "milieu",
+      "max": 1,
+      "maxProvisoire": true
+    },
+    {
+      "id": "AC",
+      "nom": "Attaquant",
+      "ligneDefense": "attaque",
+      "max": 3,
+      "maxProvisoire": true
+    }
+  ],
+  "plateauParDefaut": "hexagones",
+  "plateaux": {
+    "hexagones": {
+      "nom": "Hexagones",
+      "forme": "hexagone",
+      "colonnes": 5,
+      "gardien": {
+        "zoneM": 8,
+        "largeurCases": 0.6,
+        "cases": [
+          {
+            "label": "normal"
+          },
+          {
+            "label": "avancé"
+          }
+        ]
+      },
+      "rangees": [
+        ["DG", "DC", "DC", "DC", "DD"],
+        ["DG", "DC", "DC", "DD"],
+        ["DG", "MC:MDC", "MC:MDC", "MC:MDC", "DD"],
+        ["AG", "MC:MC", "MC:MC", "AD"],
+        ["AG", "MC:MOC", "MC:MOC", "MC:MOC", "AD"],
+        ["AG", "AC", "AC", "AD"],
+        ["", "AC", "AC", "AC", ""]
+      ]
+    },
+    "carres": {
+      "nom": "Carrés",
+      "forme": "carre",
+      "colonnes": 5,
+      "gardien": {
+        "zoneM": 8,
+        "largeurCases": 0.6,
+        "cases": [
+          {
+            "label": "normal"
+          },
+          {
+            "label": "avancé"
+          }
+        ]
+      },
+      "rangees": [
+        ["DG", "DC", "DC", "DC", "DD"],
+        ["DG", "DC", "DC", "DC", "DD"],
+        ["DG", "MC:MDC", "MC:MDC", "MC:MDC", "DD"],
+        ["AG", "MC:MC", "MC:MC", "MC:MC", "AD"],
+        ["AG", "MC:MOC", "MC:MOC", "MC:MOC", "AD"],
+        ["AG", "AC", "AC", "AC", "AD"],
+        ["", "AC", "AC", "AC", ""]
+      ]
+    }
+  }
+}

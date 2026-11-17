@@ -1,0 +1,911 @@
+// Écran de préparation, d'après la maquette du 12/11 (docs/maquette-interface/,
+// page « V2 figurines ») : en-tête (chrono, groupe), compteurs de pays et de
+// styles à gauche, plateau en hexagones au centre, banc de 5, mercato.
+//
+// Tout au glisser-déposer (appui long ou glissement) :
+//   - sur une case libre de son poste : le joueur y va ;
+//   - sur un joueur du même poste : échange ou entrée du remplaçant ;
+//   - sur le banc : sortie (5 places) ; sur un remplaçant : il entre à sa place ;
+//   - sur le mercato : vente.
+// Hors poste : refusé (12/11). Un toucher affiche le nom. Un toucher sur une
+// carte du mercato l'achète (fusion automatique si on a déjà ce joueur).
+// Le chrono et le classement du groupe sont des données de démonstration.
+
+import type { Donnees } from "../sim/donnees";
+import { caseAuPoint, occupant } from "../sim/placement";
+import type { Cellule } from "../sim/types";
+import { BUSTES } from "./bustes";
+import { CORPS_PICTOS, PICTOS } from "./pictos";
+import { html, svg } from "./dom";
+import { type Action, type Issue, Preparation, libellePoste } from "./preparation";
+import { notesAffichees } from "../sim/notes";
+import { ouvrirFiche } from "./fiche";
+
+// Plateau : x de 0 à 1 sur W, y de 0,5 (ligne médiane, en haut) à 0 (but, en bas) sur H.
+// H = 1,5 W donnait des hexagones presque réguliers ; 13/11 (« l'interface ne rentre pas
+// dans l'écran ») : H = 1,1 W, des hexagones aplatis comme un plateau vu en perspective.
+// MH laisse dépasser les bustes du haut.
+const W = 300;
+const H = 330;
+const MH = 22;
+const HAUT_TOTAL = MH + H + 10;
+
+const DELAI_APPUI_MS = 250;
+const SEUIL_GLISSEMENT_PX = 8;
+const DECALAGE_DOIGT_PX = 44;
+
+const ZONES = {
+  gk: { bg: "#F2C230", lane: "#F2C230" },
+  def: { bg: "#2F5FD0", lane: "#8FB0F0" },
+  mid: { bg: "#7B45D0", lane: "#B9A0EE" },
+  att: { bg: "#D2403A", lane: "#F09A95" },
+};
+const ZONE_DU_POSTE: Record<string, keyof typeof ZONES> = {
+  G: "gk", DC: "def", DG: "def", DD: "def", MC: "mid", AG: "att", AD: "att", AC: "att",
+};
+const COULOIRS = new Set(["DG", "DD", "AG", "AD"]);
+const COULEUR_FUSION = ["", "#5EC8FF", "#FFC400", "#C04BFF"];
+
+/** Partie contre l'ordinateur (13/11) : draft des titulaires, puis mercato et match. */
+export interface ControlePartie {
+  /** Draft des 11 titulaires en cours ? */
+  enDraft(): boolean;
+  /** Case vide où l'on peut recruter maintenant (le gardien en dernier s'il manque). */
+  casePermise(poste: string, cellule: number): boolean;
+  /** Ouvre les joueurs proposés pour cette case. */
+  ouvrirCase(poste: string, cellule: number): void;
+  /** Pièces à garder pour finir le draft. */
+  aGarder(): number;
+  /** Choix de l'ordinateur (le plus récent d'abord) et taille de son banc. */
+  ordi(): { titulaires: number; banc: number; choix: { nom: string; poste: string; prix: number; couleur: string; pays: string }[] };
+  /** Championnat (13/11) : journée, classement, prochain adversaire, résultats de la journée passée. */
+  championnat(): {
+    journee: number;
+    total: number;
+    fini: boolean;
+    prochain: string | null;
+    classement: { nom: string; points: number; joues: number; diff: number; toi: boolean; prochain: boolean }[];
+    resultats: string[];
+  };
+  /** Mi-temps (13/11) : score, forme et note de match de tes joueurs ; null hors mi-temps. */
+  miTemps(): { score: [number, number]; joueur(id: string): { forme: number; note: number } | null } | null;
+  jouer(): void;
+  nouvelle(): void;
+  /** Équipe automatique (14/11) : nouvelle partie, titulaires et banc choisis tout seuls. */
+  auto?(qualite: "haute" | "moyenne"): void;
+  /** Les boutons d'équipe automatique sont proposés (début de partie, avant le premier match). */
+  autoPossible?(): boolean;
+  /** 1 contre 1 (15/11) : temps restant (« 7:42 »), affiché en haut et mis à jour par majChrono(). */
+  chrono?(): string | null;
+  /** 1 contre 1 : titre et sous-titre de l'en-tête après le draft (à la place de la journée de championnat). */
+  titre?(): { titre: string; sous: string };
+  /** 1 contre 1 : texte du gros bouton (« Prêt ▶ ») et s'il est encore actif (équipe pas encore envoyée). */
+  libelleJouer?(miTemps: boolean): string;
+  jouerActif?(): boolean;
+}
+
+// Gardien : une case en double losange (deux hexagones fusionnés), sous le DC central.
+const GARDIEN_Y = 0.0578;
+const DOUBLE_LOSANGE = [
+  [0, 25], [24.07, 0], [48.15, 25], [51.85, 25], [75.93, 0], [100, 25],
+  [100, 75], [75.93, 100], [51.85, 75], [48.15, 75], [24.07, 100], [0, 75],
+] as const;
+
+// Étincelles du niveau 3 (repère de la maquette : buste de 48 × 49, socle en 24,47).
+const ETINCELLES =
+  "M5 3 L6.4 6.6 L10 8 L6.4 9.4 L5 13 L3.6 9.4 L0 8 L3.6 6.6 Z M43 -1 L44.68 3.32 L49 5 L44.68 6.68 L43 11 L41.32 6.68 L37 5 L41.32 3.32 Z M2 26.5 L2.98 29.02 L5.5 30 L2.98 30.98 L2 33.5 L1.02 30.98 L-1.5 30 L1.02 29.02 Z M46 23 L47.12 25.88 L50 27 L47.12 28.12 L46 31 L44.88 28.12 L42 27 L44.88 25.88 Z M24 -11.5 L25.26 -8.26 L28.5 -7 L25.26 -5.74 L24 -2.5 L22.74 -5.74 L19.5 -7 L22.74 -8.26 Z";
+
+const X = (xn: number) => xn * W;
+const Y = (yn: number) => MH + ((0.5 - yn) / 0.5) * H;
+
+export class EcranPreparation {
+  readonly racine: HTMLElement;
+  private contenu: HTMLElement;
+  private toast: HTMLElement;
+  private minuteurToast: number | undefined;
+  private choisi: string | null = null;
+
+  private plateau: SVGSVGElement | null = null;
+  private calqueCible: SVGGElement | null = null;
+  private elBanc: HTMLElement | null = null;
+  private elMercato: HTMLElement | null = null;
+  private placesBanc: { id: string; el: HTMLElement }[] = [];
+
+  private glisse: {
+    id: string;
+    pointeur: number;
+    depart: { x: number; y: number };
+    actif: boolean;
+    doigt: boolean;
+    minuteur: number | undefined;
+    origine: Element;
+    fantome: HTMLImageElement | null;
+    action: Action;
+    /** Carte du mercato glissée (n° de la place), ou null pour un joueur de l'effectif. */
+    mercato: number | null;
+  } | null = null;
+
+  constructor(
+    private prepa: Preparation,
+    private auChangement: () => void,
+    private partie?: ControlePartie,
+  ) {
+    this.racine = html("section", { class: "prepa" });
+    this.contenu = html("div", { class: "prepa-contenu" }, this.racine);
+    this.toast = html("div", { class: "prepa-toast", role: "status", "aria-live": "polite" }, this.racine);
+    window.addEventListener("resize", () => this.ajusterHauteur());
+    this.rendre();
+  }
+
+  private get donnees(): Donnees {
+    return this.prepa.donnees;
+  }
+
+  signaler(texte: string, erreur = false): void {
+    if (!texte) return;
+    window.clearTimeout(this.minuteurToast);
+    this.toast.textContent = texte;
+    this.toast.className = `prepa-toast visible${erreur ? " erreur" : ""}`;
+    this.minuteurToast = window.setTimeout(() => (this.toast.className = "prepa-toast"), erreur ? 3200 : 2200);
+  }
+
+  // ---- Repères -----------------------------------------------------------
+
+  /** Nom écrit dans une case vide : AC → BU ; la case basse des ailiers → MG / MD. */
+  private libelleCase(c: Cellule): string {
+    if (c.poste === "AG" && c.index === 0) return "MG";
+    if (c.poste === "AD" && c.index === 0) return "MD";
+    return libellePoste(c.role);
+  }
+
+  private centreCase(poste: string, cellule: number): { x: number; y: number } {
+    if (poste === "G") return { x: X(0.5), y: Y(GARDIEN_Y) };
+    const c = this.donnees.cellule(poste, cellule);
+    return { x: X(c.centre.x), y: Y(c.centre.y) };
+  }
+
+  private tailleCase(): { w: number; h: number } {
+    const c = this.donnees.cellule("DC", 0);
+    return { w: c.rect.w * W, h: (c.rect.h / 0.5) * H };
+  }
+
+  private pointsHexagone(cx: number, cy: number, w: number, h: number): string {
+    const s = [[0, -h / 2], [w / 2, -h / 4], [w / 2, h / 4], [0, h / 2], [-w / 2, h / 4], [-w / 2, -h / 4]];
+    return s.map(([x, y]) => `${(cx + x!).toFixed(1)},${(cy + y!).toFixed(1)}`).join(" ");
+  }
+
+  private pointsGardien(retrait: number): number[][] {
+    const { w, h } = this.tailleCase();
+    const lg = 2 * w - 2 * retrait;
+    const ht = h - 2 * retrait;
+    const { x: cx, y: cy } = this.centreCase("G", 0);
+    return DOUBLE_LOSANGE.map(([px, py]) => [cx - lg / 2 + (px / 100) * lg, cy - ht / 2 + (py / 100) * ht]);
+  }
+
+  private dessinerCase(poste: string, cellule: number, parent: SVGGElement, attrs: Record<string, string | number>, retrait = 2): SVGPolygonElement {
+    if (poste === "G") {
+      const pts = this.pointsGardien(retrait).map(([x, y]) => `${x!.toFixed(1)},${y!.toFixed(1)}`).join(" ");
+      return svg("polygon", { points: pts, ...attrs }, parent);
+    }
+    const { x, y } = this.centreCase(poste, cellule);
+    const { w, h } = this.tailleCase();
+    return svg("polygon", { points: this.pointsHexagone(x, y, w - 2 * retrait, h - 2 * retrait), ...attrs }, parent);
+  }
+
+  // ---- Cible d'un glissement ----------------------------------------------
+
+  private dans(el: Element | null, x: number, y: number): boolean {
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  }
+
+  private caseAuPointEcran(cx: number, cy: number): { poste: string; cellule: number } | null {
+    const s = this.plateau;
+    const ctm = s?.getScreenCTM();
+    if (!s || !ctm) return null;
+    const p = new DOMPoint(cx, cy).matrixTransform(ctm.inverse());
+    if (dansPolygone(p.x, p.y, this.pointsGardien(0))) return { poste: "G", cellule: 0 };
+    const c = caseAuPoint(this.donnees, { x: p.x / W, y: 0.5 - ((p.y - MH) / H) * 0.5 });
+    if (!c) return null;
+    return { poste: c.poste, cellule: c.poste === "G" ? 0 : c.index };
+  }
+
+  private cibleAu(id: string, cx: number, cy: number): Action {
+    const place = this.glisse?.mercato ?? null;
+    if (place !== null) return this.cibleAchat(id, place, cx, cy);
+    const surTerrain = !!this.prepa.placement(id);
+    if (this.dans(this.elMercato, cx, cy)) return { type: "vente", id };
+    if (this.dans(this.elBanc, cx, cy)) {
+      if (!surTerrain) return { type: "rien" };
+      const place = this.placesBanc.find((p) => this.dans(p.el, cx, cy));
+      return place ? { type: "remplacement", entrant: place.id, sortant: id } : { type: "banc", id };
+    }
+    const c = this.caseAuPointEcran(cx, cy);
+    if (!c) return { type: "rien" };
+    const occ = occupant(this.prepa.etat.composition, c.poste, c.cellule);
+    if (occ?.joueurId === id) return { type: "rien" };
+    if (occ) return surTerrain ? { type: "echange", a: id, b: occ.joueurId } : { type: "remplacement", entrant: id, sortant: occ.joueurId };
+    return { type: "case", id, poste: c.poste, cellule: c.cellule };
+  }
+
+  /** Carte du mercato lâchée : sur le banc, achat ; sur une case, achat et placement ;
+   *  sur un joueur, achat et remplacement (ou fusion si c'est sa copie). */
+  private cibleAchat(id: string, place: number, cx: number, cy: number): Action {
+    if (this.dans(this.elMercato, cx, cy)) return { type: "rien" };
+    if (this.dans(this.elBanc, cx, cy)) return { type: "achat", place };
+    const c = this.caseAuPointEcran(cx, cy);
+    if (!c) return { type: "rien" };
+    const occ = occupant(this.prepa.etat.composition, c.poste, c.cellule);
+    if (occ?.joueurId === id) return { type: "achat", place };
+    if (occ) return { type: "achat", place, vers: { remplace: occ.joueurId } };
+    return { type: "achat", place, vers: { poste: c.poste, cellule: c.cellule } };
+  }
+
+  private montrerCible(a: Action): void {
+    const calque = this.calqueCible;
+    calque?.replaceChildren();
+    this.elBanc?.classList.remove("cible-ok", "cible-non");
+    this.elMercato?.classList.remove("cible-ok", "cible-non");
+    if (a.type === "rien") return;
+    const ok = this.prepa.essayer(a).ok;
+    const classe = ok ? "cible-ok" : "cible-non";
+    if (a.type === "vente") return void this.elMercato?.classList.add(classe);
+    if (a.type === "banc") return void this.elBanc?.classList.add(classe);
+    if (a.type === "achat") {
+      const id = this.glisse?.id ?? "";
+      const v = a.vers;
+      const visee = !v || this.prepa.membre(id) ? this.prepa.placement(id) : "remplace" in v ? this.prepa.placement(v.remplace) : v;
+      if (!v && !visee) return void this.elBanc?.classList.add(classe);
+      if (visee && calque) this.dessinerCase(visee.poste, visee.cellule, calque, { class: `prepa-cible ${classe}` }, 1);
+      return;
+    }
+    // Joueur du terrain lâché sur un remplaçant : on vise le banc.
+    if (a.type === "remplacement" && a.sortant === this.glisse?.id) return void this.elBanc?.classList.add(classe);
+    const visee =
+      a.type === "case" ? { poste: a.poste, cellule: a.cellule }
+      : a.type === "echange" ? this.prepa.placement(a.b)
+      : this.prepa.placement(a.sortant);
+    if (visee && calque) this.dessinerCase(visee.poste, visee.cellule, calque, { class: `prepa-cible ${classe}` }, 1);
+  }
+
+  // ---- Glisser-déposer -----------------------------------------------------
+
+  private appui(ev: PointerEvent, id: string, el: Element, mercato: number | null = null): void {
+    if (this.glisse || (ev.pointerType === "mouse" && ev.button !== 0)) return;
+    ev.preventDefault();
+    el.setPointerCapture(ev.pointerId);
+    this.glisse = {
+      id,
+      pointeur: ev.pointerId,
+      depart: { x: ev.clientX, y: ev.clientY },
+      actif: false,
+      doigt: ev.pointerType !== "mouse",
+      minuteur: window.setTimeout(() => this.soulever(ev.clientX, ev.clientY), DELAI_APPUI_MS),
+      origine: el,
+      fantome: null,
+      action: { type: "rien" },
+      mercato,
+    };
+    const bouge = (e: PointerEvent) => this.bouger(e);
+    const lache = (e: PointerEvent) => {
+      el.removeEventListener("pointermove", bouge as EventListener);
+      el.removeEventListener("pointerup", lache as EventListener);
+      el.removeEventListener("pointercancel", lache as EventListener);
+      this.lacher(e);
+    };
+    el.addEventListener("pointermove", bouge as EventListener);
+    el.addEventListener("pointerup", lache as EventListener);
+    el.addEventListener("pointercancel", lache as EventListener);
+  }
+
+  private soulever(cx: number, cy: number): void {
+    const gl = this.glisse;
+    if (!gl || gl.actif) return;
+    gl.actif = true;
+    gl.origine.classList.add("prepa-origine");
+    const m = this.prepa.membre(gl.id);
+    const f = html("img", { src: BUSTES[gl.id] ?? "", alt: "", class: `prepa-fantome aura-${m?.fusions ?? 0}` }, document.body);
+    gl.fantome = f;
+    try {
+      navigator.vibrate?.(15);
+    } catch {
+      // vibration indisponible : sans conséquence
+    }
+    this.suivre(cx, cy);
+  }
+
+  private suivre(cx: number, cy: number): void {
+    const gl = this.glisse;
+    if (!gl?.fantome) return;
+    const py = cy - (gl.doigt ? DECALAGE_DOIGT_PX : 0);
+    // Le socle du buste est au point visé.
+    gl.fantome.style.transform = `translate(${cx - 28}px, ${py - 54}px)`;
+    gl.action = this.cibleAu(gl.id, cx, py);
+    this.montrerCible(gl.action);
+  }
+
+  private bouger(ev: PointerEvent): void {
+    const gl = this.glisse;
+    if (!gl || ev.pointerId !== gl.pointeur) return;
+    if (!gl.actif) {
+      if (Math.hypot(ev.clientX - gl.depart.x, ev.clientY - gl.depart.y) < SEUIL_GLISSEMENT_PX) return;
+      window.clearTimeout(gl.minuteur);
+      this.soulever(ev.clientX, ev.clientY);
+    }
+    this.suivre(ev.clientX, ev.clientY);
+  }
+
+  private lacher(ev: PointerEvent): void {
+    const gl = this.glisse;
+    if (!gl) return;
+    window.clearTimeout(gl.minuteur);
+    gl.fantome?.remove();
+    this.glisse = null;
+    if (ev.type === "pointercancel") return this.rendre();
+    if (!gl.actif) {
+      // Toucher sans glisser : la fiche du joueur (12/11).
+      this.choisi = null;
+      this.rendre();
+      return this.ouvrirFiche(gl.id, gl.mercato);
+    }
+    this.afficherIssue(this.prepa.appliquer(gl.action));
+  }
+
+  /** Fiche du joueur, façon Clash Royale (fiche.ts). */
+  private ouvrirFiche(id: string, place: number | null = null): void {
+    const f = this.prepa.fiche(id);
+    // Depuis le mercato : bouton pour recruter (ou fusionner) sans quitter la fiche.
+    const essai = place !== null ? this.prepa.essayerAchat(place) : null;
+    const fusion = place !== null && !!this.prepa.membre(id);
+    const action = essai
+      ? {
+          libelle: essai.ok ? `${fusion ? "Fusionner" : "Recruter"} · ${f.prix}` : essai.erreur,
+          piece: essai.ok,
+          possible: essai.ok,
+          faire: () => this.afficherIssue(this.prepa.acheter(place!)),
+        }
+      : undefined;
+    const pays = this.prepa.d.deck.find((p) => p.code === f.pays) ?? { code: f.pays, nom: f.pays, couleur: "#3A4A40" };
+    ouvrirFiche({
+      id,
+      nom: f.nom,
+      pays,
+      poste: f.poste,
+      style: f.style ? { code: f.style, nom: this.prepa.d.styles[f.style] ?? f.style } : null,
+      // Notes de la carte (14/11 : une fusion ne les change plus ; son boost de match est indiqué à part).
+      notes: f.notes ?? null,
+      fusions: place === null ? (this.prepa.membre(id)?.fusions ?? 0) : 0,
+      bonusFusion: this.prepa.bonusFusion,
+      // Joueur de ton équipe (banc ou terrain) : son prix de vente (14/11).
+      vente: place === null && this.prepa.membre(id) && this.partie ? this.prepa.prixVente(id) : undefined,
+      action,
+    });
+  }
+
+  private afficherIssue(r: Issue): void {
+    if (r.ok) {
+      this.choisi = null;
+      this.auChangement();
+      this.signaler(r.message);
+    } else {
+      this.signaler(r.erreur, true);
+    }
+    this.rendre();
+  }
+
+  // ---- Affichage -----------------------------------------------------------
+
+  rendre(): void {
+    const c = this.contenu;
+    c.replaceChildren();
+    requestAnimationFrame(() => this.ajusterHauteur());
+    const draft = this.partie?.enDraft() ?? false;
+    const mt = this.partie?.miTemps() ?? null;
+    if (this.partie) this.rendreGrosBouton(c, mt !== null);
+    if (draft) this.rendreEnteteDraft(c);
+    else if (mt) this.rendreEnteteMiTemps(c, mt.score);
+    else if (this.partie) this.rendreEnteteMercato(c);
+    else this.rendreEntete(c);
+    const milieu = html("div", { class: "prepa-milieu" }, c);
+    this.rendreTraits(milieu);
+    const terrain = html("div", { class: "prepa-terrain" }, milieu);
+    this.rendreTactique(terrain);
+    this.rendrePlateau(terrain);
+    if (draft) return this.rendreAttenteDraft(c);
+    this.rendreBanc(c);
+    if (mt) return; // mi-temps : pas de mercato
+    this.rendreMercato(c);
+    // (15/11 : plus de ligne « Les ordinateurs ont fait leur mercato ».)
+  }
+
+  /** L'écran doit tenir sur la hauteur du téléphone sans défiler (13/11, puis
+   *  15/11 : « les écrans sont encore trop hauts ») : s'il dépasse, le plateau
+   *  rétrécit d'autant (jusqu'à 240 px de haut au plus petit). */
+  ajusterHauteur(): void {
+    if (!this.racine.isConnected) return;
+    const plateau = this.contenu.querySelector<SVGSVGElement>("svg.prepa-plateau");
+    if (!plateau) return;
+    plateau.style.maxHeight = "";
+    const exces = document.documentElement.scrollHeight - window.innerHeight;
+    if (exces <= 0) return;
+    const h = plateau.getBoundingClientRect().height;
+    plateau.style.maxHeight = `${Math.max(240, Math.floor(h - exces))}px`;
+  }
+
+  /** Draft : titre, budget, progression ; touche une case pour recruter. */
+  private rendreEnteteDraft(parent: HTMLElement): void {
+    const p = this.partie!;
+    const n = this.prepa.etat.composition.length;
+    const tete = html("div", { class: "draft-tete" }, parent);
+    const t = html("div", { class: "prepa-titre" }, tete);
+    html("span", { class: "prepa-h" }, t, "Draft");
+    html("span", { class: "prepa-sous" }, t, n === 10 && !this.prepa.etat.composition.some((x) => x.poste === "G") ? "Dernier choix : ton gardien" : "Touche une case libre");
+    const budget = html("div", { class: "prepa-budget", "aria-label": `Budget : ${this.prepa.etat.budget} pièces` }, tete);
+    html("span", { class: "prepa-piece" }, budget);
+    html("span", { class: "prepa-nombre" }, budget, String(this.prepa.etat.budget));
+    this.boutonNouvelle(tete);
+    this.rendreEtapes(parent, 1, n);
+    this.rendreAuto(parent);
+    if (p.aGarder() > 0) html("span", { class: "prepa-discret" }, parent, `Garde au moins ${p.aGarder()} pièce${p.aGarder() > 1 ? "s" : ""} pour finir ton équipe ; le reste servira au banc.`);
+  }
+
+  /** Après le draft : mercato, puis championnat (journée, classement, prochain adversaire). */
+  private rendreEnteteMercato(parent: HTMLElement): void {
+    const ch = this.partie!.championnat();
+    const tete = html("div", { class: "draft-tete" }, parent);
+    const t = html("div", { class: "prepa-titre" }, tete);
+    const titre = this.partie!.titre?.();
+    if (titre) {
+      html("span", { class: "prepa-h mt-titre" }, t, titre.titre);
+      html("span", { class: "prepa-sous champ-sous" }, t, titre.sous);
+    } else if (ch.fini) {
+      const premier = ch.classement[0];
+      html("span", { class: "prepa-h" }, t, "Championnat terminé");
+      html("span", { class: "prepa-sous" }, t, premier ? (premier.toi ? "Tu es champion ! 🏆" : `Champion : ${premier.nom}`) : "");
+    } else {
+      html("span", { class: "prepa-h mt-titre" }, t, `Journée ${ch.journee}/${ch.total}`);
+      html("span", { class: "prepa-sous champ-sous" }, t, ch.prochain ? `contre ${ch.prochain}` : "");
+    }
+    this.boutonNouvelle(tete);
+    // Avant le premier match, le classement est à zéro partout : à sa place, les
+    // boutons d'équipe automatique (14/11), pour que le mercato reste visible.
+    if (this.partie!.auto && (this.partie!.autoPossible?.() ?? false)) return this.rendreAuto(parent);
+    // Classement (4 équipes) : toi en bleu, ton prochain adversaire en rouge.
+    const groupe = html("div", { class: "prepa-groupe champ" }, parent);
+    ch.classement.forEach((e, i) => {
+      const cl = e.toi ? " toi" : e.prochain ? " prochain" : "";
+      const b = html("div", { class: `prepa-equipe${cl}`, "aria-label": `${i + 1}e ${e.nom}, ${e.points} points` }, groupe);
+      html("span", { class: "prepa-avatar" }, b, String(i + 1));
+      const n = html("span", { class: "prepa-equipe-texte" }, b);
+      html("span", { class: "prepa-equipe-nom" }, n, e.nom);
+      html("span", { class: "prepa-equipe-pts" }, n, `${e.points} pt${e.points > 1 ? "s" : ""} · ${e.diff > 0 ? "+" : ""}${e.diff}`);
+    });
+    if (ch.resultats.length) html("div", { class: "champ-resultats" }, parent, ch.resultats.join("  ·  "));
+  }
+
+  /** Équipe automatique (14/11, concepteur : « comme ça, j'ai pas à m'embêter au
+   *  début, je peux générer plusieurs cas ») : chaque bouton relance une partie
+   *  avec une équipe déjà faite, très forte ou moyenne. */
+  private rendreAuto(parent: HTMLElement): void {
+    const p = this.partie;
+    if (!p?.auto || !(p.autoPossible?.() ?? false)) return;
+    const l = html("div", { class: "auto-ligne" }, parent);
+    html("span", { class: "auto-titre" }, l, "Équipe auto");
+    for (const [q, texte] of [["haute", "★★★ Haute qualité"], ["moyenne", "★★ Moyenne"]] as const) {
+      const b = html("button", { type: "button", class: `auto-bouton ${q}` }, l, texte);
+      b.addEventListener("click", () => p.auto!(q));
+    }
+  }
+
+  /** Mi-temps (13/11) : déplacer ses joueurs, faire des changements, voir la fatigue. */
+  private rendreEnteteMiTemps(parent: HTMLElement, score: [number, number]): void {
+    const tete = html("div", { class: "draft-tete" }, parent);
+    const t = html("div", { class: "prepa-titre" }, tete);
+    html("span", { class: "prepa-h mt-titre" }, t, `Mi-temps ${score[0]}–${score[1]}`);
+    html("span", { class: "prepa-sous" }, t, "Glisse pour déplacer ou remplacer");
+    const l = html("div", { class: "mt-legende" }, parent);
+    html("span", { class: "mt-forme-ex" }, l);
+    l.append("Forme (fatigue)");
+    html("span", { class: "mt-note-ex" }, l, "6.8");
+    l.append("Note du match");
+  }
+
+  /** Les trois étapes de la partie : titulaires, banc, match. */
+  private rendreEtapes(parent: HTMLElement, etape: number, n: number): void {
+    const barre = html("div", { class: "draft-progres", role: "progressbar", "aria-valuemin": 0, "aria-valuemax": 3, "aria-valuenow": etape }, parent);
+    html("i", {}, barre).style.width = etape === 1 ? `${(n / 11) * 33}%` : "66%";
+    const etapes = html("div", { class: "draft-etapes" }, parent);
+    html("span", { class: etape === 1 ? "actif" : "fait" }, etapes, etape === 1 ? `① Titulaires ${n}/11` : "✓ Titulaires");
+    html("span", { class: etape === 2 ? "actif" : "" }, etapes, "② Mercato : le banc");
+    html("span", {}, etapes, "③ Match");
+  }
+
+  private boutonNouvelle(parent: HTMLElement): void {
+    // 15/11 : ⌂ ramène au premier écran (choix du mode : championnat ou 1 contre 1).
+    const b = html("button", { type: "button", class: "partie-nouvelle", "aria-label": "Accueil : changer de mode", title: "Accueil" }, parent, "⌂");
+    b.addEventListener("click", () => this.partie!.nouvelle());
+  }
+
+  /** Gros bouton en haut de l'écran (15/11, concepteur : « tu mets juste un gros
+   *  jouer le match, en haut ») ; à la place des onglets « Préparation / Match ».
+   *  Grisé tant que les 11 titulaires ne sont pas en place ; « 2e mi-temps » à la mi-temps.
+   *  (L'encart « Les 3 ordinateurs draftent aussi » est retiré le même jour : « on imagine bien ».) */
+  private rendreGrosBouton(parent: HTMLElement, miTemps: boolean): void {
+    const p = this.partie!;
+    if (p.championnat().fini) return;
+    const pret = this.prepa.pret() && (p.jouerActif?.() ?? true);
+    const texte = p.libelleJouer?.(miTemps) ?? (miTemps ? "2e mi-temps ▶" : "Jouer le match ▶");
+    const b = html("button", { type: "button", class: "partie-jouer-gros", disabled: !pret, title: pret ? texte : "Il faut 11 titulaires" }, parent, texte);
+    b.addEventListener("click", () => p.jouer());
+    // 1 contre 1 (15/11) : le temps qui reste, juste sous le bouton.
+    const ch = p.chrono?.();
+    if (ch) {
+      const z = html("div", { class: "prepa-chrono un-contre-un", "aria-live": "off" }, parent);
+      z.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M9 2h6"></path></svg>';
+      html("span", { class: "prepa-chrono-texte" }, z, ch);
+    }
+  }
+
+  /** 1 contre 1 (15/11) : met à jour le temps restant sans redessiner l'écran. */
+  majChrono(): void {
+    const t = this.contenu.querySelector(".prepa-chrono-texte");
+    const ch = this.partie?.chrono?.();
+    if (t && ch) t.textContent = ch;
+  }
+
+  private rendreEntete(parent: HTMLElement): void {
+    const d = this.prepa.d;
+    const tete = html("div", { class: "prepa-tete" }, parent);
+    const t = html("div", { class: "prepa-titre" }, tete);
+    html("span", { class: "prepa-h" }, t, "Préparation");
+    html("span", { class: "prepa-sous" }, t, `${d.groupe.nom} · ${d.groupe.match}`);
+    if (!d.chrono) return this.rendreGroupe(parent);
+    const chrono = html("div", { class: "prepa-chrono", "aria-label": `Temps restant ${d.chrono}` }, tete);
+    chrono.innerHTML =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M9 2h6"></path></svg>';
+    html("span", {}, chrono, d.chrono);
+    this.rendreGroupe(parent);
+  }
+
+  private rendreGroupe(parent: HTMLElement): void {
+    const d = this.prepa.d;
+    const groupe = html("div", { class: "prepa-groupe" }, parent);
+    for (const e of d.groupe.equipes) {
+      const cl = e.toi ? " toi" : e.prochain ? " prochain" : "";
+      const b = html("div", { class: `prepa-equipe${cl}`, "aria-label": `${e.nom}, ${e.points} point${e.points > 1 ? "s" : ""}${e.prochain ? ", prochain adversaire" : ""}` }, groupe);
+      html("span", { class: "prepa-avatar" }, b, e.nom.charAt(0));
+      const n = html("span", { class: "prepa-equipe-texte" }, b);
+      html("span", { class: "prepa-equipe-nom" }, n, e.nom);
+      html("span", { class: "prepa-equipe-pts" }, n, `${e.points} pt${e.points > 1 ? "s" : ""}`);
+      if (e.prochain) html("span", { class: "prepa-prochain" }, b, "Prochain");
+    }
+  }
+
+  private rendreTraits(parent: HTMLElement): void {
+    const d = this.prepa.d;
+    const { pays, styles } = this.prepa.compteurs();
+    const col = html("div", { class: "prepa-traits" }, parent);
+    html("span", { class: "prepa-etiquette" }, col, "Pays");
+    for (const p of pays) {
+      const couleur = d.deck.find((x) => x.code === p.code)!.couleur;
+      const { prochain, atteint, fort } = this.prepa.palier(p.n, "pays");
+      const nom = d.deck.find((x) => x.code === p.code)!.nom;
+      const r = html("div", { class: `prepa-trait${atteint ? " atteint" : ""}${fort ? " fort" : ""}`, title: nom, "aria-label": `${nom} : ${p.n} sur ${prochain}` }, col);
+      const b = html("span", { class: "prepa-badge" }, r, p.code);
+      b.style.background = couleur;
+      b.style.borderColor = couleur;
+      const n = html("span", { class: "prepa-nombre" }, r, String(p.n));
+      html("span", { class: "prepa-palier" }, n, `/${prochain}`);
+    }
+    html("span", { class: "prepa-etiquette" }, col, "Style");
+    for (const s of styles) {
+      const { prochain, atteint, fort } = this.prepa.palier(s.n, "style");
+      const nom = d.styles[s.code] ?? s.code;
+      const r = html("div", { class: `prepa-trait style${atteint ? " atteint" : ""}${fort ? " fort" : ""}`, title: nom, "aria-label": `${nom} : ${s.n} sur ${prochain}` }, col);
+      const b = html("span", { class: "prepa-badge" }, r);
+      b.innerHTML = PICTOS[s.code] ?? s.code;
+      const n = html("span", { class: "prepa-nombre" }, r, String(s.n));
+      html("span", { class: "prepa-palier" }, n, `/${prochain}`);
+    }
+    const tit = html("div", { class: "prepa-titulaires" }, col);
+    html("span", { class: "prepa-nombre" }, tit, `${this.prepa.etat.composition.length}/11`);
+    html("span", {}, tit, "titulaires");
+  }
+
+  private rendrePlateau(parent: HTMLElement): void {
+    const s = svg("svg", { viewBox: `0 0 ${W} ${HAUT_TOTAL}`, class: "prepa-plateau", role: "img", "aria-label": "Plateau de placement" });
+    parent.appendChild(s);
+    this.plateau = s;
+    this.definirAuras(svg("defs", {}, s));
+
+    this.dessinerPelouse(s);
+
+    // Cases : couleur de la zone à 30 %, fin contour blanc, nom du poste à 30 % (cases vides).
+    const cases = svg("g", { class: "prepa-cases" }, s);
+    const compo = this.prepa.etat.composition;
+    const { h } = this.tailleCase();
+    for (const p of this.donnees.postes) {
+      const cellules = p.id === "G" ? p.cases.slice(0, 1) : p.cases;
+      for (const c of cellules) {
+        const z = ZONES[ZONE_DU_POSTE[p.id] ?? "mid"];
+        const couleur = COULOIRS.has(p.id) ? z.lane : z.bg;
+        const vide = !occupant(compo, p.id, c.index);
+        const enDraft = vide && (this.partie?.enDraft() ?? false);
+        const permise = enDraft && this.partie!.casePermise(p.id, c.index);
+        const el = this.dessinerCase(p.id, c.index, cases, { fill: couleur, class: `prepa-case${permise ? " draft-libre" : enDraft ? " draft-bloque" : ""}` });
+        if (vide) {
+          const { x, y } = this.centreCase(p.id, c.index);
+          const t = svg("text", { x, y: y + 4, class: "prepa-role" }, cases);
+          t.textContent = p.id === "G" ? "G" : this.libelleCase(c);
+          if (permise) {
+            const plus = svg("text", { x, y: y - 9, class: "draft-plus", "text-anchor": "middle" }, cases);
+            plus.textContent = "+";
+            el.addEventListener("click", () => this.partie!.ouvrirCase(p.id, c.index));
+            el.setAttribute("role", "button");
+            el.setAttribute("aria-label", `Recruter : ${p.id === "G" ? "gardien" : this.libelleCase(c)}`);
+          }
+        }
+      }
+    }
+    this.calqueCible = svg("g", {}, s);
+
+    // Bustes : du haut vers le bas, pour que ceux de devant passent dessus.
+    const echelle = this.tailleCase().w / 52;
+    const ordre = [...compo].sort((a, b) => this.centreCase(a.poste, a.cellule).y - this.centreCase(b.poste, b.cellule).y);
+    const dessus = svg("g", {}, s);
+    for (const pl of ordre) {
+      const { x, y } = this.centreCase(pl.poste, pl.cellule);
+      const socle = y + 0.258 * h;
+      const fusions = this.prepa.membre(pl.joueurId)?.fusions ?? 0;
+      const nom = this.prepa.fiche(pl.joueurId).nom;
+      const g = svg("g", { class: "prepa-buste", "aria-label": nom }, dessus);
+      this.figurine(g, pl.joueurId, fusions, x, socle, echelle);
+      this.infosMiTemps(g, pl.joueurId, x, socle, echelle);
+      g.addEventListener("pointerdown", (ev) => this.appui(ev, pl.joueurId, g));
+      // Les navigateurs ignorent `touch-action` sur les éléments SVG : sans
+      // ceci, le doigt posé sur un buste ferait défiler la page.
+      g.addEventListener("touchstart", (ev) => ev.preventDefault(), { passive: false });
+      const style = this.prepa.fiche(pl.joueurId).style;
+      const libelle = style ? `${nom} · ${this.prepa.d.styles[style] ?? style}` : `${nom} · sans style`;
+      // Les 4 notes (12/11) sous le nom ; le gardien n'a pas encore de notes.
+      const notes = notesAffichees({ id: pl.joueurId, nom, postes: [], notes: this.prepa.fiche(pl.joueurId).notes ?? null });
+      const ligneNotes = notes ? notes.map((n) => `${n.code} ${n.valeur}`).join(" · ") : "notes à venir";
+      if (pl.joueurId === this.choisi) this.etiquette(s, libelle, x, socle - 48 * echelle - 4, ligneNotes, socle + 6);
+    }
+  }
+
+  /** Mi-temps : barre de forme sous le socle et note du match au-dessus de la tête. */
+  private infosMiTemps(g: SVGGElement, id: string, x: number, socle: number, echelle: number): void {
+    const info = this.partie?.miTemps()?.joueur(id);
+    if (!info) return;
+    const w = 30 * echelle;
+    const y = socle + 3 * echelle;
+    svg("rect", { x: x - w / 2, y, width: w, height: 4, rx: 2, class: "mt-forme-fond" }, g);
+    const f = Math.max(0, Math.min(100, info.forme));
+    svg("rect", { x: x - w / 2, y, width: (w * f) / 100, height: 4, rx: 2, class: `mt-forme ${f >= 80 ? "bien" : f >= 55 ? "moyen" : "faible"}` }, g);
+    const ny = socle - 50 * echelle;
+    const n = svg("g", { class: `mt-note ${info.note >= 7 ? "bien" : info.note >= 6 ? "moyen" : "faible"}` }, g);
+    svg("rect", { x: x - 13 * echelle - 9, y: ny - 7, width: 20, height: 12, rx: 6 }, n);
+    const t = svg("text", { x: x - 13 * echelle + 1, y: ny + 2.5, "text-anchor": "middle" }, n);
+    t.textContent = info.note.toFixed(1);
+  }
+
+  /** Pelouse rayée et tracé du demi-terrain. Les lignes sont à l'échelle de la
+   *  largeur (68 m), posées sur la ligne de but (en bas) et la ligne médiane (en haut). */
+  private dessinerPelouse(s: SVGSVGElement): void {
+    const M = W / 68;
+    const yBut = Y(0);
+    const yMed = Y(0.5);
+    const cx = W / 2;
+    const clip = svg("clipPath", { id: "prepa-bord" }, s.querySelector("defs") ?? s);
+    svg("rect", { x: 0, y: 0, width: W, height: HAUT_TOTAL, rx: 14 }, clip);
+    const g = svg("g", { "clip-path": "url(#prepa-bord)" }, s);
+    svg("rect", { x: 0, y: 0, width: W, height: HAUT_TOTAL, class: "prepa-pelouse" }, g);
+    const nb = 10;
+    const hb = H / nb;
+    for (let i = 0; i <= nb; i += 2) svg("rect", { x: 0, y: yBut - (i + 1) * hb, width: W, height: hb, class: "prepa-bande" }, g);
+    const l = svg("g", { class: "prepa-ligne" }, g);
+    svg("line", { x1: 0, y1: yMed, x2: W, y2: yMed }, l);
+    svg("line", { x1: 0, y1: yBut, x2: W, y2: yBut }, l);
+    svg("line", { x1: 1, y1: yMed, x2: 1, y2: yBut }, l);
+    svg("line", { x1: W - 1, y1: yMed, x2: W - 1, y2: yBut }, l);
+    svg("circle", { cx, cy: yMed, r: 9.15 * M }, l);
+    svg("circle", { cx, cy: yMed, r: 1.6, class: "point" }, l);
+    svg("rect", { x: cx - 20.16 * M, y: yBut - 16.5 * M, width: 40.32 * M, height: 16.5 * M }, l);
+    svg("rect", { x: cx - 9.16 * M, y: yBut - 5.5 * M, width: 18.32 * M, height: 5.5 * M }, l);
+    svg("circle", { cx, cy: yBut - 11 * M, r: 1.6, class: "point" }, l);
+    const dx = Math.sqrt(9.15 ** 2 - 5.5 ** 2) * M;
+    svg("path", { d: `M ${cx - dx} ${yBut - 16.5 * M} A ${9.15 * M} ${9.15 * M} 0 0 1 ${cx + dx} ${yBut - 16.5 * M}` }, l);
+    svg("path", { d: `M 1 ${yBut - M} A ${M} ${M} 0 0 0 ${1 + M} ${yBut} M ${W - 1} ${yBut - M} A ${M} ${M} 0 0 1 ${W - 1 - M} ${yBut}` }, l);
+    svg("rect", { x: cx - 3.66 * M, y: yBut, width: 7.32 * M, height: 7, class: "but" }, l);
+  }
+
+  private definirAuras(defs: SVGDefsElement): void {
+    const niveaux: [string, number][][] = [
+      [],
+      [["#5EC8FF", 1.5], ["#5EC8FF", 3.5], ["#5EC8FF", 6]],
+      [["#FFC400", 1.5], ["#FFC400", 3.5], ["#FFC400", 6]],
+      [["#FFFFFF", 1], ["#E9A8FF", 2], ["#C04BFF", 4], ["#8A2BE2", 7], ["#FF4FD8", 10]],
+    ];
+    niveaux.forEach((ombres, n) => {
+      if (!n) return;
+      const f = svg("filter", { id: `prepa-aura-${n}`, x: "-80%", y: "-80%", width: "260%", height: "260%", "color-interpolation-filters": "sRGB" }, defs);
+      for (const [c, e] of ombres) svg("feDropShadow", { dx: 0, dy: 0, stdDeviation: e, "flood-color": c, "flood-opacity": 1 }, f);
+    });
+  }
+
+  /** Buste sur son socle, dans le repère de la maquette (48 × 53, socle en 24,47). */
+  private figurine(parent: SVGGElement, id: string, fusions: number, x: number, socle: number, echelle: number): void {
+    const g = svg("g", { transform: `translate(${(x - 24 * echelle).toFixed(1)} ${(socle - 47 * echelle).toFixed(1)}) scale(${echelle.toFixed(3)})` }, parent);
+    svg("ellipse", { cx: 24, cy: 47, rx: 17, ry: 5, fill: "#16201A", "fill-opacity": 0.22 }, g);
+    if (fusions > 0) {
+      svg("ellipse", { cx: 24, cy: 47, rx: 17, ry: 5, fill: "none", stroke: "#16201A", "stroke-width": 5 }, g);
+      svg("ellipse", { cx: 24, cy: 47, rx: 17, ry: 5, fill: "none", stroke: COULEUR_FUSION[fusions] ?? "#C04BFF", "stroke-width": 3 }, g);
+    }
+    if (fusions >= 3) svg("path", { d: ETINCELLES, fill: "#FFFFFF", stroke: "#C04BFF", "stroke-width": 0.9, "stroke-linejoin": "round" }, g);
+    svg("image", { href: BUSTES[id] ?? "", x: 0, y: -1, width: 48, height: 49, filter: fusions ? `url(#prepa-aura-${Math.min(fusions, 3)})` : undefined }, g);
+    // Pastille du style (en bas à droite du buste), même pictogramme que les compteurs.
+    const style = this.prepa.fiche(id).style;
+    if (style && CORPS_PICTOS[style]) {
+      svg("circle", { cx: 41, cy: 41, r: 7.5, class: "prepa-pastille-style" }, g);
+      const ic = svg("g", { transform: "translate(35.25 35.25) scale(0.48)", class: "prepa-pastille-picto" }, g);
+      ic.innerHTML = CORPS_PICTOS[style]!;
+    }
+    // Zone de toucher plus large que le buste.
+    svg("rect", { x: 2, y: -2, width: 44, height: 54, fill: "transparent" }, g);
+  }
+
+  /** Pastille du style d'un joueur (banc, mercato). */
+  private pastilleStyle(parent: HTMLElement, style: string | null): void {
+    if (!style || !PICTOS[style]) return;
+    const b = html("span", { class: "prepa-pastille", title: this.prepa.d.styles[style] ?? style }, parent);
+    b.innerHTML = PICTOS[style]!;
+  }
+
+  /** Nom du joueur touché (et ses 4 notes), au-dessus du buste. */
+  private etiquette(s: SVGSVGElement, nom: string, x: number, bas: number, notes?: string, hautSiCoupe?: number): void {
+    const l = Math.max(nom.length * 6.2, (notes?.length ?? 0) * 5.4) + 14;
+    const h = notes ? 29 : 16;
+    // Pas la place au-dessus (rangée du haut) : sous le socle.
+    if (bas - h < 2 && hautSiCoupe !== undefined) bas = hautSiCoupe + h;
+    const g = svg("g", { class: "prepa-nom" }, s);
+    svg("rect", { x: Math.min(W - l - 2, Math.max(2, x - l / 2)), y: bas - h, width: l, height: h, rx: 6 }, g);
+    const cx = Math.min(W - l / 2 - 2, Math.max(l / 2 + 2, x));
+    const t = svg("text", { x: cx, y: bas - h + 11.5 }, g);
+    t.textContent = nom;
+    if (notes) {
+      const n = svg("text", { x: cx, y: bas - 4.5, class: "prepa-nom-notes" }, g);
+      n.textContent = notes;
+    }
+  }
+
+  /** Liste déroulante de la tactique d'équipe, au-dessus du terrain (une seule à la fois).
+   *  La liste native est posée, invisible, sur le texte affiché : on garde le
+   *  sélecteur du téléphone et on règle librement la taille du texte. */
+  private rendreTactique(parent: HTMLElement): void {
+    const d = this.prepa.d;
+    const actuelle = d.tactiques.find((t) => t.code === this.prepa.etat.tactique) ?? d.tactiques[0]!;
+    const l = html("label", { class: "prepa-tactique" }, parent);
+    html("span", { class: "prepa-tactique-titre" }, l, "Tactique");
+    html("span", { class: "prepa-tactique-valeur" }, l, actuelle.nom);
+    const choix = html("select", { "aria-label": "Tactique d'équipe" }, l);
+    for (const t of d.tactiques) {
+      const o = html("option", { value: t.code }, choix, t.nom);
+      o.selected = t.code === actuelle.code;
+    }
+    choix.addEventListener("change", () => this.afficherIssue(this.prepa.choisirTactique(choix.value)));
+  }
+
+  /** Pendant le draft, le banc et le mercato sont déjà là, vides (15/11, concepteur :
+   *  « il faudrait que la zone du mercato soit déjà blanche, mais déjà présente »),
+   *  pour que l'écran ne change pas de forme à la fin du draft. Rien n'y est actif. */
+  private rendreAttenteDraft(parent: HTMLElement): void {
+    const b = html("div", { class: "prepa-banc attente" }, parent);
+    const t = html("div", { class: "prepa-banc-titre" }, b);
+    html("span", { class: "prepa-gras" }, t, "Banc");
+    html("span", { class: "prepa-discret" }, t, `0/${this.prepa.d.bancMax}`);
+    const places = html("div", { class: "prepa-places" }, b);
+    for (let i = 0; i < this.prepa.d.bancMax; i++) {
+      const v = html("div", { class: "prepa-place" }, places);
+      html("div", { class: "prepa-vide" }, v);
+      html("span", { class: "prepa-discret" }, v, "vide");
+    }
+    const m = html("div", { class: "prepa-mercato attente" }, parent);
+    const tm = html("div", { class: "prepa-mercato-tete" }, m);
+    html("span", { class: "prepa-h petit" }, html("div", { class: "prepa-titre" }, tm), "Mercato");
+    html("div", { class: "prepa-discret prepa-aide" }, m, "S'ouvre à la fin du draft, pour remplir ton banc");
+    const cartes = html("div", { class: "prepa-cartes" }, m);
+    for (let i = 0; i < 6; i++) html("div", { class: "prepa-carte vide", "aria-hidden": "true" }, cartes);
+  }
+
+  private rendreBanc(parent: HTMLElement): void {
+    const d = this.prepa.d;
+    const banc = this.prepa.banc();
+    const b = html("div", { class: "prepa-banc" }, parent);
+    this.elBanc = b;
+    const t = html("div", { class: "prepa-banc-titre" }, b);
+    html("span", { class: "prepa-gras" }, t, "Banc");
+    html("span", { class: "prepa-discret" }, t, `${banc.length}/${d.bancMax}`);
+    const places = html("div", { class: "prepa-places" }, b);
+    this.placesBanc = [];
+    for (let i = 0; i < d.bancMax; i++) {
+      const id = banc[i];
+      if (!id) {
+        const v = html("div", { class: "prepa-place" }, places);
+        html("div", { class: "prepa-vide" }, v);
+        html("span", { class: "prepa-discret" }, v, "vide");
+        continue;
+      }
+      const f = this.prepa.fiche(id);
+      const fusions = this.prepa.membre(id)?.fusions ?? 0;
+      const p = html("div", { class: `prepa-place prepa-tirable${id === this.choisi ? " choisi" : ""}`, "aria-label": `${f.nom}, ${libellePoste(f.poste)}, remplaçant` }, places);
+      const boite = html("span", { class: "prepa-mini-boite" }, p);
+      html("img", { src: BUSTES[id] ?? "", alt: "", class: `prepa-mini aura-${fusions}`, draggable: "false" }, boite);
+      this.pastilleStyle(boite, f.style);
+      html("span", { class: "prepa-poste" }, p, id === this.choisi ? f.nom : libellePoste(f.poste));
+      p.addEventListener("pointerdown", (ev) => this.appui(ev, id, p));
+      this.placesBanc.push({ id, el: p });
+    }
+  }
+
+  private rendreMercato(parent: HTMLElement): void {
+    const e = this.prepa.etat;
+    const m = html("div", { class: "prepa-mercato" }, parent);
+    this.elMercato = m;
+    const t = html("div", { class: "prepa-mercato-tete" }, m);
+    const g = html("div", { class: "prepa-titre" }, t);
+    html("span", { class: "prepa-h petit" }, g, "Mercato");
+    if (this.prepa.tirage) {
+      const r = html("button", { type: "button", class: "prepa-relancer", disabled: e.budget < this.prepa.relanceCout }, t, `↻ Relancer · ${this.prepa.relanceCout}`);
+      r.addEventListener("click", () => this.afficherIssue(this.prepa.relancer()));
+    }
+    const budget = html("div", { class: "prepa-budget", "aria-label": `Budget : ${e.budget} pièces` }, t);
+    html("span", { class: "prepa-piece" }, budget);
+    html("span", { class: "prepa-nombre" }, budget, String(e.budget));
+    html("div", { class: "prepa-discret prepa-aide" }, m, "Touche : fiche · Appui long : glisser sur le banc ou le terrain");
+    const cartes = html("div", { class: "prepa-cartes" }, m);
+    e.mercato.forEach((id, i) => {
+      if (!id) {
+        html("div", { class: "prepa-carte vide", "aria-hidden": "true" }, cartes);
+        return;
+      }
+      const f = this.prepa.fiche(id);
+      const fusion = this.prepa.fusionPossible(id);
+      const trop = f.prix > e.budget;
+      const k = html(
+        "button",
+        {
+          type: "button",
+          class: `prepa-carte prepa-tirable${fusion ? " fusion" : ""}${trop ? " trop-cher" : ""}`,
+          "aria-label": `Fiche de ${f.nom} (rester appuyé pour le glisser et le recruter), ${libellePoste(f.poste)}, ${f.style ? this.prepa.d.styles[f.style] : "sans style"}, ${f.prix} pièces${fusion ? ", fusion avec ta copie" : ""}`,
+        },
+        cartes,
+      );
+      const boite = html("span", { class: "prepa-mini-boite" }, k);
+      html("img", { src: BUSTES[id] ?? "", alt: "", class: "prepa-mini", draggable: "false" }, boite);
+      this.pastilleStyle(boite, f.style);
+      html("span", { class: "prepa-poste" }, k, libellePoste(f.poste));
+      html("span", { class: "prepa-prix" }, k, String(f.prix));
+      if (fusion) html("span", { class: "prepa-fusion" }, k, "Fusion");
+      // 13/11 : toucher = fiche (avec « Recruter ») ; rester appuyé = glisser la carte
+      // sur le banc ou le terrain pour l'acheter.
+      k.addEventListener("pointerdown", (ev) => this.appui(ev, id, k, i));
+      k.addEventListener("click", (ev) => {
+        if (ev.detail === 0) this.ouvrirFiche(id, i); // clavier
+      });
+    });
+  }
+}
+
+/** Point dans un polygone (règle du rayon). */
+function dansPolygone(x: number, y: number, pts: number[][]): boolean {
+  let dedans = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const [xi, yi] = pts[i] as [number, number];
+    const [xj, yj] = pts[j] as [number, number];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) dedans = !dedans;
+  }
+  return dedans;
+}

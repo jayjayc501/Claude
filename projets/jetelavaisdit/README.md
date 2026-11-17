@@ -8,6 +8,7 @@ App mobile (iPhone et Android) pour sceller une phrase datée et l'envoyer plus 
 
 | Dossier / fichier | Rôle |
 |---|---|
+| [`CONTEXTE.md`](CONTEXTE.md) | **À lire en premier** : état du projet, accès, pièges, prochaines étapes |
 | [`cadrage.md`](cadrage.md) | Concept, parcours, règles, pistes techniques, points ouverts |
 | [`maquettes/`](maquettes/) | Copie des 11 écrans et de la planche logo. Version cliquable : https://claude.ai/artifact/GBrtiSGWzndyC5aD4Husvq |
 | [`supabase/migrations/`](supabase/migrations/) | Base de données : tables, sécurité, scellement, carte publique |

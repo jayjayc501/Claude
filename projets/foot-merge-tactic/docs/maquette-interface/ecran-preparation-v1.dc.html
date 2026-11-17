@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Préparation du match</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:Inter,system-ui,sans-serif;color:#16201A}
+a{color:#3563C0}a:hover{color:#244A96}
+button{font:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #EEF1EC; padding: 10px 8px 12px; display: flex; flex-direction: column; gap: 6px; font-family: Inter, system-ui, sans-serif; color: #16201A; overflow: hidden">
+
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 4px">
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 11px; font-weight: 600; color: #4A5A50; text-transform: uppercase; letter-spacing: 0.06em">Groupe A · Match 2 sur 3</span>
+        <span style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700">Préparation</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px; background: #16201A; color: #FFFFFF; border-radius: 999px; padding: 6px 12px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M9 2h6"></path></svg>
+        <span style="font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700">0:24</span>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+      <sc-for list="{{teams}}" as="t" hint-placeholder-count="4">
+        <button type="button" aria-label="{{t.aria}}" style="position: relative; display: flex; align-items: center; gap: 5px; padding: 6px 5px; border-radius: 10px; border: 2px solid {{t.border}}; background: {{t.bg}}; color: #16201A; cursor: pointer; text-align: left; min-height: 44px">
+          <span style="width: 20px; height: 20px; flex: none; border-radius: 50%; background: {{t.av}}; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{t.letter}}</span>
+          <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.2">
+            <span style="font-size: 10px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{t.name}}</span>
+            <span style="font-size: 10px; color: #4A5A50">{{t.pts}}</span>
+          </span>
+          <sc-if value="{{t.next}}" hint-placeholder-val="{{false}}">
+            <span style="position: absolute; top: -8px; right: 4px; background: #C2413D; color: #FFFFFF; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 1px 4px; border-radius: 4px">Prochain</span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 8px; align-items: stretch">
+    <div style="width: 60px; flex: none; display: flex; flex-direction: column; gap: 4px">
+      <span style="font-size: 9px; font-weight: 700; color: #4A5A50; text-transform: uppercase; letter-spacing: 0.06em">Pays</span>
+      <sc-for list="{{nations}}" as="tr" hint-placeholder-count="4">
+        <div style="display: flex; align-items: center; gap: 4px; padding: 3px; border-radius: 8px; background: {{tr.bg}}">
+          <span style="width: 26px; height: 26px; flex: none; box-sizing: border-box; border-radius: 6px; border: 2px solid {{tr.border}}; background: {{tr.badge}}; color: {{tr.badgeFg}}; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{tr.code}}</span>
+          <span style="display: flex; align-items: baseline; color: {{tr.fg}}">
+            <span style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700">{{tr.n}}</span>
+            <span style="font-size: 9px; font-weight: 600">/{{tr.next}}</span>
+          </span>
+        </div>
+      </sc-for>
+      <span style="font-size: 9px; font-weight: 700; color: #4A5A50; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px">Style</span>
+      <sc-for list="{{styles}}" as="tr" hint-placeholder-count="4">
+        <div style="display: flex; align-items: center; gap: 4px; padding: 3px; border-radius: 8px; background: {{tr.bg}}">
+          <span style="width: 26px; height: 26px; flex: none; box-sizing: border-box; border-radius: 6px; border: 2px solid {{tr.border}}; background: {{tr.badge}}; color: {{tr.badgeFg}}; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{tr.code}}</span>
+          <span style="display: flex; align-items: baseline; color: {{tr.fg}}">
+            <span style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700">{{tr.n}}</span>
+            <span style="font-size: 9px; font-weight: 600">/{{tr.next}}</span>
+          </span>
+        </div>
+      </sc-for>
+      <div style="margin-top: auto; display: flex; flex-direction: column; align-items: center; background: #16201A; color: #FFFFFF; border-radius: 8px; padding: 6px 2px">
+        <span style="font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700">11/11</span>
+        <span style="font-size: 9px; color: #D7DED9">titulaires</span>
+      </div>
+    </div>
+
+    <div style="flex: 1; min-width: 0; position: relative; background: {{pitch}}; border-radius: 14px; padding: 12px 0 6px; overflow: hidden">
+      <div style="position: absolute; top: -48px; left: 50%; margin-left: -48px; width: 96px; height: 96px; box-sizing: border-box; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%"></div>
+      <div style="position: absolute; bottom: 0; left: 50%; margin-left: -60px; width: 120px; height: 76px; box-sizing: border-box; border: 2px solid rgba(255,255,255,0.3); border-bottom: none"></div>
+      <div style="position: relative; display: flex; flex-direction: column; align-items: center">
+        <sc-for list="{{rows}}" as="row" hint-placeholder-count="7">
+          <div style="display: flex; gap: 4px; margin-top: {{row.mt}}">
+            <sc-for list="{{row.cells}}" as="c" hint-placeholder-count="5">
+              <div style="position: relative; width: 52px; height: 60px; flex: none; color: {{c.fg}}; opacity: {{c.op}}; z-index: {{c.z}}; display: flex; flex-direction: column; align-items: center; justify-content: center">
+                <div style="position: absolute; top: 0; left: 0; width: 52px; height: 60px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: rgba(255,255,255,0.4)"></div>
+                <div style="position: absolute; top: 2px; left: 2px; width: 48px; height: 56px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: {{c.pitch}}"></div>
+                <div style="position: absolute; top: 2px; left: 2px; width: 48px; height: 56px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: {{c.bg}}; opacity: {{c.alpha}}"></div>
+                <sc-if value="{{c.hasPlayer}}" hint-placeholder-val="{{false}}">
+                  <div style="position: relative; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center">
+                  <svg width="42" height="42" viewBox="0 0 42 42" aria-hidden="true" style="position: absolute; top: 0; left: 0"><g transform="rotate(-90 21 21)"><circle cx="21" cy="21" r="18" fill="none" stroke="#16201A" stroke-opacity="0.2" stroke-width="3" stroke-dasharray="33.7 4"></circle><circle cx="21" cy="21" r="18" fill="none" stroke="#16201A" stroke-width="{{c.gOutW}}" stroke-dasharray="{{c.dash}}"></circle><circle cx="21" cy="21" r="18" fill="none" stroke="{{c.gCol}}" stroke-width="{{c.gW}}" stroke-dasharray="{{c.dash}}"></circle></g></svg>
+                  <div style="position: relative; width: 30px; height: 30px; box-sizing: border-box; border-radius: 50%; border: 2px solid #FFFFFF; background: {{c.fill}}; color: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1">
+                    <sc-if value="{{c.hasStars}}" hint-placeholder-val="{{false}}">
+                      <span style="font-size: 9px; color: #FFFFFF">{{c.stars}}</span>
+                    </sc-if>
+                    <sc-if value="{{c.hp}}" hint-placeholder-val="{{false}}">
+                      <span style="position: absolute; top: -5px; right: -8px; width: 16px; height: 16px; box-sizing: border-box; border-radius: 50%; background: #FFD23F; border: 2px solid #16201A; color: #16201A; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center">!</span>
+                    </sc-if>
+                  </div>
+                  <sc-if value="{{c.fused}}" hint-placeholder-val="{{false}}">
+                    <span style="position: absolute; top: -3px; right: -7px; min-width: 18px; height: 15px; box-sizing: border-box; padding: 0 3px; border-radius: 8px; background: #FFC400; border: 1.5px solid #16201A; color: #16201A; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{c.plus}}</span>
+                  </sc-if>
+                  </div>
+                  <span style="position: relative; margin-top: -5px; background: #16201A; color: #FFFFFF; font-size: 9px; font-weight: 700; line-height: 1.3; padding: 0 4px; border-radius: 4px; white-space: nowrap">{{c.name}}</span>
+                </sc-if>
+                <sc-if value="{{c.isEmpty}}" hint-placeholder-val="{{true}}">
+                  <span style="position: relative; font-size: 10px; font-weight: 700; letter-spacing: 0.02em; opacity: {{c.la}}">{{c.role}}</span>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+        <div style="position: relative; width: 108px; height: 60px; margin-top: -11px; display: flex; flex-direction: column; align-items: center; justify-content: center">
+          <div style="position: absolute; top: 0; left: 0; width: 108px; height: 60px; clip-path: polygon(0 25%, 24.07% 0, 48.15% 25%, 51.85% 25%, 75.93% 0, 100% 25%, 100% 75%, 75.93% 100%, 51.85% 75%, 48.15% 75%, 24.07% 100%, 0 75%); background: rgba(255,255,255,0.4)"></div>
+          <div style="position: absolute; top: 2px; left: 2px; width: 104px; height: 56px; clip-path: polygon(0 25%, 24.07% 0, 48.15% 25%, 51.85% 25%, 75.93% 0, 100% 25%, 100% 75%, 75.93% 100%, 51.85% 75%, 48.15% 75%, 24.07% 100%, 0 75%); background: {{gk.pitch}}"></div>
+          <div style="position: absolute; top: 2px; left: 2px; width: 104px; height: 56px; clip-path: polygon(0 25%, 24.07% 0, 48.15% 25%, 51.85% 25%, 75.93% 0, 100% 25%, 100% 75%, 75.93% 100%, 51.85% 75%, 48.15% 75%, 24.07% 100%, 0 75%); background: {{gk.bg}}; opacity: {{gk.alpha}}"></div>
+          <div style="position: relative; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center">
+            <svg width="42" height="42" viewBox="0 0 42 42" aria-hidden="true" style="position: absolute; top: 0; left: 0"><g transform="rotate(-90 21 21)"><circle cx="21" cy="21" r="18" fill="none" stroke="#16201A" stroke-opacity="0.2" stroke-width="3" stroke-dasharray="33.7 4"></circle><circle cx="21" cy="21" r="18" fill="none" stroke="#16201A" stroke-width="{{gk.gOutW}}" stroke-dasharray="{{gk.dash}}"></circle><circle cx="21" cy="21" r="18" fill="none" stroke="{{gk.gCol}}" stroke-width="{{gk.gW}}" stroke-dasharray="{{gk.dash}}"></circle></g></svg>
+            <div style="position: relative; width: 30px; height: 30px; box-sizing: border-box; border-radius: 50%; border: 2px solid #FFFFFF; background: {{gk.fill}}"></div>
+          </div>
+          <span style="position: relative; margin-top: -5px; background: #16201A; color: #FFFFFF; font-size: 9px; font-weight: 700; line-height: 1.3; padding: 0 4px; border-radius: 4px; white-space: nowrap">{{gk.name}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 8px; background: #FFFFFF; border-radius: 14px; padding: 4px 10px">
+    <div style="display: flex; flex-direction: column; width: 40px; flex: none">
+      <span style="font-size: 12px; font-weight: 700">Banc</span>
+      <span style="font-size: 10px; color: #4A5A50">2/5</span>
+    </div>
+    <div style="flex: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px">
+      <sc-for list="{{bench}}" as="b" hint-placeholder-count="5">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
+          <sc-if value="{{b.filled}}" hint-placeholder-val="{{false}}">
+            <div style="width: 36px; height: 36px; box-sizing: border-box; border-radius: 50%; border: 2px solid #FFFFFF; box-shadow: 0 0 0 1px #C9D1CB; background: {{b.fill}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">{{b.poste}}</div>
+            <span style="font-size: 9px; font-weight: 600; color: #4A5A50">{{b.name}}</span>
+          </sc-if>
+          <sc-if value="{{b.empty}}" hint-placeholder-val="{{true}}">
+            <div style="width: 36px; height: 36px; box-sizing: border-box; border-radius: 50%; border: 2px dashed #B5BEB8"></div>
+            <span style="font-size: 9px; color: #6B776F">vide</span>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px; background: #16201A; border-radius: 16px; padding: 8px 10px 10px">
+    <div style="display: flex; align-items: baseline; justify-content: space-between">
+      <span style="color: #FFFFFF; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700">Mercato</span>
+      <span style="font-size: 10px; color: #B9C4BC">Glisse un joueur ici pour le revendre</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: stretch">
+      <div style="flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+        <sc-for list="{{cards}}" as="k" hint-placeholder-count="6">
+          <button type="button" aria-label="{{k.aria}}" style="position: relative; box-sizing: border-box; border: 2px solid {{k.edge}}; padding: 4px 5px; margin: 0; background: #FFFFFF; border-radius: 10px; display: flex; flex-direction: column; gap: 2px; text-align: left; cursor: pointer; color: #16201A; min-height: 60px">
+            <div style="display: flex; align-items: center; gap: 4px">
+              <span style="width: 22px; height: 22px; flex: none; border-radius: 50%; background: {{k.fill}}; color: #FFFFFF; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{k.poste}}</span>
+              <span style="margin-left: auto; width: 18px; height: 18px; flex: none; border-radius: 50%; background: #E8B92E; color: #2E2100; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{k.price}}</span>
+            </div>
+            <span style="font-size: 10px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{k.name}}</span>
+            <span style="font-size: 9px; color: #4A5A50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{k.meta}}</span>
+            <sc-if value="{{k.fusion}}" hint-placeholder-val="{{false}}">
+              <span style="position: absolute; top: -8px; right: 4px; font-size: 8px; font-weight: 700; color: #FFFFFF; background: #7347B8; border-radius: 4px; padding: 1px 4px; text-transform: uppercase; letter-spacing: 0.04em">Fusion</span>
+            </sc-if>
+          </button>
+        </sc-for>
+      </div>
+      <div style="width: 56px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: #E8B92E; color: #2E2100; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700">7</div>
+        <span style="font-size: 10px; font-weight: 600; color: #E5EAE6">Budget</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"gauge":{"editor":"enum","default":"or","options":["or","magenta"],"section":"Plateau"},"pitch":{"editor":"color","default":"#c4dbcd","options":["#5DA86A","#7BBF84","#3F8A4C","#8A9A90"],"section":"Plateau"},"cellAlpha":{"editor":"range","default":0.3,"min":0,"max":1,"step":0.05,"section":"Plateau"},"labelAlpha":{"editor":"range","default":0.3,"min":0,"max":1,"step":0.05,"section":"Plateau"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var ZONES = {
+      gk:  { bg: '#F2C230', fg: '#FFFFFF', lane: '#F2C230', laneFg: '#FFFFFF' },
+      def: { bg: '#2F5FD0', fg: '#FFFFFF', lane: '#8FB0F0', laneFg: '#FFFFFF' },
+      mid: { bg: '#7B45D0', fg: '#FFFFFF', lane: '#B9A0EE', laneFg: '#FFFFFF' },
+      att: { bg: '#D2403A', fg: '#FFFFFF', lane: '#F09A95', laneFg: '#FFFFFF' }
+    };
+    var alpha = this.props.cellAlpha ?? 0.3;
+    var pitch = this.props.pitch ?? '#c4dbcd';
+    var labelAlpha = this.props.labelAlpha ?? 0.3;
+    var magenta = (this.props.gauge ?? 'or') === 'magenta';
+    var NAT = { FRA: '#1F3A93', ESP: '#B85600', BRA: '#17773F', ITA: '#0B7FA8' };
+    var PLAYERS = {
+      TR: ['FRA', 2, 'Roux'], BL: ['BRA', 0, 'Lima'], KM: ['BRA', 1, 'Moura'], IS: ['ESP', 1, 'Salvat'],
+      PA: ['ESP', 0, 'Arnau'], HF: ['FRA', 1, 'Ferrand'], RC: ['ESP', 0, 'Castell'], JM: ['FRA', 0, 'Marchal'],
+      LM: ['ITA', 0, 'Monti'], NV: ['ITA', 1, 'Vitale'], MO: ['FRA', 0, 'Ollivier']
+    };
+    function stars(n) { var s = ''; for (var i = 0; i < n; i++) { s += '★'; } return s; }
+    function cell(spec) {
+      if (spec === '-') {
+        return { bg: 'transparent', fg: 'transparent', op: '0', z: '0', role: '', isEmpty: true, hasPlayer: false };
+      }
+      var p = spec.split('|');
+      var z = ZONES[p[1]];
+      var lane = p[2] === '1';
+      var c = { role: p[0], bg: lane ? z.lane : z.bg, fg: lane ? z.laneFg : z.fg, op: '1', z: '1', alpha: alpha, pitch: pitch, la: labelAlpha, isEmpty: true, hasPlayer: false };
+      if (p[3]) {
+        var pl = PLAYERS[p[3]];
+        c.isEmpty = false; c.hasPlayer = true;
+        c.ini = p[3]; c.fill = NAT[pl[0]]; c.stars = stars(pl[1]); c.hasStars = false;
+        c.dash = ['0 120', '33.7 79.4', '33.7 4 33.7 41.7', '33.7 4 33.7 4 33.7 4'][pl[1]];
+        c.gCol = magenta ? '#D6336C' : '#FFC400'; c.gW = magenta ? '3.5' : '4'; c.gOutW = magenta ? '0' : '6';
+        c.fused = false; c.plus = '+' + pl[1];
+        c.name = pl[2]; c.hp = pl[3] === true; c.z = '2';
+      }
+      return c;
+    }
+    var layout = [
+      ['-', 'BU|att|0', 'BU|att|0|TR', 'BU|att|0', '-'],
+      ['AG|att|1', 'BU|att|0', 'BU|att|0', 'AD|att|1'],
+      ['AG|att|1|BL', 'MOC|mid|0', 'MOC|mid|0', 'MOC|mid|0', 'AD|att|1|KM'],
+      ['MG|att|1', 'MC|mid|0|IS', 'MC|mid|0|PA', 'MD|att|1'],
+      ['DG|def|1', 'MDC|mid|0', 'MDC|mid|0|HF', 'MDC|mid|0', 'DD|def|1'],
+      ['DG|def|1|RC', 'DC|def|0', 'DC|def|0', 'DD|def|1|JM'],
+      ['DG|def|1', 'DC|def|0|LM', 'DC|def|0', 'DC|def|0|NV', 'DD|def|1']
+    ];
+    var rows = layout.map(function (r, i) { return { mt: i === 0 ? '0px' : '-11px', cells: r.map(cell) }; });
+    var gk = cell('G|gk|0|MO');
+
+    function nation(code, n, next, on) {
+      var col = NAT[code];
+      return {
+        code: code, n: n, next: next,
+        bg: on ? '#FFFFFF' : '#E1E6E2',
+        border: col, badge: col, badgeFg: '#FFFFFF',
+        fg: on ? '#16201A' : '#4F5B54'
+      };
+    }
+    function style(code, n, next, on) {
+      return {
+        code: code, n: n, next: next,
+        bg: on ? '#FFFFFF' : '#E1E6E2',
+        border: on ? '#2B2F36' : '#B5BEB8', badge: on ? '#2B2F36' : '#FFFFFF', badgeFg: on ? '#FFFFFF' : '#4F5B54',
+        fg: on ? '#16201A' : '#4F5B54'
+      };
+    }
+    var nations = [nation('FRA', 4, 5, true), nation('ESP', 3, 5, true), nation('BRA', 2, 3, false), nation('ITA', 2, 3, false)];
+    var styles = [style('TEC', 4, 5, true), style('PRE', 3, 5, true), style('RAP', 2, 3, false), style('FIN', 2, 3, false)];
+
+    var teams = [
+      { letter: 'T', name: 'Toi', pts: '3 pts', border: '#3563C0', bg: '#E6EDFA', av: '#3563C0', next: false, aria: 'Ton équipe, 3 points' },
+      { letter: 'R', name: 'Rives FC', pts: '3 pts', border: '#D5DCD6', bg: '#FFFFFF', av: '#4A5A50', next: false, aria: 'Rives FC, 3 points, voir son placement' },
+      { letter: 'O', name: 'Olympia', pts: '1 pt', border: '#C2413D', bg: '#FBE9E8', av: '#C2413D', next: true, aria: 'Olympia, prochain adversaire, 1 point, voir son placement' },
+      { letter: 'U', name: 'Union Vale', pts: '0 pt', border: '#D5DCD6', bg: '#FFFFFF', av: '#4A5A50', next: false, aria: 'Union Vale, 0 point, voir son placement' }
+    ];
+
+    var bench = [
+      { filled: true, empty: false, name: 'Sanz', fill: NAT.ESP, poste: 'BU' },
+      { filled: true, empty: false, name: 'Conti', fill: NAT.ITA, poste: 'DC' },
+      { filled: false, empty: true }, { filled: false, empty: true },
+      { filled: false, empty: true }
+    ];
+
+    function card(ini, nat, poste, name, styleName, price, fusion, posteLong) {
+      return {
+        ini: ini, fill: NAT[nat], poste: poste, name: name, meta: nat + ' · ' + styleName, price: price,
+        fusion: fusion, edge: fusion ? '#7347B8' : '#FFFFFF',
+        aria: 'Recruter ' + name + ', ' + posteLong + ', ' + price + ' pièces' + (fusion ? ', fusion avec ta copie' : '')
+      };
+    }
+    var cards = [
+      card('HF', 'FRA', 'MC', 'H. Ferrand', 'Presseur', '3', true, 'milieu central'),
+      card('DA', 'ESP', 'MC', 'D. Almar', 'Technicien', '3', false, 'milieu central'),
+      card('CB', 'BRA', 'AD', 'C. Brandão', 'Rapide', '2', false, 'ailier droit'),
+      card('MV', 'ITA', 'DC', 'M. Vianello', 'Rempart', '2', false, 'défenseur central'),
+      card('AM', 'FRA', 'AG', 'A. Mercier', 'Rapide', '2', false, 'ailier gauche'),
+      card('EL', 'BRA', 'MC', 'E. Lobo', 'Créateur', '3', false, 'milieu central')
+    ];
+
+    return { pitch: pitch, rows: rows, gk: gk, nations: nations, styles: styles, teams: teams, bench: bench, cards: cards };
+  }
+}
+</script>
+</body>
+</html>

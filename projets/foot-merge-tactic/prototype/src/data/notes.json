@@ -1,0 +1,44 @@
+{
+  "_note": "Caractéristiques des joueurs (12/11). VALIDÉ : 4 notes (Vitesse, Technique, Tir, Physique), 2 sous-notes chacune ; gardien sans notes pour l'instant (ses 4 caractéristiques viendront plus tard). PROPOSITION : les chiffres ci-dessous. Une sous-note absente vaut `reference` : à 65 partout, le moteur ne change pas. Chaque action compare la sous-note de l'un à celle de l'adversaire direct. Probabilités : écart ajouté à la cote (logit), divisé par `echelle` (15 : +10 points ≈ 50 % → 66 %, +20 ≈ 79 %). Taux (tacles, fautes) : multipliés par exp(écart × coefficient).",
+  "reference": 65,
+  "echelle": 15,
+  "vitesse": {
+    "_note": "Vitesse de pointe : ± 0,8 % par point (90 → +20 %, 8 → 9,6 m/s en sprint ; 40 → 6,4 m/s). Accélération : ± 1,2 % par point (90 → +30 %). Le moteur cherche les duels de vitesse favorables : passe vers l'avant (+choixPasseParPoint à la note de la passe par point d'avance sur l'adversaire le plus proche) et appel en profondeur (+appelParPoint m de « liberté » par point d'avance).",
+    "pointeParPoint": 0.008,
+    "accelerationParPoint": 0.012,
+    "choixPasseParPoint": 0.12,
+    "appelParPoint": 0.15
+  },
+  "technique": {
+    "_note": "Passe : imprécision des passes, centres, ballons longs et dégagements × exp(−(passe − 65) × coefficient) (85 → × 0,55 ; 45 → × 1,82) ; passe bien dosée, plus dure à intercepter (portée des adversaires − 0,5 % par point). Dribble : contre le duel du défenseur (dribbles, tacles subis, contrôle quand on est serré).",
+    "imprecisionPasseParPoint": 0.03,
+    "interceptionParPoint": 0.005
+  },
+  "tir": {
+    "_note": "Précision : erreur de visée × exp(−(précision − 65) × coefficient). Puissance : vitesse du tir (+0,4 % par point) et chances d'arrêt (écart avec le gardien × poids ; gardien à 65 tant qu'il n'a pas de notes).",
+    "erreurParPoint": 0.04,
+    "puissanceParPoint": 0.004,
+    "poidsPuissanceArret": 1
+  },
+  "physique": {
+    "_note": "Duel : tacles (taux × exp(écart duel − dribble × tacleParPoint)), fautes (un défenseur dépassé en fait plus), portée sur le ballon (interceptions, ballons disputés, têtes : +0,6 % de rayon par point). Endurance : enregistrée, sans effet pour l'instant (VALIDÉ : le moteur l'interprétera plus tard).",
+    "tacleParPoint": 0.04,
+    "fautesParPoint": 0.02,
+    "porteeParPoint": 0.006
+  },
+  "unContreUn": {
+    "_note": "Avantage en 1 contre 1 = dribble du porteur − duel du défenseur + poidsVitesse × écart d'accélération (la vitesse fait passer). Il décide de la réussite du dribble et, × poidsTentative, de l'envie de le tenter.",
+    "poidsVitesse": 0.8,
+    "poidsTentative": 0.5
+  },
+  "endurance": {
+    "_note": "Fatigue (demande du concepteur, 12/11) : au-delà de 30 minutes d'affilée (la période en cours) et de 60 minutes au total, perte de vitesse et d'accélération de perteParMinute par minute de dépassement (les deux s'ajoutent), × exp(−(endurance − 65) × parPoint), plafonnée à perteMax. Minutes de match : 45 minutes par mi-temps de 180 s simulées. Exemples en fin de match : endurance 40 → −23 %, 65 → −9 %, 90 → −3 %.",
+    "minutesParSeconde": 0.25,
+    "seuilAffileeMin": 30,
+    "seuilTotalMin": 60,
+    "perteParMinute": 0.002,
+    "parPoint": 0.04,
+    "perteMax": 0.25
+  },
+  "gardien": { "poidsReflexes": 1, "placementParPoint": 0.012, "sortiesDistanceM": 12, "poidsSorties": 0.8, "poidsCaptage": 1 }
+}

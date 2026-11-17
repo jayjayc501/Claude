@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Publication du Short Naglfar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700;800&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Un seul univers visuel : la nuit nordique de la chaîne (bleu nuit, or, braise, bleu fjord).
+     Mise en page : colonne principale dans l'ordre de YouTube Studio + liste de contrôle à côté. */
+  :root {
+    --nuit: #0e1522;
+    --ardoise: #162133;
+    --trait: #2a3850;
+    --or: #e8b23a;
+    --braise: #e07a2c;
+    --fjord: #5b9be6;
+    --parchemin: #ece5d3;
+    --brume: #a3adbd;
+    --vert: #6cc28a;
+    --display: "Alegreya", Georgia, "Times New Roman", serif;
+    --texte: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--nuit); }
+  body {
+    margin: 0; background: var(--nuit); color: var(--parchemin);
+    font-family: var(--texte); font-size: 17px; line-height: 1.55;
+  }
+  a { color: var(--fjord); }
+  a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--or); outline-offset: 2px; }
+  .page { max-width: 1120px; margin: 0 auto; padding: 32px 20px 64px; }
+
+  header { display: grid; gap: 14px; padding-bottom: 26px; border-bottom: 1px solid var(--trait); }
+  .surtitre { color: var(--braise); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 13px; }
+  h1 { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 5vw, 46px); line-height: 1.08; margin: 0; color: var(--or); text-wrap: balance; }
+  .chapo { margin: 0; max-width: 64ch; color: var(--brume); }
+  .puces { display: flex; flex-wrap: wrap; gap: 8px; }
+  .puce { border: 1px solid var(--trait); border-radius: 999px; padding: 3px 12px; font-size: 14px; color: var(--parchemin); font-variant-numeric: tabular-nums; }
+  .puce b { color: var(--or); font-weight: 700; }
+
+  .grille { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 36px; margin-top: 30px; align-items: start; }
+  @media (max-width: 920px) { .grille { grid-template-columns: 1fr; } aside { order: -1; } }
+
+  main { display: grid; gap: 34px; }
+  section { display: grid; gap: 12px; }
+  h2 { font-family: var(--display); font-weight: 700; font-size: 25px; margin: 0; display: flex; align-items: baseline; gap: 12px; text-wrap: balance; }
+  h2 .num { color: var(--or); font-size: 15px; font-family: var(--texte); font-weight: 700; border: 1px solid var(--or); border-radius: 6px; padding: 0 7px; font-variant-numeric: tabular-nums; }
+  h3 { font-size: 16px; margin: 0; color: var(--or); }
+  p { margin: 0; max-width: 68ch; }
+  .note { color: var(--brume); font-size: 15px; }
+
+  .bloc { background: var(--ardoise); border: 1px solid var(--trait); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
+  .bloc.choisi { border-color: var(--or); }
+  .ligne { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+  .valeur { font-size: 19px; font-weight: 700; color: var(--parchemin); }
+  pre.valeur, pre.copie {
+    margin: 0; white-space: pre-wrap; word-wrap: break-word; font-family: var(--texte);
+    font-size: 16px; font-weight: 400; line-height: 1.55; color: var(--parchemin);
+  }
+  .meta { color: var(--brume); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .etiquette { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--nuit); background: var(--or); border-radius: 4px; padding: 1px 7px; }
+
+  button.copier {
+    font: inherit; font-size: 14px; font-weight: 700; color: var(--nuit); background: var(--or);
+    border: 0; border-radius: 7px; padding: 6px 14px; cursor: pointer; white-space: nowrap;
+  }
+  button.copier:hover { background: #f3c45a; }
+  button.copier.ok { background: var(--vert); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 15.5px; }
+  .tableau { overflow-x: auto; border: 1px solid var(--trait); border-radius: 10px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--trait); }
+  tr:last-child td { border-bottom: 0; }
+  th { color: var(--brume); font-weight: 500; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; background: var(--ardoise); }
+  td:first-child { font-weight: 700; white-space: nowrap; }
+  td .choix { color: var(--or); font-weight: 700; }
+
+  ol.etapes { margin: 0; padding-left: 22px; display: grid; gap: 8px; max-width: 70ch; }
+  ol.etapes li::marker { color: var(--or); font-weight: 700; }
+
+  aside { position: sticky; top: 20px; background: var(--ardoise); border: 1px solid var(--trait); border-radius: 12px; padding: 16px 18px; display: grid; gap: 12px; }
+  @media (max-width: 920px) { aside { position: static; } }
+  aside h2 { font-size: 21px; }
+  .compteur { font-variant-numeric: tabular-nums; color: var(--brume); font-size: 14px; }
+  .barre { height: 6px; background: var(--trait); border-radius: 3px; overflow: hidden; }
+  .barre span { display: block; height: 100%; width: 0; background: var(--or); transition: width .2s; }
+  ul.controle { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  ul.controle label { display: flex; gap: 9px; align-items: flex-start; cursor: pointer; font-size: 15.5px; line-height: 1.35; }
+  ul.controle input { accent-color: var(--or); width: 17px; height: 17px; margin-top: 1px; flex: none; }
+  ul.controle input:checked + span { color: var(--brume); text-decoration: line-through; }
+  button.raz { font: inherit; font-size: 13px; color: var(--brume); background: none; border: 1px solid var(--trait); border-radius: 6px; padding: 4px 10px; cursor: pointer; justify-self: start; }
+
+  .sources { font-size: 14px; color: var(--brume); display: grid; gap: 4px; }
+  .sources ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+  @media (prefers-reduced-motion: reduce) { .barre span { transition: none; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="surtitre">La Pause Mytho… logique · fiche de publication YouTube</div>
+    <h1>Short Naglfar : le navire des ongles de Loki</h1>
+    <p class="chapo">Tout ce qu'il faut copier dans YouTube Studio, dans l'ordre des écrans d'import. Publie depuis un ordinateur : la vidéo associée et la miniature ne se règlent qu'à partir de YouTube Studio sur ordinateur.</p>
+    <div class="puces">
+      <span class="puce">Fichier <b>naglfar-ongles.mp4</b></span>
+      <span class="puce"><b>44,0 s</b> · 9:16</span>
+      <span class="puce"><b>2160 × 3840</b> · 24 i/s</span>
+      <span class="puce">Son <b>−14 LUFS</b></span>
+      <span class="puce">Sous-titres <b>naglfar-ongles.srt</b></span>
+      <span class="puce">≈ <b>168 Mo</b></span>
+    </div>
+  </header>
+
+  <div class="grille">
+    <main>
+
+      <section id="titre">
+        <h2><span class="num">1</span>Titre</h2>
+        <div class="bloc choisi">
+          <div class="ligne">
+            <div><span class="etiquette">Recommandé</span></div>
+            <button class="copier" data-cible="t1">Copier</button>
+          </div>
+          <div class="valeur" id="t1">Les Vikings coupaient-ils les ongles de leurs morts ?</div>
+          <div class="meta"><span data-compte="t1"></span> / 100 caractères · mot pour mot la première phrase de la vidéo et le titre doré affiché à l'écran.</div>
+        </div>
+        <div class="bloc">
+          <div class="ligne">
+            <div class="valeur" id="t2">Naglfar, le navire de Loki fait d'ongles humains</div>
+            <button class="copier" data-cible="t2">Copier</button>
+          </div>
+          <div class="meta"><span data-compte="t2"></span> / 100 caractères · plus descriptif, mais il dévoile la réponse.</div>
+        </div>
+        <p class="note">Pas de hashtag dans le titre : ceux de la description s'affichent déjà au-dessus du titre.</p>
+      </section>
+
+      <section id="description">
+        <h2><span class="num">2</span>Description</h2>
+        <div class="bloc">
+          <div class="ligne">
+            <h3>À coller telle quelle</h3>
+            <button class="copier" data-cible="desc">Copier</button>
+          </div>
+<pre class="copie" id="desc">D'après l'Edda de Snorri (XIIIe siècle), chaque ongle laissé aux morts sert à construire Naglfar, le navire de Loki pour le Ragnarök.
+
+🎥 Comment Loki s'est retrouvé enchaîné dans la grotte : touche le lien de la vidéo associée, juste sous le nom de la chaîne.
+
+À bientôt sur La Pause Mytho… logique, la mythologie sans mytho.
+
+#mythologienordique #Loki #Ragnarok #vikings #Naglfar</pre>
+        </div>
+        <p class="note">« Sans mytho » : la mise en garde sur les ongles ne se trouve que chez Snorri ; aucune autre source ne dit que tous les Vikings le faisaient. La description le précise en citant sa source. Cinq hashtags, #mythologienordique en premier.</p>
+      </section>
+
+      <section id="tags">
+        <h2><span class="num">3</span>Tags</h2>
+        <div class="bloc">
+          <div class="ligne">
+            <h3>Dans « Afficher plus » → Tags</h3>
+            <button class="copier" data-cible="tags">Copier</button>
+          </div>
+          <pre class="copie" id="tags">Naglfar, navire des ongles, ongles des morts, couper les ongles des morts, Loki, Loki enchaîné, Ragnarök, Ragnarok, Vikings, croyances vikings, rites funéraires vikings, Edda, Snorri, mythologie nordique, dieux nordiques, mythe nordique, légendes nordiques, mythologie</pre>
+          <div class="meta"><span data-compte="tags"></span> / 500 caractères</div>
+        </div>
+      </section>
+
+      <section id="reglages">
+        <h2><span class="num">4</span>Réglages dans YouTube Studio</h2>
+        <div class="tableau">
+          <table>
+            <thead><tr><th>Réglage</th><th>Valeur</th><th>Pourquoi</th></tr></thead>
+            <tbody>
+              <tr><td>Public</td><td class="choix">Non, elle n'est pas conçue pour les enfants</td><td>Mort, venin et armée des morts : pour ados et adultes. Une vidéo marquée « pour enfants » perd les commentaires.</td></tr>
+              <tr><td>Contenu modifié ou synthétique</td><td class="choix">Non</td><td>Comme pour Odin : une scène de mythe (Loki, navire géant, morts-vivants) ne peut pas passer pour un fait réel. Cocher « Oui » reste possible si tu préfères tout signaler.</td></tr>
+              <tr><td>Promotion payante</td><td class="choix">Non</td><td>Aucun partenariat dans la vidéo.</td></tr>
+              <tr><td>Playlist</td><td class="choix">Mythologie nordique</td><td>Avec Odin, Baldr et les prochains.</td></tr>
+              <tr><td>Langue de la vidéo</td><td class="choix">Français</td><td>Aide YouTube à proposer le Short aux bons spectateurs.</td></tr>
+              <tr><td>Sous-titres</td><td class="choix">Importer naglfar-ongles.srt</td><td>Sous-titres → Ajouter une langue : Français → Importer un fichier → « Avec synchronisation ».</td></tr>
+              <tr><td>Catégorie</td><td class="choix">Éducation</td><td>Ou la même que tes autres vidéos.</td></tr>
+              <tr><td>Vidéo associée</td><td class="choix">Ta vidéo sur Baldr</td><td>Celle qui finit sur Loki enchaîné dans la grotte : ce Short commence exactement là. Seul lien cliquable dans un Short, à ajouter depuis YouTube Studio sur ordinateur.</td></tr>
+              <tr><td>Miniature</td><td class="choix">Image de 0:00 à 0:02</td><td>La main du mort, les ciseaux et la question dorée.</td></tr>
+              <tr><td>Commentaires</td><td class="choix">Activés</td><td>Épingle le commentaire de la section 6 juste après la mise en ligne.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="quand">
+        <h2><span class="num">5</span>Quand publier</h2>
+        <div class="bloc choisi">
+          <div class="valeur">Dimanche 15 novembre 2026 à 17 h 00 (heure de Paris)</div>
+          <p class="meta">Trois jours après le Short Odin (jeudi 12). Import le matin en mode « Planifier », mise en ligne automatique à 17 h.</p>
+        </div>
+        <p class="note">À décaler selon ton rythme de publication ; garde le même créneau de 17 h.</p>
+      </section>
+
+      <section id="commentaire">
+        <h2><span class="num">6</span>Commentaire à épingler</h2>
+        <div class="bloc choisi">
+          <div class="ligne">
+            <span class="etiquette">Recommandé</span>
+            <button class="copier" data-cible="c1">Copier</button>
+          </div>
+          <pre class="copie" id="c1">Tu connaissais cette histoire d'ongles ? Dis-moi quelle autre légende de Loki tu veux voir dans le prochain Short 👇</pre>
+        </div>
+      </section>
+
+      <section id="etapes">
+        <h2><span class="num">7</span>Pas à pas sur studio.youtube.com</h2>
+        <ol class="etapes">
+          <li>Créer → Importer des vidéos → <b>naglfar-ongles.mp4</b>.</li>
+          <li><b>Détails</b> : titre, description, playlist, public « pas pour enfants ». Dans « Afficher plus » : contenu modifié ou synthétique, tags, langue, catégorie.</li>
+          <li><b>Miniature</b> et <b>vidéo associée</b> (ta vidéo sur Baldr).</li>
+          <li><b>Éléments vidéo</b> → Sous-titres : importer <b>naglfar-ongles.srt</b>.</li>
+          <li><b>Visibilité</b> → Planifier : dimanche 15 novembre, 17 h 00.</li>
+          <li>À la mise en ligne : épingler le commentaire et répondre aux premiers commentaires pendant la première heure.</li>
+        </ol>
+        <p class="note">YouTube publie d'abord une version basse définition, puis ajoute la 4K au bout de quelques heures.</p>
+      </section>
+
+      <section class="sources">
+        <h3>Sources du mythe</h3>
+        <ul>
+          <li>Snorri Sturluson, <i>Edda</i>, Gylfaginning 43 et 51 (Naglfar, le plus grand navire, fait des ongles des morts).</li>
+          <li><i>Völuspá</i>, strophes 50-51 (Loki tient la barre, avec le peuple de Hel).</li>
+        </ul>
+      </section>
+    </main>
+
+    <aside aria-labelledby="titre-controle">
+      <h2 id="titre-controle">Avant de publier</h2>
+      <div class="compteur" id="compteur">0 / 11 cochés</div>
+      <div class="barre" aria-hidden="true"><span id="barre"></span></div>
+      <ul class="controle" id="controle">
+        <li><label><input type="checkbox" id="k1"><span>Titre collé</span></label></li>
+        <li><label><input type="checkbox" id="k2"><span>Description et hashtags collés</span></label></li>
+        <li><label><input type="checkbox" id="k3"><span>Tags collés</span></label></li>
+        <li><label><input type="checkbox" id="k4"><span>« Pas conçue pour les enfants »</span></label></li>
+        <li><label><input type="checkbox" id="k5"><span>Contenu modifié ou synthétique choisi</span></label></li>
+        <li><label><input type="checkbox" id="k6"><span>Playlist Mythologie nordique</span></label></li>
+        <li><label><input type="checkbox" id="k7"><span>Sous-titres naglfar-ongles.srt importés</span></label></li>
+        <li><label><input type="checkbox" id="k8"><span>Vidéo associée (Baldr) ajoutée</span></label></li>
+        <li><label><input type="checkbox" id="k9"><span>Miniature choisie</span></label></li>
+        <li><label><input type="checkbox" id="k10"><span>Publication planifiée dimanche 17 h</span></label></li>
+        <li><label><input type="checkbox" id="k11"><span>Commentaire épinglé (après la mise en ligne)</span></label></li>
+      </ul>
+      <button class="raz" id="raz" type="button">Tout décocher</button>
+    </aside>
+  </div>
+</div>
+
+<script>
+  // Nombre de caractères affiché à côté de chaque texte
+  document.querySelectorAll("[data-compte]").forEach(function (el) {
+    var src = document.getElementById(el.getAttribute("data-compte"));
+    if (src) el.textContent = Array.from(src.textContent.trim()).length;
+  });
+
+  // Boutons Copier
+  document.querySelectorAll("button.copier").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var el = document.getElementById(b.getAttribute("data-cible"));
+      var texte = el ? el.textContent.trim() : "";
+      var fini = function (ok) {
+        b.textContent = ok ? "Copié" : "Sélectionné, fais Ctrl+C";
+        b.classList.toggle("ok", ok);
+        setTimeout(function () { b.textContent = "Copier"; b.classList.remove("ok"); }, 1800);
+      };
+      var selectionner = function () {
+        var r = document.createRange(); r.selectNodeContents(el);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        fini(false);
+      };
+      try {
+        navigator.clipboard.writeText(texte).then(function () { fini(true); }, selectionner);
+      } catch (e) { selectionner(); }
+    });
+  });
+
+  // Liste de contrôle (gardée dans ce navigateur si possible)
+  var CLE = "fiche-naglfar-controle";
+  var cases = Array.from(document.querySelectorAll("#controle input"));
+  function lire() { try { return JSON.parse(localStorage.getItem(CLE) || "{}"); } catch (e) { return {}; } }
+  function ecrire(etat) { try { localStorage.setItem(CLE, JSON.stringify(etat)); } catch (e) {} }
+  function maj() {
+    var n = cases.filter(function (c) { return c.checked; }).length;
+    document.getElementById("compteur").textContent = n + " / " + cases.length + " cochés";
+    document.getElementById("barre").style.width = (100 * n / cases.length) + "%";
+  }
+  var etat = lire();
+  cases.forEach(function (c) {
+    c.checked = !!etat[c.id];
+    c.addEventListener("change", function () { etat[c.id] = c.checked; ecrire(etat); maj(); });
+  });
+  document.getElementById("raz").addEventListener("click", function () {
+    cases.forEach(function (c) { c.checked = false; }); etat = {}; ecrire(etat); maj();
+  });
+  maj();
+</script>
+</body>
+</html>

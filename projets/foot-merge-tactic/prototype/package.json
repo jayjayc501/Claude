@@ -1,0 +1,12 @@
+{
+  "name": "foot-merge-tactic-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Prototype 1 : placement sur le demi-terrain et mouvement des blocs (version web).",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "verifier": "tsc --noEmit -p .",
+    "construire": "bun run scripts/assembler.ts"
+  }
+}

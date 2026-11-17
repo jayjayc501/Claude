@@ -72,6 +72,7 @@ L'ancien `CLAUDE.md` (442 lignes, commit `9885b08`) est découpé en cinq fichie
 
 ## Décisions remplacées
 
+- « En cas de doute ou de contradiction, le dossier fait foi (le §20 prime sur les sections plus anciennes), puis le concepteur. » → 17/11 : les décisions datées de `docs/decisions.md` priment sur le dossier, qui reste la référence pour le reste.
 - **Mi-temps de jeu : 10 s à l'écran, en montage accéléré à vitesse variable** (11/11). Le moteur simulait toute la mi-temps et l'écran enchaînait les actions importantes. → Le 16/11, la cible de 10 s est jugée trop courte : on essaie une mi-temps de 30 s au rythme ×3,5, et le montage devient la solution de repli. La phrase du 12/11, « Réglage de test : la cible validée reste la mi-temps de 10 s en montage accéléré », tombe avec elle.
 - « Préparation et mi-temps : plus de 10 s. **L'ancien total de 40 s n'est plus valable.** » La seconde phrase est gardée ici pour mémoire.
 - Vitesse d'affichage du match dans le prototype : 60 s par mi-temps en ×3, puis 45 s en ×4. → ×3,5 depuis le 12/11, soit environ 51 s.

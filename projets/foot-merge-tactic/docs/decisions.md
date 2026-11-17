@@ -10,6 +10,7 @@ Quand une décision est validée, on l'ajoute ici avec sa date et les mots du co
 ## 1. Univers et principes
 
 - Le jeu en bref, le principe directeur et la priorité au moteur : voir `CLAUDE.md`.
+- **Ordre de priorité** (17/11, accord du concepteur) : les décisions datées de ce fichier **priment sur le dossier de conception** du 11/11. Le dossier reste la référence pour tout ce qui n'a pas été décidé depuis, son §20 primant sur ses sections plus anciennes. En cas de doute, demander au concepteur.
 - Vrais pays (cadre et nationalités), clubs fictifs, joueurs fictifs.
 - Aucun élément sous licence : vrais joueurs, visages, noms de clubs, logos, maillots, marques de compétitions.
 - Pas de divisions hebdomadaires à la Hattrick : on peut jouer un match à tout moment, sans calendrier ni attente.

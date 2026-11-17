@@ -9,7 +9,7 @@ Ce fichier est lu au début de chaque séance. Il est volontairement court ; le 
 - `docs/propositions.md` : les **[PROPOSITION]** en cours (moteur, rendu, réglages), avec leurs chiffres.
 - `docs/questions-ouvertes.md` : les **[OUVERT]** et les points de vigilance.
 - `docs/historique-etat.md` : ce qui a été remplacé, et les anciens « État ». À ne lire que pour retrouver une ancienne version.
-- `docs/dossier-conception.md` : le dossier de conception du 11/11, complété le même jour par son §20. En cas de doute ou de contradiction, le dossier fait foi (le §20 prime sur les sections plus anciennes), puis le concepteur.
+- `docs/dossier-conception.md` : le dossier de conception du 11/11, complété le même jour par son §20. **En cas de contradiction, les décisions datées de `docs/decisions.md` priment sur le dossier** (concepteur, 17/11) : par exemple, une mi-temps de 30 s et non de 10 s, et 5 pays par match. Le dossier reste la référence pour tout ce qui n'a pas été décidé depuis, son §20 primant sur ses sections plus anciennes. En cas de doute, demander au concepteur.
 - `docs/reference-football.md` : vocabulaire, principes tactiques, rôles, chiffres et tests de réalisme. **À relire avant de modifier un comportement du moteur** : §7 pour les chiffres, §9.4 pour les tests. Le concepteur l'a demandée pour que le moteur ne s'éloigne pas du vrai football.
 - `journal.md` : ce qui a été fait, séance par séance. Ne lire que les dernières entrées.
 - **Projet claude.ai « App Foot Merge Tactic »** : copies de ce fichier (`claude/contexte-foot-merge-tactic.md`), de `decisions.md`, `propositions.md`, `questions-ouvertes.md`, du dossier et de la référence football, plus les trois fichiers de l'audit du 16/11 (`claude/audit-1…`, `audit-2…`, `audit-3…`).

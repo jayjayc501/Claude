@@ -965,3 +965,12 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 ## 17/11/2026 (midi) — Découpage A1 fusionné
 
 **Demande du concepteur** : « fusionne », après avoir testé la page claude.ai (moteur découpé et son rétabli). Pull request n° 14 fusionnée sur `main`. Prochaine étape demandée : A3 (serveur).
+
+## 17/11/2026 (12 h 30) — A3 (serveur) préparé, puis mis de côté
+
+**Demande du concepteur** : prompt A3 (ménage, limites, triche). Après la proposition : « le but à terme c'est quand même d'avoir un peu l'historique de ce qui s'est passé », « on met tout de côté et on passe à A2 ».
+
+**Ce qui a été fait** (rien de déployé, rien d'appliqué sur Supabase)
+- Branche `a3-serveur`, pull request n° 15 fermée sans fusion : action `menage` (parties sans mouvement depuis 24 h et leurs films, par l'API du stockage, car la base refuse d'effacer les films elle-même), limite de 10 créations par heure et par connexion (empreinte HMAC de l'adresse), 2 tests. Gardé pour plus tard.
+- Mesure sur Supabase, avec une partie d'essai jouée par requêtes (`reg8g3dj`, gardée) : 1re mi-temps 847 ms de calcul (1 106 ms la requête), 2e mi-temps 1 325 ms (1 597 ms), limite de Supabase 2 s. En local : 206 ms par mi-temps, 37 ms d'encodage du film.
+- Plan, mesures et deux solutions contre la triche notés dans `docs/questions-ouvertes.md` ; décision dans `docs/decisions.md` §14.

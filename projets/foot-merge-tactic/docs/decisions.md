@@ -315,6 +315,7 @@ Les règles de l'écran :
   7. `CLAUDE.md` trop long et copié à la main à deux endroits (traité le 17/11) ;
   8. `dist/index.html` (3,2 Mo) était enregistré dans le dépôt à chaque version. Retiré le 17/11 avec l'accord du concepteur : la page est refabriquée par `bun run construire` avant chaque publication ;
   9. la 2e mi-temps recalcule la 1re sur le serveur.
+- **Serveur en ligne : A3 mis de côté** (17/11). Après la proposition d'un ménage à 24 h, le concepteur : « le but à terme c'est quand même d'avoir un peu l'historique de ce qui s'est passé », « on met tout de côté ». On ne purge rien et on ne déploie rien ; **l'historique des parties est à garder**. Le code (ménage, limite de créations, tests) reste sur la branche `a3-serveur` (pull request n° 15, fermée sans fusion) ; le plan pour y revenir est dans `questions-ouvertes.md`.
 
 ## 15. Feuille de route et laboratoire de tests (dossier, §16)
 

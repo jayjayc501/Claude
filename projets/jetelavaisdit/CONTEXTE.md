@@ -69,7 +69,7 @@ Valeurs publiques (URL Supabase, clé `sb_publishable_…`) : déjà dans `mobil
 
 ## Prochaines étapes possibles
 
-1. Appliquer la migration, fusionner #12, vérifier prénom et jours sur la carte.
+1. Appliquer le script SQL, fusionner #16, refabriquer l'APK, vérifier prénom et jours sur la carte.
 2. Image au format story (Instagram) à partager depuis l'app.
 3. Notifications de rappel (« Il y a 6 mois, tu as scellé… Ça s'est réalisé ? »).
 4. Modération par IA.

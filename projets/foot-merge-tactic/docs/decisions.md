@@ -21,9 +21,9 @@ Quand une décision est validée, on l'ajoute ici avec sa date et les mots du co
 - Vue du dessus, terrain entier visible, 22 joueurs, ballon visible. Marqueurs simples au début, pas de 3D. Référence : le moteur 2D de Football Manager. Le joueur doit voir sa tactique.
 - Le moteur simule toute la mi-temps. Il gère les déplacements, les passes, les appels, les duels, les interceptions, les tirs et les transitions.
 - **Aucune action pendant le match** : on agit seulement pendant la préparation et à la mi-temps. Les tactiques se changent **avant le coup d'envoi et à la mi-temps seulement**. Pendant le jeu, pause comprise, elles sont grisées (13/11 au soir).
-- **Durée (16/11)** : essayer une **mi-temps de 30 s à l'écran en gardant le rythme actuel (×3,5)**. Cela fait environ 105 s simulées au lieu de 180. Le chrono reste ramené à 45 minutes par une règle de trois. On jugera sur les chiffres (buts, matchs nuls). **La cible de 10 s est jugée trop courte.** Le **montage des temps forts** devient la **solution de repli** : la construction passe très vite, la dernière passe et le tir reviennent presque à vitesse réelle.
+- **Durée (16/11)** : essayer une **mi-temps de 30 s à l'écran en gardant le rythme actuel (×3,5)**. Cela fait environ 105 s simulées au lieu de 180. Le chrono reste ramené à 45 minutes par une règle de trois. On jugera sur les chiffres (buts, matchs nuls). **La cible de 10 s est jugée trop courte.** Le concepteur a confirmé le 17/11 que c'est bien 30 s par mi-temps, soit environ 1 min de match. Le **montage des temps forts** devient la **solution de repli** : la construction passe très vite, la dernière passe et le tir reviennent presque à vitesse réelle.
 - Préparation et mi-temps : plus de 10 s (durée exacte à tester). Les durées fixées :
-  - tournoi en ligne : **5 minutes de préparation** (16/11, à réduire plus tard) ;
+  - tournoi en ligne : **5 minutes de préparation** (16/11, à réduire plus tard). **Le mercato entre deux journées et la mi-temps seront plus courts** (17/11) ; leurs durées exactes restent à fixer ;
   - 1 contre 1 : 10 minutes pour faire son équipe et une mi-temps d'1 minute (15/11).
 - **Deux mi-temps** (12/11) :
   - **panneau de statistiques** à la mi-temps et à la fin : possession, tirs et tirs cadrés, passes réussies, tacles, fautes, corners, hors-jeu, arrêts ;
@@ -192,7 +192,7 @@ Quand une décision est validée, on l'ajoute ici avec sa date et les mots du co
 
 - **Tournoi en ligne** (16/11) : **en direct, complété par des IA**. L'idée des équipes enregistrées, jouées en différé, est abandonnée.
   - Pour l'instant : **4 équipes, 3 journées**, comme le championnat du prototype.
-  - **5 minutes de préparation**, à réduire plus tard.
+  - **5 minutes de préparation**, à réduire plus tard ; le mercato et la mi-temps seront plus courts (17/11).
 - **Championnat de 4 équipes** (13/11 midi, « simuler tout un championnat de 4 équipes ») :
   - toi contre 3 ordinateurs (Tigres, Requins, Aigles) ;
   - les ordinateurs draftent et font leur mercato **avec le même budget** ;
@@ -200,7 +200,7 @@ Quand une décision est validée, on l'ajoute ici avec sa date et les mots du co
 - Format visé par le dossier (11/11) : **2 groupes de 4** (8 équipes), complétés par des équipes IA si besoin.
   - Puis demi-finales (1A contre 2B, 1B contre 2A) et finale, sans aller-retour.
   - 15 matchs au total ; chaque équipe en joue 3 à 5.
-  - À revoir plus tard si c'est trop long.
+  - **Ce format reste l'objectif à terme** (confirmé le 17/11) ; à revoir s'il est trop long.
 - Adversaires : des **entraîneurs IA** au départ, puis des humains **en direct** (16/11 : tournoi en ligne complété par des IA).
 - **Si un joueur se déconnecte**, son équipe reste en l'état jusqu'à la fin du tournoi.
 
@@ -313,7 +313,7 @@ Les règles de l'écran :
   5. aucune limite sur la création de parties ;
   6. le feu des fusions, un filtre SVG de turbulence, et les 22 figurines en SVG n'ont jamais été mesurés sur un téléphone d'entrée de gamme ;
   7. `CLAUDE.md` trop long et copié à la main à deux endroits (traité le 17/11) ;
-  8. `dist/index.html` (3,2 Mo) est enregistré dans le dépôt à chaque version ;
+  8. `dist/index.html` (3,2 Mo) était enregistré dans le dépôt à chaque version. Retiré le 17/11 avec l'accord du concepteur : la page est refabriquée par `bun run construire` avant chaque publication ;
   9. la 2e mi-temps recalcule la 1re sur le serveur.
 
 ## 15. Feuille de route et laboratoire de tests (dossier, §16)

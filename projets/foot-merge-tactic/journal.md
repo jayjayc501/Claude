@@ -918,4 +918,11 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 
 **Vérification** : relecture croisée par script de l'ancien fichier (hors « État ») : 125 citations du concepteur, 81 chiffres avec unité, 124 noms de fichiers, 5 adresses et 290 puces comparés aux nouveaux fichiers. Seuls restent des titres de sections et des chemins écrits plus courts.
 
+**Décisions validées dans la séance** (17/11 au matin) :
+- les décisions datées de `docs/decisions.md` priment sur le dossier de conception ;
+- 30 s par mi-temps, confirmé ;
+- le format à 8 équipes reste l'objectif à terme ;
+- en tournoi en ligne, le mercato et la mi-temps seront plus courts que la préparation ;
+- `prototype/dist/index.html` est retiré du dépôt (`.gitignore`).
+
 **À juger par le concepteur** : la proposition de mise à jour du skill `foot-merge-tactic-etape` (nouveaux chemins).

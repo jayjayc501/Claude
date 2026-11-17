@@ -175,6 +175,7 @@ L'ancien `CLAUDE.md` (442 lignes, commit `9885b08`) est découpé en cinq fichie
   - MD / MG, qui sont les cases basses des côtés ;
   - placement sur un demi-terrain ;
   - outil du prototype : le web.
+- « Les 5 minutes de préparation valent-elles aussi pour chaque mercato et pour la mi-temps ? » (audit du 16/11). → Tranché le 17/11 : non, le mercato et la mi-temps seront plus courts.
 - « Comment un style ajoute de petites caractéristiques » (13/11). → Tranché le 14/11 : bonus caché et comportement, sans contrepartie.
 - « L'interrupteur « Styles » coupe les styles, pas les bonus de pays ni les fusions (à confirmer) » (14/11). → Sans objet : interrupteurs retirés le 15/11.
 - Les paliers des styles. → Tranchés le 14/11 : 3 et 5.

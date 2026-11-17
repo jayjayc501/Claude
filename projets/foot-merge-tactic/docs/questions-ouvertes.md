@@ -4,7 +4,7 @@ Ce fichier liste les points **[OUVERT]**, pas encore décidés. **Ne pas invente
 
 ## Ouvertes le 16/11 (audit)
 
-- Les **5 minutes de préparation** valent-elles aussi pour chaque mercato et pour la mi-temps ?
+- **Durées du mercato et de la mi-temps en tournoi en ligne** : plus courtes que les 5 minutes de préparation (17/11), mais pas encore fixées. Exemple proposé : 2 min de mercato et 1 min de mi-temps, comme en 1 contre 1.
 - **Économie du mercato** : revenu par journée, intérêt. Le concepteur la verra plus tard.
 - **Cartes données au départ** : à revoir quand le moteur sera stabilisé avec tous les joueurs.
 - **Comment on gagne les cartes** : à rediscuter avec plus de propositions. Piste du concepteur : **un paquet offert à chacun des 3 premiers tournois du jour**, plus d'autres bonus à définir.

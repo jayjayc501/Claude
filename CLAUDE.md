@@ -32,7 +32,7 @@ mets-le à jour quand quelque chose d'important change.
 
 ## Supabase (offre gratuite : 2 projets actifs au maximum)
 
-- Projet `myproject` (ex-`jelavaisdit` ; identifiant `joqzrjjgrntbyutytpnr`, l'URL ne change pas)
+- Projet `claude_projets` (ex-`jelavaisdit` ; identifiant `joqzrjjgrntbyutytpnr`, l'URL ne change pas)
   = base **mutualisée** entre toutes les applis (« Je te l'avais dit », MyFlix, projets à venir) :
   chaque appli préfixe ses tables, ses fonctions SQL et ses fonctions Edge, aucune table sans préfixe.
   - `jtlad_…` : « Je te l'avais dit » (`jtlad_profils`, `jtlad_phrases`, `jtlad_moderation_mots`, fonctions `jtlad_…`).

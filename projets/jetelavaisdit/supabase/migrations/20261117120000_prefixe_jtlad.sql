@@ -1,6 +1,6 @@
 -- « Je te l'avais dit » — préfixe jtlad_ pour partager la base avec d'autres applis
 --
--- Le projet Supabase (« myproject ») est mutualisé : chaque appli préfixe ses
+-- Le projet Supabase (« claude_projets ») est mutualisé : chaque appli préfixe ses
 -- objets (myflix_…, jtlad_…). Les tables, index, contraintes, fonctions et
 -- déclencheurs de « Je te l'avais dit » prennent le préfixe jtlad_.
 -- Les données, les droits et les politiques RLS sont conservés tels quels.

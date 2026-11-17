@@ -6,73 +6,13 @@
 // Tout reste déterministe (générateur à graine) et indépendant de l'affichage.
 
 import { PARAMETRES_NOTES as PN, decaler } from "./notes";
-
-/** Statistiques d'un joueur pendant le match (13/11, note de match). */
-export interface StatsJoueur {
-  passes: number;
-  passesReussies: number;
-  tirs: number;
-  tirsCadres: number;
-  buts: number;
-  passesDecisives: number;
-  dribbles: number;
-  dribblesReussis: number;
-  tacles: number;
-  interceptions: number;
-  fautes: number;
-  arrets: number;
-}
-
-export function statsVides(): StatsJoueur {
-  return { passes: 0, passesReussies: 0, tirs: 0, tirsCadres: 0, buts: 0, passesDecisives: 0, dribbles: 0, dribblesReussis: 0, tacles: 0, interceptions: 0, fautes: 0, arrets: 0 };
-}
 import { Aleatoire } from "./rng";
 import type { Camp, JoueurSim, MatchSim } from "./simulation";
 import type { PointM } from "./types";
+import { DEMI_BUT_M, avantBouche, avantage1c1, avantageVitesse, contrePresse, depuisRecuperation, dist, distSegment, fusions, portee, precisionPasse } from "./ballon/outils";
+import { type StatsBallon, type StatsJoueur, noterStyle, statsBallonVides, statsJoueur } from "./ballon/stats";
 
-const DEMI_BUT_M = 3.66;
-
-function dist(a: PointM, b: PointM): number {
-  return Math.hypot(a.x - b.x, a.y - b.y);
-}
-
-/** Distance d'un point au segment [a, b]. */
-function distSegment(p: PointM, a: PointM, b: PointM): number {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const l2 = dx * dx + dy * dy;
-  const t = l2 < 1e-9 ? 0 : Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / l2));
-  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
-}
-
-export interface StatsBallon {
-  passes: [number, number];
-  passesReussies: [number, number];
-  /** Somme des longueurs de passe (m), passes vers l'avant (5 m gagnés ou plus), passes longues (25 m ou plus). */
-  distancePasses: [number, number];
-  /** Somme des mètres gagnés vers le but adverse par les passes. */
-  gainPasses: [number, number];
-  passesAvant: [number, number];
-  passesLongues: [number, number];
-  interceptions: [number, number];
-  tacles: [number, number];
-  tirs: [number, number];
-  contres: number;
-  touches: number;
-  centres: [number, number];
-  degagements: [number, number];
-  fautes: [number, number];
-  penalties: [number, number];
-  corners: [number, number];
-  horsJeu: [number, number];
-  dribbles: [number, number];
-  dribblesReussis: [number, number];
-  arrets: [number, number];
-  sorties: number;
-  /** 14/11 : montées de latéral et repiquages d'ailier lancés. */
-  montees: [number, number];
-  repiquages: [number, number];
-}
+export { type StatsBallon, type StatsJoueur, statsVides } from "./ballon/stats";
 
 export class BallonReel {
   vit: PointM = { x: 0, y: 0 };
@@ -86,55 +26,31 @@ export class BallonReel {
   /** Remise en jeu : seule cette équipe peut prendre le ballon jusqu'à cet instant. */
   reserve: { camp: Camp; jusqua: number } | null = null;
   /** Partenaire de l'engagement et sa place à côté du ballon. */
-  private placePartenaire: { joueur: JoueurSim; point: PointM; depuis: number } | null = null;
+  placePartenaire: { joueur: JoueurSim; point: PointM; depuis: number } | null = null;
   /** Dernière perte de balle en jeu (pas sur une remise en jeu) : contre-pressing. */
   perte: { camp: Camp; a: number } | null = null;
-  readonly stats: StatsBallon = {
-    passes: [0, 0],
-    passesReussies: [0, 0],
-    distancePasses: [0, 0],
-    gainPasses: [0, 0],
-    passesAvant: [0, 0],
-    passesLongues: [0, 0],
-    interceptions: [0, 0],
-    tacles: [0, 0],
-    tirs: [0, 0],
-    contres: 0,
-    touches: 0,
-    centres: [0, 0],
-    degagements: [0, 0],
-    fautes: [0, 0],
-    penalties: [0, 0],
-    corners: [0, 0],
-    horsJeu: [0, 0],
-    dribbles: [0, 0],
-    dribblesReussis: [0, 0],
-    arrets: [0, 0],
-    sorties: 0,
-    montees: [0, 0],
-    repiquages: [0, 0],
-  };
+  readonly stats: StatsBallon = statsBallonVides();
 
-  private dernierTemps = -Infinity;
+  dernierTemps = -Infinity;
   /** Direction de conduite lissée : le ballon ne saute pas d'un côté à l'autre du joueur. */
-  private dir: PointM = { x: 0, y: 1 };
-  private decisionA = 0;
+  dir: PointM = { x: 0, y: 1 };
+  decisionA = 0;
   /** Appel en profondeur en cours (jeu sans ballon). */
-  private appel: { joueur: JoueurSim; fin: number; point: PointM } | null = null;
+  appel: { joueur: JoueurSim; fin: number; point: PointM } | null = null;
   /** Dernier instant où l'on a tiré au sort un appel. */
-  private dernierTirageAppel = 0;
+  dernierTirageAppel = 0;
   /** Montée du latéral en cours (14/11). */
-  private montee: { joueur: JoueurSim; fin: number; point: PointM } | null = null;
-  private dernierTirageMontee = 0;
+  montee: { joueur: JoueurSim; fin: number; point: PointM } | null = null;
+  dernierTirageMontee = 0;
   /** Ailier qui repique balle au pied (14/11). */
-  private repique: { joueur: JoueurSim; fin: number; point: PointM } | null = null;
-  private protegeJusqua = 0;
+  repique: { joueur: JoueurSim; fin: number; point: PointM } | null = null;
+  protegeJusqua = 0;
   /** Coup de pied arrêté en attente : le premier joueur de l'équipe qui prend le ballon le joue. */
-  private arrete: "corner" | "penalty" | "engagement" | "sixMetres" | "coupFranc" | "touche" | null = null;
+  arrete: "corner" | "penalty" | "engagement" | "sixMetres" | "coupFranc" | "touche" | null = null;
   /** Plongeon du gardien sur le tir en cours. */
-  private plongeon: { gardien: JoueurSim; point: PointM } | null = null;
+  plongeon: { gardien: JoueurSim; point: PointM } | null = null;
   /** Ballon aérien (centre, dégagement) : personne ne le touche avant cet instant. */
-  private airJusqua = -Infinity;
+  airJusqua = -Infinity;
 
   /** Statistiques de chaque joueur (13/11, pour la note de match), par « camp:id ». */
   readonly statsJoueurs = new Map<string, StatsJoueur>();
@@ -142,33 +58,14 @@ export class BallonReel {
    *  du joueur. Simple trace : elle ne change rien au jeu. */
   readonly actionsStyle: { t: number; camp: Camp; id: string; style: string }[] = [];
   /** Receveur d'une passe dans l'espace ou d'un ballon long (pour le Rapide). */
-  private espacePour: JoueurSim | null = null;
+  espacePour: JoueurSim | null = null;
   /** Passeur d'une passe jouée sous pression (pour le Technicien). */
-  private sousPressionDe: JoueurSim | null = null;
+  sousPressionDe: JoueurSim | null = null;
   /** Touche (13/11, « il y a double touche ») : le lanceur ne rejoue pas le
    *  ballon avant qu'un autre joueur l'ait touché. */
-  private lanceur: JoueurSim | null = null;
+  lanceur: JoueurSim | null = null;
   /** Dernière passe réussie (pour les passes décisives). */
-  private passeReussie: { de: JoueurSim; vers: JoueurSim; t: number } | null = null;
-
-  /** Le style du joueur vient de faire la différence (14/11) : on le note pour l'écran. */
-  private styleAgit(j: JoueurSim, styles: string[]): void {
-    const st = j.joueur.style;
-    if (st && styles.includes(st) && this.sim.options.styles) this.actionsStyle.push({ t: this.sim.temps, camp: j.camp, id: j.joueur.id, style: st });
-  }
-
-  /** Niveau de fusion d'un joueur (14/11 : un joueur fusionné pèse plus dans le jeu). */
-  private fusions(j: JoueurSim): number {
-    return j.joueur.fusions ?? 0;
-  }
-
-  /** Statistiques d'un joueur (créées à la demande). */
-  sj(j: JoueurSim): StatsJoueur {
-    const k = `${j.camp}:${j.joueur.id}`;
-    let x = this.statsJoueurs.get(k);
-    if (!x) this.statsJoueurs.set(k, (x = statsVides()));
-    return x;
-  }
+  passeReussie: { de: JoueurSim; vers: JoueurSim; t: number } | null = null;
 
   /** Mi-temps : des joueurs sortent du terrain, on oublie ceux qu'on suivait. */
   oublierJoueurs(): void {
@@ -194,7 +91,7 @@ export class BallonReel {
   }
 
   /** Début du vol du ballon aérien en cours (pour sa hauteur à l'écran). */
-  private airDebut = 0;
+  airDebut = 0;
   /** Hauteur relative du ballon aérien (0 au sol, 1 au sommet de sa trajectoire) : affichage. */
   get hauteur(): number {
     if (this.sim.temps >= this.airJusqua) return 0;
@@ -206,8 +103,8 @@ export class BallonReel {
     return this.sim.temps < this.airJusqua;
   }
   /** Le receveur de la passe en cours était hors-jeu au départ de la passe. */
-  private horsJeu = false;
-  private tirPenalty = false;
+  horsJeu = false;
+  tirPenalty = false;
   /** Dernier événement de jeu, pour l'affichage (« Corner », « Hors-jeu »…). */
   evenement: { texte: string; a: number } | null = null;
   /** Après un but : chacun regagne son camp avant l'engagement. */
@@ -215,13 +112,13 @@ export class BallonReel {
   /** Buts du match, dans l'ordre : équipe qui marque, buteur, minute. */
   buts: { camp: Camp; joueur: string | null; contreSonCamp: boolean; minute: number }[] = [];
   /** Défenseurs que le tir en cours a déjà passés sans les toucher. */
-  private tirEvite = new Set<JoueurSim>();
+  tirEvite = new Set<JoueurSim>();
   /** Joueur désigné pour la remise en jeu (le gardien sur un six mètres). */
-  private tireur: JoueurSim | null = null;
-  private arret: "?" | "oui" | "non" = "?";
-  private rng: Aleatoire;
+  tireur: JoueurSim | null = null;
+  arret: "?" | "oui" | "non" = "?";
+  readonly rng: Aleatoire;
 
-  constructor(private sim: MatchSim, graine: number) {
+  constructor(readonly sim: MatchSim, graine: number) {
     this.rng = new Aleatoire((graine ^ 0x9e3779b9) >>> 0);
   }
 
@@ -254,7 +151,7 @@ export class BallonReel {
 
   /** But : ballon au centre, les deux équipes regagnent leur camp ; l'engagement
    *  a lieu quand tout le monde y est (10 s au plus). */
-  private preparerEngagement(camp: Camp, texte: string): void {
+  preparerEngagement(camp: Camp, texte: string): void {
     const s = this.sim;
     this.remettre({ x: s.donnees.largeurM / 2, y: s.donnees.longueurM / 2 }, camp, null, texte);
     this.reserve = null;
@@ -263,7 +160,7 @@ export class BallonReel {
   }
 
   /** Le point est-il dans la surface de réparation que défend ce camp ? */
-  private dansSurface(pt: PointM, campDefenseur: Camp): boolean {
+  dansSurface(pt: PointM, campDefenseur: Camp): boolean {
     const r = this.sim.reglages.ballon;
     const W = this.sim.donnees.largeurM;
     const L = this.sim.donnees.longueurM;
@@ -272,7 +169,7 @@ export class BallonReel {
   }
 
   /** Six mètres : les adversaires sortent de la surface. */
-  private viderSurface(camp: Camp): void {
+  viderSurface(camp: Camp): void {
     const L = this.sim.donnees.longueurM;
     const bord = this.sim.reglages.ballon.surface.profondeurM + 1.5;
     for (const o of this.sim.joueurs) {
@@ -282,7 +179,7 @@ export class BallonReel {
   }
 
   /** Coup franc : les adversaires se tiennent à 9,15 m du ballon (touche : 2 m). */
-  private eloigner(camp: Camp, rayon = 9.5): void {
+  eloigner(camp: Camp, rayon = 9.5): void {
     const b = this.sim.ballon;
     for (const o of this.sim.joueurs) {
       if (o.camp === camp) continue;
@@ -295,7 +192,7 @@ export class BallonReel {
   }
 
   /** Coup d'envoi : les adversaires restent dans leur moitié, hors du rond central. */
-  private eloignerEngagement(camp: Camp): void {
+  eloignerEngagement(camp: Camp): void {
     const s = this.sim;
     const b = s.ballon;
     const L = s.donnees.longueurM;
@@ -315,7 +212,7 @@ export class BallonReel {
   }
 
   /** Joueur qui engage : le joueur de champ de l'équipe le plus proche du centre. */
-  private engageur(): JoueurSim {
+  engageur(): JoueurSim {
     const s = this.sim;
     const camp = this.engagement!.camp;
     return s.joueurs
@@ -325,7 +222,7 @@ export class BallonReel {
 
   /** Coéquipier qui se place à côté du ballon pour l'engagement (12/11 :
    *  « les engagements sont nuls : une passe en arrière à personne »). */
-  private partenaire(camp: Camp, kicker: JoueurSim): JoueurSim | undefined {
+  partenaire(camp: Camp, kicker: JoueurSim): JoueurSim | undefined {
     const s = this.sim;
     const centre = { x: s.donnees.largeurM / 2, y: s.donnees.longueurM / 2 };
     return s.joueurs
@@ -334,7 +231,7 @@ export class BallonReel {
   }
 
   /** Place du partenaire : 4 m à côté du ballon, un pas dans son camp. */
-  private placerPartenaire(camp: Camp, kicker: JoueurSim): void {
+  placerPartenaire(camp: Camp, kicker: JoueurSim): void {
     const s = this.sim;
     const q = this.partenaire(camp, kicker);
     if (!q) return;
@@ -381,7 +278,7 @@ export class BallonReel {
 
   // --- Ballon aux pieds ---------------------------------------------------
 
-  private conduire(): void {
+  conduire(): void {
     const p = this.porteur!;
     const sens = p.camp === 0 ? 1 : -1;
     const v = Math.hypot(p.vit.x, p.vit.y);
@@ -401,7 +298,7 @@ export class BallonReel {
     this.vit = { ...p.vit };
   }
 
-  private tacler(dt: number): void {
+  tacler(dt: number): void {
     const p = this.porteur!;
     const s = this.sim;
     for (const o of s.joueurs) {
@@ -423,7 +320,7 @@ export class BallonReel {
 
   /** Un défenseur gagne un duel sur le porteur : tacle propre, ou faute
    *  (coup franc, penalty si c'est dans sa surface). */
-  private duelGagne(o: JoueurSim): void {
+  duelGagne(o: JoueurSim): void {
     const s = this.sim;
     const r = s.reglages.ballon;
     const p = this.porteur!;
@@ -431,13 +328,13 @@ export class BallonReel {
     const n = Math.exp(-(o.notes.duel - p.notes.dribble) * PN.physique.fautesParPoint);
     if (this.rng.suivant() >= s.reg(o.camp).ballon.fautes.proba * o.effet.fautes * n) {
       this.stats.tacles[o.camp]++;
-      this.sj(o).tacles++;
-      this.styleAgit(o, ["REC", "REM"]);
+      statsJoueur(this, o).tacles++;
+      noterStyle(this, o, ["REC", "REM"]);
       this.donner(o);
       return;
     }
     this.stats.fautes[o.camp]++;
-    this.sj(o).fautes++;
+    statsJoueur(this, o).fautes++;
     const W = s.donnees.largeurM;
     const L = s.donnees.longueurM;
     const deSonBut = o.camp === 0 ? p.pos.y : L - p.pos.y; // distance au but du fautif
@@ -449,7 +346,7 @@ export class BallonReel {
     this.remettre({ x: Math.min(W - 1, Math.max(1, p.pos.x)), y: p.pos.y }, p.camp, "coupFranc", "Faute");
   }
 
-  private decider(): void {
+  decider(): void {
     const s = this.sim;
     const p = this.porteur!;
     const r = s.reg(p.camp).ballon; // décisions selon la tactique de son équipe
@@ -460,9 +357,9 @@ export class BallonReel {
     const dBut = dist(p.pos, but);
     const adverses = s.joueurs.filter((j) => j.camp !== p.camp);
     const pression = Math.min(...adverses.filter((o) => (o.pos.y - p.pos.y) * sens > -1.5).map((o) => dist(o.pos, p.pos)));
-    this.decisionA = s.temps + this.rng.entre(r.decisionS.min, r.decisionS.max) * this.contrePresse(p).precipite;
+    this.decisionA = s.temps + this.rng.entre(r.decisionS.min, r.decisionS.max) * contrePresse(this, p).precipite;
     // Contre-attaque : juste après la récupération, on cherche l'avant.
-    const poidsProgression = r.poidsProgression + (this.depuisRecuperation(p.camp) < r.contreAttaque.dureeS ? r.contreAttaque.bonusProgression : 0);
+    const poidsProgression = r.poidsProgression + (depuisRecuperation(this, p.camp) < r.contreAttaque.dureeS ? r.contreAttaque.bonusProgression : 0);
 
     if (this.arrete === "touche") {
       // Touche (13/11, « ils donnent le ballon à l'adversaire collé ») : passe à la main
@@ -557,7 +454,7 @@ export class BallonReel {
         return;
       }
       // Un joueur fusionné (14/11) ose plus (× 1 sans fusion : inchangé).
-      const oseTir = 1 + this.fusions(p) * s.influences.fusion.tirLoinParNiveau;
+      const oseTir = 1 + fusions(p) * s.influences.fusion.tirLoinParNiveau;
       if (dBut < r.tirDistanceM && Math.abs(p.pos.x - W / 2) < dBut * 0.8 && this.rng.suivant() < (r.tirLoin.probaBase + r.tirLoin.probaMax * (1 - dBut / r.tirDistanceM)) * oseTir) {
         this.tirer(but);
         return;
@@ -611,9 +508,9 @@ export class BallonReel {
     // parfois de l'éliminer plutôt que de passer.
     const db = r.dribble;
     const devant = adverses.find((o) => o.poste.id !== "G" && dist(o.pos, p.pos) < db.distanceM && (o.pos.y - p.pos.y) * sens > -0.5);
-    const tente = (p.poste.ligneDefense === "defense" ? db.probaTentative * 0.25 : p.poste.ligneDefense === "gardien" ? 0 : db.probaTentative) * (1 + this.fusions(p) * s.influences.fusion.tentativeParNiveau);
+    const tente = (p.poste.ligneDefense === "defense" ? db.probaTentative * 0.25 : p.poste.ligneDefense === "gardien" ? 0 : db.probaTentative) * (1 + fusions(p) * s.influences.fusion.tentativeParNiveau);
     // Notes : on tente plus souvent le 1 contre 1 quand on a l'avantage (dribble et accélération).
-    if (devant && this.rng.suivant() < (tente > 0 ? decaler(tente, this.avantage1c1(p, devant) * PN.unContreUn.poidsTentative) : 0)) {
+    if (devant && this.rng.suivant() < (tente > 0 ? decaler(tente, avantage1c1(p, devant) * PN.unContreUn.poidsTentative) : 0)) {
       this.dribbler(devant, sens);
       return;
     }
@@ -622,7 +519,7 @@ export class BallonReel {
     // attaquant lancé ou libre, là où il arrivera avant les défenseurs.
     const jl = r.jeuLong;
     const deSonButJL = sens === 1 ? p.pos.y : L - p.pos.y;
-    const probaJL = this.depuisRecuperation(p.camp) < r.contreAttaque.dureeS ? jl.probaContre : jl.proba;
+    const probaJL = depuisRecuperation(this, p.camp) < r.contreAttaque.dureeS ? jl.probaContre : jl.proba;
     if (p.poste.id !== "G" && deSonButJL < jl.profondeurMaxM && probaJL > 0 && this.rng.suivant() < probaJL) {
       let choixJL: { q: JoueurSim; point: PointM; gain: number } | null = null;
       for (const q of s.joueurs) {
@@ -689,9 +586,9 @@ export class BallonReel {
         const gain = (o.vise.y - p.pos.y) * sens;
         const large = Math.abs(o.vise.x - W / 2) > r.construction.largeurM && (o.vise.y - L / 2) * sens > -10 ? r.construction.bonusLargeur : 0;
         // Notes : on cherche le coéquipier plus rapide que son adversaire direct (passe vers l'avant).
-        const vitesse = gain > 0 ? this.avantageVitesse(q, o.vise, adverses) * PN.vitesse.choixPasseParPoint : 0;
+        const vitesse = gain > 0 ? avantageVitesse(q, o.vise, adverses) * PN.vitesse.choixPasseParPoint : 0;
         // Fusions (14/11) : on cherche davantage le joueur fusionné (+ 0 sans fusion).
-        const vedette = this.fusions(q) * s.influences.fusion.passeVersLuiParNiveau;
+        const vedette = fusions(q) * s.influences.fusion.passeVersLuiParNiveau;
         // Latéral qui monte devant le ballon (14/11) : le porteur le cherche (+ 0 sinon).
         const dedouble = this.montee?.joueur === q && gain > 0 ? r.sansBallon.montee.bonusPasse : 0;
         const sc = gain * poidsProgression + ouvert * r.poidsEspace - dist(p.pos, o.vise) * 0.08 + large - (versSurface ? r.construction.surfaceMalus : 0) + vitesse + vedette + dedouble + this.rng.entre(-2, 2);
@@ -704,7 +601,7 @@ export class BallonReel {
     const presse = pression < r.pressionM;
     // Avant bouché (adversaire proche dans le cône) : il fait tourner le ballon
     // (passe latérale ou en retrait) plutôt que de foncer dans le bloc.
-    const bouche = this.avantBouche(p);
+    const bouche = avantBouche(this, p);
     const seuil = bouche ? r.seuilPasse - r.construction.baisseSeuil : r.seuilPasse;
     if (meilleur && (p.poste.id === "G" || presse || score > seuil)) {
       this.passer(meilleur.q, presse, meilleur.point);
@@ -726,13 +623,13 @@ export class BallonReel {
   }
 
   /** Ballon aérien vers un point, dosé pour y arriver en T secondes. */
-  private lober(point: PointM, T: number, angleErreurDeg = 0): void {
+  lober(point: PointM, T: number, angleErreurDeg = 0): void {
     const r = this.sim.reglages.ballon;
     const b = this.sim.ballon;
     const d = dist(b, point) || 1;
     const k = r.frottementParS;
     const v = Math.min(30, (k * d) / (1 - Math.exp(-k * T)));
-    const e = (this.rng.entre(-1, 1) * angleErreurDeg * this.precisionPasse(this.porteur) * Math.PI) / 180;
+    const e = (this.rng.entre(-1, 1) * angleErreurDeg * precisionPasse(this.porteur) * Math.PI) / 180;
     const ux = (point.x - b.x) / d;
     const uy = (point.y - b.y) / d;
     this.lancer((ux * Math.cos(e) - uy * Math.sin(e)) * v, (ux * Math.sin(e) + uy * Math.cos(e)) * v);
@@ -742,10 +639,10 @@ export class BallonReel {
 
   /** Touche : lancer à la main, en l'air, dans les pieds du coéquipier (pas de
    *  hors-jeu). Personne ne peut couper le ballon à la sortie des mains. */
-  private lancerTouche(p: JoueurSim, q: JoueurSim): void {
+  lancerTouche(p: JoueurSim, q: JoueurSim): void {
     const d = dist(p.pos, q.pos);
     this.stats.passes[p.camp]++;
-    this.sj(p).passes++;
+    statsJoueur(this, p).passes++;
     this.stats.distancePasses[p.camp] += d;
     // Un peu devant le receveur s'il court, sinon dans ses pieds.
     const point = { x: q.pos.x + q.vit.x * 0.3, y: q.pos.y + q.vit.y * 0.3 };
@@ -758,7 +655,7 @@ export class BallonReel {
   }
 
   /** Ballon long aérien vers un coéquipier (jeu long, contre-attaque). */
-  private jouerLong(q: JoueurSim, point: PointM): void {
+  jouerLong(q: JoueurSim, point: PointM): void {
     const s = this.sim;
     const p = this.porteur!;
     const jl = s.reg(p.camp).ballon.jeuLong;
@@ -766,7 +663,7 @@ export class BallonReel {
     this.espacePour = q;
     this.sousPressionDe = null;
     this.stats.passes[p.camp]++;
-    this.sj(p).passes++;
+    statsJoueur(this, p).passes++;
     this.stats.distancePasses[p.camp] += d;
     this.stats.passesLongues[p.camp]++;
     const gainPasse = (point.y - p.pos.y) * (p.camp === 0 ? 1 : -1);
@@ -779,7 +676,7 @@ export class BallonReel {
   }
 
   /** Centre aérien vers un coéquipier de la surface (ou le point de penalty). */
-  private centrer(but: PointM, sens: number): void {
+  centrer(but: PointM, sens: number): void {
     const s = this.sim;
     const r = s.reglages.ballon;
     const p = this.porteur!;
@@ -790,7 +687,7 @@ export class BallonReel {
       : { x: but.x + this.rng.entre(-6, 6), y: but.y - sens * this.rng.entre(6, 12) };
     this.stats.centres[p.camp]++;
     this.stats.passes[p.camp]++;
-    this.sj(p).passes++;
+    statsJoueur(this, p).passes++;
     this.lober(point, r.centre.dureeS, r.centre.erreurDeg);
     this.receveur = q;
     this.espacePour = null;
@@ -798,7 +695,7 @@ export class BallonReel {
   }
 
   /** Dégagement : long ballon aérien vers l'avant et le côté. */
-  private degager(sens: number): void {
+  degager(sens: number): void {
     const s = this.sim;
     const g = s.reglages.ballon.degagement;
     const p = this.porteur!;
@@ -812,17 +709,17 @@ export class BallonReel {
 
   /** 1 contre 1 : réussi, l'adversaire est éliminé et le porteur accélère ;
    *  raté, l'adversaire prend le ballon ou le ballon part libre. */
-  private dribbler(o: JoueurSim, sens: number): void {
+  dribbler(o: JoueurSim, sens: number): void {
     const s = this.sim;
     const p = this.porteur!;
     const db = s.reg(p.camp).ballon.dribble;
     this.stats.dribbles[p.camp]++;
-    this.sj(p).dribbles++;
+    statsJoueur(this, p).dribbles++;
     // Notes : dribble et accélération du porteur contre duel et accélération du défenseur.
-    if (this.rng.suivant() < decaler(Math.min(0.95, db.probaReussite * p.effet.dribble), this.avantage1c1(p, o))) {
+    if (this.rng.suivant() < decaler(Math.min(0.95, db.probaReussite * p.effet.dribble), avantage1c1(p, o))) {
       this.stats.dribblesReussis[p.camp]++;
-      this.sj(p).dribblesReussis++;
-      this.styleAgit(p, ["TEC", "RAP"]);
+      statsJoueur(this, p).dribblesReussis++;
+      noterStyle(this, p, ["TEC", "RAP"]);
       o.freineJusqua = s.temps + db.eliminationS;
       p.sprintJusqua = Math.max(p.sprintJusqua, s.temps + db.eliminationS);
       return;
@@ -835,7 +732,7 @@ export class BallonReel {
     }
   }
 
-  private lancer(vx: number, vy: number): void {
+  lancer(vx: number, vy: number): void {
     this.airJusqua = -Infinity;
     this.dernier = this.porteur;
     this.dernierTemps = this.sim.temps;
@@ -844,7 +741,7 @@ export class BallonReel {
     this.arret = "?";
   }
 
-  private passer(q: JoueurSim, presse = false, point: PointM | null = null, anticipe = true): void {
+  passer(q: JoueurSim, presse = false, point: PointM | null = null, anticipe = true): void {
     const p = this.porteur!;
     const r = this.sim.reg(p.camp).ballon;
     const d = dist(p.pos, point ?? q.pos);
@@ -864,14 +761,14 @@ export class BallonReel {
     // Passe jouée sous pression : moins précise ; une équipe qui presse gêne de plus loin.
     const g = this.sim.reg(p.camp === 0 ? 1 : 0).ballon.gene;
     const dAdv = Math.min(...this.sim.joueurs.filter((o) => o.camp !== p.camp && o.poste.id !== "G").map((o) => dist(o.pos, p.pos)));
-    const gene = (presse ? r.imprecision.sousPressionFacteur : 1) * (dAdv < g.rayonM ? g.facteur : 1) * this.contrePresse(p).gene;
+    const gene = (presse ? r.imprecision.sousPressionFacteur : 1) * (dAdv < g.rayonM ? g.facteur : 1) * contrePresse(this, p).gene;
     // Cohésion d'un pays (14/11) : passe plus précise vers un compatriote (× 1 : inchangé).
     const compatriote = p.joueur.pays && q.joueur.pays === p.joueur.pays ? p.effet.imprecisionCompatriote : 1;
-    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * gene * p.effet.imprecision * compatriote * this.precisionPasse(p) * Math.PI) / 180) * this.rng.entre(-1, 1);
+    const erreur = (((r.imprecision.baseDeg + r.imprecision.parMetreDeg * d) * gene * p.effet.imprecision * compatriote * precisionPasse(p) * Math.PI) / 180) * this.rng.entre(-1, 1);
     const c = Math.cos(erreur);
     const si = Math.sin(erreur);
     this.stats.passes[p.camp]++;
-    this.sj(p).passes++;
+    statsJoueur(this, p).passes++;
     this.stats.distancePasses[p.camp] += d;
     const gainPasse = ((point ?? q.pos).y - p.pos.y) * (p.camp === 0 ? 1 : -1);
     this.stats.gainPasses[p.camp] += gainPasse;
@@ -887,7 +784,7 @@ export class BallonReel {
 
   /** Hors-jeu : dans le camp adverse, plus près du but adverse que le ballon et
    *  que l'avant-dernier adversaire, au moment de la passe. */
-  private estHorsJeu(q: JoueurSim): boolean {
+  estHorsJeu(q: JoueurSim): boolean {
     const L = this.sim.donnees.longueurM;
     const prof = (y: number) => (q.camp === 0 ? y : L - y); // profondeur vers le but adverse
     const dq = prof(q.pos.y);
@@ -902,7 +799,7 @@ export class BallonReel {
   /** Tir : vise un coin, loin du gardien ; l'erreur grandit avec la distance.
    *  Le gardien plonge vers le point où le ballon passe à sa hauteur ; il a
    *  d'autant plus de chances d'arrêter que ce point est proche de lui. */
-  private tirer(but: PointM, penalty = false): void {
+  tirer(but: PointM, penalty = false): void {
     const s = this.sim;
     const r = s.reglages.ballon;
     const t = r.tir;
@@ -920,8 +817,8 @@ export class BallonReel {
     const n = Math.hypot(dx, dy) || 1;
     const vTir = r.vitesseTirMS * (1 + (p.notes.puissance - PN.reference) * PN.tir.puissanceParPoint);
     this.stats.tirs[p.camp]++;
-    this.sj(p).tirs++;
-    if (Math.abs(cible.x - but.x) <= DEMI_BUT_M) this.sj(p).tirsCadres++;
+    statsJoueur(this, p).tirs++;
+    if (Math.abs(cible.x - but.x) <= DEMI_BUT_M) statsJoueur(this, p).tirsCadres++;
     this.lancer((dx / n) * vTir, (dy / n) * vTir);
     this.tirEnCours = true;
     this.tirEvite.clear();
@@ -950,7 +847,7 @@ export class BallonReel {
 
   // --- Ballon libre -------------------------------------------------------
 
-  private rouler(dt: number): void {
+  rouler(dt: number): void {
     const s = this.sim;
     const W = s.donnees.largeurM;
     const L = s.donnees.longueurM;
@@ -966,9 +863,9 @@ export class BallonReel {
         s.score[marqueur]++;
         // Note de match (13/11) : buteur, passeur décisif (passe reçue dans les 12 s).
         if (this.dernier && this.dernier.camp === marqueur) {
-          this.sj(this.dernier).buts++;
+          statsJoueur(this, this.dernier).buts++;
           const pr = this.passeReussie;
-          if (pr && pr.vers === this.dernier && s.temps - pr.t < 12) this.sj(pr.de).passesDecisives++;
+          if (pr && pr.vers === this.dernier && s.temps - pr.t < 12) statsJoueur(this, pr.de).passesDecisives++;
         }
         // Buteur (13/11) : le dernier à avoir touché le ballon ; contre son camp s'il est de l'autre équipe.
         const m = s.minutesJouees();
@@ -1004,7 +901,7 @@ export class BallonReel {
     s.ballon = { x, y };
   }
 
-  private reprendre(): void {
+  reprendre(): void {
     const s = this.sim;
     if (s.temps < this.airJusqua) return; // ballon en l'air
     const r = s.reglages.ballon;
@@ -1017,15 +914,15 @@ export class BallonReel {
       if (j === this.lanceur) continue;
       const gardienAdverse = j.poste.id === "G" && this.tirEnCours && this.dernier !== null && j.camp !== this.dernier.camp;
       // Notes : le duel donne la portée sur le ballon (interceptions, ballons disputés, têtes).
-      let portee = this.portee(j);
+      let allonge = portee(j);
       // Passe bien dosée (note de passe du passeur) : plus dure à intercepter.
       if (this.receveur && this.dernier && j.camp !== this.dernier.camp && j.poste.id !== "G" && this.dernier.notes.passe !== PN.reference)
-        portee *= 1 - (this.dernier.notes.passe - PN.reference) * PN.technique.interceptionParPoint;
-      const rayon = j === this.receveur ? r.rayonReceveurM : gardienAdverse ? r.tir.rayonPlongeonM : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM * portee;
+        allonge *= 1 - (this.dernier.notes.passe - PN.reference) * PN.technique.interceptionParPoint;
+      const rayon = j === this.receveur ? r.rayonReceveurM : gardienAdverse ? r.tir.rayonPlongeonM : j.poste.id === "G" ? r.rayonGardienM : r.rayonControleM * allonge;
       const d = dist(j.pos, s.ballon);
       if (d > rayon) continue;
       const adverseDuTireur = this.dernier !== null && j.camp !== this.dernier.camp && j.poste.id !== "G";
-      if (adverseDuTireur && !this.tirPenalty && vBalle > r.contre.vitesseMinMS && d <= r.rayonControleM * portee) {
+      if (adverseDuTireur && !this.tirPenalty && vBalle > r.contre.vitesseMinMS && d <= r.rayonControleM * allonge) {
         // Tir (12/11, « pas assez de buts » : 41 % des tirs étaient contrés) : un défenseur
         // sur la trajectoire ne touche le ballon qu'une fois sur deux ; sinon le tir passe.
         if (this.tirEnCours) {
@@ -1045,8 +942,8 @@ export class BallonReel {
         if (this.arret === "?") this.arret = this.rng.suivant() < (this.tirPenalty ? r.fautes.arretPenaltyProba : r.arretProba) ? "oui" : "non";
         if (this.arret === "non") continue;
       }
-      if (d / portee < meilleurD) {
-        meilleurD = d / portee;
+      if (d / allonge < meilleurD) {
+        meilleurD = d / allonge;
         gagnant = j;
       }
     }
@@ -1059,7 +956,7 @@ export class BallonReel {
     }
     if (this.tirEnCours && gagnant.poste.id === "G") {
       this.stats.arrets[gagnant.camp]++;
-      this.sj(gagnant).arrets++;
+      statsJoueur(this, gagnant).arrets++;
       this.evenement = { texte: "Arrêt", a: s.temps };
       // Réflexes (13/11) : un bon gardien bloque plus souvent au lieu de repousser.
       if (this.rng.suivant() < decaler(r.tir.paradeProba, -(gagnant.notes.reflexes - PN.reference) * PN.gardien.poidsCaptage)) {
@@ -1094,53 +991,29 @@ export class BallonReel {
       }
     }
     if (gagnant === this.receveur) {
-      if (gagnant === this.espacePour) this.styleAgit(gagnant, ["RAP"]);
+      if (gagnant === this.espacePour) noterStyle(this, gagnant, ["RAP"]);
       // Passe réussie sous pression : le Technicien a gardé le ballon.
-      if (this.sousPressionDe && this.sousPressionDe.camp === gagnant.camp && this.sousPressionDe !== gagnant) this.styleAgit(this.sousPressionDe, ["TEC"]);
+      if (this.sousPressionDe && this.sousPressionDe.camp === gagnant.camp && this.sousPressionDe !== gagnant) noterStyle(this, this.sousPressionDe, ["TEC"]);
       this.stats.passesReussies[gagnant.camp]++;
       if (this.dernier && this.dernier.camp === gagnant.camp && this.dernier !== gagnant) {
-        this.sj(this.dernier).passesReussies++;
+        statsJoueur(this, this.dernier).passesReussies++;
         this.passeReussie = { de: this.dernier, vers: gagnant, t: s.temps };
       }
     } else if (this.dernier && gagnant.camp !== this.dernier.camp) {
       this.stats.interceptions[gagnant.camp]++;
-      this.sj(gagnant).interceptions++;
-      this.styleAgit(gagnant, ["REC", "REM"]);
+      statsJoueur(this, gagnant).interceptions++;
+      noterStyle(this, gagnant, ["REC", "REM"]);
     }
     this.donner(gagnant);
   }
 
-  /** Avantage du porteur en 1 contre 1, en points de notes : dribble contre duel,
-   *  plus une part de l'écart d'accélération (la vitesse fait passer). */
-  private avantage1c1(p: JoueurSim, o: JoueurSim): number {
-    return p.notes.dribble - o.notes.duel + PN.unContreUn.poidsVitesse * (p.notes.acceleration - o.notes.acceleration);
-  }
-
-  /** Avance de vitesse de pointe (points de notes, 0 au mieux) d'un joueur sur l'adversaire le plus proche d'un point. */
-  private avantageVitesse(q: JoueurSim, point: PointM, adverses: JoueurSim[]): number {
-    let o: JoueurSim | null = null;
-    for (const a of adverses) if (a.poste.id !== "G" && (!o || dist(a.pos, point) < dist(o.pos, point))) o = a;
-    return o ? Math.max(0, q.notes.pointe - o.notes.pointe) : 0;
-  }
-
-  /** Note de passe : multiplicateur de l'imprécision (1 à la référence). */
-  private precisionPasse(j: JoueurSim | null): number {
-    const e = j ? j.notes.passe - PN.reference : 0;
-    return e === 0 ? 1 : Math.exp(-e * PN.technique.imprecisionPasseParPoint);
-  }
-
-  /** Note de duel : portée sur le ballon (1 à la référence ; gardien : toujours 1). */
-  private portee(j: JoueurSim): number {
-    return j.poste.id === "G" ? 1 : 1 + (j.notes.duel - PN.reference) * PN.physique.porteeParPoint;
-  }
-
-  private devier(j: JoueurSim, v: number): void {
+  devier(j: JoueurSim, v: number): void {
     const c = this.sim.reglages.ballon.contre;
     const cote = this.rng.suivant() < 0.5 ? -1 : 1; // dévié franchement d'un côté ou de l'autre
     const a = Math.atan2(this.vit.y, this.vit.x) + (cote * this.rng.entre(c.angleMinDeg, c.angleMaxDeg) * Math.PI) / 180;
     const nv = v * c.perteVitesse;
     this.stats.contres++;
-    this.styleAgit(j, ["REM"]);
+    noterStyle(this, j, ["REM"]);
     this.vit = { x: Math.cos(a) * nv, y: Math.sin(a) * nv };
     this.dernier = j;
     this.dernierTemps = this.sim.temps;
@@ -1150,7 +1023,7 @@ export class BallonReel {
   }
 
   /** Le joueur prend le ballon aux pieds ; son équipe a la possession. */
-  private donner(j: JoueurSim): void {
+  donner(j: JoueurSim): void {
     const r = this.sim.reglages.ballon;
     if (j !== this.lanceur) this.lanceur = null;
     const avant = this.sim.possession;
@@ -1179,7 +1052,7 @@ export class BallonReel {
   // --- Cibles de course ---------------------------------------------------
 
   /** Où va le ballon si personne ne le touche (pour que les joueurs anticipent). */
-  private pointArrivee(tS: number): PointM {
+  pointArrivee(tS: number): PointM {
     const k = this.sim.reglages.ballon.frottementParS;
     const g = (1 - Math.exp(-k * tS)) / k;
     const W = this.sim.donnees.largeurM;
@@ -1191,7 +1064,7 @@ export class BallonReel {
   }
 
   /** Premier point de la trajectoire du ballon que ce joueur peut atteindre à temps. */
-  private pointInterception(j: JoueurSim): PointM {
+  pointInterception(j: JoueurSim): PointM {
     const vMax = this.sim.reglages.mouvement.vitesseMaxMS * j.vitesseF;
     for (let t = 0; t <= 3; t += 1 / 15) {
       const b = this.pointArrivee(t);
@@ -1208,42 +1081,7 @@ export class BallonReel {
     if (!this.engagement && !this.arrete) for (const camp of [0, 1] as const) this.marquer(camp);
   }
 
-  /** Jeu sans ballon de l'équipe qui attaque (référence §5 ; 12/11, « plus
-   *  réaliste dans les mouvements ») :
-   *  - appel en profondeur : quand le porteur a du temps, un attaquant part
-   *    dans le dos de la défense, en diagonale ; le porteur lève la tête
-   *    (décision avancée) ; le défenseur le plus proche le suit, côté but ;
-   *  - soutien : les deux coéquipiers les plus proches, si un adversaire coupe
-   *    leur ligne de passe, font un pas de côté ou décrochent pour l'ouvrir.
-   *  Ces décalages dépendent des adversaires, mais restent bornés autour de la
-   *  place donnée par la projection (pas de dérive, référence §9.2 règle 6). */
-  /** Un adversaire (hors gardien) devant le porteur, dans un cône de
-   *  construction.boucheM : l'avant est bouché, on ne fonce pas dedans. */
-  private avantBouche(p: JoueurSim): boolean {
-    const s = this.sim;
-    const sens = p.camp === 0 ? 1 : -1;
-    const b = s.reg(p.camp).ballon.construction.boucheM;
-    return s.joueurs.some((o) => {
-      if (o.camp === p.camp || o.poste.id === "G") return false;
-      const avant = (o.pos.y - p.pos.y) * sens;
-      return avant > 0 && avant < b && Math.abs(o.pos.x - p.pos.x) < 2 + avant * 0.6;
-    });
-  }
-
-  /** Effets du contre-pressing adverse sur ce porteur (neutres hors de la fenêtre de contre-pressing). */
-  private contrePresse(p: JoueurSim): { precipite: number; gene: number } {
-    const adv: Camp = p.camp === 0 ? 1 : 0;
-    const cp = this.sim.reg(adv).ballon.contrePressing;
-    const actif = this.perte !== null && this.perte.camp === adv && this.sim.temps - this.perte.a < cp.dureeS;
-    return actif ? { precipite: cp.precipite, gene: cp.gene } : { precipite: 1, gene: 1 };
-  }
-
-  /** Secondes depuis que l'équipe `camp` a récupéré le ballon (Infinity : pas de récupération connue). */
-  private depuisRecuperation(camp: Camp): number {
-    return this.perte && this.perte.camp !== camp ? this.sim.temps - this.perte.a : Infinity;
-  }
-
-  private jeuSansBallon(p: JoueurSim): void {
+  jeuSansBallon(p: JoueurSim): void {
     const s = this.sim;
     const sb = s.reg(p.camp).ballon.sansBallon;
     const W = s.donnees.largeurM;
@@ -1259,7 +1097,7 @@ export class BallonReel {
     if (this.appel && prof(this.appel.joueur.pos.y) > avantDernier + 2 && this.receveur !== this.appel.joueur) this.appel = null;
 
     // Nouvel appel : le porteur a du temps, dans la moitié de terrain qui compte.
-    const enContre = this.depuisRecuperation(p.camp) < s.reg(p.camp).ballon.contreAttaque.dureeS;
+    const enContre = depuisRecuperation(this, p.camp) < s.reg(p.camp).ballon.contreAttaque.dureeS;
     const pressé = !enContre && adverses.some((o) => o.poste.id !== "G" && dist(o.pos, p.pos) < s.reglages.ballon.pressionM * 1.5);
     const frequence = ap.parSeconde * (enContre ? s.reg(p.camp).ballon.contreAttaque.appelsFois : 1);
     const dt = s.temps - this.dernierTirageAppel;
@@ -1273,7 +1111,7 @@ export class BallonReel {
       });
       // Le plus libre (le plus loin de son adversaire le plus proche), et le plus
       // rapide face à son adversaire (notes, 12/11 : « la vitesse, c'est super important »).
-      const libreDe = (q: JoueurSim) => Math.min(...adverses.map((o) => dist(o.pos, q.pos))) + this.avantageVitesse(q, q.pos, adverses) * PN.vitesse.appelParPoint;
+      const libreDe = (q: JoueurSim) => Math.min(...adverses.map((o) => dist(o.pos, q.pos))) + avantageVitesse(q, q.pos, adverses) * PN.vitesse.appelParPoint;
       const q = candidats.sort((a, b) => libreDe(b) - libreDe(a))[0];
       if (q) {
         const yBut = sens === 1 ? L : 0;
@@ -1354,7 +1192,7 @@ export class BallonReel {
 
   /** Le latéral qui monte garde sa course tant que son équipe a le ballon,
    *  passes comprises (sinon, ballon en l'air, il revenait vers sa place). */
-  private suivreMontee(): void {
+  suivreMontee(): void {
     const mo = this.montee;
     if (!mo) return;
     const s = this.sim;
@@ -1368,13 +1206,13 @@ export class BallonReel {
   }
 
   /** Latéral (DG ou DD) d'une équipe du côté `cote` (signe de x − largeur/2). */
-  private lateralDuCote(camp: Camp, cote: number): JoueurSim | undefined {
+  lateralDuCote(camp: Camp, cote: number): JoueurSim | undefined {
     const W = this.sim.donnees.largeurM;
     return this.sim.joueurs.find((q) => q.camp === camp && (q.poste.id === "DG" || q.poste.id === "DD") && Math.sign(q.cible.x - W / 2) === cote && q !== this.porteur);
   }
 
   /** Hauteur de la case d'un joueur parmi celles de son poste : 0 la plus basse, 1 la plus haute. */
-  private hauteurCase(j: JoueurSim): number {
+  hauteurCase(j: JoueurSim): number {
     const ys = j.poste.cases.map((c) => c.centre.y);
     const min = Math.min(...ys);
     const max = Math.max(...ys);
@@ -1383,7 +1221,7 @@ export class BallonReel {
 
   /** Lance la montée du latéral du côté `cote` (14/11). Sur un repiquage de
    *  l'ailier, il prend le couloir le plus souvent (surRepiqueProba). */
-  private lancerMontee(camp: Camp, cote: number, surRepique: boolean): void {
+  lancerMontee(camp: Camp, cote: number, surRepique: boolean): void {
     const s = this.sim;
     const mo = s.reg(camp).ballon.sansBallon.montee;
     if (this.montee || !this.porteur) return;
@@ -1400,7 +1238,7 @@ export class BallonReel {
 
   /** Défense de la surface : quand le ballon approche de son but, chaque
    *  défenseur libre suit un attaquant dangereux, côté but, à 1,5 m. */
-  private marquer(campDef: Camp): void {
+  marquer(campDef: Camp): void {
     const s = this.sim;
     const m = s.reg(campDef).ballon.marquage;
     const W = s.donnees.largeurM;
@@ -1428,7 +1266,7 @@ export class BallonReel {
   /** Pressing (référence §4) : pendant qu'un joueur presse le porteur, les
    *  milieux et attaquants libres ferment les lignes de passe en se plaçant
    *  entre le ballon et les adversaires proches. Inactif si zone = 0. */
-  private fermerLignes(campDef: Camp, zoneM: number, rayonM: number): void {
+  fermerLignes(campDef: Camp, zoneM: number, rayonM: number): void {
     const s = this.sim;
     const p = this.porteur;
     if (zoneM <= 0 || !p || p.camp === campDef) return;
@@ -1447,7 +1285,7 @@ export class BallonReel {
     }
   }
 
-  private surchargerBallon(): void {
+  surchargerBallon(): void {
     const s = this.sim;
     const r = s.reglages.ballon;
     const W = s.donnees.largeurM;
@@ -1483,7 +1321,7 @@ export class BallonReel {
         // Avant bouché (12/11, « les actions finissent trop vite en tir ») : il
         // ne fonce plus dans le bloc, il temporise et cherche une passe : il
         // s'écarte de côté de l'adversaire le plus proche (il protège le ballon).
-        const bouche = this.avantBouche(p);
+        const bouche = avantBouche(this, p);
         const avance = bouche ? s.reg(p.camp).ballon.construction.temporiseM : r.dribbleAvanceM;
         p.cible =
           dBut < 35 // dernier tiers : droit vers le but

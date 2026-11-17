@@ -32,3 +32,9 @@ python3 scripts/capture/planche-bustes.py /tmp/bustes.png ENG GER
 
 Un match se joue en temps réel à la vitesse ×3,5 (environ 51 s par mi-temps) :
 prévoir un `timeout` long. Ouvrir les PNG avec l'outil de lecture d'images.
+
+## Écran du match rejouable et fluidité (17/11, A2)
+
+- `rejouable.py <page absolue> <préfixe> [light|dark]` : hasard à graine et horloge virtuelle ; captures et texte de l'écran à 0,5, 2, 4,5, 10, 20, 30, 45 s et à la mi-temps. Deux passages donnent les mêmes octets.
+- `comparer-captures.py <préfixe avant> <préfixe après>` : pixels et texte identiques ou non (pour un découpage sans changement visible).
+- `mesurer-ips.py <page absolue> <joueurs fusionnés par équipe> <ralenti>` : images par seconde pendant 15 s de match, processeur ralenti (×4, ×6), avec `?ips=1&fusions=N` (`src/ui/mesure.ts`).

@@ -19,6 +19,7 @@ import { EcranMatch } from "./ui/ecranMatch";
 import { UnContreUn, idDepuis } from "./ui/unContreUn";
 import { type ControlePartie, EcranPreparation } from "./ui/ecranPreparation";
 import { inscrireImages } from "./ui/imagesCatalogue";
+import { FUSIONS_FORCEES, lancerCompteurIps } from "./ui/mesure";
 import { ouvrirCaseDraft } from "./ui/draft";
 import { type DonneesPrepa, type Fiche, Preparation, donneesPrepa } from "./ui/preparation";
 
@@ -69,7 +70,13 @@ function demarrer(): void {
       const f = prepa.d.joueurs[id];
       if (!f) return undefined;
       // Fusions : celles de ton effectif, ou celles de l'ordinateur pour ses joueurs.
-      const fusions = camp === 0 ? (prepa.membre(id)?.fusions ?? 0) : (partie.camps[adversaire()]!.effectif.find((m) => m.id === id)?.fusions ?? 0);
+      let fusions = camp === 0 ? (prepa.membre(id)?.fusions ?? 0) : (partie.camps[adversaire()]!.effectif.find((m) => m.id === id)?.fusions ?? 0);
+      // Mesure de la fluidité (?fusions=N, 17/11) : les N premiers de chaque équipe affichés au niveau 3.
+      if (FUSIONS_FORCEES) {
+        const compo = camp === 0 ? prepa.etat.composition : partie.equipeDe(adversaire()).composition;
+        const rang = compo.findIndex((p) => p.joueurId === id);
+        if (rang >= 0 && rang < FUSIONS_FORCEES) fusions = 3;
+      }
       return { couleur: couleurs[f.pays] ?? "#1F3A93", style: f.style, fusions };
     },
   };
@@ -272,4 +279,5 @@ function demarrer(): void {
   else montrerAccueil();
 }
 
+lancerCompteurIps();
 demarrer();

@@ -974,3 +974,23 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 - Branche `a3-serveur`, pull request n° 15 fermée sans fusion : action `menage` (parties sans mouvement depuis 24 h et leurs films, par l'API du stockage, car la base refuse d'effacer les films elle-même), limite de 10 créations par heure et par connexion (empreinte HMAC de l'adresse), 2 tests. Gardé pour plus tard.
 - Mesure sur Supabase, avec une partie d'essai jouée par requêtes (`reg8g3dj`, gardée) : 1re mi-temps 847 ms de calcul (1 106 ms la requête), 2e mi-temps 1 325 ms (1 597 ms), limite de Supabase 2 s. En local : 206 ms par mi-temps, 37 ms d'encodage du film.
 - Plan, mesures et deux solutions contre la triche notés dans `docs/questions-ouvertes.md` ; décision dans `docs/decisions.md` §14.
+
+## 17/11/2026 (13 h) — A2 : fluidité de l'écran du match mesurée
+
+**Demande du concepteur** : prompt A2 (découper l'écran du match, mesurer la fluidité, proposer des solutions avant de coder si on passe sous 50 images par seconde).
+
+**Ce qui a été fait** (branche `a2-ecran-match`, pas de pull request pour l'instant)
+- `src/ui/mesure.ts` : `?ips=1` affiche un compteur d'images par seconde ; `?fusions=N` affiche les N premiers joueurs de chaque équipe fusionnés au niveau 3, à l'écran seulement (le match ne change pas). Sans paramètre, rien ne change : captures identiques au pixel près.
+- `scripts/capture/rejouable.py` (hasard à graine, horloge virtuelle) et `comparer-captures.py` : deux passages donnent les mêmes images et le même texte d'écran ; ils serviront à vérifier le découpage. `scripts/capture/mesurer-ips.py` : mesure dans Chrome sans fenêtre, processeur ralenti.
+- Le découpage d'`ecranMatch.ts` et de `demarrer()` reste à faire.
+
+**Mesures** (15 s de match après le coup d'envoi, Chrome sans fenêtre et sans carte graphique ; médiane / pire seconde, en images par seconde)
+| Joueurs fusionnés niveau 3 par équipe | Normal | Ralenti ×4 | Ralenti ×6 |
+|---|---|---|---|
+| 0 | 60 / 60 | 60 / 59 | 57 / 45 |
+| 3 | 57 / 49 | 26 / 16 | 15 / 7 |
+| 11 | 18 / 15 | 7 / 6 | 5 / 3 |
+
+Avec 3 joueurs fusionnés par équipe, au ralenti ×4 : turbulence figée 25 ; sans la matière du feu (filtre) 31 ; sans le contour lumineux 23 ; **sans le feu ni les braises 58**. C'est le feu qui coûte : ses flammes animées et ses braises, en plus de son filtre.
+
+**À trancher par le concepteur** : la solution (voir sa réponse dans la conversation).

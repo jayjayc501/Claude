@@ -311,7 +311,7 @@ Les règles de l'écran :
   3. rien ne nettoie le serveur : chaque partie laisse 2 films d'environ 0,9 Mo, et la table d'essai `parties_essai_15_11` est vide ;
   4. le serveur ne vérifie pas que les cartes viennent des offres du draft, ni le nombre de copies de la réserve ;
   5. aucune limite sur la création de parties ;
-  6. le feu des fusions, un filtre SVG de turbulence, et les 22 figurines en SVG n'ont jamais été mesurés sur un téléphone d'entrée de gamme ;
+  6. le feu des fusions, un filtre SVG de turbulence, et les 22 figurines en SVG n'ont jamais été mesurés sur un téléphone d'entrée de gamme (mesuré le 17/11 dans Chrome au processeur ralenti : c'est le feu qui coûte, voir `journal.md`) ;
   7. `CLAUDE.md` trop long et copié à la main à deux endroits (traité le 17/11) ;
   8. `dist/index.html` (3,2 Mo) était enregistré dans le dépôt à chaque version. Retiré le 17/11 avec l'accord du concepteur : la page est refabriquée par `bun run construire` avant chaque publication ;
   9. la 2e mi-temps recalcule la 1re sur le serveur.

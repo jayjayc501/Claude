@@ -306,7 +306,7 @@ Les règles de l'écran :
 
 - **Prototype en version web** : TypeScript, page autonome ouverte d'un lien sur le téléphone. Godot n'est installable ni dans l'environnement de Claude ni sur le PC de travail du concepteur. L'outil final se choisira quand le moteur convaincra : rester en web et en faire une application, ou passer à Godot.
 - **Audit du code du 16/11** : les constats sont **gardés tels quels**, et rien n'a été changé dans le code. Détail et prompts A1 à A4 dans le fichier `claude/audit-1-code-actuel.md` du projet claude.ai. Les constats, par ordre d'importance :
-  1. `src/sim/ballon.ts` (1 605 lignes, `decider()` de 277 lignes) est à découper ;
+  1. `src/sim/ballon.ts` (1 605 lignes, `decider()` de 277 lignes) est à découper (découpé le 17/11 en dix fichiers, `src/sim/ballon.ts` et `src/sim/ballon/`, sans changer un seul match : pull request n° 14, à fusionner) ;
   2. `src/ui/ecranMatch.ts` (1 397 lignes) et `demarrer()` de `main.ts` (246 lignes) aussi ; aucun test sur les écrans ;
   3. rien ne nettoie le serveur : chaque partie laisse 2 films d'environ 0,9 Mo, et la table d'essai `parties_essai_15_11` est vide ;
   4. le serveur ne vérifie pas que les cartes viennent des offres du draft, ni le nombre de copies de la réserve ;

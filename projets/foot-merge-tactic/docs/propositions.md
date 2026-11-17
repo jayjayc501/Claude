@@ -4,7 +4,7 @@ Ce fichier regroupe les pistes **[PROPOSITION]** de Claude, souvent déjà codé
 
 ## 1. Principes techniques
 
-- Modules séparés dans `prototype/src/sim/` (données, placement, projection, simulation, ballon, actions, statistiques). **Jamais un seul gros fichier** : `ballon.ts` ne respecte pas encore cette règle (audit du 16/11, prompt A1).
+- Modules séparés dans `prototype/src/sim/` (données, placement, projection, simulation, ballon, actions, statistiques). **Jamais un seul gros fichier** : `ballon.ts` (1 605 lignes) a été découpé le 17/11 (prompt A1) en `ballon.ts` et neuf modules dans `ballon/` ; reste `src/ui/ecranMatch.ts` (prompt A2).
 - Simulation séparée du rendu et des animations. Elle tourne sans affichage, sur des milliers de matchs, avec une graine aléatoire contrôlable.
 - Terrain, rectangles, sous-zones, attributs et paramètres dans des fichiers de données, jamais codés en dur.
 - Répartition 40 % qualité, 40 % tactique, 20 % hasard : **ancienne piste, pas une règle. Ne pas la coder.**
@@ -66,7 +66,7 @@ Ce fichier regroupe les pistes **[PROPOSITION]** de Claude, souvent déjà codé
   - **évitement anticipé** : 3 m au minimum entre coéquipiers, 2,5 m entre adversaires.
 - **Charnière centrale** (14/11, `reglages.json` → `projection.defense.resserrementDC` et `projection.attaque.resserrementDC`, 0,42) : 15 m entre les DC avec le ballon (29 avant), 11 m sans (17). Du DC au latéral : 16 m au lieu de 9.
 
-## 4. Ballon et actions (12/11, `src/sim/ballon.ts`, chiffres dans `reglages.json` → `ballon`)
+## 4. Ballon et actions (12/11, `src/sim/ballon.ts` et `src/sim/ballon/`, chiffres dans `reglages.json` → `ballon`)
 
 - **Ballon** : porté ou libre (frottement) ; la possession revient au dernier qui l'a touché. Un ballon aérien (centre, dégagement) est intouchable pendant 80 % du vol.
 - **Porteur** : il décide toutes les 0,6 à 1,2 s entre :

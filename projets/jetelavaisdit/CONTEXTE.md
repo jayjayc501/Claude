@@ -23,7 +23,7 @@ Documents : [`cadrage.md`](cadrage.md) (décisions détaillées), [`README.md`](
 | Page web de la carte reçue | `web/carte/` |
 | Maquettes (copie) | `maquettes/` · version cliquable : https://claude.ai/artifact/GBrtiSGWzndyC5aD4Husvq |
 | Version web en ligne | https://jayjayc501.github.io/Claude/app/ (carte : `/Claude/carte/?c=…`) |
-| Base Supabase | projet `joqzrjjgrntbyutytpnr` (https://joqzrjjgrntbyutytpnr.supabase.co) |
+| Base Supabase | projet `jelavaisdit` / `joqzrjjgrntbyutytpnr` (https://joqzrjjgrntbyutytpnr.supabase.co), **partagé avec MyFlix** : les tables sans préfixe (`profils`, `phrases`, `moderation_mots`) sont à « Je te l'avais dit », celles en `myflix_…` à MyFlix — ne pas y toucher |
 | Compte Expo | `jayjayc501`, projet `jetelavaisdit` (fabrication de l'APK) |
 | Mise en ligne web | `.github/workflows/jetelavaisdit.yml` (à chaque push sur `main`) |
 | Fabrication de l'APK | `.github/workflows/jetelavaisdit-apk.yml` (lancement manuel, secret `EXPO_TOKEN`) |

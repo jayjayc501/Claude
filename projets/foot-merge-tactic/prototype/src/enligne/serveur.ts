@@ -19,6 +19,12 @@
 //   fini     : le match est fini (score gardé).
 // Les téléphones demandent l'état toutes les 1,5 s ; chaque demande fait avancer
 // la partie si c'est l'heure (pas de minuterie côté serveur).
+//
+// Ménage (17/11, prompt A3) : l'action « menage », appelée toutes les heures par
+// une tâche planifiée Supabase, supprime les parties sans mouvement depuis
+// menageApresH heures (finies ou abandonnées) et leurs films. Création limitée à
+// creationsParHeure parties par heure et par connexion (empreinte de l'adresse,
+// jamais l'adresse elle-même).
 
 import { VITESSE_LECTURE } from "../match/arbitre";
 import { ArbitreLocal, planificateurImmediat } from "../match/arbitreLocal";
@@ -62,6 +68,14 @@ export interface PartieEnLigne {
   finMt2: number | null;
   scoreMiTemps: Paire<number> | null;
   score: Paire<number> | null;
+  /** Empreinte de la connexion qui a créé la partie (limite de créations ; null : inconnue). */
+  origine?: string | null;
+}
+
+/** Une partie à supprimer et les chemins de ses films. */
+export interface PartieASupprimer {
+  id: string;
+  films: string[];
 }
 
 /** Le stockage : une table de parties et des fichiers (les films). */
@@ -73,10 +87,16 @@ export interface Magasin {
   ecrire(p: PartieEnLigne, versionLue: number): Promise<boolean>;
   deposerFilm(chemin: string, octets: Uint8Array): Promise<void>;
   lireFilm(chemin: string): Promise<Uint8Array | null>;
+  /** Nombre de parties créées par cette connexion depuis l'instant `depuis` (ms). */
+  creationsDepuis(origine: string, depuis: number): Promise<number>;
+  /** Parties sans mouvement depuis l'instant `avant` (ms), `max` au plus. */
+  anciennes(avant: number, max: number): Promise<PartieASupprimer[]>;
+  /** Supprime les films de la partie, puis la partie. */
+  supprimer(p: PartieASupprimer): Promise<void>;
 }
 
 export interface Requete {
-  action: "creer" | "rejoindre" | "etat" | "equipe" | "mitemps" | "film";
+  action: "creer" | "rejoindre" | "etat" | "equipe" | "mitemps" | "film" | "menage";
   id?: string;
   jeton?: string;
   equipe?: unknown;
@@ -149,7 +169,11 @@ export function dureeLectureMs(film: Film): number {
   return ((Math.max(0, film.images - 1) * film.entete.pasDeTempsS) / VITESSE_LECTURE) * 1000;
 }
 
-const cheminFilm = (p: PartieEnLigne, n: 1 | 2) => `${p.id}-${p.secret}/mt${n}.bin`;
+const cheminFilm = (p: { id: string; secret: string }, n: 1 | 2) => `${p.id}-${p.secret}/mt${n}.bin`;
+/** Les deux films possibles d'une partie (le 2e n'existe pas toujours). */
+export const cheminsFilms = (p: { id: string; secret: string }): string[] => [cheminFilm(p, 1), cheminFilm(p, 2)];
+/** Parties supprimées au plus par ménage (le suivant reprend la suite). */
+const MENAGE_MAX = 100;
 
 function vue(p: PartieEnLigne, camp: Camp, maintenant: number): VuePartie {
   const a = camp;
@@ -283,9 +307,21 @@ async function modifier(m: Magasin, p: PartieEnLigne, maintenant: number, f: (p:
   return "Serveur occupé, réessaie.";
 }
 
-/** Traite une demande d'un téléphone. */
-export async function traiter(r: Requete, m: Magasin, ctx: Contexte, maintenant = Date.now()): Promise<Reponse> {
+/** Ménage : supprime les parties sans mouvement depuis menageApresH heures et leurs films. */
+async function menage(m: Magasin, maintenant: number): Promise<number> {
+  const vieilles = await m.anciennes(maintenant - EN_LIGNE.menageApresH * 3600_000, MENAGE_MAX);
+  for (const v of vieilles) await m.supprimer(v);
+  return vieilles.length;
+}
+
+/** Traite une demande d'un téléphone (ou de la tâche planifiée pour le ménage).
+ *  `origine` : empreinte de la connexion (null : inconnue, pas de limite de créations). */
+export async function traiter(r: Requete, m: Magasin, ctx: Contexte, maintenant = Date.now(), origine: string | null = null): Promise<Reponse> {
+  if (r.action === "menage") return json({ ok: true, supprimees: await menage(m, maintenant) });
+
   if (r.action === "creer") {
+    if (origine && (await m.creationsDepuis(origine, maintenant - 3600_000)) >= EN_LIGNE.creationsParHeure)
+      return erreur("Trop de parties créées depuis cette connexion : réessaie dans une heure.", 429);
     for (let essai = 0; essai < 5; essai++) {
       const p: PartieEnLigne = {
         id: hasard(8),
@@ -308,6 +344,7 @@ export async function traiter(r: Requete, m: Magasin, ctx: Contexte, maintenant 
         finMt2: null,
         scoreMiTemps: null,
         score: null,
+        origine,
       };
       if (await m.creer(p)) return json({ ok: true, jeton: p.jetons[0], partie: vue(p, 0, maintenant) });
     }
@@ -403,6 +440,16 @@ export class MagasinMemoire implements Magasin {
   }
   async lireFilm(chemin: string) {
     return this.films.get(chemin) ?? null;
+  }
+  async creationsDepuis(origine: string, depuis: number) {
+    return [...this.parties.values()].filter((p) => p.origine === origine && p.creeLe > depuis).length;
+  }
+  async anciennes(avant: number, max: number) {
+    return [...this.parties.values()].filter((p) => p.majLe < avant).slice(0, max).map((p) => ({ id: p.id, films: cheminsFilms(p) }));
+  }
+  async supprimer(p: PartieASupprimer) {
+    for (const c of p.films) this.films.delete(c);
+    this.parties.delete(p.id);
   }
 }
 

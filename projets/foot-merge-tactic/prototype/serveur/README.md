@@ -9,6 +9,8 @@ Le match d'une partie en ligne est calculé ici, pas sur les téléphones.
   RLS activée, aucune politique : seule la fonction (clé de service) y touche.
   `parties_essai_15_11` : table vide du premier essai, mise de côté (à supprimer quand le concepteur le voudra).
 - **Films** : compartiment privé `films` (`<partie>-<secret>/mt1.bin`, `mt2.bin`), lus par la fonction seulement.
+- **Ménage** (17/11, A3) : l'action `{"action":"menage"}` supprime les parties sans mouvement depuis `menageApresH` heures (24 h ; finies ou abandonnées) et leurs films, 100 au plus par appel. La base refuse d'effacer les films elle-même (déclencheur `storage.protect_delete`) : c'est la fonction qui le fait, par l'API du stockage. Appelée toutes les heures par la tâche `cron` « menage-parties » (extensions `pg_cron` et `pg_net`). Sans risque si quelqu'un d'autre l'appelle : elle ne touche qu'aux parties mortes.
+- **Limite de créations** (17/11, A3) : `creationsParHeure` parties par heure et par connexion. La colonne `origine` garde une empreinte de l'adresse (HMAC-SHA-256 avec la clé du serveur, tronquée), jamais l'adresse ; elle part avec la partie au ménage.
 - Fonction `essai` : vérification de l'environnement du 15/11, retirée (répond 410).
 
 ## Fichiers

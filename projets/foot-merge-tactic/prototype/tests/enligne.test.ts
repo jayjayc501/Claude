@@ -91,10 +91,10 @@ describe("équipes reçues", () => {
 });
 
 /** Une demande au serveur, réponse JSON attendue. */
-async function demander(m: MagasinMemoire, t: number, r: Parameters<typeof traiter>[0]): Promise<{ ok: boolean; erreur?: string; jeton?: string; partie?: VuePartie }> {
-  const rep: Reponse = await traiter(r, m, ctx, t);
+async function demander(m: MagasinMemoire, t: number, r: Parameters<typeof traiter>[0], origine: string | null = null): Promise<{ ok: boolean; erreur?: string; jeton?: string; partie?: VuePartie; supprimees?: number }> {
+  const rep: Reponse = await traiter(r, m, ctx, t, origine);
   if (rep.type !== "json") throw new Error("JSON attendu");
-  return rep.corps as { ok: boolean; erreur?: string; jeton?: string; partie?: VuePartie };
+  return rep.corps as { ok: boolean; erreur?: string; jeton?: string; partie?: VuePartie; supprimees?: number };
 }
 
 describe("serveur : une partie entière", () => {
@@ -181,5 +181,46 @@ describe("serveur : une partie entière", () => {
     const [x, y] = await Promise.all([demander(m, t, { action: "equipe", id, jeton: ji, equipe: B }), demander(m, t, { action: "etat", id, jeton: c.jeton! })]);
     expect(depots).toBe(1);
     expect([x.partie!.etat, y.partie!.etat]).toContain("mt1");
+  });
+});
+
+describe("serveur : ménage et limite de créations (A3, 17/11)", () => {
+  const H = 3600_000;
+
+  test("ménage : parties sans mouvement depuis 24 h supprimées avec leurs films ; les récentes gardées", async () => {
+    const m = new MagasinMemoire();
+    let t = 50_000_000;
+    // Une partie jouée jusqu'à la 1re mi-temps (un film), puis abandonnée.
+    const c = await demander(m, t, { action: "creer" });
+    const id = c.partie!.id;
+    const ji = (await demander(m, t, { action: "rejoindre", id })).jeton!;
+    await demander(m, t, { action: "equipe", id, jeton: c.jeton!, equipe: A });
+    await demander(m, t, { action: "equipe", id, jeton: ji, equipe: B });
+    expect(m.films.size).toBe(1);
+    // Une partie en attente, créée 23 h plus tard.
+    const recente = (await demander(m, (t += 23 * H), { action: "creer" })).partie!.id;
+    // 24 h après la première : rien à supprimer à 1 s près, puis la vieille part.
+    expect((await demander(m, t + H - 2000, { action: "menage" })).supprimees).toBe(0);
+    const r = await demander(m, (t += 2 * H), { action: "menage" });
+    expect(r.supprimees).toBe(1);
+    expect(m.parties.has(id)).toBe(false);
+    expect(m.films.size).toBe(0);
+    expect(m.parties.has(recente)).toBe(true);
+    // Le lien de la partie supprimée ne mène plus nulle part.
+    expect((await demander(m, t, { action: "rejoindre", id })).erreur).toContain("introuvable");
+  });
+
+  test("création : 10 par heure et par connexion, puis refus ; autre connexion ou une heure après : accepté", async () => {
+    const m = new MagasinMemoire();
+    const t = 70_000_000;
+    const max = REGLES.enLigne.creationsParHeure;
+    for (let i = 0; i < max; i++) expect((await demander(m, t + i * 1000, { action: "creer" }, "abc")).ok).toBe(true);
+    const refus = await demander(m, t + max * 1000, { action: "creer" }, "abc");
+    expect(refus.ok).toBe(false);
+    expect(refus.erreur).toContain("Trop de parties");
+    expect((await demander(m, t + max * 1000, { action: "creer" }, "autre")).ok).toBe(true);
+    expect((await demander(m, t + H + 500, { action: "creer" }, "abc")).ok).toBe(true);
+    // Connexion inconnue (serveur local, essais) : pas de limite.
+    for (let i = 0; i <= max; i++) expect((await demander(m, t, { action: "creer" })).ok).toBe(true);
   });
 });

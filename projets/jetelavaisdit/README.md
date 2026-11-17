@@ -38,7 +38,7 @@ La version web est mise en ligne automatiquement par GitHub (`.github/workflows/
 ### 1. La base de données (Supabase, gratuit)
 
 1. Créer un projet sur [supabase.com](https://supabase.com).
-2. Ouvrir **SQL Editor**, coller le contenu de `supabase/migrations/20261110120000_init.sql` et l'exécuter.
+2. Ouvrir **SQL Editor**, coller et exécuter un par un, dans l'ordre, les fichiers de `supabase/migrations/` (`…_init.sql`, `…_noms_et_jours.sql`, `…_prefixe_jtlad.sql`). Tous les objets de l'appli portent le préfixe `jtlad_` : la base peut être partagée avec d'autres applis.
 3. **Authentication › URL Configuration** : mettre `https://jayjayc501.github.io/Claude/app/` en **Site URL** et dans **Redirect URLs**.
 4. Reporter l'URL du projet et la clé publique (`anon` / `publishable`) dans `mobile/.env.example` et `web/carte/config.js` (déjà fait pour ce projet).
 

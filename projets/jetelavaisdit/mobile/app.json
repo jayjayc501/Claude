@@ -14,13 +14,20 @@
     },
     "android": {
       "package": "app.jetelavaisdit",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#C8FF3D"
+      }
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
           "backgroundColor": "#0D0C12"
         }
       ]

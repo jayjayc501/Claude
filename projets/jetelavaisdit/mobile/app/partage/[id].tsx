@@ -19,14 +19,28 @@ export default function Partage() {
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [auteur, setAuteur] = useState('');
 
   useEffect(() => {
     supabase
-      .from('phrases')
+      .from('jtlad_phrases')
       .select('id, texte, scellee_le, jour, revelee_le, lien')
       .eq('id', id)
       .single()
       .then(({ data }) => setPhrase(data as Phrase));
+    supabase
+      .from('jtlad_profils')
+      .select('pseudo, prenom, nom')
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        // Même règle que sur la carte : « Prénom N. », sinon le prénom, sinon le pseudo.
+        setAuteur(
+          data.prenom && data.nom
+            ? `${data.prenom} ${data.nom.charAt(0).toUpperCase()}.`
+            : data.prenom || data.pseudo,
+        );
+      });
   }, [id]);
 
   async function partager() {
@@ -34,7 +48,7 @@ export default function Partage() {
     setErreur(null);
     setEnvoi(true);
     // Crée (ou récupère) le lien public de la carte : c'est le moment où la phrase est « révélée ».
-    const { data: lien, error } = await supabase.rpc('reveler_phrase', { p_id: phrase.id });
+    const { data: lien, error } = await supabase.rpc('jtlad_reveler_phrase', { p_id: phrase.id });
     setEnvoi(false);
     if (error || !lien) {
       setErreur("Impossible de créer le lien. Réessaie dans un instant.");
@@ -85,7 +99,9 @@ export default function Partage() {
           </View>
           <View style={styles.carteRose}>
             <Text style={styles.phrase}>« {phrase.texte} »</Text>
-            <Text style={styles.date}>Scellée le {formaterDate(phrase.scellee_le, true)}</Text>
+            <Text style={styles.date}>
+              {auteur ? `Par ${auteur} · ` : ''}Scellée le {formaterDate(phrase.scellee_le, true)}
+            </Text>
           </View>
           <Text style={styles.slogan}>
             regarde.{'\n'}je te l'avais <Text style={{ color: couleurs.vert }}>dit.</Text>

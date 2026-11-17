@@ -961,3 +961,7 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 **Vérification** : page ouverte dans Chrome avec une politique de sécurité comme celle des pages claude.ai, match lancé : 0 son chargé sur 6 avant, 6 sur 6 après (6 sur 6 aussi sans cette politique).
 
 **À juger par le concepteur** : le son revient dans la page claude.ai.
+
+## 17/11/2026 (midi) — Découpage A1 fusionné
+
+**Demande du concepteur** : « fusionne », après avoir testé la page claude.ai (moteur découpé et son rétabli). Pull request n° 14 fusionnée sur `main`. Prochaine étape demandée : A3 (serveur).

@@ -926,3 +926,26 @@ Réalisme (`mesurer-realisme.ts`, 20 matchs) : changements de camp 5,3 → 5,0 p
 - `prototype/dist/index.html` est retiré du dépôt (`.gitignore`).
 
 **À juger par le concepteur** : la proposition de mise à jour du skill `foot-merge-tactic-etape` (nouveaux chemins).
+
+## 17/11/2026 (matin) — Découpage de `ballon.ts` (prompt A1 de l'audit du 16/11)
+
+**Demande du concepteur** : prompt A1 tel quel : découper `src/sim/ballon.ts` (1 605 lignes, `decider()` de 277 lignes) « SANS changer le comportement du moteur », empreintes identiques au bit près sans régénération, même ordre des tirages, aucune fonctionnalité nouvelle, fonctions de 60 lignes au plus, branche et pull request.
+
+**Ce qui a été fait** (aucun réglage changé ; pull request n° 14, branche `decoupage-ballon-a1`, 6 commits, un par étape)
+- `src/sim/ballon.ts` : 1 605 → 271 lignes. Il garde l'état du ballon, ce que le jeu en lit, le pas de temps (`pas`, `surcharger`) et les trois changements d'état (`remettre`, `donner`, `lancer`). Imports inchangés pour le reste du jeu (types réexportés).
+- `src/sim/ballon/` : `decision.ts` (ce que fait le porteur ; `decider()` devient une suite d'essais dans le même ordre : tir, seul devant, centre, repiquage, dribble, jeu long, passe), `gestes.ts` (comment le ballon part, plongeon du gardien), `defense.ts`, `sansBallon.ts`, `arrets.ts`, `physique.ts` (conduite, roulement, sorties, buts, hors-jeu), `controle.ts` (qui prend le ballon libre), `stats.ts`, `outils.ts`.
+- Écart avec le découpage proposé : décision et gestes séparés, physique et contrôle du ballon libre séparés, pour qu'un réglage ne touche qu'un fichier court.
+- 102 fonctions, la plus longue fait 43 lignes (`chercherGagnant`, qui prend le ballon libre). Expressions recopiées telles quelles (même ordre des calculs en virgule flottante et des tirages).
+- `tests/ballon.test.ts` : le test du hors-jeu importe `passer` de `ballon/gestes.ts` au lieu d'appeler une méthode privée.
+
+**Vérifications** (après chacune des 6 étapes)
+| | Avant | Après |
+|---|---|---|
+| Empreintes (`tests/empreintes.test.ts` : 6 matchs, une partie entière) | référence | identiques au bit près, sans régénération |
+| Empreinte large (hors dépôt : 40 matchs, 5 oppositions de tactiques, styles, pays et fusions, 2 mi-temps, chaque pas haché) | `8e0a5e3a` | `8e0a5e3a` |
+| Suite complète | 187 verts, 365 122 vérifications | 187 verts, 365 122 vérifications |
+| `mesurer-realisme.ts` (20 matchs de 180 s) | 5,0 changements de camp/min, 1,40 but/match | sortie identique |
+
+**Tests** : 187 verts (aucun nouveau : le comportement ne change pas). Page construite : un match joué jusqu'à la mi-temps dans Chrome, sans erreur. `serveur/moteur.js` non reconstruit (rien à redéployer).
+
+**À juger par le concepteur** : fusionner la pull request n° 14. Rien à juger en jouant : les matchs sont les mêmes.

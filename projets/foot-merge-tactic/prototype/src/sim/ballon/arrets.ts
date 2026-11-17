@@ -87,6 +87,16 @@ export function placerPartenaire(b: BallonReel, camp: Camp, kicker: JoueurSim): 
 
 // --- Placements pendant l'arrêt ----------------------------------------------
 
+/** Un engagement se joue au point central : loin du centre, ce n'en est plus un. */
+export function annulerEngagementLoin(b: BallonReel, p: JoueurSim): void {
+  const W = b.sim.donnees.largeurM;
+  const L = b.sim.donnees.longueurM;
+  if (b.arrete === "engagement" && dist(p.pos, { x: W / 2, y: L / 2 }) > 4) {
+    b.arrete = null;
+    b.placePartenaire = null;
+  }
+}
+
 /** Remise en jeu prise par le porteur : on place les autres (true), ou rien à
  *  faire (false, la touche se joue avec le jeu sans ballon habituel). */
 export function placerPendantArret(b: BallonReel, p: JoueurSim): boolean {

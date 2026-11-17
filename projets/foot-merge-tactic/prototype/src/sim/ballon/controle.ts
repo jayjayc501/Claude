@@ -1,12 +1,13 @@
 // Contrôle du ballon libre : qui le prend (receveur, interception, ballon
 // disputé), les contres sur les ballons rapides, l'arrêt du gardien, le
-// contrôle raté sous pression et la sanction du hors-jeu. Aussi : où va le
-// ballon si personne ne le touche, pour que les joueurs anticipent.
+// contrôle raté sous pression et la sanction du hors-jeu. Aussi : qui court
+// vers le ballon libre, et où il va si personne ne le touche (anticipation).
 
 import { PARAMETRES_NOTES as PN, decaler } from "../notes";
 import type { Camp, JoueurSim } from "../simulation";
 import type { PointM } from "../types";
 import type { BallonReel } from "../ballon";
+import { eloigner, eloignerEngagement, placerPartenaire, viderSurface } from "./arrets";
 import { dist, portee } from "./outils";
 import { noterStyle, statsJoueur } from "./stats";
 
@@ -184,4 +185,43 @@ export function pointInterception(b: BallonReel, j: JoueurSim): PointM {
     if (dist(j.pos, p) <= vMax * t + b.sim.reglages.ballon.rayonControleM) return p;
   }
   return pointArrivee(b, 3);
+}
+
+/** Ballon libre : les plus proches de chaque équipe vont le disputer (un de
+ *  chaque côté ; sur une passe, le receveur et deux adversaires). Pendant une
+ *  remise en jeu, seul le tireur y va et l'adversaire se tient à distance. */
+export function coursesBallonLibre(b: BallonReel): void {
+  const s = b.sim;
+  const vMax = s.reglages.mouvement.vitesseMaxMS;
+  for (const camp of [0, 1] as const) {
+    const equipe = s.joueurs.filter((j) => j.camp === camp);
+    const proches = equipe
+      .filter((j) => j.poste.id !== "G" || dist(j.pos, s.ballon) < 12)
+      .map((j) => ({ j, t: dist(j.pos, s.ballon) / vMax }))
+      .sort((a, c) => a.t - c.t);
+    let nombre = 1;
+    if (b.receveur) nombre = camp === b.receveur.camp ? 0 : 2;
+    else if (b.reserve && b.reserve.camp !== camp) {
+      nombre = 0;
+      if (b.arrete === "coupFranc") eloigner(b, b.reserve.camp);
+      if (b.arrete === "touche") eloigner(b, b.reserve.camp, 2.5);
+      if (b.arrete === "engagement") eloignerEngagement(b, b.reserve.camp);
+    }
+    else if (b.reserve && b.tireur) {
+      nombre = 0;
+      if (b.arrete === "sixMetres") viderSurface(b, b.tireur.camp);
+      b.tireur.cible = { ...s.ballon };
+      b.tireur.auBallon = true;
+    }
+    if (b.receveur && camp === b.receveur.camp) {
+      b.receveur.cible = pointInterception(b, b.receveur);
+      b.receveur.auBallon = true;
+    }
+    for (const { j } of proches.slice(0, nombre)) {
+      j.cible = pointInterception(b, j);
+      j.auBallon = true;
+    }
+    // Coup d'envoi : pendant que l'un va au ballon, un coéquipier se place à côté.
+    if (b.arrete === "engagement" && b.reserve?.camp === camp && proches[0]) placerPartenaire(b, camp, proches[0].j);
+  }
 }

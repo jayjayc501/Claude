@@ -48,9 +48,9 @@ export default function Ecrire() {
 
   const charger = useCallback(async () => {
     const [profil, duJour] = await Promise.all([
-      supabase.from('profils').select('pseudo, prenom').maybeSingle(),
+      supabase.from('jtlad_profils').select('pseudo, prenom').maybeSingle(),
       supabase
-        .from('phrases')
+        .from('jtlad_phrases')
         .select('id, texte, scellee_le, jour, revelee_le, lien')
         .eq('jour', aujourdhuiParis())
         .maybeSingle(),
@@ -70,7 +70,7 @@ export default function Ecrire() {
     setErreur(null);
     setEnvoi(true);
     vibrerAppui();
-    const { data, error } = await supabase.rpc('sceller_phrase', { p_texte: texte });
+    const { data, error } = await supabase.rpc('jtlad_sceller_phrase', { p_texte: texte });
     setEnvoi(false);
 
     if (error) {

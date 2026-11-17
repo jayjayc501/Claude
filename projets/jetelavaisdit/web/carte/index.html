@@ -142,7 +142,7 @@
   var code = new URLSearchParams(location.search).get('c');
   if (!code || !config.supabaseUrl) { montrer('introuvable'); return; }
 
-  fetch(config.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/carte_publique', {
+  fetch(config.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/jtlad_carte_publique', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

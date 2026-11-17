@@ -26,7 +26,7 @@ export default function MesPhrases() {
   useFocusEffect(
     useCallback(() => {
       supabase
-        .from('phrases')
+        .from('jtlad_phrases')
         .select('id, texte, scellee_le, jour, revelee_le, lien')
         .order('scellee_le', { ascending: false })
         .then(({ data }) => setPhrases((data as Phrase[]) ?? []));

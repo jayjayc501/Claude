@@ -23,7 +23,7 @@ Documents : [`cadrage.md`](cadrage.md) (décisions détaillées), [`README.md`](
 | Page web de la carte reçue | `web/carte/` |
 | Maquettes (copie) | `maquettes/` · version cliquable : https://claude.ai/artifact/GBrtiSGWzndyC5aD4Husvq |
 | Version web en ligne | https://jayjayc501.github.io/Claude/app/ (carte : `/Claude/carte/?c=…`) |
-| Base Supabase | projet `jelavaisdit` / `joqzrjjgrntbyutytpnr` (https://joqzrjjgrntbyutytpnr.supabase.co), **partagé avec MyFlix** : les tables sans préfixe (`profils`, `phrases`, `moderation_mots`) sont à « Je te l'avais dit », celles en `myflix_…` à MyFlix — ne pas y toucher |
+| Base Supabase | projet `myproject` (ex-`jelavaisdit`) / `joqzrjjgrntbyutytpnr` (https://joqzrjjgrntbyutytpnr.supabase.co), **mutualisé** avec MyFlix et les projets à venir : chaque appli préfixe ses objets. « Je te l'avais dit » = `jtlad_…` (tables `jtlad_profils`, `jtlad_phrases`, `jtlad_moderation_mots`, fonctions `jtlad_sceller_phrase`, `jtlad_reveler_phrase`, `jtlad_carte_publique`…). Ne jamais toucher aux autres préfixes (`myflix_…`). Les comptes (`auth.users`) sont communs à toutes les applis |
 | Compte Expo | `jayjayc501`, projet `jetelavaisdit` (fabrication de l'APK) |
 | Mise en ligne web | `.github/workflows/jetelavaisdit.yml` (à chaque push sur `main`) |
 | Fabrication de l'APK | `.github/workflows/jetelavaisdit-apk.yml` (lancement manuel, secret `EXPO_TOKEN`) |
@@ -46,13 +46,14 @@ Valeurs publiques (URL Supabase, clé `sb_publishable_…`) : déjà dans `mobil
 - APK Android installable (fabriqué par EAS).
 
 **En attente — à faire en premier dans la prochaine session :**
-1. **Migration `supabase/migrations/20261114120000_noms_et_jours.sql` NON appliquée** sur Supabase (vérifié le 17/11 : la colonne `profils.prenom` n'existe pas). Elle ajoute prénom / nom de l'auteur (« Jérome J. » sur la carte) et corrige le **bug des jours** (la carte comptait jusqu'au premier envoi → « 0 jour » ; elle doit compter jusqu'à aujourd'hui).
-   - ⚠️ Les outils Supabase `apply_migration` / `execute_sql` en écriture demandent une confirmation que l'app du propriétaire **annule automatiquement**. Il faut que le propriétaire colle le fichier dans **Supabase › SQL Editor › Run** (confirmer l'avertissement « destructive » dû au `drop function`). Les requêtes en lecture seule fonctionnent.
-2. **Pull requests ouvertes, non fusionnées :**
-   - **#7** : image de démarrage + icône Android (indispensable pour fabriquer l'APK).
-   - **#12** : prénom de l'auteur, jours corrects, textes et exemples plus fun (inclut #7). Fusionner #12 suffit ; #7 peut ensuite être fermée.
-   - Tant que #12 n'est pas fusionnée, la version web en ligne et `main` n'ont pas ces changements.
-3. **Dernier APK** (contient #12) : https://expo.dev/artifacts/eas/ayx1KbZPUe_j2lQAPjc-_jgKuETslnbdStWmHKw-q5Q.apk — lien valable environ deux semaines. À installer par-dessus l'ancienne version **après** la migration.
+1. **Deux migrations NON appliquées sur Supabase, à appliquer ensemble et dans l'ordre** :
+   - `supabase/migrations/20261114120000_noms_et_jours.sql` : prénom / nom de l'auteur (« Jérôme J. » sur la carte) et **bug des jours** corrigé (la carte comptait jusqu'au premier envoi → « 0 jour » ; elle compte maintenant jusqu'à aujourd'hui).
+   - `supabase/migrations/20261117120000_prefixe_jtlad.sql` (17/11) : base mutualisée, tout ce qui est à « Je te l'avais dit » prend le préfixe `jtlad_` (tables, index, contraintes, fonctions). Données, droits et RLS conservés. Testé sur un PostgreSQL local imitant Supabase (parcours complet : inscription, modération, scellement, envoi, carte, droits).
+   - Méthode : le propriétaire colle le script combiné (les deux fichiers dans une seule transaction, envoyé dans la conversation du 17/11 ; à défaut, coller les deux fichiers l'un après l'autre) dans **Supabase › SQL Editor › Run** et confirme l'avertissement « destructive » (`drop function`). Si l'erreur `relation "public.profils" does not exist` apparaît, c'est que c'est déjà fait.
+   - ⚠️ Les outils Supabase `apply_migration` / `execute_sql` en écriture demandent une confirmation que l'app du propriétaire **annule automatiquement**. Les requêtes en lecture seule fonctionnent.
+   - Les deux déclencheurs sur `auth.users` sont renommés en `jtlad_…` seulement si Supabase l'autorise (`auth.users` n'appartient pas au rôle `postgres`) ; sinon ils gardent leur nom (`profil_a_l_inscription`, `noms_a_la_connexion`) mais appellent bien les fonctions `jtlad_…`. À vérifier après application.
+2. **Pull request « préfixe jtlad_ » à fusionner juste après le script SQL** : elle contient #7 (image de démarrage + icône Android) et #12 (prénom, jours, textes plus fun) et fait appeler `jtlad_…` par l'app et la carte. La fusionner suffit ; fermer ensuite #7 et #12. Entre le script SQL et la fusion, la version web et la carte en ligne ne marchent pas : enchaîner les deux.
+3. **APK à refabriquer après la fusion** (workflow `jetelavaisdit-apk.yml`) : l'APK installé et le dernier APK fabriqué (#12) appellent les anciens noms et cessent de marcher dès le script SQL.
 
 **Données en base (17/11)** : 2 comptes, 1 phrase scellée et envoyée.
 

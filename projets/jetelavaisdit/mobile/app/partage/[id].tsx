@@ -23,13 +23,13 @@ export default function Partage() {
 
   useEffect(() => {
     supabase
-      .from('phrases')
+      .from('jtlad_phrases')
       .select('id, texte, scellee_le, jour, revelee_le, lien')
       .eq('id', id)
       .single()
       .then(({ data }) => setPhrase(data as Phrase));
     supabase
-      .from('profils')
+      .from('jtlad_profils')
       .select('pseudo, prenom, nom')
       .maybeSingle()
       .then(({ data }) => {
@@ -48,7 +48,7 @@ export default function Partage() {
     setErreur(null);
     setEnvoi(true);
     // Crée (ou récupère) le lien public de la carte : c'est le moment où la phrase est « révélée ».
-    const { data: lien, error } = await supabase.rpc('reveler_phrase', { p_id: phrase.id });
+    const { data: lien, error } = await supabase.rpc('jtlad_reveler_phrase', { p_id: phrase.id });
     setEnvoi(false);
     if (error || !lien) {
       setErreur("Impossible de créer le lien. Réessaie dans un instant.");

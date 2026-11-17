@@ -66,6 +66,9 @@ Ce fichier liste les points **[OUVERT]**, pas encore décidés. **Ne pas invente
   - faire calculer les matchs des ordinateurs eux aussi par l'arbitre ;
   - les marges avant le coup d'envoi (8 s) et avant la reprise (6 s) ;
   - ce qui se passe si un joueur quitte la partie. Aujourd'hui, son équipe joue quand même ; s'il n'a rien envoyé, elle est faite automatiquement.
+- **Stockage et ménage du serveur** (A3 mis de côté le 17/11, à reprendre vers 300 parties) : seuls les films pèsent (environ 1,7 Mo par partie ; offre gratuite : 1 Go de fichiers, 500 Mo de base, soit environ 600 parties) ; une partie sans film ne fait que quelques Ko. Piste [PROPOSITION] : garder toutes les parties (historique) et ne supprimer que les films de plus de 30 jours ; les buteurs ne sont aujourd'hui que dans le film. Limite de créations par connexion (10 par heure) prête aussi. Code sur la branche `a3-serveur`. Vigilance : un projet gratuit est mis en pause après une semaine sans activité.
+- **Triche au 1 contre 1** (pour un futur mode classé seulement) : aujourd'hui, un téléphone modifié peut envoyer une équipe qui ne vient pas de son draft. Deux solutions : (1) le téléphone envoie la liste de ses gestes du draft et le serveur la rejoue avec la même graine (environ une séance ; rien ne change pour le joueur ; un tricheur pourrait encore connaître les offres à venir) ; (2) le draft se fait sur le serveur (2 à 3 séances, une petite attente à chaque geste, les coupures réseau à gérer ; triche impossible). Conseil de Claude : (1), le jour d'un mode classé.
+- **2e mi-temps sur le serveur** (mesuré le 17/11 sur Supabase) : 0,85 s de calcul pour la 1re mi-temps, 1,33 s pour la 2e, qui rejoue la 1re ; limite de Supabase : 2 s de calcul par requête. Garder l'état de la mi-temps n'est utile que si la 2e dépasse 1,5 s après une évolution du moteur.
 
 ## Le jeu dans son ensemble
 

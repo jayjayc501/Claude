@@ -1011,6 +1011,6 @@ Avec 3 joueurs fusionnés par équipe, au ralenti ×4 : turbulence figée 25 ; s
 | 11, normal | 18 / 15 | 60 / 58 |
 | 11, ×4 | 7 / 6 | 50 / 40 |
 
-**Tests** : 189 verts.
+**Tests** : 187 verts.
 
 **À juger par le concepteur** : le nouveau feu sur son téléphone (page claude.ai republiée).

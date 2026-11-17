@@ -7,6 +7,7 @@ import { PARAMETRES_NOTES as PN, decaler } from "../notes";
 import type { JoueurSim } from "../simulation";
 import type { PointM } from "../types";
 import type { BallonReel } from "../ballon";
+import { duelGagne } from "./defense";
 import { DEMI_BUT_M, avantage1c1, contrePresse, dist, precisionPasse } from "./outils";
 import { estHorsJeu, dansSurface } from "./physique";
 import { noterStyle, statsJoueur } from "./stats";
@@ -161,7 +162,7 @@ export function dribbler(b: BallonReel, o: JoueurSim, sens: number): void {
     return;
   }
   if (b.rng.suivant() < 0.5) {
-    b.duelGagne(o);
+    duelGagne(b, o);
   } else {
     const a = b.rng.entre(-Math.PI, Math.PI);
     b.lancer(Math.cos(a) * 5, Math.sin(a) * 5 + sens * 2);

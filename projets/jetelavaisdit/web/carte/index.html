@@ -41,6 +41,7 @@
   .phrase { margin: 0; font-size: 25px; line-height: 1.2; font-weight: 800; letter-spacing: -0.3px; overflow-wrap: anywhere; }
   .puces { display: flex; flex-wrap: wrap; gap: 8px; }
   .puce { background: rgba(13,12,18,0.12); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700; }
+  #date { white-space: nowrap; }
   .puce.temoin { display: flex; align-items: center; gap: 6px; background: var(--fond); color: var(--texte); padding-left: 8px; }
   .slogan { margin: 26px 0 0; font-size: 30px; line-height: 1.02; letter-spacing: -1px; }
   .slogan em { font-style: normal; color: var(--vert); }
@@ -97,7 +98,6 @@
           <span id="ditATexte"></span>
         </span>
         <span class="puce" id="date"></span>
-        <span class="puce" id="mois"></span>
       </div>
     </article>
     <p class="slogan titre"><span id="regarde">regarde.</span><br>je te l'avais <em>dit.</em></p>
@@ -134,7 +134,7 @@
 
   function formaterDate(iso) {
     var v = parties(new Date(iso), { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-    return Number(v('day')) + ' ' + MOIS[Number(v('month')) - 1] + ' ' + v('year') + ' · ' + v('hour') + 'h' + v('minute');
+    return Number(v('day')) + ' ' + MOIS[Number(v('month')) - 1] + ' ' + v('year') + ' à ' + v('hour') + 'h' + v('minute');
   }
 
   function lienStore(id, url, libelle) {
@@ -178,11 +178,7 @@
       document.getElementById('bulle').setAttribute('aria-label', jours + (jours > 1 ? ' jours' : ' jour'));
       document.getElementById('joursMot').textContent = jours > 1 ? 'jours.' : 'jour.';
       document.getElementById('phrase').textContent = '« ' + c.texte + ' »';
-      document.getElementById('date').textContent = formaterDate(c.scellee_le);
-      var moisNom = MOIS[Number(parties(new Date(c.scellee_le), { month: 'numeric' })('month')) - 1];
-      document.getElementById('mois').textContent = c.scellees_mois > 1
-        ? '1 prédiction sur ' + c.scellees_mois + ' en ' + moisNom
-        : 'sa seule prédiction en ' + moisNom;
+      document.getElementById('date').textContent = 'Scellée le ' + formaterDate(c.scellee_le);
       var empreinte = document.getElementById('empreinte');
       empreinte.textContent = c.empreinte.slice(0, 16) + '…';
       empreinte.title = c.empreinte;

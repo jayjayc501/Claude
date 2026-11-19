@@ -41,7 +41,7 @@ Un visuel soigné et partageable, entre le diplôme et le ticket :
 - **« Scellée le 10 novembre 2026 à 12h13 »** ;
 - le nom ou pseudo de l'auteur ;
 - un sceau ou tampon **« Authentique »** ;
-- un indicateur discret de sincérité, par exemple *« 1 prédiction sur 12 scellées ce mois-ci »* ;
+- ~~un indicateur discret de sincérité (*« 1 prédiction sur 12 ce mois-ci »*)~~ : **retiré le 19/11/2026** à la demande du propriétaire ; la cartouche rose garde la date entière (« Scellée le 14 mars 2026 à 22h47 ») ;
 - l'invitation à installer l'app.
 
 La crédibilité repose sur une règle simple : **l'app empêche de modifier ou d'antidater une phrase.**
@@ -68,7 +68,7 @@ Le « te » de « Je te l'avais dit » : au scellement, on peut préciser à qui
 | Modération | **Automatique** au scellement, plus signalement sur la carte | Éviter insultes, harcèlement et menaces |
 
 ### Triche par sélection (risque connu)
-Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » lundi et le contraire mardi, puis ne montrer que la bonne. Le fait d'afficher le nombre de prédictions scellées sur la carte atténue ce risque sans compliquer l'app.
+Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » lundi et le contraire mardi, puis ne montrer que la bonne. Le compteur sur la carte a été retiré (19/11) ; ce qui limite encore ce risque : 1 par jour, et le témoin nommé au scellement (on dit à Marc lui-même ce qu'on prédit).
 
 ### Modération automatique
 - **Au moment du scellement**, une IA analyse la phrase.

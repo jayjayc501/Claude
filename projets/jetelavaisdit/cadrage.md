@@ -17,9 +17,10 @@ Une app mobile (iPhone et Android) où l'on **scelle une phrase datée**, une pr
 ### 3.1 Sceller une phrase
 1. L'utilisateur se connecte.
 2. Il écrit sa phrase. Exemple : *« Je te parie que Marc va démissionner avant l'été. »*
-4. Il appuie sur **« Continuer »** : la modération automatique vérifie la phrase tout de suite (voir §5).
-5. **Étape 2, facultative : « Tu l'as dit à qui ? »** (voir §4 bis), puis **« Sceller »**.
-6. La phrase est enregistrée avec la date et l'heure du scellement. **Elle n'est plus modifiable ni supprimable.** À confirmer : l'utilisateur peut-il au moins la masquer ?
+3. Il appuie sur **« Continuer »** : la modération automatique vérifie la phrase tout de suite (voir §5).
+4. **Étape 2, facultative : « Tu l'as dit à qui ? »** (voir §4 bis), puis **« Sceller »**.
+5. La phrase est enregistrée avec la date et l'heure du scellement. **Elle n'est plus modifiable ni supprimable.** À confirmer : l'utilisateur peut-il au moins la masquer ?
+6. Sur « C'est scellé ! », facultatif : la personne signe du doigt, sur place (voir §4 bis).
 7. La phrase reste **privée** jusqu'à ce que l'utilisateur décide de l'envoyer.
 
 ### 3.2 Envoyer « Je te l'avais dit ! »

@@ -1,4 +1,4 @@
--- « Je te l'avais dit » — à qui on l'a dit (le témoin)
+-- « Je te l'avais dit » — à qui on l'a dit (le témoin), et fin de la limite d'une phrase par jour
 --
 -- Au scellement, l'auteur peut préciser (c'est facultatif) à qui il a dit sa prédiction :
 --   * le prénom de la personne et la 1re lettre de son nom : « Léa M. » ;
@@ -6,6 +6,9 @@
 --     et / ou un texte libre (« petite sœur », « voisin du 3e »).
 -- Le témoin est scellé avec la phrase : il n'est plus modifiable et entre dans l'empreinte.
 -- À l'envoi, l'auteur choisit si le lien s'affiche sur la carte (le prénom s'affiche toujours).
+--
+-- Plus de limite d'une phrase par jour (décision du 19/11/2026) : seul reste un garde-fou
+-- anti-abus invisible de 20 phrases par jour et par personne.
 --
 -- Compatible avec l'APK déjà installé : les nouveaux paramètres ont tous une valeur par défaut,
 -- et les anciennes façons d'appeler jtlad_sceller_phrase(p_texte) et jtlad_reveler_phrase(p_id)
@@ -34,6 +37,11 @@ alter table public.jtlad_phrases
   -- Pas d'initiale ni de lien sans prénom.
   add constraint jtlad_phrases_temoin_complet
     check (temoin_prenom is not null or (temoin_initiale is null and temoin_lien is null and temoin_precision is null));
+
+-- Fin de « une phrase par jour » : l'unicité (auteur, jour) disparaît, un index la remplace
+-- pour compter vite les phrases du jour (garde-fou anti-abus).
+alter table public.jtlad_phrases drop constraint jtlad_une_phrase_par_jour;
+create index jtlad_phrases_auteur_jour on public.jtlad_phrases (auteur, jour);
 
 comment on column public.jtlad_phrases.temoin_prenom    is 'Prénom de la personne à qui la prédiction a été dite (facultatif, scellé).';
 comment on column public.jtlad_phrases.temoin_initiale  is '1re lettre du nom de cette personne, en majuscule (facultatif, scellé).';
@@ -100,6 +108,7 @@ declare
   v_lien       text := nullif(lower(btrim(coalesce(p_temoin_lien, ''))), '');
   v_precision  text := nullif(btrim(regexp_replace(coalesce(p_temoin_precision, ''), '\s+', ' ', 'g')), '');
   v_maintenant timestamptz := now();
+  v_jour       date := (now() at time zone 'Europe/Paris')::date;
   v_a_signer   text;
   v_ligne      public.jtlad_phrases;
 begin
@@ -152,25 +161,26 @@ begin
       || '|' || coalesce(v_lien, '') || '|' || coalesce(v_precision, '');
   end if;
 
-  begin
-    insert into public.jtlad_phrases (
-      auteur, texte, scellee_le, jour, empreinte,
-      temoin_prenom, temoin_initiale, temoin_lien, temoin_precision, afficher_lien
-    )
-    values (
-      v_auteur,
-      v_texte,
-      v_maintenant,
-      (v_maintenant at time zone 'Europe/Paris')::date,
-      encode(extensions.digest(v_a_signer, 'sha256'), 'hex'),
-      v_prenom, v_initiale, v_lien, v_precision,
-      -- Par défaut, on garde pour soi les liens les plus gênants.
-      coalesce(v_lien, '') not in ('crush', 'ex')
-    )
-    returning * into v_ligne;
-  exception when unique_violation then
+  -- Garde-fou anti-abus (même code d'erreur qu'avant, que l'ancienne app sait lire).
+  if (select count(*) from public.jtlad_phrases where auteur = v_auteur and jour = v_jour) >= 20 then
     raise exception 'deja_scelle_aujourdhui' using errcode = 'P0001';
-  end;
+  end if;
+
+  insert into public.jtlad_phrases (
+    auteur, texte, scellee_le, jour, empreinte,
+    temoin_prenom, temoin_initiale, temoin_lien, temoin_precision, afficher_lien
+  )
+  values (
+    v_auteur,
+    v_texte,
+    v_maintenant,
+    v_jour,
+    encode(extensions.digest(v_a_signer, 'sha256'), 'hex'),
+    v_prenom, v_initiale, v_lien, v_precision,
+    -- Par défaut, on garde pour soi les liens les plus gênants.
+    coalesce(v_lien, '') not in ('crush', 'ex')
+  )
+  returning * into v_ligne;
 
   return v_ligne;
 end;

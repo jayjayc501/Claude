@@ -8,7 +8,7 @@ App mobile (Android d'abord, iPhone plus tard) : on **scelle une phrase datée**
 
 - Public : plutôt les jeunes (15-25 ans). Ton fun, complice, un peu taquin.
 - Vocabulaire : **certitude** (et plus « prédiction », depuis le 19/11), esprit « t'en es sûr ? ».
-- Une certitude par jour maximum (heure de Paris). Envoi « après coup », quand on veut.
+- Plus de limite par jour depuis le 19/11 (garde-fou anti-abus invisible : 20 par jour). Envoi « après coup », quand on veut.
 - Le destinataire voit la carte via un simple lien web, sans installer l'app.
 - Tout est stocké **sur le serveur** (Supabase) ; le téléphone ne fait qu'afficher.
 
@@ -66,7 +66,9 @@ Décision du propriétaire (détail dans `cadrage.md` §4 bis) : au scellement, 
 - App : écran `components/EtapeTemoin.tsx`, logique dans `lib/temoin.ts` ; Mes phrases triées par personne ; partage personnalisé avec interrupteur « Montrer votre lien » (masqué par défaut pour Crush et Ex).
 - Carte web : « Sarah K., Jules R. te l'avait dit il y a… », « regarde, sarah. ».
 - Retours du propriétaire intégrés : pas de texte « 1re lettre » à côté du champ de l'initiale ; carte reçue sans « 1 prédiction sur N », date entière dans la cartouche rose ; « prédiction » remplacé par « certitude » partout.
-- Pistes en discussion (pas décidées) : pari à deux avec signature du témoin, échéance, score par duo ; limite à 3 par jour ; ronds de couleur neutres dans Mes phrases.
+- Plus de limite d'une par jour (dans la même migration : contrainte `jtlad_une_phrase_par_jour` supprimée, garde-fou de 20 par jour qui renvoie toujours `deja_scelle_aujourdhui`) ; écran « reviens demain » et pastille « 1 dispo aujourd'hui » supprimés ; étiquettes « Son prénom » / « Nom » retirées de l'écran témoin.
+- **Décidé, maquetté, pas encore codé** : la signature du témoin en option (écran 06 « Fais signer Léa », page web 07 de signature au doigt, carte 11 « Signée par… »).
+- Pistes en discussion (pas décidées) : pari à deux avec échéance et score par duo ; ronds de couleur neutres dans Mes phrases.
 
 **À faire, dans cet ordre :**
 1. Coller `supabase/migrations/20261119120000_temoin.sql` dans Supabase › SQL Editor (ou dire à Claude de l'appliquer) — **avant** de fusionner, car la nouvelle app lit les nouvelles colonnes.

@@ -65,7 +65,7 @@ export default function Scellee() {
 
         <View style={{ flex: 1 }} />
         <Text style={styles.note}>
-          {temoin_prenom ? `${temoin_prenom} ne se doute de rien.` : 'Prochaine certitude demain.'}
+          {temoin_prenom ? `${temoin_prenom} ne se doute de rien.` : 'Personne ne se doute de rien.'}
           {'\n'}Rendez-vous quand ça arrive.
         </Text>
         <Bouton titre="Voir mes phrases" variante="noir" onPress={() => router.replace('/phrases')} />

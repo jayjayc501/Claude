@@ -1,6 +1,6 @@
 # « Je te l'avais dit » — Document de cadrage
 
-*Version 3 — 19 novembre 2026 (ajout : à qui on l'a dit)*
+*Version 3 — 19 novembre 2026 (ajouts : à qui on l'a dit, signature en option, plus de limite par jour, « certitude »)*
 
 ## 1. Le concept en une phrase
 
@@ -55,6 +55,7 @@ Le « te » de « Je te l'avais dit » : au scellement, on peut préciser à qui
 - **Une interface qui pousse à remplir** : écran dédié après la phrase, aperçu de la carte en direct (« regarde, léa. »), jauge à 3 flammes (Tiède → Ça chauffe → Brûlant), personnes déjà citées en raccourci (un geste remplit tout).
 - **Sur la carte** : « Sarah K., Jules R. te l'avait dit il y a… », pastille « Dit à Sarah K. · binôme de théâtre », « regarde, sarah. ». Le prénom s'affiche toujours ; **le lien est affichable ou non**, au choix à l'envoi (masqué par défaut pour Crush et Ex).
 - **Mes phrases** : tri par personne, bouton « Je te l'avais dit, Sarah ! », « Envoyée à Sarah K. ».
+- **Signature en option** (*décidée le 19/11/2026*) : sur « C'est scellé », « Fais signer Léa » envoie un lien ; Léa ouvre une page web (sans installer l'app), voit la phrase et signe du doigt (« Je signe » / « Il ne m'a rien dit »). La carte affiche ensuite « Signée par Léa M. » avec sa signature : c'est la preuve la plus forte. Maquettes faites (écrans 06, 07, 11) ; code à faire.
 - **Plus tard** : rappels qui citent la personne (« Yanis attend toujours ta preuve »), plusieurs personnes ou un groupe pour une même prédiction.
 
 ## 5. Règles du jeu
@@ -62,13 +63,13 @@ Le « te » de « Je te l'avais dit » : au scellement, on peut préciser à qui
 | Règle | Décision | Pourquoi |
 |---|---|---|
 | Moment de l'envoi | **Après coup**, quand l'utilisateur le décide | Simplicité, c'est l'esprit du « je te l'avais dit » |
-| Nombre de prédictions | **1 par jour maximum** | Chaque prédiction devient précieuse, et la triche est limitée |
+| Nombre de certitudes | **Sans limite** (décidé le 19/11/2026 ; avant : 1 par jour). Garde-fou anti-abus invisible : 20 par jour | Ne pas freiner l'usage, surtout le premier jour ; la crédibilité vient du témoin et de sa signature |
 | Modification | **Impossible** après scellement | C'est la base de la preuve |
 | Accès du destinataire | **Lien web**, avec invitation à installer l'app | Aucune friction, et la viralité est intégrée |
 | Modération | **Automatique** au scellement, plus signalement sur la carte | Éviter insultes, harcèlement et menaces |
 
 ### Triche par sélection (risque connu)
-Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » lundi et le contraire mardi, puis ne montrer que la bonne. Le compteur sur la carte a été retiré (19/11) ; ce qui limite encore ce risque : 1 par jour, et le témoin nommé au scellement (on dit à Marc lui-même ce qu'on prédit).
+On peut écrire « Marc va démissionner » et le contraire, puis ne montrer que la bonne. Depuis le 19/11 il n'y a plus de limite par jour ni de compteur sur la carte : ce qui protège, c'est le témoin nommé au scellement et surtout **sa signature** (en option) : une phrase signée par Marc ne peut pas être trichée.
 
 ### Modération automatique
 - **Au moment du scellement**, une IA analyse la phrase.

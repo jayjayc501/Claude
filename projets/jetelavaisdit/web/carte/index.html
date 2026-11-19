@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Regarde. Je te l'avais dit.</title>
-<meta name="description" content="Une prédiction scellée, vérifiée, et elle s'est réalisée.">
+<meta name="description" content="Une certitude scellée, vérifiée, et elle s'est réalisée.">
 <meta property="og:title" content="Regarde. Je te l'avais dit.">
-<meta property="og:description" content="Une prédiction scellée, vérifiée, et elle s'est réalisée.">
+<meta property="og:description" content="Une certitude scellée, vérifiée, et elle s'est réalisée.">
 <meta name="theme-color" content="#0D0C12">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,6 +41,12 @@
   .phrase { margin: 0; font-size: 25px; line-height: 1.2; font-weight: 800; letter-spacing: -0.3px; overflow-wrap: anywhere; }
   .puces { display: flex; flex-wrap: wrap; gap: 8px; }
   .puce { background: rgba(13,12,18,0.12); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700; }
+  #date { white-space: nowrap; }
+  .signature { display: flex; align-items: center; gap: 12px; padding-top: 12px; border-top: 1.5px dashed rgba(13,12,18,0.35); }
+  .signature svg { flex-shrink: 0; }
+  .signature span { display: flex; flex-direction: column; gap: 1px; font-size: 12px; line-height: 1.3; font-weight: 700; }
+  .signature b { font-size: 13px; font-weight: 800; }
+  .puce.temoin { display: flex; align-items: center; gap: 6px; background: var(--fond); color: var(--texte); padding-left: 8px; }
   .slogan { margin: 26px 0 0; font-size: 30px; line-height: 1.02; letter-spacing: -1px; }
   .slogan em { font-style: normal; color: var(--vert); }
   .empreinte { margin: 12px 0 0; font-size: 12px; color: var(--doux); overflow-wrap: anywhere; }
@@ -78,7 +84,8 @@
   </section>
 
   <section id="carte" hidden>
-    <p class="intro"><b id="pseudo"></b> l'avait scellé il y a…</p>
+    <p class="intro" id="intro"><b id="pseudo"></b> l'avait scellé il y a…</p>
+    <p class="intro" id="introTemoin" hidden><b id="temoinNom"></b>, <b id="auteurTemoin"></b> te l'avait dit il y a…</p>
     <div class="compteur titre">
       <svg width="168" height="126" viewBox="0 0 200 150" role="img" id="bulle"><path d="M72 44V30a28 28 0 0 1 56 0v14" stroke="#C8FF3D" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M36 40h128a26 26 0 0 1 26 26v36a26 26 0 0 1-26 26H78l-30 22v-22H36a26 26 0 0 1-26-26V66a26 26 0 0 1 26-26z" fill="#C8FF3D"/><text id="jours" x="100" y="104" text-anchor="middle" font-family="Unbounded, sans-serif" font-size="52" font-weight="800" letter-spacing="-2" fill="#0D0C12"></text></svg>
       <span id="joursMot">jours.</span>
@@ -90,24 +97,31 @@
       </span>
       <p class="phrase" id="phrase"></p>
       <div class="puces">
+        <span class="puce temoin" id="ditA" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" stroke="#C8FF3D" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+          <span id="ditATexte"></span>
+        </span>
         <span class="puce" id="date"></span>
-        <span class="puce" id="mois"></span>
+      </div>
+      <div class="signature" id="signature" hidden>
+        <svg width="104" height="52" viewBox="0 0 300 150" role="img" id="signatureDessin"><path id="signatureTrace" stroke="#0D0C12" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><b id="signatureNom"></b><span id="signatureDate">sur place</span></span>
       </div>
     </article>
-    <p class="slogan titre">regarde.<br>je te l'avais <em>dit.</em></p>
+    <p class="slogan titre"><span id="regarde">regarde.</span><br>je te l'avais <em>dit.</em></p>
     <p class="empreinte">Empreinte de scellement : <span id="empreinte"></span></p>
   </section>
 
   <div class="espace"></div>
 
   <section class="cta">
-    <p class="titre">À ton tour de sceller tes prédictions.</p>
+    <p class="titre">À ton tour de sceller tes certitudes.</p>
     <div class="boutons">
       <a class="bouton blanc" id="appstore" href="#">App Store</a>
       <a class="bouton vert" id="googleplay" href="#">Google Play</a>
     </div>
   </section>
-  <p class="pied"><span>Une prédiction par jour, pas une de plus.</span><a id="signaler" href="#" hidden>Signaler</a></p>
+  <p class="pied"><span>Scellée, datée, impossible à modifier.</span><a id="signaler" href="#" hidden>Signaler</a></p>
 </main>
 
 <script>
@@ -128,7 +142,7 @@
 
   function formaterDate(iso) {
     var v = parties(new Date(iso), { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-    return Number(v('day')) + ' ' + MOIS[Number(v('month')) - 1] + ' ' + v('year') + ' · ' + v('hour') + 'h' + v('minute');
+    return Number(v('day')) + ' ' + MOIS[Number(v('month')) - 1] + ' ' + v('year') + ' à ' + v('hour') + 'h' + v('minute');
   }
 
   function lienStore(id, url, libelle) {
@@ -155,21 +169,43 @@
       var c = lignes && lignes[0];
       if (!c) { montrer('introuvable'); return; }
       var jours = Math.max(0, c.jours || 0);
-      document.getElementById('pseudo').textContent = c.auteur || ('@' + c.pseudo);
+      var auteur = c.auteur || ('@' + c.pseudo);
+      document.getElementById('pseudo').textContent = auteur;
+      // À qui la certitude avait été dite (facultatif) : la carte lui parle directement.
+      var qui = (c.temoin || '').trim();
+      var SANS_NOM = { pote: 'un pote', best: 'son best', crush: 'son crush', famille: 'sa famille', coloc: 'son coloc', collegue: 'un collègue', prof: 'un prof', ex: 'son ex' };
+      var ditA = qui
+        ? 'Dit à ' + qui + (c.temoin_lien ? ' · ' + c.temoin_lien : '')
+        : (c.temoin_lien_type && SANS_NOM[c.temoin_lien_type] ? 'Dit à ' + SANS_NOM[c.temoin_lien_type] : '');
+      if (ditA) {
+        document.getElementById('ditATexte').textContent = ditA;
+        document.getElementById('ditA').hidden = false;
+      }
+      if (qui) {
+        document.getElementById('intro').hidden = true;
+        document.getElementById('introTemoin').hidden = false;
+        document.getElementById('temoinNom').textContent = qui.charAt(0).toUpperCase() + qui.slice(1);
+        document.getElementById('auteurTemoin').textContent = auteur;
+        document.getElementById('regarde').textContent = 'regarde, ' + qui.toLowerCase() + '.';
+        // Signature faite sur place : une image (simple tracé), vérifiée avant affichage.
+        if (c.temoin_signature && /^M[ML0-9 .]*$/.test(c.temoin_signature)) {
+          document.getElementById('signatureTrace').setAttribute('d', c.temoin_signature);
+          document.getElementById('signatureDessin').setAttribute('aria-label', 'Signature de ' + qui);
+          document.getElementById('signatureNom').textContent = 'Signée par ' + qui;
+          document.getElementById('signatureDate').textContent = c.temoin_signee_le ? 'sur place, à ' + formaterDate(c.temoin_signee_le).split(' à ')[1] : 'sur place';
+          document.getElementById('signature').hidden = false;
+        }
+      }
       document.getElementById('jours').textContent = String(jours);
       document.getElementById('jours').setAttribute('font-size', String(jours).length > 3 ? '42' : '52');
       document.getElementById('bulle').setAttribute('aria-label', jours + (jours > 1 ? ' jours' : ' jour'));
       document.getElementById('joursMot').textContent = jours > 1 ? 'jours.' : 'jour.';
       document.getElementById('phrase').textContent = '« ' + c.texte + ' »';
-      document.getElementById('date').textContent = formaterDate(c.scellee_le);
-      var moisNom = MOIS[Number(parties(new Date(c.scellee_le), { month: 'numeric' })('month')) - 1];
-      document.getElementById('mois').textContent = c.scellees_mois > 1
-        ? '1 prédiction sur ' + c.scellees_mois + ' en ' + moisNom
-        : 'sa seule prédiction en ' + moisNom;
+      document.getElementById('date').textContent = 'Scellée le ' + formaterDate(c.scellee_le);
       var empreinte = document.getElementById('empreinte');
       empreinte.textContent = c.empreinte.slice(0, 16) + '…';
       empreinte.title = c.empreinte;
-      document.title = '« ' + c.texte + ' » · Je te l\'avais dit';
+      document.title = (qui ? qui.charAt(0).toUpperCase() + qui.slice(1) + ', regarde. ' : '') + '« ' + c.texte + ' » · Je te l\'avais dit';
       if (config.emailSignalement) {
         var s = document.getElementById('signaler');
         s.href = 'mailto:' + config.emailSignalement + '?subject=' + encodeURIComponent('Signalement carte ' + code);

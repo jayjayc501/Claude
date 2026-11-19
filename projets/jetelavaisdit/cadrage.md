@@ -1,6 +1,6 @@
 # « Je te l'avais dit » — Document de cadrage
 
-*Version 2 — 10 novembre 2026*
+*Version 3 — 19 novembre 2026 (ajouts validés : à qui on l'a dit, signature sur place, plus de limite par jour, « certitude »)*
 
 ## 1. Le concept en une phrase
 
@@ -17,10 +17,11 @@ Une app mobile (iPhone et Android) où l'on **scelle une phrase datée**, une pr
 ### 3.1 Sceller une phrase
 1. L'utilisateur se connecte.
 2. Il écrit sa phrase. Exemple : *« Je te parie que Marc va démissionner avant l'été. »*
-3. Il appuie sur **« Sceller »**.
-4. La modération automatique vérifie la phrase (voir §5).
+3. Il appuie sur **« Continuer »** : la modération automatique vérifie la phrase tout de suite (voir §5).
+4. **Étape 2, facultative : « Tu l'as dit à qui ? »** (voir §4 bis), puis **« Sceller »**.
 5. La phrase est enregistrée avec la date et l'heure du scellement. **Elle n'est plus modifiable ni supprimable.** À confirmer : l'utilisateur peut-il au moins la masquer ?
-6. La phrase reste **privée** jusqu'à ce que l'utilisateur décide de l'envoyer.
+6. Sur « C'est scellé ! », facultatif : la personne signe du doigt, sur place (voir §4 bis).
+7. La phrase reste **privée** jusqu'à ce que l'utilisateur décide de l'envoyer.
 
 ### 3.2 Envoyer « Je te l'avais dit ! »
 1. Plus tard, quand la prédiction se réalise, l'utilisateur ouvre sa liste de phrases scellées.
@@ -40,23 +41,35 @@ Un visuel soigné et partageable, entre le diplôme et le ticket :
 - **« Scellée le 10 novembre 2026 à 12h13 »** ;
 - le nom ou pseudo de l'auteur ;
 - un sceau ou tampon **« Authentique »** ;
-- un indicateur discret de sincérité, par exemple *« 1 prédiction sur 12 scellées ce mois-ci »* ;
+- ~~un indicateur discret de sincérité (*« 1 prédiction sur 12 ce mois-ci »*)~~ : **retiré le 19/11/2026** à la demande du propriétaire ; la cartouche rose garde la date entière (« Scellée le 14 mars 2026 à 22h47 ») ;
 - l'invitation à installer l'app.
 
 La crédibilité repose sur une règle simple : **l'app empêche de modifier ou d'antidater une phrase.**
+
+## 4 bis. À qui on l'a dit, et sa signature — *décidé et validé sur maquettes le 19/11/2026*
+
+Le « te » de « Je te l'avais dit » : on peut préciser à qui on a dit la certitude, et la faire signer sur place.
+
+- **« Tu l'as dit à qui ? »** (étape 2, facultative) : **une case à cocher** pour le lien (Pote, Best, Crush, Famille, Coloc, Collègue, Prof, Ex) **et un texte libre** pour la personne (« Sarah », « ma petite sœur », 30 caractères). L'un, l'autre ou les deux. Aperçu de la carte en direct (« Dit à Sarah · pote », « regarde, sarah. »), personnes déjà citées en raccourci (« Déjà dit à »). Pas de jauge.
+- **Scellé avec la phrase** : non modifiable, inclus dans l'empreinte. La modération s'applique aussi au texte libre.
+- **Signature sur place** (facultative), sur l'écran « C'est scellé ! » : « Tu veux faire signer Sarah ? », on passe le téléphone, la personne signe du doigt dans une zone noire, puis « Valider la signature ». La signature est **une image** (tracé SVG), ajoutée **une seule fois, dans les 15 minutes** après le scellement, puis plus modifiable ; une seconde empreinte la protège.
+- **Sur la carte** : « Sarah, Jules R. te l'avait dit il y a… », « Dit à Sarah · pote », « Signée par Sarah, sur place », « regarde, sarah. ». Le texte libre s'affiche toujours ; **le lien coché est affichable ou non**, au choix à l'envoi (masqué par défaut pour Crush et Ex).
+- **Mes phrases** : tri par personne, bouton « Je te l'avais dit, Sarah ! », pastille « signée », « Envoyée à Sarah ».
+- **Écriture** : on ne connaît pas le genre de la personne → aucun « il / elle » dans les textes.
+- **Plus tard** : rappels qui citent la personne (« Yanis attend toujours ta preuve »).
 
 ## 5. Règles du jeu
 
 | Règle | Décision | Pourquoi |
 |---|---|---|
 | Moment de l'envoi | **Après coup**, quand l'utilisateur le décide | Simplicité, c'est l'esprit du « je te l'avais dit » |
-| Nombre de prédictions | **1 par jour maximum** | Chaque prédiction devient précieuse, et la triche est limitée |
+| Nombre de certitudes | **Sans limite** (décidé le 19/11/2026 ; avant : 1 par jour). Garde-fou anti-abus invisible : 20 par jour | Ne pas freiner l'usage, surtout le premier jour ; la crédibilité vient du témoin et de sa signature |
 | Modification | **Impossible** après scellement | C'est la base de la preuve |
 | Accès du destinataire | **Lien web**, avec invitation à installer l'app | Aucune friction, et la viralité est intégrée |
 | Modération | **Automatique** au scellement, plus signalement sur la carte | Éviter insultes, harcèlement et menaces |
 
 ### Triche par sélection (risque connu)
-Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » lundi et le contraire mardi, puis ne montrer que la bonne. Le fait d'afficher le nombre de prédictions scellées sur la carte atténue ce risque sans compliquer l'app.
+On peut écrire « Marc va démissionner » et le contraire, puis ne montrer que la bonne. Depuis le 19/11 il n'y a plus de limite par jour ni de compteur sur la carte : ce qui protège, c'est le témoin nommé au scellement et surtout **sa signature** (en option) : une phrase signée par Marc ne peut pas être trichée.
 
 ### Modération automatique
 - **Au moment du scellement**, une IA analyse la phrase.
@@ -95,6 +108,7 @@ Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » l
 - [x] **Logo :** la « bulle scellée », une bulle de parole fermée par un cadenas, avec un « ! ». Élément signature : la **bulle-compteur** (le logo avec le nombre de jours dedans, en vert, légèrement penché), utilisée sur la carte, la story et le partage. *Décidé le 10/11/2026.*
 - [x] **Règles de couleur :** vert = agir (sceller, envoyer, compteur, logo) ; rose = phrase révélée uniquement ; gris = phrase en attente. *Décidé le 10/11/2026.*
 - [x] **Nom :** « Je te l'avais dit » (identifiant technique : `jetelavaisdit`). *Décidé le 10/11/2026.*
+- [x] **Vocabulaire :** on ne parle plus de « prédiction » (jugé à côté du projet) mais de **certitude**, dans l'esprit « t'en es sûr ? » : « Ta certitude du jour », « Scelle tes certitudes ». Les textes de l'app, de la carte et des maquettes sont passés à « certitude ». *Décidé le 19/11/2026.*
 
 ## 9. Prochaines étapes
 

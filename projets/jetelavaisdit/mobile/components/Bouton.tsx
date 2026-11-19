@@ -12,6 +12,8 @@ type Props = {
   desactive?: boolean;
   chargement?: boolean;
   petit?: boolean;
+  /** Icône après le texte (ex. flèche « Continuer »). */
+  iconeApres?: boolean;
 };
 
 const styles_variantes: Record<Variante, { fond: string; texte: string; bordure?: string }> = {
@@ -21,7 +23,7 @@ const styles_variantes: Record<Variante, { fond: string; texte: string; bordure?
   contour: { fond: 'transparent', texte: couleurs.texte, bordure: couleurs.bordureForte },
 };
 
-export function Bouton({ titre, onPress, variante = 'vert', icone, desactive, chargement, petit }: Props) {
+export function Bouton({ titre, onPress, variante = 'vert', icone, desactive, chargement, petit, iconeApres }: Props) {
   const v = desactive
     ? { fond: couleurs.surface, texte: couleurs.texteDoux, bordure: couleurs.bordure }
     : styles_variantes[variante];
@@ -41,8 +43,9 @@ export function Bouton({ titre, onPress, variante = 'vert', icone, desactive, ch
         <ActivityIndicator color={v.texte} />
       ) : (
         <View style={styles.contenu}>
-          {icone}
+          {iconeApres ? null : icone}
           <Text style={[petit ? styles.textePetit : styles.texte, { color: v.texte }]}>{titre}</Text>
+          {iconeApres ? icone : null}
         </View>
       )}
     </Pressable>

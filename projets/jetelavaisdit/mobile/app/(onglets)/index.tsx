@@ -2,15 +2,16 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  ActivityIndicator, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bouton } from '../../components/Bouton';
-import { IconeCadenas, IconeInterdit } from '../../components/Icones';
-import { aujourdhuiParis, avantMinuitParis, dateRelative } from '../../lib/dates';
+import { EtapeTemoin } from '../../components/EtapeTemoin';
+import { IconeCadenas, IconeInterdit, IconeSuivant } from '../../components/Icones';
 import { lireErreur } from '../../lib/erreurs';
 import { vibrerAppui, vibrerErreur, vibrerSucces } from '../../lib/vibration';
 import { supabase, type Phrase } from '../../lib/supabase';
+import { TEMOIN_VIDE, personnesDepuis, type ColonnesTemoin, type Personne, type Temoin } from '../../lib/temoin';
 import { couleurs, polices } from '../../lib/theme';
 
 const LONGUEUR_MAX = 200;
@@ -40,23 +41,29 @@ export default function Ecrire() {
   const [chargement, setChargement] = useState(true);
   const [prenom, setPrenom] = useState('');
   const [exemple] = useState(() => EXEMPLES[Math.floor(Math.random() * EXEMPLES.length)]);
-  const [phraseDuJour, setPhraseDuJour] = useState<Phrase | null>(null);
   const [texte, setTexte] = useState('');
   const [envoi, setEnvoi] = useState(false);
   const [refus, setRefus] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
+  // Étape 2 : à qui on l'a dit (facultatif). La signature se fait après, sur « C'est scellé ».
+  const [etape, setEtape] = useState<'phrase' | 'temoin'>('phrase');
+  const [temoin, setTemoin] = useState<Temoin>(TEMOIN_VIDE);
+  const [personnes, setPersonnes] = useState<Personne[]>([]);
+  const [erreurTemoin, setErreurTemoin] = useState<string | null>(null);
 
   const charger = useCallback(async () => {
-    const [profil, duJour] = await Promise.all([
+    const [profil, temoins] = await Promise.all([
       supabase.from('jtlad_profils').select('pseudo, prenom').maybeSingle(),
+      // Les personnes déjà citées, pour les remplir d'un seul geste.
       supabase
         .from('jtlad_phrases')
-        .select('id, texte, scellee_le, jour, revelee_le, lien')
-        .eq('jour', aujourdhuiParis())
-        .maybeSingle(),
+        .select('temoin, temoin_lien')
+        .not('temoin', 'is', null)
+        .order('scellee_le', { ascending: false })
+        .limit(200),
     ]);
     setPrenom(profil.data?.prenom || profil.data?.pseudo || '');
-    setPhraseDuJour((duJour.data as Phrase | null) ?? null);
+    setPersonnes(personnesDepuis((temoins.data as ColonnesTemoin[] | null) ?? []));
     setChargement(false);
   }, []);
 
@@ -66,20 +73,62 @@ export default function Ecrire() {
     }, [charger]),
   );
 
-  async function sceller() {
-    setErreur(null);
-    setEnvoi(true);
-    vibrerAppui();
-    const { data, error } = await supabase.rpc('jtlad_sceller_phrase', { p_texte: texte });
-    setEnvoi(false);
+  // Sur Android, le bouton « retour » ramène à l'étape précédente.
+  useEffect(() => {
+    if (etape === 'phrase') return;
+    const abonnement = BackHandler.addEventListener('hardwareBackPress', () => {
+      setEtape('phrase');
+      return true;
+    });
+    return () => abonnement.remove();
+  }, [etape]);
 
+  // « Continuer » : la phrase est vérifiée tout de suite (refus avant l'étape « à qui »).
+  async function continuer() {
+    vibrerAppui();
+    setErreur(null);
+    setErreurTemoin(null);
+    setEnvoi(true);
+    const { error } = await supabase.rpc('jtlad_verifier_phrase', { p_texte: texte });
+    setEnvoi(false);
     if (error) {
       const e = lireErreur(error.message);
       if (e.moderation) {
         vibrerErreur();
         setRefus(e.message);
-      } else if (e.dejaScelle) {
-        charger();
+      } else {
+        setErreur(e.message);
+      }
+      return;
+    }
+    setEtape('temoin');
+  }
+
+  async function sceller() {
+    setErreur(null);
+    setErreurTemoin(null);
+    setEnvoi(true);
+    vibrerAppui();
+    const nomTemoin = temoin.nom.trim();
+    const { data, error } = await supabase.rpc('jtlad_sceller_phrase', {
+      p_texte: texte,
+      // Témoin facultatif : seulement ce qui a été rempli.
+      ...(nomTemoin ? { p_temoin: nomTemoin } : {}),
+      ...(temoin.lien ? { p_temoin_lien: temoin.lien } : {}),
+    });
+    setEnvoi(false);
+
+    if (error) {
+      const e = lireErreur(error.message);
+      if (e.temoin) {
+        vibrerErreur();
+        setErreurTemoin(e.message);
+      } else if (e.moderation) {
+        vibrerErreur();
+        setEtape('phrase');
+        setRefus(e.message);
+      } else if (etape !== 'phrase') {
+        setErreurTemoin(e.message);
       } else {
         setErreur(e.message);
       }
@@ -89,8 +138,20 @@ export default function Ecrire() {
     vibrerSucces();
     const phrase = data as Phrase;
     setTexte('');
-    setPhraseDuJour(phrase);
-    router.push({ pathname: '/scellee', params: { texte: phrase.texte, scellee_le: phrase.scellee_le } });
+    setTemoin(TEMOIN_VIDE);
+    setEtape('phrase');
+    charger();
+    router.push({
+      pathname: '/scellee',
+      params: {
+        texte: phrase.texte,
+        scellee_le: phrase.scellee_le,
+        temoin: phrase.temoin ?? '',
+        temoin_lien: phrase.temoin_lien ?? '',
+        // Pour la signature sur place, juste après.
+        id: phrase.id,
+      },
+    });
   }
 
   if (chargement) {
@@ -105,10 +166,22 @@ export default function Ecrire() {
     <SafeAreaView style={styles.page} edges={['top']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.contenu} keyboardShouldPersistTaps="handled">
-          <EnTete prenom={prenom} disponible={!phraseDuJour} />
+          {etape === 'phrase' ? <EnTete prenom={prenom} /> : null}
 
-          {phraseDuJour ? (
-            <DejaScelle phrase={phraseDuJour} />
+          {etape === 'temoin' ? (
+            <EtapeTemoin
+              texte={texte.trim()}
+              temoin={temoin}
+              onChange={(t) => {
+                setErreurTemoin(null);
+                setTemoin(t);
+              }}
+              personnes={personnes}
+              erreur={erreurTemoin}
+              envoi={envoi}
+              onRetour={() => setEtape('phrase')}
+              onSceller={sceller}
+            />
           ) : refus ? (
             <Refus message={refus} texte={texte} onReformuler={() => setRefus(null)} />
           ) : (
@@ -116,9 +189,9 @@ export default function Ecrire() {
               <Text style={styles.titre} accessibilityRole="header">Tu sens venir quoi ?</Text>
 
               <View style={styles.carte}>
-                <Text style={styles.etiquette} nativeID="etiquette-prediction">TA PRÉDICTION</Text>
+                <Text style={styles.etiquette} nativeID="etiquette-certitude">TA CERTITUDE</Text>
                 <TextInput
-                  accessibilityLabelledBy="etiquette-prediction"
+                  accessibilityLabelledBy="etiquette-certitude"
                   value={texte}
                   onChangeText={setTexte}
                   placeholder={exemple}
@@ -154,12 +227,18 @@ export default function Ecrire() {
               {erreur ? <Text style={styles.erreur} accessibilityLiveRegion="polite">{erreur}</Text> : null}
 
               <View style={{ flex: 1, minHeight: 24 }} />
+              <View style={styles.etape} accessible accessibilityLabel="Étape 1 sur 2. Ensuite : à qui tu l'as dit.">
+                <View style={[styles.trait, { backgroundColor: couleurs.vert }]} />
+                <View style={styles.trait} />
+                <Text style={styles.etapeTexte}>Étape 1 sur 2 · ensuite : à qui tu l'as dit</Text>
+              </View>
               <Bouton
-                titre="Sceller"
-                onPress={sceller}
+                titre="Continuer"
+                onPress={continuer}
                 chargement={envoi}
                 desactive={texte.trim().length < 3}
-                icone={<IconeCadenas couleur={texte.trim().length < 3 ? couleurs.texteDoux : couleurs.fond} />}
+                icone={<IconeSuivant couleur={texte.trim().length < 3 ? couleurs.texteDoux : couleurs.fond} />}
+                iconeApres
               />
             </>
           )}
@@ -169,7 +248,7 @@ export default function Ecrire() {
   );
 }
 
-function EnTete({ prenom, disponible }: { prenom: string; disponible: boolean }) {
+function EnTete({ prenom }: { prenom: string }) {
   return (
     <View style={styles.enTete}>
       <View style={styles.salut}>
@@ -178,39 +257,7 @@ function EnTete({ prenom, disponible }: { prenom: string; disponible: boolean })
         </View>
         <Text style={styles.salutTexte}>Salut {prenom}</Text>
       </View>
-      <View style={[styles.dispo, !disponible && styles.dispoVide]}>
-        <Text style={[styles.dispoTexte, !disponible && { color: couleurs.texteDoux }]}>
-          {disponible ? "1 dispo aujourd'hui" : "0 dispo aujourd'hui"}
-        </Text>
-      </View>
     </View>
-  );
-}
-
-/** Écran « reviens demain » avec compte à rebours jusqu'à minuit (heure de Paris). */
-function DejaScelle({ phrase }: { phrase: Phrase }) {
-  const [reste, setReste] = useState(avantMinuitParis());
-  useEffect(() => {
-    const minuteur = setInterval(() => setReste(avantMinuitParis()), 30_000);
-    return () => clearInterval(minuteur);
-  }, []);
-
-  return (
-    <>
-      <Text style={[styles.titre, { marginTop: 24 }]} accessibilityRole="header">reviens{'\n'}demain.</Text>
-      <View style={{ gap: 4 }}>
-        <Text style={styles.petitDoux}>Prochaine prédiction dans</Text>
-        <Text style={styles.decompte}>{reste.heures} h {String(reste.minutes).padStart(2, '0')} min</Text>
-      </View>
-      <View style={styles.carte}>
-        <View style={styles.ligne}>
-          <IconeCadenas couleur={couleurs.texteDoux} taille={16} />
-          <Text style={styles.petitDoux}>Ta prédiction du jour · {dateRelative(phrase.scellee_le, phrase.jour).replace("Aujourd'hui · ", '')}</Text>
-        </View>
-        <Text style={styles.phrase}>« {phrase.texte} »</Text>
-      </View>
-      <Text style={styles.infoTexte}>Une seule par jour : c'est ce qui rend chaque prédiction précieuse.</Text>
-    </>
   );
 }
 
@@ -234,7 +281,7 @@ function Refus({ message, texte, onReformuler }: { message: string; texte: strin
       </View>
       <View style={{ flex: 1, minHeight: 24 }} />
       <Text style={[styles.petitDoux, { textAlign: 'center' }]}>
-        Pas de panique : ta prédiction du jour n'est pas perdue.
+        Pas de panique : rien n'est scellé, reformule tranquille.
       </Text>
       <Bouton titre="Reformuler" onPress={onReformuler} />
     </>
@@ -253,9 +300,6 @@ const styles = StyleSheet.create({
   },
   avatarTexte: { fontFamily: polices.titre, fontSize: 16, color: couleurs.fond },
   salutTexte: { fontFamily: polices.gras, fontSize: 16, color: couleurs.texte },
-  dispo: { backgroundColor: couleurs.vert, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
-  dispoVide: { backgroundColor: couleurs.surface, borderWidth: 1, borderColor: couleurs.bordure },
-  dispoTexte: { fontFamily: polices.tresGras, fontSize: 13, color: couleurs.fond },
   titre: { fontFamily: polices.titre, fontSize: 30, lineHeight: 34, color: couleurs.texte, letterSpacing: -0.8, marginTop: 8 },
   carte: {
     backgroundColor: couleurs.surface, borderColor: couleurs.bordure, borderWidth: 1,
@@ -278,9 +322,11 @@ const styles = StyleSheet.create({
   infoTexte: { flex: 1, fontFamily: polices.normal, fontSize: 14, lineHeight: 20, color: couleurs.texteDoux },
   erreur: { fontFamily: polices.moyen, fontSize: 14, color: couleurs.rose },
   petitDoux: { fontFamily: polices.moyen, fontSize: 14, color: couleurs.texteDoux },
-  decompte: { fontFamily: polices.titre, fontSize: 40, color: couleurs.vert, letterSpacing: -1.5 },
   ligne: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   phrase: { fontFamily: polices.tresGras, fontSize: 20, lineHeight: 26, color: couleurs.texte },
+  etape: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  trait: { width: 22, height: 6, borderRadius: 999, backgroundColor: couleurs.bordure },
+  etapeTexte: { marginLeft: 4, fontFamily: polices.moyen, fontSize: 13, color: couleurs.texteDoux },
   pastilleRose: {
     width: 72, height: 72, borderRadius: 36, backgroundColor: couleurs.rose,
     alignItems: 'center', justifyContent: 'center', marginTop: 24,

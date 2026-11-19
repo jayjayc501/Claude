@@ -1,4 +1,4 @@
-import Svg, { Path, Rect } from 'react-native-svg';
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 type Props = { couleur: string; taille?: number };
 
@@ -50,6 +50,23 @@ export function IconeInterdit({ couleur, taille = 36 }: Props) {
   return (
     <Svg width={taille} height={taille} viewBox="0 0 24 24">
       <Path d="M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17zM6 6l12 12" stroke={couleur} {...trait} strokeWidth={2.6} />
+    </Svg>
+  );
+}
+
+export function IconeSuivant({ couleur, taille = 20 }: Props) {
+  return (
+    <Svg width={taille} height={taille} viewBox="0 0 24 24">
+      <Path d="M5 12h14M13 6l6 6-6 6" stroke={couleur} {...trait} strokeWidth={2.8} />
+    </Svg>
+  );
+}
+
+export function IconePersonne({ couleur, taille = 16 }: Props) {
+  return (
+    <Svg width={taille} height={taille} viewBox="0 0 24 24">
+      <Circle cx={12} cy={8} r={4} stroke={couleur} {...trait} strokeWidth={2.6} />
+      <Path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6" stroke={couleur} {...trait} strokeWidth={2.6} />
     </Svg>
   );
 }

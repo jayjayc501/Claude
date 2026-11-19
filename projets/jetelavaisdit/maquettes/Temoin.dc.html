@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tu l'as dit à qui ?</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#C8FF3D}a:hover{color:#FFFFFF}
+input::placeholder{color:#6E6A80}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #0D0C12; color: #FFFFFF; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; padding: 48px 24px 24px; gap: 16px; overflow: hidden">
+  <div style="display: flex; align-items: center; gap: 14px">
+    <a href="Ecrire.dc.html" aria-label="Revenir à la phrase" style="width: 44px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #1A1922; border: 1px solid #2C2A38; box-sizing: border-box">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" stroke="#FFFFFF" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #A9A6B8">
+        <span aria-hidden="true" style="width: 16px; height: 5px; border-radius: 999px; background: #C8FF3D"></span>
+        <span aria-hidden="true" style="width: 16px; height: 5px; border-radius: 999px; background: #C8FF3D"></span>
+        Étape 2 sur 2
+      </span>
+      <h1 style="margin: 0; font-family: 'Unbounded', sans-serif; font-size: 22px; line-height: 1.1; font-weight: 800; letter-spacing: -0.6px">Tu l'as dit à qui ?</h1>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <span style="font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #A9A6B8">APERÇU DE TA CARTE</span>
+    <div style="background: #FF4FA3; color: #0D0C12; border-radius: 24px; padding: 16px 18px; transform: rotate(-1.2deg); display: flex; flex-direction: column; gap: 10px">
+      <p style="margin: 0; font-size: 17px; line-height: 1.3; font-weight: 800">« Mon frère va se faire larguer avant l'été. »</p>
+      <sc-if value="{{ aTemoin }}" hint-placeholder-val="{{ true }}">
+        <span style="align-self: flex-start; display: flex; align-items: center; gap: 6px; background: #0D0C12; color: #FFFFFF; border-radius: 999px; padding: 6px 12px 6px 8px; font-size: 13px; font-weight: 700">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" stroke="#C8FF3D" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>
+          {{ ditA }}
+        </span>
+      </sc-if>
+      <sc-if value="{{ sansTemoin }}" hint-placeholder-val="{{ false }}">
+        <span style="align-self: flex-start; border: 1.5px dashed rgba(13,12,18,0.45); border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 700">Dit à… personne ?</span>
+      </sc-if>
+    </div>
+    <span style="font-family: 'Unbounded', sans-serif; font-size: 15px; line-height: 1.2; font-weight: 800; letter-spacing: -0.3px">{{ sloganDebut }} je te l'avais <span style="color: #C8FF3D">dit.</span></span>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 8px; overflow: hidden">
+    <span style="font-size: 13px; font-weight: 600; color: #A9A6B8; flex-shrink: 0">Déjà dit à</span>
+    <sc-for list="{{ recents }}" as="r" hint-placeholder-count="3">
+      <button type="button" onClick="{{ r.pick }}" style="font-family: 'Inter', sans-serif; flex-shrink: 0; display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px 0 4px; border-radius: 999px; background: #1A1922; border: 1px solid #2C2A38; color: #FFFFFF; font-size: 13px; font-weight: 700">
+        <span aria-hidden="true" style="width: 26px; height: 26px; border-radius: 50%; background: #2C2A38; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Unbounded', sans-serif; font-size: 11px; font-weight: 800">{{ r.lettre }}</span>
+        {{ r.nom }}
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="background: #1A1922; border: 1px solid #2C2A38; border-radius: 26px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+    <span id="etiquette-lien" style="font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #A9A6B8">VOTRE LIEN</span>
+    <div role="group" aria-labelledby="etiquette-lien" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+      <sc-for list="{{ liens }}" as="l" hint-placeholder-count="8">
+        <button type="button" aria-pressed="{{ l.choisi }}" onClick="{{ l.pick }}" style="font-family: 'Inter', sans-serif; height: 36px; padding: 0 4px; border-radius: 999px; background: {{ l.fond }}; border: 1px solid {{ l.bordure }}; color: {{ l.texte }}; font-size: 13px; font-weight: 700">{{ l.label }}</button>
+      </sc-for>
+    </div>
+    <label for="qui" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">À qui ? Son prénom ou un surnom</label>
+    <div style="display: flex; align-items: center; gap: 8px; height: 48px; box-sizing: border-box; border-radius: 14px; border: 1px solid #4A475A; background: #0D0C12; padding: 0 12px">
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" stroke="#A9A6B8" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>
+      <input id="qui" type="text" autocomplete="off" value="{{ nom }}" onChange="{{ onNom }}" placeholder="Sarah" style="flex: 1; min-width: 0; height: 44px; border: none; background: transparent; color: #FFFFFF; font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; outline: none">
+      <span style="font-size: 12px; color: #A9A6B8">{{ compteur }}</span>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 10px; align-items: flex-start">
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0; margin-top: 1px" stroke="#A9A6B8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="3"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+    <p style="margin: 0; font-size: 13px; line-height: 1.4; color: #A9A6B8">Scellé avec ta phrase, pour de bon.</p>
+  </div>
+
+  <div style="flex-grow: 1"></div>
+
+  <a href="Scellee.dc.html" style="display: flex; align-items: center; justify-content: center; gap: 10px; height: 60px; flex-shrink: 0; border-radius: 999px; background: #C8FF3D; color: #0D0C12; font-family: 'Unbounded', sans-serif; font-size: 18px; font-weight: 800; text-decoration: none">
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" stroke="#0D0C12" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="3"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+    Sceller
+  </a>
+  <button type="button" onClick="{{ vider }}" style="font-family: 'Inter', sans-serif; align-self: center; height: 32px; margin-top: -4px; background: none; border: none; color: #A9A6B8; font-size: 14px; font-weight: 600; text-decoration: underline">Je ne l'ai dit à personne</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { nom: 'Léa', lien: 'famille' };
+  }
+
+  renderVals() {
+    var s = this.state;
+    var self = this;
+    var LIENS = [
+      { id: 'pote', label: 'Pote' }, { id: 'best', label: 'Best' },
+      { id: 'crush', label: 'Crush' }, { id: 'famille', label: 'Famille' },
+      { id: 'coloc', label: 'Coloc' }, { id: 'collegue', label: 'Collègue' },
+      { id: 'prof', label: 'Prof' }, { id: 'ex', label: 'Ex' }
+    ];
+    var SANS_NOM = { pote: 'un pote', best: 'son best', crush: 'son crush', famille: 'sa famille', coloc: 'son coloc', collegue: 'un collègue', prof: 'un prof', ex: 'son ex' };
+    var RECENTS = [
+      { nom: 'Sarah', lien: 'pote' }, { nom: 'Yanis', lien: 'pote' }, { nom: 'Maman', lien: 'famille' }
+    ];
+
+    var nom = s.nom.trim();
+    var choix = LIENS.filter(function (l) { return l.id === s.lien; })[0];
+    var label = choix ? choix.label.toLowerCase() : '';
+    var aTemoin = !!(nom || choix);
+    var ditA = nom ? 'Dit à ' + nom + (label ? ' · ' + label : '') : (choix ? 'Dit à ' + SANS_NOM[choix.id] : '');
+    var niveau = (nom ? 1 : 0) + (choix ? 1 : 0) + 1;
+
+    var TITRES = ['Tiède.', 'Ça chauffe.', 'Brûlant.'];
+    var TEXTES = [
+      'Une carte sans destinataire, ça pique moins.',
+      nom ? 'Coche votre lien pour finir le travail.' : 'Écris son prénom pour finir le travail.',
+      nom + ' ne va pas s’en remettre.'
+    ];
+
+    return {
+      nom: s.nom,
+      aTemoin: aTemoin,
+      sansTemoin: !aTemoin,
+      ditA: ditA,
+      sloganDebut: nom ? 'regarde, ' + nom.toLowerCase() + '.' : 'regarde.',
+      compteur: s.nom.length + ' / 30',
+      niveauTitre: TITRES[niveau - 1],
+      niveauTexte: TEXTES[niveau - 1],
+      jaugeLabel: 'Effet « je te l’avais dit » : ' + niveau + ' sur 3',
+      flammes: [1, 2, 3].map(function (n) {
+        return n <= niveau ? { fond: '#C8FF3D', trait: '#C8FF3D' } : { fond: 'none', trait: '#4A475A' };
+      }),
+      liens: LIENS.map(function (l) {
+        var choisi = l.id === s.lien;
+        return {
+          label: l.label,
+          choisi: choisi,
+          fond: choisi ? '#FFFFFF' : '#0D0C12',
+          bordure: choisi ? '#FFFFFF' : '#2C2A38',
+          texte: choisi ? '#0D0C12' : '#FFFFFF',
+          pick: function () { self.setState({ lien: choisi ? null : l.id }); }
+        };
+      }),
+      recents: RECENTS.map(function (r) {
+        return {
+          nom: r.nom,
+          lettre: r.nom.charAt(0),
+          pick: function () { self.setState({ nom: r.nom, lien: r.lien }); }
+        };
+      }),
+      onNom: function (e) { self.setState({ nom: e.target.value.slice(0, 30) }); },
+      vider: function () { self.setState({ nom: '', lien: null }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,13 +1,14 @@
 # « Je te l'avais dit » — contexte pour reprendre le projet
 
-*Mis à jour le 17 novembre 2026. À lire en premier dans une nouvelle conversation.*
+*Mis à jour le 19 novembre 2026. À lire en premier dans une nouvelle conversation.*
 
 ## Le projet en bref
 
 App mobile (Android d'abord, iPhone plus tard) : on **scelle une phrase datée** (une prédiction), elle devient non modifiable, et plus tard on l'**envoie** à quelqu'un avec une **carte d'authenticité** : « Regarde, je te l'avais dit. »
 
 - Public : plutôt les jeunes (15-25 ans). Ton fun, complice, un peu taquin.
-- Une prédiction par jour maximum (heure de Paris). Envoi « après coup », quand on veut.
+- Vocabulaire : **certitude** (et plus « prédiction », depuis le 19/11), esprit « t'en es sûr ? ».
+- Plus de limite par jour depuis le 19/11 (garde-fou anti-abus invisible : 20 par jour). Envoi « après coup », quand on veut.
 - Le destinataire voit la carte via un simple lien web, sans installer l'app.
 - Tout est stocké **sur le serveur** (Supabase) ; le téléphone ne fait qu'afficher.
 
@@ -21,7 +22,7 @@ Documents : [`cadrage.md`](cadrage.md) (décisions détaillées), [`README.md`](
 | App mobile (Expo / React Native) | `mobile/` |
 | Base de données (migrations SQL) | `supabase/migrations/` |
 | Page web de la carte reçue | `web/carte/` |
-| Maquettes (copie) | `maquettes/` · version cliquable : https://claude.ai/artifact/GBrtiSGWzndyC5aD4Husvq |
+| Maquettes (copie) | `maquettes/` · version cliquable v2 **validée** (19/11, « à qui tu l'as dit » + signature) : https://claude.ai/artifact/KcMXxoMWFZcQ2vrLkT343o (v1 : https://claude.ai/artifact/GBrtiSGWzndyC5aD4Husvq) |
 | Version web en ligne | https://jayjayc501.github.io/Claude/app/ (carte : `/Claude/carte/?c=…`) |
 | Base Supabase | projet `claude_projets` (ex-`jelavaisdit`) / `joqzrjjgrntbyutytpnr` (https://joqzrjjgrntbyutytpnr.supabase.co), **mutualisé** avec MyFlix et les projets à venir : chaque appli préfixe ses objets. « Je te l'avais dit » = `jtlad_…` (tables `jtlad_profils`, `jtlad_phrases`, `jtlad_moderation_mots`, fonctions `jtlad_sceller_phrase`, `jtlad_reveler_phrase`, `jtlad_carte_publique`…). Ne jamais toucher aux autres préfixes (`myflix_…`). Les comptes (`auth.users`) sont communs à toutes les applis |
 | Compte Expo | `jayjayc501`, projet `jetelavaisdit` (fabrication de l'APK) |
@@ -56,6 +57,23 @@ Valeurs publiques (URL Supabase, clé `sb_publishable_…`) : déjà dans `mobil
 
 **Données en base (17/11)** : 2 comptes (1 avec prénom / nom repris de Google), 1 phrase scellée et envoyée.
 
+## 19 novembre 2026 : « à qui tu l'as dit » et signature sur place
+
+Modèle **validé par le propriétaire sur les maquettes** (https://claude.ai/artifact/KcMXxoMWFZcQ2vrLkT343o), détail dans `cadrage.md` §4 bis :
+- 03 Écrire → « Continuer » vérifie la phrase tout de suite (04 Refus si besoin) → 05 « Tu l'as dit à qui ? » : une case pour le lien (Pote, Best, Crush, Famille, Coloc, Collègue, Prof, Ex) et **un seul texte libre** (« Sarah », « ma petite sœur »), tous deux facultatifs, aperçu de la carte en direct, « Déjà dit à ». Pas de champs prénom / initiale, pas de jauge.
+- 06 « C'est scellé ! » : en option (« FACULTATIF · Tu veux faire signer Sarah ? »), la personne signe du doigt dans une **zone noire** ; la signature est stockée comme **image (tracé SVG)**, une seule fois, dans les 15 minutes, avec sa propre empreinte.
+- Vocabulaire : « certitude » (plus « prédiction ») ; écran vide : « Tu en es sûr ? ». **Aucun « il / elle »** dans les textes (on ne connaît pas le genre de la personne).
+- Plus de limite d'une par jour (garde-fou invisible : 20 par jour), plus d'écran « reviens demain ».
+- Carte reçue : « Sarah, Jules R. te l'avait dit il y a… », « Dit à Sarah · pote », « Signée par Sarah, sur place », « regarde, sarah. » ; plus de « 1 certitude sur N ».
+
+**Code (branche `jetelavaisdit/temoin`, pull request n° 17)** : migration `20261119120000_temoin.sql` (colonnes `temoin`, `temoin_lien`, `temoin_signature`, `temoin_signee_le`, `empreinte_signature`, `afficher_lien` ; fonctions `jtlad_verifier_phrase`, `jtlad_sceller_phrase(p_texte, p_temoin, p_temoin_lien)`, `jtlad_signer_phrase(p_id, p_signature)`, `jtlad_reveler_phrase(p_id, p_afficher_lien)`, carte publique enrichie ; anciens appels toujours valides), testée sur PostgreSQL local ; app (`components/EtapeTemoin.tsx`, `components/Signature.tsx`, `lib/temoin.ts`, écrans Écrire, C'est scellé, Mes phrases, Partager) ; carte web.
+
+**Fait le 19/11 vers 16 h 40 :** script `20261119120000_temoin.sql` appliqué sur la base par Claude (outil Supabase, migration `jtlad_temoin`). Vérifié : 6 nouvelles colonnes, contraintes, fonctions `jtlad_verifier_phrase`, `jtlad_sceller_phrase(text,text,text)`, `jtlad_signer_phrase(uuid,text)`, `jtlad_reveler_phrase(uuid,boolean)`, droits (anon lit la carte mais ne scelle pas), carte existante intacte (« Jérome J. / 9 j »), 1 phrase en base. L'ancienne contrainte « une par jour » est supprimée.
+
+**À faire, dans cet ordre :**
+1. Fusionner la pull request n° 17 (le propriétaire dit « fusionne » ; mise en ligne web automatique).
+2. Fabriquer un nouvel APK (workflow `jetelavaisdit-apk.yml`), l'installer, tester : sceller avec / sans « à qui », signer, partager, carte.
+
 ## Leçons apprises (pièges déjà rencontrés)
 
 - **E-mails Supabase** : le service gratuit n'envoie que 2 e-mails par heure et ses modèles ne sont pas modifiables sans SMTP personnel → abandon de la connexion par e-mail au profit de Google.
@@ -63,15 +81,18 @@ Valeurs publiques (URL Supabase, clé `sb_publishable_…`) : déjà dans `mobil
 - **Supabase › URL Configuration** : Site URL = `https://jayjayc501.github.io/Claude/app/` ; Redirect URLs = cette adresse + `jetelavaisdit://**` (retour dans l'app Android).
 - **EAS / APK** : Node 22 obligatoire dans GitHub Actions ; `expo-splash-screen` exige une image ; la file d'attente gratuite d'Expo peut dépasser 45 minutes ; le lien de l'APK apparaît dans les journaux du run (`APK : https://…`) et sur expo.dev › Builds.
 - **Installation Android** : si « Application non installée », désactiver temporairement Play Protect.
-- **Environnement de Claude** : pas d'accès npm ni à expo.dev / supabase.co depuis le terminal ; on vérifie via GitHub Actions (build + typecheck), un PostgreSQL local pour tester le SQL, et l'outil Supabase en lecture.
+- **Environnement de Claude** : pas d'accès npm ni à expo.dev / supabase.co depuis le terminal ; on vérifie via GitHub Actions (build + typecheck) et un PostgreSQL local pour tester le SQL. L'outil Supabase permet aussi d'**appliquer** une migration (fait le 19/11) : toujours la tester en local d'abord.
 - **Base mutualisée** : `auth.users` appartient à `supabase_auth_admin` ; le rôle `postgres` peut créer un déclencheur dessus mais pas le renommer → toujours le nommer avec le préfixe de l'appli dès sa création.
 - **Règles du dépôt** : modification de code existant → branche + pull request ; le propriétaire dit « fusionne » pour valider.
+- **Fonctions SQL appelées par l'app** : pour ajouter un paramètre, supprimer l'ancienne version et recréer avec des valeurs par défaut (deux versions en parallèle rendraient l'appel ambigu pour l'API) ; l'ancienne app continue ainsi de marcher.
+- **Maquettes (type Design)** : une planche créée dans une autre session ne peut pas être modifiée ici → on en crée une nouvelle version.
+- **Méthode avec le propriétaire** : pour une évolution visible, on itère d'abord sur les maquettes ; **pas de code avant sa validation explicite**.
 
 ## Prochaines étapes possibles
 
 1. Installer le nouvel APK, vérifier prénom et jours sur la carte.
 2. Image au format story (Instagram) à partager depuis l'app.
-3. Notifications de rappel (« Il y a 6 mois, tu as scellé… Ça s'est réalisé ? »).
+3. Notifications de rappel, qui citent la personne (« Yanis attend toujours ta preuve »).
 4. Modération par IA.
 5. Aperçu enrichi du lien dans WhatsApp (titre + image de la carte).
 6. Points ouverts du cadrage : masquer une phrase, modèle économique.

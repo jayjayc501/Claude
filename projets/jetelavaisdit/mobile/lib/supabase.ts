@@ -2,6 +2,7 @@ import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import { AppState, Platform } from 'react-native';
+import type { ColonnesTemoin } from './temoin';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const cleAnon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -34,14 +35,22 @@ AppState.addEventListener('change', (etat) => {
   }
 });
 
-export type Phrase = {
+export type Phrase = ColonnesTemoin & {
   id: string;
   texte: string;
   scellee_le: string;
   jour: string; // AAAA-MM-JJ, heure de Paris
   revelee_le: string | null;
   lien: string | null;
+  afficher_lien: boolean;
+  /** Signature au doigt du témoin (image SVG : tracé dans un cadre 300 × 150), faite sur place. */
+  temoin_signature: string | null;
+  temoin_signee_le: string | null;
 };
+
+/** Colonnes à demander pour remplir une `Phrase`. */
+export const COLONNES_PHRASE =
+  'id, texte, scellee_le, jour, revelee_le, lien, afficher_lien, temoin, temoin_lien, temoin_signature, temoin_signee_le';
 
 export const URL_CARTE = process.env.EXPO_PUBLIC_URL_CARTE ?? '';
 

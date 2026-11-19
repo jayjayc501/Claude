@@ -1,4 +1,4 @@
-// « À qui tu l'as dit » : le témoin d'une prédiction (prénom, initiale, lien).
+// « À qui tu l'as dit » : le témoin d'une certitude (prénom, initiale, lien).
 // Mêmes règles que la base (migration 20261119120000_temoin.sql).
 import { couleurs } from './theme';
 

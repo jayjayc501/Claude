@@ -7,7 +7,8 @@
 App mobile (Android d'abord, iPhone plus tard) : on **scelle une phrase datée** (une prédiction), elle devient non modifiable, et plus tard on l'**envoie** à quelqu'un avec une **carte d'authenticité** : « Regarde, je te l'avais dit. »
 
 - Public : plutôt les jeunes (15-25 ans). Ton fun, complice, un peu taquin.
-- Une prédiction par jour maximum (heure de Paris). Envoi « après coup », quand on veut.
+- Vocabulaire : **certitude** (et plus « prédiction », depuis le 19/11), esprit « t'en es sûr ? ».
+- Une certitude par jour maximum (heure de Paris). Envoi « après coup », quand on veut.
 - Le destinataire voit la carte via un simple lien web, sans installer l'app.
 - Tout est stocké **sur le serveur** (Supabase) ; le téléphone ne fait qu'afficher.
 
@@ -64,7 +65,8 @@ Décision du propriétaire (détail dans `cadrage.md` §4 bis) : au scellement, 
 - Migration `20261119120000_temoin.sql` : colonnes `temoin_prenom`, `temoin_initiale`, `temoin_lien` (pote, best, crush, famille, coloc, collegue, prof, ex), `temoin_precision`, `afficher_lien` ; `jtlad_sceller_phrase(p_texte, p_temoin_prenom, p_temoin_initiale, p_temoin_lien, p_temoin_precision)` ; `jtlad_reveler_phrase(p_id, p_afficher_lien)` ; la carte publique renvoie `temoin`, `temoin_prenom`, `temoin_lien`, `temoin_lien_type`. Anciens appels toujours valides (l'APK actuel continue de marcher). Testée sur PostgreSQL local (normalisation, refus, modération, empreinte, droits).
 - App : écran `components/EtapeTemoin.tsx`, logique dans `lib/temoin.ts` ; Mes phrases triées par personne ; partage personnalisé avec interrupteur « Montrer votre lien » (masqué par défaut pour Crush et Ex).
 - Carte web : « Sarah K., Jules R. te l'avait dit il y a… », « regarde, sarah. ».
-- Retour du propriétaire intégré : pas de texte « 1re lettre » à côté du champ de l'initiale.
+- Retours du propriétaire intégrés : pas de texte « 1re lettre » à côté du champ de l'initiale ; carte reçue sans « 1 prédiction sur N », date entière dans la cartouche rose ; « prédiction » remplacé par « certitude » partout.
+- Pistes en discussion (pas décidées) : pari à deux avec signature du témoin, échéance, score par duo ; limite à 3 par jour ; ronds de couleur neutres dans Mes phrases.
 
 **À faire, dans cet ordre :**
 1. Coller `supabase/migrations/20261119120000_temoin.sql` dans Supabase › SQL Editor (ou dire à Claude de l'appliquer) — **avant** de fusionner, car la nouvelle app lit les nouvelles colonnes.

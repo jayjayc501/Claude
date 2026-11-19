@@ -197,9 +197,9 @@ export default function Ecrire() {
               <Text style={styles.titre} accessibilityRole="header">Tu sens venir quoi ?</Text>
 
               <View style={styles.carte}>
-                <Text style={styles.etiquette} nativeID="etiquette-prediction">TA PRÉDICTION</Text>
+                <Text style={styles.etiquette} nativeID="etiquette-certitude">TA CERTITUDE</Text>
                 <TextInput
-                  accessibilityLabelledBy="etiquette-prediction"
+                  accessibilityLabelledBy="etiquette-certitude"
                   value={texte}
                   onChangeText={setTexte}
                   placeholder={exemple}
@@ -285,13 +285,13 @@ function DejaScelle({ phrase }: { phrase: Phrase }) {
     <>
       <Text style={[styles.titre, { marginTop: 24 }]} accessibilityRole="header">reviens{'\n'}demain.</Text>
       <View style={{ gap: 4 }}>
-        <Text style={styles.petitDoux}>Prochaine prédiction dans</Text>
+        <Text style={styles.petitDoux}>Prochaine certitude dans</Text>
         <Text style={styles.decompte}>{reste.heures} h {String(reste.minutes).padStart(2, '0')} min</Text>
       </View>
       <View style={styles.carte}>
         <View style={styles.ligne}>
           <IconeCadenas couleur={couleurs.texteDoux} taille={16} />
-          <Text style={styles.petitDoux}>Ta prédiction du jour · {dateRelative(phrase.scellee_le, phrase.jour).replace("Aujourd'hui · ", '')}</Text>
+          <Text style={styles.petitDoux}>Ta certitude du jour · {dateRelative(phrase.scellee_le, phrase.jour).replace("Aujourd'hui · ", '')}</Text>
         </View>
         <Text style={styles.phrase}>« {phrase.texte} »</Text>
         {phrase.temoin_prenom ? (
@@ -303,7 +303,7 @@ function DejaScelle({ phrase }: { phrase: Phrase }) {
           </View>
         ) : null}
       </View>
-      <Text style={styles.infoTexte}>Une seule par jour : c'est ce qui rend chaque prédiction précieuse.</Text>
+      <Text style={styles.infoTexte}>Une seule par jour : c'est ce qui rend chaque certitude précieuse.</Text>
     </>
   );
 }
@@ -328,7 +328,7 @@ function Refus({ message, texte, onReformuler }: { message: string; texte: strin
       </View>
       <View style={{ flex: 1, minHeight: 24 }} />
       <Text style={[styles.petitDoux, { textAlign: 'center' }]}>
-        Pas de panique : ta prédiction du jour n'est pas perdue.
+        Pas de panique : ta certitude du jour n'est pas perdue.
       </Text>
       <Bouton titre="Reformuler" onPress={onReformuler} />
     </>

@@ -112,7 +112,7 @@ export default function MesPhrases() {
                           key={p.cle ?? 'tous'}
                           accessibilityRole="button"
                           accessibilityState={{ selected: actif }}
-                          accessibilityLabel={`${p.nom}, ${p.nombre} ${p.nombre > 1 ? 'prédictions' : 'prédiction'}`}
+                          accessibilityLabel={`${p.nom}, ${p.nombre} ${p.nombre > 1 ? 'certitudes' : 'certitude'}`}
                           onPress={() => setPersonne(p.cle)}
                           style={[styles.personne, actif && styles.filtreActif]}
                         >
@@ -139,9 +139,9 @@ export default function MesPhrases() {
                 <Logo taille={132} couleur={couleurs.bordureForte} couleurPoint={couleurs.vert} pointilles />
               </View>
               <Text style={styles.videTitre}>Rien de scellé{'\n'}pour l'instant.</Text>
-              <Text style={styles.videTexte}>Écris ta première prédiction. Dans quelques mois, tu te remercieras.</Text>
+              <Text style={styles.videTexte}>Écris ta première certitude. Dans quelques mois, tu te remercieras.</Text>
               <View style={{ alignSelf: 'stretch', marginTop: 12 }}>
-                <Bouton titre="Ma première prédiction" onPress={() => router.navigate('/')} />
+                <Bouton titre="Ma première certitude" onPress={() => router.navigate('/')} />
               </View>
             </View>
           ) : (

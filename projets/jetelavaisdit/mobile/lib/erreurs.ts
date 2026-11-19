@@ -10,11 +10,11 @@ export type ErreurLisible = {
 export function lireErreur(brute?: string | null): ErreurLisible {
   const code = brute ?? '';
   if (code.includes('deja_scelle_aujourdhui')) {
-    return { message: 'Tu as déjà scellé ta prédiction du jour.', moderation: false, dejaScelle: true };
+    return { message: 'Tu as déjà scellé ta certitude du jour.', moderation: false, dejaScelle: true };
   }
   if (code.includes('moderation:insulte')) {
     return {
-      message: 'Ta phrase contient une insulte. Ici, on prédit, on ne clashe pas.',
+      message: 'Ta phrase contient une insulte. Ici, on a des certitudes, pas des clashs.',
       moderation: true,
       dejaScelle: false,
     };

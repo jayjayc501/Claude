@@ -24,7 +24,7 @@ export function joursDepuis(jour: string): number {
   return joursEntre(jour, aujourdhuiParis());
 }
 
-/** Temps restant avant minuit à Paris (prochaine prédiction possible). */
+/** Temps restant avant minuit à Paris (prochaine certitude possible). */
 export function avantMinuitParis(maintenant = new Date()): { heures: number; minutes: number } {
   const v = morceaux(maintenant, { hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
   const ecoule = Number(v('hour')) * 3600 + Number(v('minute')) * 60 + Number(v('second'));

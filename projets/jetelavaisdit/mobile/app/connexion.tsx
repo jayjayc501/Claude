@@ -40,7 +40,7 @@ export default function Connexion() {
         <Text style={styles.titre} accessibilityRole="header">
           je te l'avais <Text style={{ color: couleurs.vert }}>dit.</Text>
         </Text>
-        <Text style={styles.sousTitre}>Scelle tes prédictions aujourd'hui.{'\n'}Prouve que t'avais raison demain.</Text>
+        <Text style={styles.sousTitre}>Scelle tes certitudes aujourd'hui.{'\n'}Prouve que t'avais raison demain.</Text>
 
         <View style={{ flex: 1, minHeight: 32 }} />
 

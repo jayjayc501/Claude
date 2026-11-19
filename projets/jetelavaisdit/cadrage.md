@@ -107,6 +107,7 @@ Même avec 1 prédiction par jour, on peut écrire « Marc va démissionner » l
 - [x] **Logo :** la « bulle scellée », une bulle de parole fermée par un cadenas, avec un « ! ». Élément signature : la **bulle-compteur** (le logo avec le nombre de jours dedans, en vert, légèrement penché), utilisée sur la carte, la story et le partage. *Décidé le 10/11/2026.*
 - [x] **Règles de couleur :** vert = agir (sceller, envoyer, compteur, logo) ; rose = phrase révélée uniquement ; gris = phrase en attente. *Décidé le 10/11/2026.*
 - [x] **Nom :** « Je te l'avais dit » (identifiant technique : `jetelavaisdit`). *Décidé le 10/11/2026.*
+- [x] **Vocabulaire :** on ne parle plus de « prédiction » (jugé à côté du projet) mais de **certitude**, dans l'esprit « t'en es sûr ? » : « Ta certitude du jour », « Scelle tes certitudes ». Les textes de l'app, de la carte et des maquettes sont passés à « certitude ». *Décidé le 19/11/2026.*
 
 ## 9. Prochaines étapes
 

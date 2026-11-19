@@ -72,7 +72,9 @@ Modèle **validé par le propriétaire sur les maquettes** (https://claude.ai/ar
 
 **Fait le 19/11 vers 16 h 45 :** pull request n° 17 fusionnée (commit `77315db`) ; version web mise en ligne (run 44557610202, succès) ; fabrication de l'APK lancée (run 44557689470 du workflow `jetelavaisdit-apk`, file Expo souvent ~1 h ; le lien apparaît dans les journaux du run : `APK : https://…`).
 
-**À faire :** installer le nouvel APK par-dessus l'ancien, puis tester sur le téléphone : sceller avec / sans « à qui », faire signer, Mes phrases, partager, ouvrir la carte.
+**APK prêt le 19/11 vers 17 h 30** (≈ 50 min de file Expo) : https://expo.dev/artifacts/eas/1vVKjRddyozyCF4g6wxOhccnZiSoTFzJrVj-O6PX4X0.apk — lien valable environ deux semaines.
+
+**À faire :** installer ce nouvel APK par-dessus l'ancien, puis tester sur le téléphone : sceller avec / sans « à qui », faire signer, Mes phrases, partager, ouvrir la carte.
 
 ## Leçons apprises (pièges déjà rencontrés)
 

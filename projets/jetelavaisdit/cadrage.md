@@ -1,6 +1,6 @@
 # « Je te l'avais dit » — Document de cadrage
 
-*Version 3 — 19 novembre 2026 (ajouts : à qui on l'a dit, signature en option, plus de limite par jour, « certitude »)*
+*Version 3 — 19 novembre 2026 (ajouts validés : à qui on l'a dit, signature sur place, plus de limite par jour, « certitude »)*
 
 ## 1. Le concept en une phrase
 
@@ -17,9 +17,8 @@ Une app mobile (iPhone et Android) où l'on **scelle une phrase datée**, une pr
 ### 3.1 Sceller une phrase
 1. L'utilisateur se connecte.
 2. Il écrit sa phrase. Exemple : *« Je te parie que Marc va démissionner avant l'été. »*
-3. Il appuie sur **« Sceller »**.
-4. La modération automatique vérifie la phrase (voir §5).
-5. **Étape 2, facultative : « Tu l'as dit à qui ? »** (voir §4 bis).
+4. Il appuie sur **« Continuer »** : la modération automatique vérifie la phrase tout de suite (voir §5).
+5. **Étape 2, facultative : « Tu l'as dit à qui ? »** (voir §4 bis), puis **« Sceller »**.
 6. La phrase est enregistrée avec la date et l'heure du scellement. **Elle n'est plus modifiable ni supprimable.** À confirmer : l'utilisateur peut-il au moins la masquer ?
 7. La phrase reste **privée** jusqu'à ce que l'utilisateur décide de l'envoyer.
 
@@ -46,17 +45,17 @@ Un visuel soigné et partageable, entre le diplôme et le ticket :
 
 La crédibilité repose sur une règle simple : **l'app empêche de modifier ou d'antidater une phrase.**
 
-## 4 bis. À qui on l'a dit (le témoin) — *décidé le 19/11/2026*
+## 4 bis. À qui on l'a dit, et sa signature — *décidé et validé sur maquettes le 19/11/2026*
 
-Le « te » de « Je te l'avais dit » : au scellement, on peut préciser à qui on a dit la prédiction.
+Le « te » de « Je te l'avais dit » : on peut préciser à qui on a dit la certitude, et la faire signer sur place.
 
-- **Champs, tous facultatifs** : le prénom (20 caractères, lettres, tirets, apostrophes) + la 1re lettre du nom → « Léa M. » ; **votre lien** en **case à cocher** (Pote, Best, Crush, Famille, Coloc, Collègue, Prof, Ex) **et / ou en texte libre** (« petite sœur », 30 caractères). Pas de lien sans prénom.
-- **Scellé avec la phrase** : non modifiable, inclus dans l'empreinte. La modération s'applique aussi au prénom et au texte libre.
-- **Une interface qui pousse à remplir** : écran dédié après la phrase, aperçu de la carte en direct (« regarde, léa. »), jauge à 3 flammes (Tiède → Ça chauffe → Brûlant), personnes déjà citées en raccourci (un geste remplit tout).
-- **Sur la carte** : « Sarah K., Jules R. te l'avait dit il y a… », pastille « Dit à Sarah K. · binôme de théâtre », « regarde, sarah. ». Le prénom s'affiche toujours ; **le lien est affichable ou non**, au choix à l'envoi (masqué par défaut pour Crush et Ex).
-- **Mes phrases** : tri par personne, bouton « Je te l'avais dit, Sarah ! », « Envoyée à Sarah K. ».
-- **Signature en option** (*décidée le 19/11/2026*) : sur « C'est scellé », « Fais signer Léa » envoie un lien ; Léa ouvre une page web (sans installer l'app), voit la phrase et signe du doigt (« Je signe » / « Il ne m'a rien dit »). La carte affiche ensuite « Signée par Léa M. » avec sa signature : c'est la preuve la plus forte. Maquettes faites (écrans 06, 07, 11) ; code à faire.
-- **Plus tard** : rappels qui citent la personne (« Yanis attend toujours ta preuve »), plusieurs personnes ou un groupe pour une même prédiction.
+- **« Tu l'as dit à qui ? »** (étape 2, facultative) : **une case à cocher** pour le lien (Pote, Best, Crush, Famille, Coloc, Collègue, Prof, Ex) **et un texte libre** pour la personne (« Sarah », « ma petite sœur », 30 caractères). L'un, l'autre ou les deux. Aperçu de la carte en direct (« Dit à Sarah · pote », « regarde, sarah. »), personnes déjà citées en raccourci (« Déjà dit à »). Pas de jauge.
+- **Scellé avec la phrase** : non modifiable, inclus dans l'empreinte. La modération s'applique aussi au texte libre.
+- **Signature sur place** (facultative), sur l'écran « C'est scellé ! » : « Tu veux faire signer Sarah ? », on passe le téléphone, la personne signe du doigt dans une zone noire, puis « Valider la signature ». La signature est **une image** (tracé SVG), ajoutée **une seule fois, dans les 15 minutes** après le scellement, puis plus modifiable ; une seconde empreinte la protège.
+- **Sur la carte** : « Sarah, Jules R. te l'avait dit il y a… », « Dit à Sarah · pote », « Signée par Sarah, sur place », « regarde, sarah. ». Le texte libre s'affiche toujours ; **le lien coché est affichable ou non**, au choix à l'envoi (masqué par défaut pour Crush et Ex).
+- **Mes phrases** : tri par personne, bouton « Je te l'avais dit, Sarah ! », pastille « signée », « Envoyée à Sarah ».
+- **Écriture** : on ne connaît pas le genre de la personne → aucun « il / elle » dans les textes.
+- **Plus tard** : rappels qui citent la personne (« Yanis attend toujours ta preuve »).
 
 ## 5. Règles du jeu
 

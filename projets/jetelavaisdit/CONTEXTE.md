@@ -22,7 +22,7 @@ Documents : [`cadrage.md`](cadrage.md) (décisions détaillées), [`README.md`](
 | App mobile (Expo / React Native) | `mobile/` |
 | Base de données (migrations SQL) | `supabase/migrations/` |
 | Page web de la carte reçue | `web/carte/` |
-| Maquettes (copie) | `maquettes/` · version cliquable v2 (19/11, « à qui tu l'as dit ») : https://claude.ai/artifact/KcMXxoMWFZcQ2vrLkT343o (v1 : https://claude.ai/artifact/GBrtiSGWzndyC5aD4Husvq) |
+| Maquettes (copie) | `maquettes/` · version cliquable v2 **validée** (19/11, « à qui tu l'as dit » + signature) : https://claude.ai/artifact/KcMXxoMWFZcQ2vrLkT343o (v1 : https://claude.ai/artifact/GBrtiSGWzndyC5aD4Husvq) |
 | Version web en ligne | https://jayjayc501.github.io/Claude/app/ (carte : `/Claude/carte/?c=…`) |
 | Base Supabase | projet `claude_projets` (ex-`jelavaisdit`) / `joqzrjjgrntbyutytpnr` (https://joqzrjjgrntbyutytpnr.supabase.co), **mutualisé** avec MyFlix et les projets à venir : chaque appli préfixe ses objets. « Je te l'avais dit » = `jtlad_…` (tables `jtlad_profils`, `jtlad_phrases`, `jtlad_moderation_mots`, fonctions `jtlad_sceller_phrase`, `jtlad_reveler_phrase`, `jtlad_carte_publique`…). Ne jamais toucher aux autres préfixes (`myflix_…`). Les comptes (`auth.users`) sont communs à toutes les applis |
 | Compte Expo | `jayjayc501`, projet `jetelavaisdit` (fabrication de l'APK) |
@@ -57,23 +57,21 @@ Valeurs publiques (URL Supabase, clé `sb_publishable_…`) : déjà dans `mobil
 
 **Données en base (17/11)** : 2 comptes (1 avec prénom / nom repris de Google), 1 phrase scellée et envoyée.
 
-## 19 novembre 2026 : « à qui tu l'as dit » (le témoin)
+## 19 novembre 2026 : « à qui tu l'as dit » et signature sur place
 
-Décision du propriétaire (détail dans `cadrage.md` §4 bis) : au scellement, étape 2 facultative « Tu l'as dit à qui ? » = prénom + 1re lettre du nom, **lien en case à cocher et / ou en texte libre**, interface qui pousse à remplir (aperçu en direct, jauge à 3 flammes, personnes récentes). Le témoin est scellé avec la phrase.
+Modèle **validé par le propriétaire sur les maquettes** (https://claude.ai/artifact/KcMXxoMWFZcQ2vrLkT343o), détail dans `cadrage.md` §4 bis :
+- 03 Écrire → « Continuer » vérifie la phrase tout de suite (04 Refus si besoin) → 05 « Tu l'as dit à qui ? » : une case pour le lien (Pote, Best, Crush, Famille, Coloc, Collègue, Prof, Ex) et **un seul texte libre** (« Sarah », « ma petite sœur »), tous deux facultatifs, aperçu de la carte en direct, « Déjà dit à ». Pas de champs prénom / initiale, pas de jauge.
+- 06 « C'est scellé ! » : en option (« FACULTATIF · Tu veux faire signer Sarah ? »), la personne signe du doigt dans une **zone noire** ; la signature est stockée comme **image (tracé SVG)**, une seule fois, dans les 15 minutes, avec sa propre empreinte.
+- Vocabulaire : « certitude » (plus « prédiction ») ; écran vide : « Tu en es sûr ? ». **Aucun « il / elle »** dans les textes (on ne connaît pas le genre de la personne).
+- Plus de limite d'une par jour (garde-fou invisible : 20 par jour), plus d'écran « reviens demain ».
+- Carte reçue : « Sarah, Jules R. te l'avait dit il y a… », « Dit à Sarah · pote », « Signée par Sarah, sur place », « regarde, sarah. » ; plus de « 1 certitude sur N ».
 
-**Fait (branche `jetelavaisdit/temoin`, pull request à fusionner) :**
-- Migration `20261119120000_temoin.sql` : colonnes `temoin_prenom`, `temoin_initiale`, `temoin_lien` (pote, best, crush, famille, coloc, collegue, prof, ex), `temoin_precision`, `afficher_lien` ; `jtlad_sceller_phrase(p_texte, p_temoin_prenom, p_temoin_initiale, p_temoin_lien, p_temoin_precision)` ; `jtlad_reveler_phrase(p_id, p_afficher_lien)` ; la carte publique renvoie `temoin`, `temoin_prenom`, `temoin_lien`, `temoin_lien_type`. Anciens appels toujours valides (l'APK actuel continue de marcher). Testée sur PostgreSQL local (normalisation, refus, modération, empreinte, droits).
-- App : écran `components/EtapeTemoin.tsx`, logique dans `lib/temoin.ts` ; Mes phrases triées par personne ; partage personnalisé avec interrupteur « Montrer votre lien » (masqué par défaut pour Crush et Ex).
-- Carte web : « Sarah K., Jules R. te l'avait dit il y a… », « regarde, sarah. ».
-- Retours du propriétaire intégrés : pas de texte « 1re lettre » à côté du champ de l'initiale ; carte reçue sans « 1 prédiction sur N », date entière dans la cartouche rose ; « prédiction » remplacé par « certitude » partout.
-- Plus de limite d'une par jour (dans la même migration : contrainte `jtlad_une_phrase_par_jour` supprimée, garde-fou de 20 par jour qui renvoie toujours `deja_scelle_aujourdhui`) ; écran « reviens demain » et pastille « 1 dispo aujourd'hui » supprimés ; étiquettes « Son prénom » / « Nom » retirées de l'écran témoin.
-- **Décidé, maquetté, pas encore codé** : la signature du témoin en option (écran 06 « Fais signer Léa », page web 07 de signature au doigt, carte 11 « Signée par… »).
-- Pistes en discussion (pas décidées) : pari à deux avec échéance et score par duo ; ronds de couleur neutres dans Mes phrases.
+**Code (branche `jetelavaisdit/temoin`, pull request n° 17)** : migration `20261119120000_temoin.sql` (colonnes `temoin`, `temoin_lien`, `temoin_signature`, `temoin_signee_le`, `empreinte_signature`, `afficher_lien` ; fonctions `jtlad_verifier_phrase`, `jtlad_sceller_phrase(p_texte, p_temoin, p_temoin_lien)`, `jtlad_signer_phrase(p_id, p_signature)`, `jtlad_reveler_phrase(p_id, p_afficher_lien)`, carte publique enrichie ; anciens appels toujours valides), testée sur PostgreSQL local ; app (`components/EtapeTemoin.tsx`, `components/Signature.tsx`, `lib/temoin.ts`, écrans Écrire, C'est scellé, Mes phrases, Partager) ; carte web.
 
 **À faire, dans cet ordre :**
-1. Coller `supabase/migrations/20261119120000_temoin.sql` dans Supabase › SQL Editor (ou dire à Claude de l'appliquer) — **avant** de fusionner, car la nouvelle app lit les nouvelles colonnes.
-2. Fusionner la pull request (mise en ligne web automatique).
-3. Fabriquer un nouvel APK (workflow `jetelavaisdit-apk.yml`) et l'installer.
+1. Appliquer `supabase/migrations/20261119120000_temoin.sql` (SQL Editor, ou demander à Claude) — **avant** de fusionner : la nouvelle app lit les nouvelles colonnes.
+2. Fusionner la pull request n° 17 (mise en ligne web automatique).
+3. Fabriquer un nouvel APK (workflow `jetelavaisdit-apk.yml`), l'installer, tester : sceller avec / sans « à qui », signer, partager, carte.
 
 ## Leçons apprises (pièges déjà rencontrés)
 
@@ -87,6 +85,7 @@ Décision du propriétaire (détail dans `cadrage.md` §4 bis) : au scellement, 
 - **Règles du dépôt** : modification de code existant → branche + pull request ; le propriétaire dit « fusionne » pour valider.
 - **Fonctions SQL appelées par l'app** : pour ajouter un paramètre, supprimer l'ancienne version et recréer avec des valeurs par défaut (deux versions en parallèle rendraient l'appel ambigu pour l'API) ; l'ancienne app continue ainsi de marcher.
 - **Maquettes (type Design)** : une planche créée dans une autre session ne peut pas être modifiée ici → on en crée une nouvelle version.
+- **Méthode avec le propriétaire** : pour une évolution visible, on itère d'abord sur les maquettes ; **pas de code avant sa validation explicite**.
 
 ## Prochaines étapes possibles
 

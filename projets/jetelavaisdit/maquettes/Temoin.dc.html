@@ -69,11 +69,11 @@ input::placeholder{color:#6E6A80}
   <div style="background: #1A1922; border: 1px solid #2C2A38; border-radius: 26px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
     <div style="display: flex; gap: 10px">
       <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0">
-        <label for="prenom" style="font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #A9A6B8">SON PRÉNOM</label>
+        <label for="prenom" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Son prénom</label>
         <input id="prenom" type="text" autocomplete="off" value="{{ prenom }}" onChange="{{ onPrenom }}" placeholder="Léa" style="height: 46px; box-sizing: border-box; border-radius: 14px; border: 1px solid #4A475A; background: #0D0C12; color: #FFFFFF; padding: 0 14px; font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 700; outline-color: #C8FF3D">
       </div>
       <div style="width: 56px; display: flex; flex-direction: column; gap: 6px">
-        <label for="initiale" style="font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #A9A6B8">NOM</label>
+        <label for="initiale" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Initiale du nom</label>
         <input id="initiale" type="text" autocomplete="off" aria-describedby="aide-initiale" value="{{ initiale }}" onChange="{{ onInitiale }}" placeholder="M" style="width: 56px; height: 46px; box-sizing: border-box; border-radius: 14px; border: 1px solid #4A475A; background: #0D0C12; color: #FFFFFF; padding: 0; text-align: center; font-family: 'Unbounded', sans-serif; font-size: 17px; font-weight: 800; outline-color: #C8FF3D">
         <span id="aide-initiale" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Première lettre seulement</span>
       </div>

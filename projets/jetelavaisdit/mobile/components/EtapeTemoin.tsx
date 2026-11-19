@@ -126,10 +126,9 @@ export function EtapeTemoin({ texte, temoin, onChange, personnes, erreur, envoi,
       {/* Les champs */}
       <View style={styles.champs}>
         <View style={styles.ligne}>
-          <View style={{ flex: 1, gap: 6 }}>
-            <Text style={styles.etiquette} nativeID="etiquette-prenom">SON PRÉNOM</Text>
+          <View style={{ flex: 1 }}>
             <TextInput
-              accessibilityLabelledBy="etiquette-prenom"
+              accessibilityLabel="Son prénom"
               value={temoin.prenom}
               onChangeText={(v) => maj({ prenom: v.slice(0, PRENOM_MAX) })}
               placeholder="Léa"
@@ -143,11 +142,10 @@ export function EtapeTemoin({ texte, temoin, onChange, personnes, erreur, envoi,
               style={[styles.saisie, prenomIncorrect && styles.saisieErreur]}
             />
           </View>
-          <View style={{ gap: 6 }}>
-            <Text style={styles.etiquette} nativeID="etiquette-initiale">NOM</Text>
+          <View>
             <TextInput
               ref={champInitiale}
-              accessibilityLabelledBy="etiquette-initiale"
+              accessibilityLabel="Initiale de son nom"
               accessibilityHint="Première lettre seulement"
               value={temoin.initiale}
               onChangeText={(v) => maj({ initiale: nettoyerInitiale(v) })}

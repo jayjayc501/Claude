@@ -145,26 +145,23 @@ export function EtapeTemoin({ texte, temoin, onChange, personnes, erreur, envoi,
           </View>
           <View style={{ gap: 6 }}>
             <Text style={styles.etiquette} nativeID="etiquette-initiale">NOM</Text>
-            <View style={styles.ligneInitiale}>
-              <TextInput
-                ref={champInitiale}
-                accessibilityLabelledBy="etiquette-initiale"
-                accessibilityHint="Première lettre de son nom"
-                value={temoin.initiale}
-                onChangeText={(v) => maj({ initiale: nettoyerInitiale(v) })}
-                placeholder="M"
-                placeholderTextColor="#6E6A80"
-                autoCapitalize="characters"
-                autoCorrect={false}
-                autoComplete="off"
-                maxLength={2}
-                selectTextOnFocus
-                returnKeyType="next"
-                onSubmitEditing={() => champPrecision.current?.focus()}
-                style={[styles.saisie, styles.saisieInitiale]}
-              />
-              <Text style={styles.aide}>1re{'\n'}lettre</Text>
-            </View>
+            <TextInput
+              ref={champInitiale}
+              accessibilityLabelledBy="etiquette-initiale"
+              accessibilityHint="Première lettre seulement"
+              value={temoin.initiale}
+              onChangeText={(v) => maj({ initiale: nettoyerInitiale(v) })}
+              placeholder="M"
+              placeholderTextColor="#6E6A80"
+              autoCapitalize="characters"
+              autoCorrect={false}
+              autoComplete="off"
+              maxLength={2}
+              selectTextOnFocus
+              returnKeyType="next"
+              onSubmitEditing={() => champPrecision.current?.focus()}
+              style={[styles.saisie, styles.saisieInitiale]}
+            />
           </View>
         </View>
         {prenomIncorrect ? (
@@ -282,13 +279,12 @@ const styles = StyleSheet.create({
     borderRadius: 26, padding: 16, gap: 14,
   },
   ligne: { flexDirection: 'row', gap: 10 },
-  ligneInitiale: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   saisie: {
     height: 46, borderRadius: 14, borderWidth: 1, borderColor: couleurs.bordureForte, backgroundColor: couleurs.fond,
     paddingHorizontal: 14, fontFamily: polices.gras, fontSize: 17, color: couleurs.texte,
   },
   saisieErreur: { borderColor: couleurs.rose },
-  saisieInitiale: { width: 46, paddingHorizontal: 0, textAlign: 'center', fontFamily: polices.titre },
+  saisieInitiale: { width: 56, paddingHorizontal: 0, textAlign: 'center', fontFamily: polices.titre },
   aide: { fontFamily: polices.normal, fontSize: 12, lineHeight: 15, color: couleurs.texteDoux },
   liens: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   puceLien: {

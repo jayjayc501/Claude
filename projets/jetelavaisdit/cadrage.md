@@ -1,6 +1,6 @@
 # « Je te l'avais dit » — Document de cadrage
 
-*Version 2 — 10 novembre 2026*
+*Version 3 — 19 novembre 2026 (ajout : à qui on l'a dit)*
 
 ## 1. Le concept en une phrase
 
@@ -19,8 +19,9 @@ Une app mobile (iPhone et Android) où l'on **scelle une phrase datée**, une pr
 2. Il écrit sa phrase. Exemple : *« Je te parie que Marc va démissionner avant l'été. »*
 3. Il appuie sur **« Sceller »**.
 4. La modération automatique vérifie la phrase (voir §5).
-5. La phrase est enregistrée avec la date et l'heure du scellement. **Elle n'est plus modifiable ni supprimable.** À confirmer : l'utilisateur peut-il au moins la masquer ?
-6. La phrase reste **privée** jusqu'à ce que l'utilisateur décide de l'envoyer.
+5. **Étape 2, facultative : « Tu l'as dit à qui ? »** (voir §4 bis).
+6. La phrase est enregistrée avec la date et l'heure du scellement. **Elle n'est plus modifiable ni supprimable.** À confirmer : l'utilisateur peut-il au moins la masquer ?
+7. La phrase reste **privée** jusqu'à ce que l'utilisateur décide de l'envoyer.
 
 ### 3.2 Envoyer « Je te l'avais dit ! »
 1. Plus tard, quand la prédiction se réalise, l'utilisateur ouvre sa liste de phrases scellées.
@@ -44,6 +45,17 @@ Un visuel soigné et partageable, entre le diplôme et le ticket :
 - l'invitation à installer l'app.
 
 La crédibilité repose sur une règle simple : **l'app empêche de modifier ou d'antidater une phrase.**
+
+## 4 bis. À qui on l'a dit (le témoin) — *décidé le 19/11/2026*
+
+Le « te » de « Je te l'avais dit » : au scellement, on peut préciser à qui on a dit la prédiction.
+
+- **Champs, tous facultatifs** : le prénom (20 caractères, lettres, tirets, apostrophes) + la 1re lettre du nom → « Léa M. » ; **votre lien** en **case à cocher** (Pote, Best, Crush, Famille, Coloc, Collègue, Prof, Ex) **et / ou en texte libre** (« petite sœur », 30 caractères). Pas de lien sans prénom.
+- **Scellé avec la phrase** : non modifiable, inclus dans l'empreinte. La modération s'applique aussi au prénom et au texte libre.
+- **Une interface qui pousse à remplir** : écran dédié après la phrase, aperçu de la carte en direct (« regarde, léa. »), jauge à 3 flammes (Tiède → Ça chauffe → Brûlant), personnes déjà citées en raccourci (un geste remplit tout).
+- **Sur la carte** : « Sarah K., Jules R. te l'avait dit il y a… », pastille « Dit à Sarah K. · binôme de théâtre », « regarde, sarah. ». Le prénom s'affiche toujours ; **le lien est affichable ou non**, au choix à l'envoi (masqué par défaut pour Crush et Ex).
+- **Mes phrases** : tri par personne, bouton « Je te l'avais dit, Sarah ! », « Envoyée à Sarah K. ».
+- **Plus tard** : rappels qui citent la personne (« Yanis attend toujours ta preuve »), plusieurs personnes ou un groupe pour une même prédiction.
 
 ## 5. Règles du jeu
 

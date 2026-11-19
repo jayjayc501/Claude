@@ -45,7 +45,7 @@ export default function Ecrire() {
   const [envoi, setEnvoi] = useState(false);
   const [refus, setRefus] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
-  // Étape 2 : à qui on l'a dit (facultatif).
+  // Étape 2 : à qui on l'a dit (facultatif). La signature se fait après, sur « C'est scellé ».
   const [etape, setEtape] = useState<'phrase' | 'temoin'>('phrase');
   const [temoin, setTemoin] = useState<Temoin>(TEMOIN_VIDE);
   const [personnes, setPersonnes] = useState<Personne[]>([]);
@@ -57,8 +57,8 @@ export default function Ecrire() {
       // Les personnes déjà citées, pour les remplir d'un seul geste.
       supabase
         .from('jtlad_phrases')
-        .select('temoin_prenom, temoin_initiale, temoin_lien, temoin_precision')
-        .not('temoin_prenom', 'is', null)
+        .select('temoin, temoin_lien')
+        .not('temoin', 'is', null)
         .order('scellee_le', { ascending: false })
         .limit(200),
     ]);
@@ -73,9 +73,9 @@ export default function Ecrire() {
     }, [charger]),
   );
 
-  // Sur Android, le bouton « retour » de l'étape 2 ramène à la phrase.
+  // Sur Android, le bouton « retour » ramène à l'étape précédente.
   useEffect(() => {
-    if (etape !== 'temoin') return;
+    if (etape === 'phrase') return;
     const abonnement = BackHandler.addEventListener('hardwareBackPress', () => {
       setEtape('phrase');
       return true;
@@ -83,10 +83,24 @@ export default function Ecrire() {
     return () => abonnement.remove();
   }, [etape]);
 
-  function continuer() {
+  // « Continuer » : la phrase est vérifiée tout de suite (refus avant l'étape « à qui »).
+  async function continuer() {
     vibrerAppui();
     setErreur(null);
     setErreurTemoin(null);
+    setEnvoi(true);
+    const { error } = await supabase.rpc('jtlad_verifier_phrase', { p_texte: texte });
+    setEnvoi(false);
+    if (error) {
+      const e = lireErreur(error.message);
+      if (e.moderation) {
+        vibrerErreur();
+        setRefus(e.message);
+      } else {
+        setErreur(e.message);
+      }
+      return;
+    }
     setEtape('temoin');
   }
 
@@ -95,18 +109,12 @@ export default function Ecrire() {
     setErreurTemoin(null);
     setEnvoi(true);
     vibrerAppui();
-    const prenomTemoin = temoin.prenom.trim();
+    const nomTemoin = temoin.nom.trim();
     const { data, error } = await supabase.rpc('jtlad_sceller_phrase', {
       p_texte: texte,
-      // Sans prénom, pas de témoin du tout.
-      ...(prenomTemoin
-        ? {
-            p_temoin_prenom: prenomTemoin,
-            p_temoin_initiale: temoin.initiale || null,
-            p_temoin_lien: temoin.lien,
-            p_temoin_precision: temoin.precision.trim() || null,
-          }
-        : {}),
+      // Témoin facultatif : seulement ce qui a été rempli.
+      ...(nomTemoin ? { p_temoin: nomTemoin } : {}),
+      ...(temoin.lien ? { p_temoin_lien: temoin.lien } : {}),
     });
     setEnvoi(false);
 
@@ -119,7 +127,7 @@ export default function Ecrire() {
         vibrerErreur();
         setEtape('phrase');
         setRefus(e.message);
-      } else if (etape === 'temoin') {
+      } else if (etape !== 'phrase') {
         setErreurTemoin(e.message);
       } else {
         setErreur(e.message);
@@ -138,10 +146,10 @@ export default function Ecrire() {
       params: {
         texte: phrase.texte,
         scellee_le: phrase.scellee_le,
-        temoin_prenom: phrase.temoin_prenom ?? '',
-        temoin_initiale: phrase.temoin_initiale ?? '',
+        temoin: phrase.temoin ?? '',
         temoin_lien: phrase.temoin_lien ?? '',
-        temoin_precision: phrase.temoin_precision ?? '',
+        // Pour la signature sur place, juste après.
+        id: phrase.id,
       },
     });
   }
@@ -227,6 +235,7 @@ export default function Ecrire() {
               <Bouton
                 titre="Continuer"
                 onPress={continuer}
+                chargement={envoi}
                 desactive={texte.trim().length < 3}
                 icone={<IconeSuivant couleur={texte.trim().length < 3 ? couleurs.texteDoux : couleurs.fond} />}
                 iconeApres

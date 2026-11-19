@@ -1,14 +1,10 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import {
-  LIENS, PRECISION_MAX, PRENOM_MAX, ditA, messagePiquant, nettoyerInitiale, niveauPiquant, nomTemoin, prenomValide,
-  texteLien, type Personne, type Temoin, TEMOIN_VIDE,
-} from '../lib/temoin';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { LIENS, TEMOIN_MAX, TEMOIN_VIDE, ditA, regarde, type Personne, type Temoin } from '../lib/temoin';
 import { couleurs, polices } from '../lib/theme';
 import { vibrerLeger } from '../lib/vibration';
 import { Avatar } from './Avatar';
 import { Bouton } from './Bouton';
-import { IconeCadenas, IconeCrayon, IconeFlamme, IconePersonne, IconeRetour } from './Icones';
+import { IconeCadenas, IconeCrayon, IconePersonne, IconeRetour } from './Icones';
 
 type Props = {
   texte: string;
@@ -22,35 +18,14 @@ type Props = {
 };
 
 /**
- * Étape 2 du scellement : « Tu l'as dit à qui ? ».
- * Tout est facultatif, mais l'aperçu de la carte et la jauge réagissent à chaque lettre
- * pour donner envie de remplir.
+ * Étape 2 du scellement : « Tu l'as dit à qui ? » (maquette 05).
+ * Tout est facultatif : une case pour le lien, un texte libre pour la personne.
+ * L'aperçu de la carte se met à jour à chaque lettre.
  */
 export function EtapeTemoin({ texte, temoin, onChange, personnes, erreur, envoi, onRetour, onSceller }: Props) {
-  const champInitiale = useRef<TextInput>(null);
-  const champPrecision = useRef<TextInput>(null);
-
-  const prenom = temoin.prenom.trim();
-  const nom = nomTemoin(prenom, temoin.initiale);
-  const lien = texteLien(temoin.lien, temoin.precision);
-  const niveau = niveauPiquant(temoin);
-  const message = messagePiquant(temoin);
-  const prenomIncorrect = prenom.length > 0 && !prenomValide(prenom);
-  const rempli = !!(temoin.prenom || temoin.initiale || temoin.lien || temoin.precision);
-
-  // Les flammes « sautent » et le téléphone vibre quand la jauge monte.
-  const rebond = useRef(new Animated.Value(1)).current;
-  const niveauPrecedent = useRef(niveau);
-  useEffect(() => {
-    if (niveau > niveauPrecedent.current) {
-      vibrerLeger();
-      rebond.setValue(1.35);
-      Animated.spring(rebond, { toValue: 1, friction: 4, tension: 140, useNativeDriver: true }).start();
-    }
-    niveauPrecedent.current = niveau;
-  }, [niveau, rebond]);
-
-  const maj = (champs: Partial<Temoin>) => onChange({ ...temoin, ...champs });
+  const nom = temoin.nom.trim();
+  const pastille = ditA(nom, temoin.lien);
+  const rempli = !!(temoin.nom || temoin.lien);
 
   return (
     <>
@@ -71,12 +46,12 @@ export function EtapeTemoin({ texte, temoin, onChange, personnes, erreur, envoi,
       {/* Aperçu de la carte, en direct */}
       <View style={{ gap: 8 }}>
         <Text style={styles.etiquette}>APERÇU DE TA CARTE</Text>
-        <View style={styles.carteRose} accessibilityLabel={`Aperçu : « ${texte} ». ${nom ? ditA(nom, lien) : 'Dit à personne.'}`}>
+        <View style={styles.carteRose} accessibilityLabel={`Aperçu : « ${texte} ». ${pastille || 'Dit à personne.'}`}>
           <Text style={styles.phraseRose} numberOfLines={4}>« {texte} »</Text>
-          {nom ? (
+          {pastille ? (
             <View style={styles.pastilleDit}>
               <IconePersonne couleur={couleurs.vert} />
-              <Text style={styles.pastilleDitTexte} numberOfLines={1}>{ditA(nom, lien)}</Text>
+              <Text style={styles.pastilleDitTexte} numberOfLines={1}>{pastille}</Text>
             </View>
           ) : (
             <View style={styles.pastilleVide}>
@@ -85,19 +60,7 @@ export function EtapeTemoin({ texte, temoin, onChange, personnes, erreur, envoi,
           )}
         </View>
         <Text style={styles.slogan}>
-          {prenom ? `regarde, ${prenom.toLowerCase()}.` : 'regarde.'} je te l'avais <Text style={{ color: couleurs.vert }}>dit.</Text>
-        </Text>
-      </View>
-
-      {/* Jauge « effet je te l'avais dit » */}
-      <View style={styles.jauge} accessible accessibilityLabel={`Effet « je te l'avais dit » : ${niveau} sur 3. ${message.titre} ${message.texte}`}>
-        <Animated.View style={[styles.flammes, { transform: [{ scale: rebond }] }]}>
-          {[1, 2, 3].map((n) => (
-            <IconeFlamme key={n} couleur={n <= niveau ? couleurs.vert : couleurs.bordureForte} allumee={n <= niveau} />
-          ))}
-        </Animated.View>
-        <Text style={styles.jaugeTexte}>
-          <Text style={{ color: couleurs.texte, fontFamily: polices.tresGras }}>{message.titre}</Text> {message.texte}
+          {regarde(nom)} je te l'avais <Text style={{ color: couleurs.vert }}>dit.</Text>
         </Text>
       </View>
 
@@ -109,128 +72,75 @@ export function EtapeTemoin({ texte, temoin, onChange, personnes, erreur, envoi,
             <Pressable
               key={p.cle}
               accessibilityRole="button"
-              accessibilityLabel={`Remplir avec ${p.nom}${texteLien(p.lien, p.precision) ? `, ${texteLien(p.lien, p.precision)}` : ''}`}
+              accessibilityLabel={`Remplir avec ${ditA(p.nom, p.lien).replace('Dit à ', '')}`}
               onPress={() => {
                 vibrerLeger();
-                onChange({ prenom: p.prenom, initiale: p.initiale, lien: p.lien, precision: p.precision });
+                onChange({ nom: p.nom, lien: p.lien });
               }}
               style={({ pressed }) => [styles.recent, pressed && { opacity: 0.8 }]}
             >
-              <Avatar prenom={p.prenom} />
+              <Avatar nom={p.nom} />
               <Text style={styles.recentTexte}>{p.nom}</Text>
             </Pressable>
           ))}
         </ScrollView>
       ) : null}
 
-      {/* Les champs */}
+      {/* Le lien (case à cocher) et la personne (texte libre) */}
       <View style={styles.champs}>
-        <View style={styles.ligne}>
-          <View style={{ flex: 1 }}>
-            <TextInput
-              accessibilityLabel="Son prénom"
-              value={temoin.prenom}
-              onChangeText={(v) => maj({ prenom: v.slice(0, PRENOM_MAX) })}
-              placeholder="Léa"
-              placeholderTextColor="#6E6A80"
-              autoCapitalize="words"
-              autoCorrect={false}
-              autoComplete="off"
-              maxLength={PRENOM_MAX}
-              returnKeyType="next"
-              onSubmitEditing={() => champInitiale.current?.focus()}
-              style={[styles.saisie, prenomIncorrect && styles.saisieErreur]}
-            />
-          </View>
-          <View>
-            <TextInput
-              ref={champInitiale}
-              accessibilityLabel="Initiale de son nom"
-              accessibilityHint="Première lettre seulement"
-              value={temoin.initiale}
-              onChangeText={(v) => maj({ initiale: nettoyerInitiale(v) })}
-              placeholder="M"
-              placeholderTextColor="#6E6A80"
-              autoCapitalize="characters"
-              autoCorrect={false}
-              autoComplete="off"
-              maxLength={2}
-              selectTextOnFocus
-              returnKeyType="next"
-              onSubmitEditing={() => champPrecision.current?.focus()}
-              style={[styles.saisie, styles.saisieInitiale]}
-            />
-          </View>
+        <Text style={styles.etiquette}>VOTRE LIEN</Text>
+        <View style={styles.liens}>
+          {LIENS.map((l) => {
+            const coche = temoin.lien === l.code;
+            return (
+              <Pressable
+                key={l.code}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: coche }}
+                accessibilityLabel={l.label}
+                onPress={() => {
+                  vibrerLeger();
+                  onChange({ ...temoin, lien: coche ? null : l.code });
+                }}
+                style={[styles.puceLien, coche && styles.puceLienCochee]}
+              >
+                <Text style={[styles.puceLienTexte, coche && { color: couleurs.fond }]}>{l.label}</Text>
+              </Pressable>
+            );
+          })}
         </View>
-        {prenomIncorrect ? (
-          <Text style={styles.erreur}>Des lettres seulement (espaces, tirets et apostrophes acceptés).</Text>
-        ) : null}
-
-        <View style={{ gap: 8 }}>
-          <Text style={styles.etiquette}>VOTRE LIEN</Text>
-          <View style={styles.liens}>
-            {LIENS.map((l) => {
-              const coche = temoin.lien === l.code;
-              return (
-                <Pressable
-                  key={l.code}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: coche }}
-                  accessibilityLabel={l.label}
-                  onPress={() => {
-                    vibrerLeger();
-                    maj({ lien: coche ? null : l.code });
-                  }}
-                  style={[styles.puceLien, coche && styles.puceLienCochee]}
-                >
-                  <Text style={[styles.puceLienTexte, coche && { color: couleurs.fond }]}>{l.label}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-          <View style={styles.champPrecision}>
-            <IconeCrayon couleur={couleurs.texteDoux} taille={16} />
-            <TextInput
-              ref={champPrecision}
-              accessibilityLabel="Précise votre lien (facultatif)"
-              value={temoin.precision}
-              onChangeText={(v) => maj({ precision: v.slice(0, PRECISION_MAX) })}
-              placeholder="Précise : petite sœur, voisin du 3e…"
-              placeholderTextColor="#6E6A80"
-              autoCorrect
-              maxLength={PRECISION_MAX}
-              returnKeyType="done"
-              style={styles.saisiePrecision}
-            />
-            <Text style={styles.compteur}>{temoin.precision.length} / {PRECISION_MAX}</Text>
-          </View>
+        <View style={styles.champQui}>
+          <IconeCrayon couleur={couleurs.texteDoux} taille={16} />
+          <TextInput
+            accessibilityLabel="À qui ? Son prénom ou un surnom"
+            value={temoin.nom}
+            onChangeText={(v) => onChange({ ...temoin, nom: v.slice(0, TEMOIN_MAX) })}
+            placeholder="Sarah"
+            placeholderTextColor="#6E6A80"
+            autoCapitalize="sentences"
+            autoComplete="off"
+            maxLength={TEMOIN_MAX}
+            returnKeyType="done"
+            style={styles.saisieQui}
+          />
+          <Text style={styles.compteur}>{temoin.nom.length} / {TEMOIN_MAX}</Text>
         </View>
       </View>
 
       <View style={styles.info}>
         <IconeCadenas couleur={couleurs.texteDoux} taille={18} />
-        <Text style={styles.infoTexte}>
-          Scellé avec ta phrase, pour de bon. Le prénom n'apparaît que sur la carte que tu envoies.
-        </Text>
+        <Text style={styles.infoTexte}>Scellé avec ta phrase, pour de bon.</Text>
       </View>
 
       {erreur ? <Text style={styles.erreur} accessibilityLiveRegion="polite">{erreur}</Text> : null}
 
       <View style={{ flex: 1, minHeight: 16 }} />
-      <Bouton
-        titre="Sceller"
-        onPress={onSceller}
-        chargement={envoi}
-        desactive={prenomIncorrect}
-        icone={<IconeCadenas couleur={prenomIncorrect ? couleurs.texteDoux : couleurs.fond} />}
-      />
+      <Bouton titre="Sceller" onPress={onSceller} chargement={envoi} icone={<IconeCadenas couleur={couleurs.fond} />} />
       {rempli ? (
         <Pressable accessibilityRole="button" onPress={() => onChange(TEMOIN_VIDE)} style={styles.lienTexte}>
           <Text style={styles.lienTexteTexte}>Je ne l'ai dit à personne</Text>
         </Pressable>
-      ) : (
-        <Text style={[styles.aide, { textAlign: 'center' }]}>C'est facultatif : tu peux sceller sans.</Text>
-      )}
+      ) : null}
     </>
   );
 }
@@ -262,9 +172,6 @@ const styles = StyleSheet.create({
   },
   pastilleVideTexte: { fontFamily: polices.gras, fontSize: 13, color: couleurs.fond },
   slogan: { fontFamily: polices.titre, fontSize: 15, lineHeight: 19, color: couleurs.texte, letterSpacing: -0.3 },
-  jauge: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  flammes: { flexDirection: 'row', gap: 2 },
-  jaugeTexte: { flex: 1, fontFamily: polices.normal, fontSize: 14, lineHeight: 19, color: couleurs.texteDoux },
   recents: { alignItems: 'center', gap: 8, paddingRight: 8 },
   recentsTitre: { fontFamily: polices.moyen, fontSize: 13, color: couleurs.texteDoux },
   recent: {
@@ -274,16 +181,8 @@ const styles = StyleSheet.create({
   recentTexte: { fontFamily: polices.gras, fontSize: 13, color: couleurs.texte },
   champs: {
     backgroundColor: couleurs.surface, borderColor: couleurs.bordure, borderWidth: 1,
-    borderRadius: 26, padding: 16, gap: 14,
+    borderRadius: 26, padding: 16, gap: 10,
   },
-  ligne: { flexDirection: 'row', gap: 10 },
-  saisie: {
-    height: 46, borderRadius: 14, borderWidth: 1, borderColor: couleurs.bordureForte, backgroundColor: couleurs.fond,
-    paddingHorizontal: 14, fontFamily: polices.gras, fontSize: 17, color: couleurs.texte,
-  },
-  saisieErreur: { borderColor: couleurs.rose },
-  saisieInitiale: { width: 56, paddingHorizontal: 0, textAlign: 'center', fontFamily: polices.titre },
-  aide: { fontFamily: polices.normal, fontSize: 12, lineHeight: 15, color: couleurs.texteDoux },
   liens: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   puceLien: {
     flexGrow: 1, flexBasis: '22%', height: 38, borderRadius: 999, alignItems: 'center', justifyContent: 'center',
@@ -291,13 +190,13 @@ const styles = StyleSheet.create({
   },
   puceLienCochee: { backgroundColor: couleurs.texte, borderColor: couleurs.texte },
   puceLienTexte: { fontFamily: polices.gras, fontSize: 13, color: couleurs.texte },
-  champPrecision: {
-    flexDirection: 'row', alignItems: 'center', gap: 8, height: 46, borderRadius: 14, borderWidth: 1,
+  champQui: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, height: 48, borderRadius: 14, borderWidth: 1,
     borderColor: couleurs.bordureForte, backgroundColor: couleurs.fond, paddingHorizontal: 12,
   },
-  saisiePrecision: { flex: 1, minWidth: 0, height: 44, fontFamily: polices.moyen, fontSize: 15, color: couleurs.texte, padding: 0 },
+  saisieQui: { flex: 1, minWidth: 0, height: 46, fontFamily: polices.gras, fontSize: 16, color: couleurs.texte, padding: 0 },
   compteur: { fontFamily: polices.normal, fontSize: 12, color: couleurs.texteDoux },
-  info: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
+  info: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   infoTexte: { flex: 1, fontFamily: polices.normal, fontSize: 13, lineHeight: 18, color: couleurs.texteDoux },
   erreur: { fontFamily: polices.moyen, fontSize: 14, lineHeight: 19, color: couleurs.rose },
   lienTexte: { alignSelf: 'center', paddingVertical: 6, paddingHorizontal: 12 },

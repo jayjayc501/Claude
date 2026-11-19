@@ -3,7 +3,7 @@ export type ErreurLisible = {
   message: string;
   moderation: boolean;
   dejaScelle: boolean;
-  /** L'erreur porte sur le témoin (prénom, lien) : on la montre sous ces champs. */
+  /** L'erreur porte sur le témoin (à qui, lien, signature) : on la montre près de ces champs. */
   temoin?: boolean;
 };
 
@@ -28,22 +28,31 @@ export function lireErreur(brute?: string | null): ErreurLisible {
   }
   if (code.includes('moderation:temoin')) {
     return {
-      message: 'Le prénom ou votre lien contient un mot refusé (ou un numéro, une adresse e-mail). Change-le.',
+      message: 'Ce que tu as écrit dans « à qui » contient un mot refusé, un numéro ou une adresse e-mail. Change-le.',
       moderation: false,
       dejaScelle: false,
       temoin: true,
     };
   }
-  if (code.includes('temoin_invalide:prenom')) {
+  if (code.includes('temoin_invalide:texte')) {
+    return { message: '« À qui » : 30 caractères au maximum, sans adresse web.', moderation: false, dejaScelle: false, temoin: true };
+  }
+  if (code.includes('temoin_invalide:signature')) {
+    return { message: "La signature n'a pas pu être enregistrée. Efface et recommence.", moderation: false, dejaScelle: false, temoin: true };
+  }
+  if (code.includes('signature_trop_tard')) {
     return {
-      message: 'Le prénom ne peut contenir que des lettres, des espaces, des tirets et des apostrophes (20 au maximum).',
+      message: 'Trop tard pour signer : la signature se fait sur place, dans les 15 minutes après le scellement.',
       moderation: false,
       dejaScelle: false,
       temoin: true,
     };
+  }
+  if (code.includes('signature_impossible')) {
+    return { message: 'Cette certitude ne peut plus être signée.', moderation: false, dejaScelle: false, temoin: true };
   }
   if (code.includes('temoin_invalide')) {
-    return { message: 'Votre lien fait 30 caractères au maximum, sans adresse web.', moderation: false, dejaScelle: false, temoin: true };
+    return { message: 'Ce lien n\'existe pas. Choisis une des cases.', moderation: false, dejaScelle: false, temoin: true };
   }
   if (code.includes('longueur_invalide')) {
     return { message: 'Ta phrase doit faire entre 3 et 200 caractères.', moderation: false, dejaScelle: false };

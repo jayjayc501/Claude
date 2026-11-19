@@ -42,6 +42,10 @@
   .puces { display: flex; flex-wrap: wrap; gap: 8px; }
   .puce { background: rgba(13,12,18,0.12); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700; }
   #date { white-space: nowrap; }
+  .signature { display: flex; align-items: center; gap: 12px; padding-top: 12px; border-top: 1.5px dashed rgba(13,12,18,0.35); }
+  .signature svg { flex-shrink: 0; }
+  .signature span { display: flex; flex-direction: column; gap: 1px; font-size: 12px; line-height: 1.3; font-weight: 700; }
+  .signature b { font-size: 13px; font-weight: 800; }
   .puce.temoin { display: flex; align-items: center; gap: 6px; background: var(--fond); color: var(--texte); padding-left: 8px; }
   .slogan { margin: 26px 0 0; font-size: 30px; line-height: 1.02; letter-spacing: -1px; }
   .slogan em { font-style: normal; color: var(--vert); }
@@ -98,6 +102,10 @@
           <span id="ditATexte"></span>
         </span>
         <span class="puce" id="date"></span>
+      </div>
+      <div class="signature" id="signature" hidden>
+        <svg width="104" height="52" viewBox="0 0 300 150" role="img" id="signatureDessin"><path id="signatureTrace" stroke="#0D0C12" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><b id="signatureNom"></b><span id="signatureDate">sur place</span></span>
       </div>
     </article>
     <p class="slogan titre"><span id="regarde">regarde.</span><br>je te l'avais <em>dit.</em></p>
@@ -164,14 +172,29 @@
       var auteur = c.auteur || ('@' + c.pseudo);
       document.getElementById('pseudo').textContent = auteur;
       // À qui la certitude avait été dite (facultatif) : la carte lui parle directement.
-      if (c.temoin) {
+      var qui = (c.temoin || '').trim();
+      var SANS_NOM = { pote: 'un pote', best: 'son best', crush: 'son crush', famille: 'sa famille', coloc: 'son coloc', collegue: 'un collègue', prof: 'un prof', ex: 'son ex' };
+      var ditA = qui
+        ? 'Dit à ' + qui + (c.temoin_lien ? ' · ' + c.temoin_lien : '')
+        : (c.temoin_lien_type && SANS_NOM[c.temoin_lien_type] ? 'Dit à ' + SANS_NOM[c.temoin_lien_type] : '');
+      if (ditA) {
+        document.getElementById('ditATexte').textContent = ditA;
+        document.getElementById('ditA').hidden = false;
+      }
+      if (qui) {
         document.getElementById('intro').hidden = true;
         document.getElementById('introTemoin').hidden = false;
-        document.getElementById('temoinNom').textContent = c.temoin;
+        document.getElementById('temoinNom').textContent = qui.charAt(0).toUpperCase() + qui.slice(1);
         document.getElementById('auteurTemoin').textContent = auteur;
-        document.getElementById('ditATexte').textContent = 'Dit à ' + c.temoin + (c.temoin_lien ? ' · ' + c.temoin_lien : '');
-        document.getElementById('ditA').hidden = false;
-        document.getElementById('regarde').textContent = 'regarde, ' + String(c.temoin_prenom || c.temoin).toLowerCase() + '.';
+        document.getElementById('regarde').textContent = 'regarde, ' + qui.toLowerCase() + '.';
+        // Signature faite sur place : une image (simple tracé), vérifiée avant affichage.
+        if (c.temoin_signature && /^M[ML0-9 .]*$/.test(c.temoin_signature)) {
+          document.getElementById('signatureTrace').setAttribute('d', c.temoin_signature);
+          document.getElementById('signatureDessin').setAttribute('aria-label', 'Signature de ' + qui);
+          document.getElementById('signatureNom').textContent = 'Signée par ' + qui;
+          document.getElementById('signatureDate').textContent = c.temoin_signee_le ? 'sur place, à ' + formaterDate(c.temoin_signee_le).split(' à ')[1] : 'sur place';
+          document.getElementById('signature').hidden = false;
+        }
       }
       document.getElementById('jours').textContent = String(jours);
       document.getElementById('jours').setAttribute('font-size', String(jours).length > 3 ? '42' : '52');
@@ -182,7 +205,7 @@
       var empreinte = document.getElementById('empreinte');
       empreinte.textContent = c.empreinte.slice(0, 16) + '…';
       empreinte.title = c.empreinte;
-      document.title = (c.temoin_prenom ? c.temoin_prenom + ', regarde. ' : '') + '« ' + c.texte + ' » · Je te l\'avais dit';
+      document.title = (qui ? qui.charAt(0).toUpperCase() + qui.slice(1) + ', regarde. ' : '') + '« ' + c.texte + ' » · Je te l\'avais dit';
       if (config.emailSignalement) {
         var s = document.getElementById('signaler');
         s.href = 'mailto:' + config.emailSignalement + '?subject=' + encodeURIComponent('Signalement carte ' + code);

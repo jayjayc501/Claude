@@ -5,10 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '../../components/Avatar';
 import { BulleCompteur } from '../../components/BulleCompteur';
 import { Bouton } from '../../components/Bouton';
-import { IconePersonne, IconeRetour } from '../../components/Icones';
-import { formaterDate, joursDepuis } from '../../lib/dates';
+import { IconeCoche, IconePersonne, IconeRetour } from '../../components/Icones';
+import { TraceSignature } from '../../components/Signature';
+import { formaterDate, formaterHeure, joursDepuis } from '../../lib/dates';
 import { COLONNES_PHRASE, lienCarte, supabase, type Phrase } from '../../lib/supabase';
-import { ditA, nomTemoin, texteLien } from '../../lib/temoin';
+import { ditA, labelLien, majuscule, regarde } from '../../lib/temoin';
 import { couleurs, polices } from '../../lib/theme';
 import { vibrerLeger, vibrerSucces } from '../../lib/vibration';
 
@@ -57,7 +58,7 @@ export default function Partage() {
     // On enregistre au passage le choix d'afficher (ou non) le lien sur la carte.
     const { data: lien, error } = await supabase.rpc('jtlad_reveler_phrase', {
       p_id: phrase.id,
-      ...(phrase.temoin_prenom ? { p_afficher_lien: montrerLien } : {}),
+      ...(phrase.temoin_lien ? { p_afficher_lien: montrerLien } : {}),
     });
     setEnvoi(false);
     if (error || !lien) {
@@ -66,9 +67,8 @@ export default function Partage() {
     }
     vibrerSucces();
     const url = lienCarte(lien as string);
-    const message = phrase.temoin_prenom
-      ? `${phrase.temoin_prenom}, regarde. Je te l'avais dit. ${url}`
-      : `Regarde. Je te l'avais dit. ${url}`;
+    const qui = (phrase.temoin ?? '').trim();
+    const message = qui ? `${majuscule(qui)}, regarde. Je te l'avais dit. ${url}` : `Regarde. Je te l'avais dit. ${url}`;
     try {
       await Share.share({ message, url });
     } catch {
@@ -93,10 +93,11 @@ export default function Partage() {
   }
 
   const jours = joursDepuis(phrase.jour);
-  const prenom = phrase.temoin_prenom ?? '';
-  const nom = nomTemoin(phrase.temoin_prenom, phrase.temoin_initiale);
-  const lien = texteLien(phrase.temoin_lien, phrase.temoin_precision);
-  const pastille = ditA(nom, montrerLien ? lien : '');
+  const nom = (phrase.temoin ?? '').trim();
+  const lien = labelLien(phrase.temoin_lien).toLowerCase();
+  const pastille = ditA(nom, montrerLien ? phrase.temoin_lien : null);
+  // Le bouton parle à la personne si son nom est court : « Envoyer à Sarah ».
+  const titreBouton = nom && nom.length <= 14 ? `Envoyer à ${nom}` : 'Partager';
 
   return (
     <SafeAreaView style={styles.page}>
@@ -112,7 +113,7 @@ export default function Partage() {
           <Text style={styles.intro}>
             {nom ? (
               <>
-                <Text style={styles.introFort}>{nom}</Text>, {auteur || 'ton pote'} te l'avait dit il y a…
+                <Text style={styles.introFort}>{majuscule(nom)}</Text>, {auteur || 'ton pote'} te l'avait dit il y a…
               </>
             ) : (
               <>
@@ -133,16 +134,30 @@ export default function Partage() {
               </View>
             ) : null}
             <Text style={styles.date}>Scellée le {formaterDate(phrase.scellee_le, true)}</Text>
+            {phrase.temoin_signature ? (
+              <View style={styles.signature}>
+                <TraceSignature chemin={phrase.temoin_signature} couleur={couleurs.fond} largeur={92} epaisseur={8} label={`Signature de ${nom}`} />
+                <View style={{ flexShrink: 1, gap: 1 }}>
+                  <View style={styles.signeeLigne}>
+                    <IconeCoche couleur={couleurs.fond} taille={12} />
+                    <Text style={styles.signee}>Signée par {nom}</Text>
+                  </View>
+                  <Text style={styles.date}>
+                    sur place{phrase.temoin_signee_le ? `, à ${formaterHeure(phrase.temoin_signee_le)}` : ''}
+                  </Text>
+                </View>
+              </View>
+            ) : null}
           </View>
           <Text style={styles.slogan}>
-            {prenom ? `regarde, ${prenom.toLowerCase()}.` : 'regarde.'}
+            {regarde(nom)}
             {'\n'}je te l'avais <Text style={{ color: couleurs.vert }}>dit.</Text>
           </Text>
         </View>
 
-        {nom && lien ? (
+        {lien ? (
           <View style={styles.reglage}>
-            <Avatar prenom={prenom} taille={34} />
+            <Avatar nom={nom || lien} taille={34} />
             <View style={{ flex: 1, gap: 1 }}>
               <Text style={styles.reglageTitre} nativeID="montrer-lien">Montrer votre lien</Text>
               <Text style={styles.reglageTexte}>« {lien} » sur la carte</Text>
@@ -165,9 +180,9 @@ export default function Partage() {
         <View style={{ flex: 1, minHeight: 20 }} />
         {erreur ? <Text style={styles.erreur}>{erreur}</Text> : null}
         {info ? <Text style={styles.info} selectable>{info}</Text> : null}
-        <Bouton titre={prenom ? `Envoyer à ${prenom}` : 'Partager'} onPress={partager} chargement={envoi} />
+        <Bouton titre={titreBouton} onPress={partager} chargement={envoi} />
         <Text style={styles.note}>
-          {prenom ? `${prenom} voit la carte sans installer l'app.` : "Ton pote voit la carte sans installer l'app."}
+          {nom ? `${majuscule(nom)} voit la carte sans installer l'app.` : "La carte s'ouvre sans installer l'app."}
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -200,6 +215,12 @@ const styles = StyleSheet.create({
   },
   pastilleTexte: { flexShrink: 1, fontFamily: polices.gras, fontSize: 12, color: couleurs.texte },
   date: { fontFamily: polices.gras, fontSize: 12, color: couleurs.fond },
+  signature: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 10,
+    borderTopWidth: 1.5, borderTopColor: 'rgba(13,12,18,0.3)',
+  },
+  signeeLigne: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  signee: { fontFamily: polices.tresGras, fontSize: 12, color: couleurs.fond },
   slogan: { fontFamily: polices.titre, fontSize: 20, lineHeight: 22, color: couleurs.texte },
   reglage: {
     marginTop: 16, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: couleurs.surface,

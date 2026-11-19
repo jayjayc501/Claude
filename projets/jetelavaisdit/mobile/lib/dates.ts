@@ -54,3 +54,19 @@ export function dateRelative(iso: string, jour: string): string {
   if (ecart === 1) return 'Hier';
   return formaterDate(iso);
 }
+
+/** « 12h22 » (heure de Paris). */
+export function formaterHeure(iso: string): string {
+  const v = morceaux(new Date(iso), { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  return `${v('hour')}h${v('minute')}`;
+}
+
+const MOIS_COURTS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+
+/** « 19 nov. 2026 · 12h21 » (version courte, pour les pastilles). */
+export function formaterDateCourte(iso: string): string {
+  const v = morceaux(new Date(iso), {
+    year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  });
+  return `${Number(v('day'))} ${MOIS_COURTS[Number(v('month')) - 1]} ${v('year')} · ${v('hour')}h${v('minute')}`;
+}

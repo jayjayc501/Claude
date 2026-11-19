@@ -14,54 +14,59 @@ body{margin:0}
 a{color:#0D0C12}a:hover{color:#0D0C12}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; box-sizing: border-box; background: #C8FF3D; color: #0D0C12; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; padding: 52px 24px 28px; overflow: hidden">
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #C8FF3D; color: #0D0C12; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; padding: 48px 24px 28px; overflow: hidden">
   <div style="display: flex; align-items: center; gap: 14px">
-    <svg width="76" height="76" viewBox="0 0 100 100" role="img" aria-label="Bulle scellée" style="margin-left: -10px; transform: rotate(-8deg)"><path d="M36 40V30a14 14 0 0 1 28 0v10" stroke="#0D0C12" stroke-width="9" fill="none" stroke-linecap="round"></path><path d="M28 38h44a12 12 0 0 1 12 12v18a12 12 0 0 1-12 12H46l-14 11v-11h-4a12 12 0 0 1-12-12V50a12 12 0 0 1 12-12z" fill="#0D0C12"></path><rect x="46" y="46" width="8" height="18" rx="4" fill="#C8FF3D"></rect><circle cx="50" cy="71.5" r="4.5" fill="#C8FF3D"></circle></svg>
-    <h1 style="margin: 0; font-family: 'Unbounded', sans-serif; font-size: 40px; line-height: 1; font-weight: 800; letter-spacing: -1.4px">c'est<br>scellé.</h1>
+    <svg width="72" height="72" viewBox="0 0 100 100" role="img" aria-label="Bulle scellée" style="margin-left: -10px; transform: rotate(-8deg)"><path d="M36 40V30a14 14 0 0 1 28 0v10" stroke="#0D0C12" stroke-width="9" fill="none" stroke-linecap="round"></path><path d="M28 38h44a12 12 0 0 1 12 12v18a12 12 0 0 1-12 12H46l-14 11v-11h-4a12 12 0 0 1-12-12V50a12 12 0 0 1 12-12z" fill="#0D0C12"></path><rect x="46" y="46" width="8" height="18" rx="4" fill="#C8FF3D"></rect><circle cx="50" cy="71.5" r="4.5" fill="#C8FF3D"></circle></svg>
+    <h1 style="margin: 0; font-family: 'Unbounded', sans-serif; font-size: 38px; line-height: 1; font-weight: 800; letter-spacing: -1.4px">c'est<br>scellé.</h1>
   </div>
-  <p style="margin: 14px 0 0; font-size: 17px; line-height: 1.4; font-weight: 600">Plus personne ne peut y toucher. Même pas toi.</p>
+  <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.4; font-weight: 600">Plus personne ne peut y toucher. Même pas toi.</p>
 
-  <div style="margin-top: 22px; background: #0D0C12; color: #FFFFFF; border-radius: 28px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
-    <p style="margin: 0; font-size: 21px; line-height: 1.25; font-weight: 800">« Mon frère va se faire larguer avant l'été. »</p>
+  <div style="margin-top: 18px; background: #0D0C12; color: #FFFFFF; border-radius: 26px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+    <p style="margin: 0; font-size: 19px; line-height: 1.25; font-weight: 800">« Mon frère va se faire larguer avant l'été. »</p>
     <div style="display: flex; flex-wrap: wrap; gap: 8px">
       <span style="background: #2C2A38; border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700">19 nov. 2026 · 12h21</span>
-      <span style="background: #2C2A38; border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700; color: #C8C5D6">Privée</span>
-    </div>
-    <div style="display: flex; align-items: center; gap: 10px; padding-top: 14px; border-top: 1px solid #2C2A38">
-      <span aria-hidden="true" style="width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: #FFFFFF; color: #0D0C12; display: flex; align-items: center; justify-content: center; font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 800">L</span>
-      <div style="display: flex; flex-direction: column; gap: 1px">
-        <span style="font-size: 15px; font-weight: 800">Dit à Léa M.</span>
-        <span style="font-size: 13px; font-weight: 600; color: #A9A6B8">{{ etatSignature }}</span>
-      </div>
-      <sc-if value="{{ envoyee }}" hint-placeholder-val="{{ false }}">
-        <span style="margin-left: auto; border: 1px dashed #A9A6B8; color: #A9A6B8; border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700">En attente</span>
-      </sc-if>
+      <span style="display: flex; align-items: center; gap: 6px; background: #2C2A38; border-radius: 999px; padding: 6px 12px 6px 8px; font-size: 13px; font-weight: 700">
+        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" stroke="#C8FF3D" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>
+        Dit à Léa · famille
+      </span>
     </div>
   </div>
 
-  <sc-if value="{{ proposer }}" hint-placeholder-val="{{ true }}">
-    <div style="margin-top: 16px; border: 1.5px solid rgba(13,12,18,0.3); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
-      <div style="display: flex; align-items: center; gap: 12px">
-        <span aria-hidden="true" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: #0D0C12; display: flex; align-items: center; justify-content: center">
-          <svg width="20" height="20" viewBox="0 0 24 24" stroke="#C8FF3D" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17c3-1 4-6 6-6s1 5 3 5 3-4 5-4 2 2 4 2"></path><path d="M3 21h18"></path></svg>
-        </span>
-        <div style="display: flex; flex-direction: column; gap: 1px">
-          <span style="font-size: 11px; font-weight: 800; letter-spacing: 1px; opacity: 0.7">EN OPTION</span>
-          <span style="font-size: 17px; font-weight: 800">Fais signer Léa</span>
+  <sc-if value="{{ aSigner }}" hint-placeholder-val="{{ true }}">
+    <div style="margin-top: 34px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 10px">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 11px; font-weight: 800; letter-spacing: 1px; opacity: 0.65">FACULTATIF</span>
+          <span id="etiquette-signature" style="font-size: 16px; font-weight: 800">Tu veux faire signer Léa ?</span>
         </div>
+        <sc-if value="{{ aEffacer }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ effacer }}" style="font-family: 'Inter', sans-serif; flex-shrink: 0; height: 30px; padding: 0 12px; border-radius: 999px; background: transparent; border: 1.5px solid rgba(13,12,18,0.4); color: #0D0C12; font-size: 13px; font-weight: 700">Effacer</button>
+        </sc-if>
       </div>
-      <p style="margin: 0; font-size: 14px; line-height: 1.4; font-weight: 500">Elle signe du doigt depuis un lien, sans installer l'app. Ta carte portera sa signature : impossible de dire « tu ne me l'as jamais dit ».</p>
-      <button type="button" onClick="{{ envoyer }}" style="font-family: 'Unbounded', sans-serif; height: 48px; border-radius: 999px; background: transparent; border: 2px solid #0D0C12; color: #0D0C12; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px">
-        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" stroke="#0D0C12" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-3-6z"></path></svg>
-        Envoyer à Léa pour signature
-      </button>
+      <div style="position: relative; height: 170px; border-radius: 22px; background: #0D0C12; overflow: hidden">
+        <svg role="img" aria-labelledby="etiquette-signature" width="342" height="150" viewBox="0 0 342 150" onPointerDown="{{ debut }}" onPointerMove="{{ tracer }}" onPointerUp="{{ fin }}" onPointerLeave="{{ fin }}" style="display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair">
+          <path d="{{ chemin }}" stroke="#FFFFFF" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <sc-if value="{{ vide }}" hint-placeholder-val="{{ true }}">
+          <span style="position: absolute; left: 0; right: 0; top: 74px; text-align: center; font-size: 14px; font-weight: 600; color: #4A475A; pointer-events: none">Passe le téléphone à Léa, signature au doigt</span>
+        </sc-if>
+      </div>
+      <sc-if value="{{ aValider }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ valider }}" style="font-family: 'Unbounded', sans-serif; align-self: flex-start; height: 42px; padding: 0 18px; border-radius: 999px; background: #0D0C12; border: none; color: #FFFFFF; font-size: 13px; font-weight: 800">Valider la signature</button>
+      </sc-if>
     </div>
   </sc-if>
-  <sc-if value="{{ envoyee }}" hint-placeholder-val="{{ false }}">
-    <div style="margin-top: 16px; background: #0D0C12; color: #FFFFFF; border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
-      <span style="font-size: 15px; font-weight: 800">Lien envoyé à Léa.</span>
-      <span style="font-size: 14px; line-height: 1.4; color: #C8C5D6">Tu seras prévenu dès qu'elle aura signé. Tu peux voir ce qu'elle reçoit :</span>
-      <a href="Signature.dc.html" style="align-self: flex-start; display: flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 999px; background: #C8FF3D; color: #0D0C12; font-size: 14px; font-weight: 800; text-decoration: none">Voir la page de Léa</a>
+
+  <sc-if value="{{ signee }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top: 34px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 20px; background: #0D0C12; color: #FFFFFF">
+      <svg width="110" height="48" viewBox="0 0 342 150" role="img" aria-label="Signature de Léa"><path d="{{ chemin }}" stroke="#FFFFFF" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span style="display: flex; flex-direction: column; gap: 2px">
+        <span style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 800; color: #C8FF3D">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" stroke="#C8FF3D" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>
+          Signée par Léa
+        </span>
+        <span style="font-size: 12px; color: #A9A6B8">sur place, à 12h22</span>
+      </span>
     </div>
   </sc-if>
 
@@ -74,17 +79,39 @@ a{color:#0D0C12}a:hover{color:#0D0C12}
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { envoyee: false };
+    this.state = { chemin: '', dessin: false, signee: false };
+  }
+
+  point(e) {
+    var r = e.currentTarget.getBoundingClientRect();
+    var x = Math.round(((e.clientX - r.left) * 342) / r.width);
+    var y = Math.round(((e.clientY - r.top) * 150) / r.height);
+    return x + ' ' + y;
   }
 
   renderVals() {
     var self = this;
-    var envoyee = this.state.envoyee;
+    var s = this.state;
+    var vide = !s.chemin;
     return {
-      envoyee: envoyee,
-      proposer: !envoyee,
-      etatSignature: envoyee ? 'Famille · petite sœur · signature demandée' : 'Famille · petite sœur',
-      envoyer: function () { self.setState({ envoyee: true }); }
+      chemin: s.chemin,
+      vide: vide,
+      aEffacer: !vide,
+      aValider: !vide,
+      aSigner: !s.signee,
+      signee: s.signee,
+      note: s.signee ? 'Léa a signé : impossible de nier. Rendez-vous quand ça arrive.' : 'Léa ne se doute de rien. Rendez-vous quand ça arrive.',
+      debut: function (e) {
+        try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+        self.setState({ dessin: true, chemin: (s.chemin ? s.chemin + ' ' : '') + 'M' + self.point(e) });
+      },
+      tracer: function (e) {
+        if (!self.state.dessin) return;
+        self.setState({ chemin: self.state.chemin + ' L' + self.point(e) });
+      },
+      fin: function () { if (self.state.dessin) self.setState({ dessin: false }); },
+      effacer: function () { self.setState({ chemin: '' }); },
+      valider: function () { if (self.state.chemin) self.setState({ signee: true }); }
     };
   }
 }

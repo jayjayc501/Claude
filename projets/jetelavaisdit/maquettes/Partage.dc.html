@@ -23,7 +23,7 @@ a{color:#C8FF3D}a:hover{color:#FFFFFF}
   </div>
 
   <div style="margin-top: 22px; align-self: center; width: 216px; height: 384px; box-sizing: border-box; background: #0D0C12; border: 1px solid #2C2A38; border-radius: 28px; padding: 16px 14px; display: flex; flex-direction: column; gap: 10px">
-    <span style="font-size: 11px; font-weight: 700; color: #A9A6B8"><b style="color: #FFFFFF">Sarah K.</b>, Jules te l'avait dit il y a…</span>
+    <span style="font-size: 11px; font-weight: 700; color: #A9A6B8"><b style="color: #FFFFFF">Sarah</b>, Jules te l'avait dit il y a…</span>
     <div style="display: flex; align-items: flex-end; gap: 8px">
       <svg width="96" height="72" viewBox="0 0 200 150" role="img" aria-label="241 jours" style="transform: rotate(-6deg)"><path d="M72 44V30a28 28 0 0 1 56 0v14" stroke="#C8FF3D" stroke-width="13" fill="none" stroke-linecap="round"></path><path d="M36 40h128a26 26 0 0 1 26 26v36a26 26 0 0 1-26 26H78l-30 22v-22H36a26 26 0 0 1-26-26V66a26 26 0 0 1 26-26z" fill="#C8FF3D"></path><text x="100" y="104" text-anchor="middle" font-family="Unbounded, sans-serif" font-size="52" font-weight="800" letter-spacing="-2" fill="#0D0C12">241</text></svg>
       <span style="font-family: 'Unbounded', sans-serif; font-size: 13px; line-height: 1.1; font-weight: 800; padding-bottom: 12px">jours.</span>
@@ -45,7 +45,7 @@ a{color:#C8FF3D}a:hover{color:#FFFFFF}
     <span aria-hidden="true" style="width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: #FF4FA3; color: #0D0C12; display: flex; align-items: center; justify-content: center; font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 800">S</span>
     <label for="montrer-lien" style="flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0">
       <span style="font-size: 14px; font-weight: 800">Montrer votre lien</span>
-      <span style="font-size: 12px; color: #A9A6B8">« binôme de théâtre » sur la carte</span>
+      <span style="font-size: 12px; color: #A9A6B8">« pote » sur la carte</span>
     </label>
     <button id="montrer-lien" type="button" role="switch" aria-checked="{{ montrer }}" onClick="{{ basculer }}" style="width: 52px; height: 32px; flex-shrink: 0; border-radius: 999px; border: none; padding: 3px; background: {{ interFond }}; display: flex; justify-content: {{ interCote }}">
       <span aria-hidden="true" style="width: 26px; height: 26px; border-radius: 50%; background: {{ interRond }}"></span>
@@ -89,7 +89,7 @@ class Component extends DCLogic {
     var m = this.state.montrer;
     return {
       montrer: m,
-      ditA: m ? 'Dit à Sarah K. · binôme de théâtre' : 'Dit à Sarah K.',
+      ditA: m ? 'Dit à Sarah · pote' : 'Dit à Sarah',
       interFond: m ? '#C8FF3D' : '#4A475A',
       interRond: m ? '#0D0C12' : '#FFFFFF',
       interCote: m ? 'flex-end' : 'flex-start',

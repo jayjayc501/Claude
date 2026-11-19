@@ -9,7 +9,7 @@ import { IconeCoche } from '../../components/Icones';
 import { Logo } from '../../components/Logo';
 import { dateRelative, formaterDate, joursDepuis } from '../../lib/dates';
 import { COLONNES_PHRASE, supabase, type Phrase } from '../../lib/supabase';
-import { clePersonne, nomTemoin, personnesDepuis, texteLien } from '../../lib/temoin';
+import { clePersonne, ditA, labelLien, personnesDepuis } from '../../lib/temoin';
 import { couleurs, polices } from '../../lib/theme';
 
 type Filtre = 'toutes' | 'attente' | 'envoyees';
@@ -41,7 +41,7 @@ export default function MesPhrases() {
   const visibles = useMemo(() => {
     if (!phrases) return [];
     let liste = phrases;
-    if (personne) liste = liste.filter((p) => clePersonne(p.temoin_prenom, p.temoin_initiale) === personne);
+    if (personne) liste = liste.filter((p) => clePersonne(p.temoin) === personne);
     if (filtre === 'attente') return liste.filter((p) => !p.lien);
     if (filtre === 'envoyees') return liste.filter((p) => p.lien);
     return liste;
@@ -105,7 +105,7 @@ export default function MesPhrases() {
                     contentContainerStyle={styles.personnes}
                     accessibilityLabel="Filtrer par personne"
                   >
-                    {[{ cle: null, nom: 'Tous', prenom: '', nombre: phrases.length }, ...personnes].map((p) => {
+                    {[{ cle: null, nom: 'Tous', nombre: phrases.length }, ...personnes].map((p) => {
                       const actif = personne === p.cle;
                       return (
                         <Pressable
@@ -117,9 +117,9 @@ export default function MesPhrases() {
                           style={[styles.personne, actif && styles.filtreActif]}
                         >
                           {p.cle ? (
-                            <Avatar prenom={p.prenom} />
+                            <Avatar nom={p.nom} />
                           ) : (
-                            <Avatar prenom="" lettre="★" couleur={couleurs.vert} />
+                            <Avatar nom="" lettre="★" />
                           )}
                           <Text style={[styles.filtreTexte, { fontSize: 13 }, actif && { color: couleurs.fond }]}>{p.nom}</Text>
                           <Text style={[styles.personneNombre, actif && { color: couleurs.fond }]}>{p.nombre}</Text>
@@ -157,8 +157,10 @@ export default function MesPhrases() {
 
 function CartePhrase({ phrase, onPartager }: { phrase: Phrase; onPartager: () => void }) {
   const jours = joursDepuis(phrase.jour);
-  const nom = nomTemoin(phrase.temoin_prenom, phrase.temoin_initiale);
-  const lien = texteLien(phrase.temoin_lien, phrase.temoin_precision);
+  const nom = (phrase.temoin ?? '').trim();
+  const lien = labelLien(phrase.temoin_lien).toLowerCase();
+  // Le bouton parle à la personne si son nom est court : « Je te l'avais dit, Léa ! ».
+  const titreBouton = nom && nom.length <= 14 ? `Je te l'avais dit, ${nom} !` : "Je te l'avais dit !";
 
   if (phrase.lien) {
     // Rose = phrase révélée
@@ -190,17 +192,29 @@ function CartePhrase({ phrase, onPartager }: { phrase: Phrase; onPartager: () =>
         ) : null}
       </View>
       <Text style={styles.phrase}>« {phrase.texte} »</Text>
-      {nom ? (
+      {nom || lien ? (
         <View style={styles.temoin}>
-          <Avatar prenom={phrase.temoin_prenom ?? ''} taille={22} />
-          <Text style={styles.date} numberOfLines={1}>
-            Dit à <Text style={{ color: couleurs.texte, fontFamily: polices.gras }}>{nom}</Text>
-            {lien ? ` · ${lien}` : ''}
+          {nom ? <Avatar nom={nom} taille={22} /> : null}
+          <Text style={[styles.date, { flexShrink: 1 }]} numberOfLines={1}>
+            {nom ? (
+              <>
+                Dit à <Text style={{ color: couleurs.texte, fontFamily: polices.gras }}>{nom}</Text>
+                {lien ? ` · ${lien}` : ''}
+              </>
+            ) : (
+              ditA(nom, phrase.temoin_lien)
+            )}
           </Text>
+          {phrase.temoin_signature ? (
+            <View style={styles.signee} accessibilityLabel={`Signée par ${nom}`}>
+              <IconeCoche couleur={couleurs.vert} taille={12} />
+              <Text style={styles.signeeTexte}>signée</Text>
+            </View>
+          ) : null}
         </View>
       ) : null}
       <Bouton
-        titre={phrase.temoin_prenom ? `Je te l'avais dit, ${phrase.temoin_prenom} !` : "Je te l'avais dit !"}
+        titre={titreBouton}
         onPress={onPartager}
         petit
         variante={jours >= 1 ? 'vert' : 'contour'}
@@ -235,6 +249,11 @@ const styles = StyleSheet.create({
   },
   personneNombre: { fontFamily: polices.gras, fontSize: 12, color: couleurs.texteDoux },
   temoin: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  signee: {
+    flexDirection: 'row', alignItems: 'center', gap: 4, marginLeft: 'auto', borderRadius: 999,
+    borderWidth: 1, borderColor: couleurs.bordureForte, paddingHorizontal: 8, paddingVertical: 2,
+  },
+  signeeTexte: { fontFamily: polices.gras, fontSize: 12, color: couleurs.texte },
   carte: {
     backgroundColor: couleurs.surface, borderColor: couleurs.bordure, borderWidth: 1,
     borderRadius: 28, paddingHorizontal: 20, paddingVertical: 18, gap: 12,

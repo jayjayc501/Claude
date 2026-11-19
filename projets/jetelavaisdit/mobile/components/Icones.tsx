@@ -70,19 +70,3 @@ export function IconePersonne({ couleur, taille = 16 }: Props) {
     </Svg>
   );
 }
-
-/** Flamme de la jauge « effet je te l'avais dit » : pleine si `allumee`. */
-export function IconeFlamme({ couleur, taille = 22, allumee = false }: Props & { allumee?: boolean }) {
-  return (
-    <Svg width={taille} height={taille} viewBox="0 0 24 24">
-      <Path
-        d="M12 2.8c.4 2.6 2.2 4.1 3.7 5.9A7.2 7.2 0 0 1 17.6 13 5.6 5.6 0 0 1 12 18.6 5.6 5.6 0 0 1 6.4 13c0-2.1 1-3.7 2.4-4.9.1 1.6.8 2.7 2 3.1-.5-2.9.1-5.8 1.2-8.4z"
-        stroke={couleur}
-        strokeWidth={2}
-        strokeLinejoin="round"
-        fill={allumee ? couleur : 'none'}
-      />
-      <Path d="M8 21.2h8" stroke={couleur} {...trait} strokeWidth={2} />
-    </Svg>
-  );
-}

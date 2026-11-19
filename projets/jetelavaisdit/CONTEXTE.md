@@ -68,10 +68,11 @@ Modèle **validé par le propriétaire sur les maquettes** (https://claude.ai/ar
 
 **Code (branche `jetelavaisdit/temoin`, pull request n° 17)** : migration `20261119120000_temoin.sql` (colonnes `temoin`, `temoin_lien`, `temoin_signature`, `temoin_signee_le`, `empreinte_signature`, `afficher_lien` ; fonctions `jtlad_verifier_phrase`, `jtlad_sceller_phrase(p_texte, p_temoin, p_temoin_lien)`, `jtlad_signer_phrase(p_id, p_signature)`, `jtlad_reveler_phrase(p_id, p_afficher_lien)`, carte publique enrichie ; anciens appels toujours valides), testée sur PostgreSQL local ; app (`components/EtapeTemoin.tsx`, `components/Signature.tsx`, `lib/temoin.ts`, écrans Écrire, C'est scellé, Mes phrases, Partager) ; carte web.
 
+**Fait le 19/11 vers 16 h 40 :** script `20261119120000_temoin.sql` appliqué sur la base par Claude (outil Supabase, migration `jtlad_temoin`). Vérifié : 6 nouvelles colonnes, contraintes, fonctions `jtlad_verifier_phrase`, `jtlad_sceller_phrase(text,text,text)`, `jtlad_signer_phrase(uuid,text)`, `jtlad_reveler_phrase(uuid,boolean)`, droits (anon lit la carte mais ne scelle pas), carte existante intacte (« Jérome J. / 9 j »), 1 phrase en base. L'ancienne contrainte « une par jour » est supprimée.
+
 **À faire, dans cet ordre :**
-1. Appliquer `supabase/migrations/20261119120000_temoin.sql` (SQL Editor, ou demander à Claude) — **avant** de fusionner : la nouvelle app lit les nouvelles colonnes.
-2. Fusionner la pull request n° 17 (mise en ligne web automatique).
-3. Fabriquer un nouvel APK (workflow `jetelavaisdit-apk.yml`), l'installer, tester : sceller avec / sans « à qui », signer, partager, carte.
+1. Fusionner la pull request n° 17 (le propriétaire dit « fusionne » ; mise en ligne web automatique).
+2. Fabriquer un nouvel APK (workflow `jetelavaisdit-apk.yml`), l'installer, tester : sceller avec / sans « à qui », signer, partager, carte.
 
 ## Leçons apprises (pièges déjà rencontrés)
 
@@ -80,7 +81,7 @@ Modèle **validé par le propriétaire sur les maquettes** (https://claude.ai/ar
 - **Supabase › URL Configuration** : Site URL = `https://jayjayc501.github.io/Claude/app/` ; Redirect URLs = cette adresse + `jetelavaisdit://**` (retour dans l'app Android).
 - **EAS / APK** : Node 22 obligatoire dans GitHub Actions ; `expo-splash-screen` exige une image ; la file d'attente gratuite d'Expo peut dépasser 45 minutes ; le lien de l'APK apparaît dans les journaux du run (`APK : https://…`) et sur expo.dev › Builds.
 - **Installation Android** : si « Application non installée », désactiver temporairement Play Protect.
-- **Environnement de Claude** : pas d'accès npm ni à expo.dev / supabase.co depuis le terminal ; on vérifie via GitHub Actions (build + typecheck), un PostgreSQL local pour tester le SQL, et l'outil Supabase en lecture.
+- **Environnement de Claude** : pas d'accès npm ni à expo.dev / supabase.co depuis le terminal ; on vérifie via GitHub Actions (build + typecheck) et un PostgreSQL local pour tester le SQL. L'outil Supabase permet aussi d'**appliquer** une migration (fait le 19/11) : toujours la tester en local d'abord.
 - **Base mutualisée** : `auth.users` appartient à `supabase_auth_admin` ; le rôle `postgres` peut créer un déclencheur dessus mais pas le renommer → toujours le nommer avec le préfixe de l'appli dès sa création.
 - **Règles du dépôt** : modification de code existant → branche + pull request ; le propriétaire dit « fusionne » pour valider.
 - **Fonctions SQL appelées par l'app** : pour ajouter un paramètre, supprimer l'ancienne version et recréer avec des valeurs par défaut (deux versions en parallèle rendraient l'appel ambigu pour l'API) ; l'ancienne app continue ainsi de marcher.

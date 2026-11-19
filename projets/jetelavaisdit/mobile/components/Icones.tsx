@@ -1,4 +1,4 @@
-import Svg, { Path, Rect } from 'react-native-svg';
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 type Props = { couleur: string; taille?: number };
 
@@ -50,6 +50,39 @@ export function IconeInterdit({ couleur, taille = 36 }: Props) {
   return (
     <Svg width={taille} height={taille} viewBox="0 0 24 24">
       <Path d="M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17zM6 6l12 12" stroke={couleur} {...trait} strokeWidth={2.6} />
+    </Svg>
+  );
+}
+
+export function IconeSuivant({ couleur, taille = 20 }: Props) {
+  return (
+    <Svg width={taille} height={taille} viewBox="0 0 24 24">
+      <Path d="M5 12h14M13 6l6 6-6 6" stroke={couleur} {...trait} strokeWidth={2.8} />
+    </Svg>
+  );
+}
+
+export function IconePersonne({ couleur, taille = 16 }: Props) {
+  return (
+    <Svg width={taille} height={taille} viewBox="0 0 24 24">
+      <Circle cx={12} cy={8} r={4} stroke={couleur} {...trait} strokeWidth={2.6} />
+      <Path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6" stroke={couleur} {...trait} strokeWidth={2.6} />
+    </Svg>
+  );
+}
+
+/** Flamme de la jauge « effet je te l'avais dit » : pleine si `allumee`. */
+export function IconeFlamme({ couleur, taille = 22, allumee = false }: Props & { allumee?: boolean }) {
+  return (
+    <Svg width={taille} height={taille} viewBox="0 0 24 24">
+      <Path
+        d="M12 2.8c.4 2.6 2.2 4.1 3.7 5.9A7.2 7.2 0 0 1 17.6 13 5.6 5.6 0 0 1 12 18.6 5.6 5.6 0 0 1 6.4 13c0-2.1 1-3.7 2.4-4.9.1 1.6.8 2.7 2 3.1-.5-2.9.1-5.8 1.2-8.4z"
+        stroke={couleur}
+        strokeWidth={2}
+        strokeLinejoin="round"
+        fill={allumee ? couleur : 'none'}
+      />
+      <Path d="M8 21.2h8" stroke={couleur} {...trait} strokeWidth={2} />
     </Svg>
   );
 }

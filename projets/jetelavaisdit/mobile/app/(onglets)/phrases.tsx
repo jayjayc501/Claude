@@ -1,13 +1,15 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Avatar } from '../../components/Avatar';
 import { BulleCompteur } from '../../components/BulleCompteur';
 import { Bouton } from '../../components/Bouton';
 import { IconeCoche } from '../../components/Icones';
 import { Logo } from '../../components/Logo';
 import { dateRelative, formaterDate, joursDepuis } from '../../lib/dates';
-import { supabase, type Phrase } from '../../lib/supabase';
+import { COLONNES_PHRASE, supabase, type Phrase } from '../../lib/supabase';
+import { clePersonne, nomTemoin, personnesDepuis, texteLien } from '../../lib/temoin';
 import { couleurs, polices } from '../../lib/theme';
 
 type Filtre = 'toutes' | 'attente' | 'envoyees';
@@ -22,23 +24,28 @@ export default function MesPhrases() {
   const router = useRouter();
   const [phrases, setPhrases] = useState<Phrase[] | null>(null);
   const [filtre, setFiltre] = useState<Filtre>('toutes');
+  const [personne, setPersonne] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       supabase
         .from('jtlad_phrases')
-        .select('id, texte, scellee_le, jour, revelee_le, lien')
+        .select(COLONNES_PHRASE)
         .order('scellee_le', { ascending: false })
         .then(({ data }) => setPhrases((data as Phrase[]) ?? []));
     }, []),
   );
 
+  const personnes = useMemo(() => personnesDepuis(phrases ?? []), [phrases]);
+
   const visibles = useMemo(() => {
     if (!phrases) return [];
-    if (filtre === 'attente') return phrases.filter((p) => !p.lien);
-    if (filtre === 'envoyees') return phrases.filter((p) => p.lien);
-    return phrases;
-  }, [phrases, filtre]);
+    let liste = phrases;
+    if (personne) liste = liste.filter((p) => clePersonne(p.temoin_prenom, p.temoin_initiale) === personne);
+    if (filtre === 'attente') return liste.filter((p) => !p.lien);
+    if (filtre === 'envoyees') return liste.filter((p) => p.lien);
+    return liste;
+  }, [phrases, filtre, personne]);
 
   if (phrases === null) {
     return (
@@ -68,7 +75,11 @@ export default function MesPhrases() {
                   </View>
                   <View style={styles.stat}>
                     <Text style={[styles.statNombre, { color: couleurs.vert }]}>{envoyees}</Text>
-                    <Text style={styles.statLabel}>« je te l'avais dit »</Text>
+                    <Text style={styles.statLabel}>envoyées</Text>
+                  </View>
+                  <View style={styles.stat}>
+                    <Text style={[styles.statNombre, { color: couleurs.rose }]}>{personnes.length}</Text>
+                    <Text style={styles.statLabel}>{personnes.length > 1 ? 'témoins' : 'témoin'}</Text>
                   </View>
                 </View>
                 <View style={styles.filtres} accessibilityRole="tablist">
@@ -87,6 +98,36 @@ export default function MesPhrases() {
                     );
                   })}
                 </View>
+                {personnes.length > 0 ? (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.personnes}
+                    accessibilityLabel="Filtrer par personne"
+                  >
+                    {[{ cle: null, nom: 'Tous', prenom: '', nombre: phrases.length }, ...personnes].map((p) => {
+                      const actif = personne === p.cle;
+                      return (
+                        <Pressable
+                          key={p.cle ?? 'tous'}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: actif }}
+                          accessibilityLabel={`${p.nom}, ${p.nombre} ${p.nombre > 1 ? 'prédictions' : 'prédiction'}`}
+                          onPress={() => setPersonne(p.cle)}
+                          style={[styles.personne, actif && styles.filtreActif]}
+                        >
+                          {p.cle ? (
+                            <Avatar prenom={p.prenom} />
+                          ) : (
+                            <Avatar prenom="" lettre="★" couleur={couleurs.vert} />
+                          )}
+                          <Text style={[styles.filtreTexte, { fontSize: 13 }, actif && { color: couleurs.fond }]}>{p.nom}</Text>
+                          <Text style={[styles.personneNombre, actif && { color: couleurs.fond }]}>{p.nombre}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                ) : null}
               </>
             ) : null}
           </View>
@@ -116,6 +157,8 @@ export default function MesPhrases() {
 
 function CartePhrase({ phrase, onPartager }: { phrase: Phrase; onPartager: () => void }) {
   const jours = joursDepuis(phrase.jour);
+  const nom = nomTemoin(phrase.temoin_prenom, phrase.temoin_initiale);
+  const lien = texteLien(phrase.temoin_lien, phrase.temoin_precision);
 
   if (phrase.lien) {
     // Rose = phrase révélée
@@ -128,7 +171,7 @@ function CartePhrase({ phrase, onPartager }: { phrase: Phrase; onPartager: () =>
         <Text style={[styles.phrase, { color: couleurs.fond }]}>« {phrase.texte} »</Text>
         <View style={styles.badgeEnvoyee}>
           <IconeCoche couleur={couleurs.vert} />
-          <Text style={styles.badgeTexte}>Envoyée</Text>
+          <Text style={styles.badgeTexte}>{nom ? `Envoyée à ${nom}` : 'Envoyée'}</Text>
         </View>
       </Pressable>
     );
@@ -147,7 +190,21 @@ function CartePhrase({ phrase, onPartager }: { phrase: Phrase; onPartager: () =>
         ) : null}
       </View>
       <Text style={styles.phrase}>« {phrase.texte} »</Text>
-      <Bouton titre="Je te l'avais dit !" onPress={onPartager} petit variante={jours >= 1 ? 'vert' : 'contour'} />
+      {nom ? (
+        <View style={styles.temoin}>
+          <Avatar prenom={phrase.temoin_prenom ?? ''} taille={22} />
+          <Text style={styles.date} numberOfLines={1}>
+            Dit à <Text style={{ color: couleurs.texte, fontFamily: polices.gras }}>{nom}</Text>
+            {lien ? ` · ${lien}` : ''}
+          </Text>
+        </View>
+      ) : null}
+      <Bouton
+        titre={phrase.temoin_prenom ? `Je te l'avais dit, ${phrase.temoin_prenom} !` : "Je te l'avais dit !"}
+        onPress={onPartager}
+        petit
+        variante={jours >= 1 ? 'vert' : 'contour'}
+      />
     </View>
   );
 }
@@ -157,20 +214,27 @@ const styles = StyleSheet.create({
   centre: { alignItems: 'center', justifyContent: 'center' },
   contenu: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 24, gap: 16 },
   titre: { fontFamily: polices.titre, fontSize: 32, color: couleurs.texte, letterSpacing: -1 },
-  stats: { flexDirection: 'row', gap: 10 },
+  stats: { flexDirection: 'row', gap: 8 },
   stat: {
     flex: 1, backgroundColor: couleurs.surface, borderColor: couleurs.bordure, borderWidth: 1,
-    borderRadius: 22, paddingHorizontal: 16, paddingVertical: 14, gap: 2,
+    borderRadius: 20, paddingHorizontal: 14, paddingVertical: 12, gap: 2,
   },
-  statNombre: { fontFamily: polices.titre, fontSize: 26, color: couleurs.texte },
+  statNombre: { fontFamily: polices.titre, fontSize: 22, color: couleurs.texte },
   statLabel: { fontFamily: polices.normal, fontSize: 13, color: couleurs.texteDoux },
-  filtres: { flexDirection: 'row', gap: 8, marginBottom: 4 },
+  filtres: { flexDirection: 'row', gap: 8 },
   filtre: {
     backgroundColor: couleurs.surface, borderColor: couleurs.bordure, borderWidth: 1,
     borderRadius: 999, paddingHorizontal: 16, paddingVertical: 9,
   },
   filtreActif: { backgroundColor: couleurs.texte, borderColor: couleurs.texte },
   filtreTexte: { fontFamily: polices.gras, fontSize: 14, color: couleurs.texte },
+  personnes: { gap: 8, paddingRight: 8, marginBottom: 4 },
+  personne: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, height: 38, paddingLeft: 5, paddingRight: 12,
+    backgroundColor: couleurs.surface, borderColor: couleurs.bordure, borderWidth: 1, borderRadius: 999,
+  },
+  personneNombre: { fontFamily: polices.gras, fontSize: 12, color: couleurs.texteDoux },
+  temoin: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   carte: {
     backgroundColor: couleurs.surface, borderColor: couleurs.bordure, borderWidth: 1,
     borderRadius: 28, paddingHorizontal: 20, paddingVertical: 18, gap: 12,

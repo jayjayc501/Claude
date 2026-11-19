@@ -15,3 +15,7 @@ export function vibrerSucces() {
 export function vibrerErreur() {
   if (actif) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
 }
+
+export function vibrerLeger() {
+  if (actif) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+}

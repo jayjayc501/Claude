@@ -3,6 +3,8 @@ export type ErreurLisible = {
   message: string;
   moderation: boolean;
   dejaScelle: boolean;
+  /** L'erreur porte sur le témoin (prénom, lien) : on la montre sous ces champs. */
+  temoin?: boolean;
 };
 
 export function lireErreur(brute?: string | null): ErreurLisible {
@@ -23,6 +25,25 @@ export function lireErreur(brute?: string | null): ErreurLisible {
       moderation: true,
       dejaScelle: false,
     };
+  }
+  if (code.includes('moderation:temoin')) {
+    return {
+      message: 'Le prénom ou votre lien contient un mot refusé (ou un numéro, une adresse e-mail). Change-le.',
+      moderation: false,
+      dejaScelle: false,
+      temoin: true,
+    };
+  }
+  if (code.includes('temoin_invalide:prenom')) {
+    return {
+      message: 'Le prénom ne peut contenir que des lettres, des espaces, des tirets et des apostrophes (20 au maximum).',
+      moderation: false,
+      dejaScelle: false,
+      temoin: true,
+    };
+  }
+  if (code.includes('temoin_invalide')) {
+    return { message: 'Votre lien fait 30 caractères au maximum, sans adresse web.', moderation: false, dejaScelle: false, temoin: true };
   }
   if (code.includes('longueur_invalide')) {
     return { message: 'Ta phrase doit faire entre 3 et 200 caractères.', moderation: false, dejaScelle: false };

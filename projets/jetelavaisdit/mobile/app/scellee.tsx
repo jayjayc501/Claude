@@ -2,15 +2,28 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Avatar } from '../components/Avatar';
 import { Bouton } from '../components/Bouton';
+import { IconeCadenas } from '../components/Icones';
 import { Logo } from '../components/Logo';
 import { formaterDate } from '../lib/dates';
+import { labelLien, nomTemoin, type CodeLien } from '../lib/temoin';
 import { couleurs, polices } from '../lib/theme';
 
 /** Célébration après le scellement : fond vert, la bulle-cadenas qui « tombe » en place. */
 export default function Scellee() {
   const router = useRouter();
-  const { texte, scellee_le } = useLocalSearchParams<{ texte: string; scellee_le: string }>();
+  const { texte, scellee_le, temoin_prenom, temoin_initiale, temoin_lien, temoin_precision } = useLocalSearchParams<{
+    texte: string;
+    scellee_le: string;
+    temoin_prenom?: string;
+    temoin_initiale?: string;
+    temoin_lien?: string;
+    temoin_precision?: string;
+  }>();
+  const nom = nomTemoin(temoin_prenom, temoin_initiale);
+  // « Famille · petite sœur », « Pote », « petite sœur »…
+  const detailLien = [labelLien((temoin_lien || null) as CodeLien | null), temoin_precision].filter(Boolean).join(' · ');
   const arrivee = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -38,10 +51,23 @@ export default function Scellee() {
             ) : null}
             <View style={styles.puce}><Text style={[styles.puceTexte, { color: '#C8C5D6' }]}>Privée</Text></View>
           </View>
+          {nom ? (
+            <View style={styles.temoin}>
+              <Avatar prenom={temoin_prenom ?? ''} taille={34} />
+              <View style={{ flex: 1, gap: 1 }}>
+                <Text style={styles.temoinNom}>Dit à {nom}</Text>
+                {detailLien ? <Text style={styles.temoinLien}>{detailLien}</Text> : null}
+              </View>
+              <IconeCadenas couleur={couleurs.vert} taille={18} />
+            </View>
+          ) : null}
         </View>
 
         <View style={{ flex: 1 }} />
-        <Text style={styles.note}>Rendez-vous quand ça arrive.{'\n'}Prochaine prédiction demain.</Text>
+        <Text style={styles.note}>
+          {temoin_prenom ? `${temoin_prenom} ne se doute de rien.` : 'Prochaine prédiction demain.'}
+          {'\n'}Rendez-vous quand ça arrive.
+        </Text>
         <Bouton titre="Voir mes phrases" variante="noir" onPress={() => router.replace('/phrases')} />
       </View>
     </SafeAreaView>
@@ -58,5 +84,11 @@ const styles = StyleSheet.create({
   puces: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   puce: { backgroundColor: couleurs.bordure, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   puceTexte: { fontFamily: polices.gras, fontSize: 13, color: couleurs.texte },
+  temoin: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 14,
+    borderTopWidth: 1, borderTopColor: couleurs.bordure,
+  },
+  temoinNom: { fontFamily: polices.tresGras, fontSize: 15, color: couleurs.texte },
+  temoinLien: { fontFamily: polices.moyen, fontSize: 13, color: couleurs.texteDoux },
   note: { marginBottom: 16, textAlign: 'center', fontFamily: polices.moyen, fontSize: 15, lineHeight: 21, color: couleurs.fond },
 });

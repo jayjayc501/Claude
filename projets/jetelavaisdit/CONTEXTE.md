@@ -70,9 +70,9 @@ Modèle **validé par le propriétaire sur les maquettes** (https://claude.ai/ar
 
 **Fait le 19/11 vers 16 h 40 :** script `20261119120000_temoin.sql` appliqué sur la base par Claude (outil Supabase, migration `jtlad_temoin`). Vérifié : 6 nouvelles colonnes, contraintes, fonctions `jtlad_verifier_phrase`, `jtlad_sceller_phrase(text,text,text)`, `jtlad_signer_phrase(uuid,text)`, `jtlad_reveler_phrase(uuid,boolean)`, droits (anon lit la carte mais ne scelle pas), carte existante intacte (« Jérome J. / 9 j »), 1 phrase en base. L'ancienne contrainte « une par jour » est supprimée.
 
-**À faire, dans cet ordre :**
-1. Fusionner la pull request n° 17 (le propriétaire dit « fusionne » ; mise en ligne web automatique).
-2. Fabriquer un nouvel APK (workflow `jetelavaisdit-apk.yml`), l'installer, tester : sceller avec / sans « à qui », signer, partager, carte.
+**Fait le 19/11 vers 16 h 45 :** pull request n° 17 fusionnée (commit `77315db`) ; version web mise en ligne (run 44557610202, succès) ; fabrication de l'APK lancée (run 44557689470 du workflow `jetelavaisdit-apk`, file Expo souvent ~1 h ; le lien apparaît dans les journaux du run : `APK : https://…`).
+
+**À faire :** installer le nouvel APK par-dessus l'ancien, puis tester sur le téléphone : sceller avec / sans « à qui », faire signer, Mes phrases, partager, ouvrir la carte.
 
 ## Leçons apprises (pièges déjà rencontrés)
 

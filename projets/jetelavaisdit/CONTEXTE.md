@@ -1,6 +1,6 @@
 # « Je te l'avais dit » — contexte pour reprendre le projet
 
-*Mis à jour le 17 novembre 2026. À lire en premier dans une nouvelle conversation.*
+*Mis à jour le 19 novembre 2026. À lire en premier dans une nouvelle conversation.*
 
 ## Le projet en bref
 
@@ -21,7 +21,7 @@ Documents : [`cadrage.md`](cadrage.md) (décisions détaillées), [`README.md`](
 | App mobile (Expo / React Native) | `mobile/` |
 | Base de données (migrations SQL) | `supabase/migrations/` |
 | Page web de la carte reçue | `web/carte/` |
-| Maquettes (copie) | `maquettes/` · version cliquable : https://claude.ai/artifact/GBrtiSGWzndyC5aD4Husvq |
+| Maquettes (copie) | `maquettes/` · version cliquable v2 (19/11, « à qui tu l'as dit ») : https://claude.ai/artifact/KcMXxoMWFZcQ2vrLkT343o (v1 : https://claude.ai/artifact/GBrtiSGWzndyC5aD4Husvq) |
 | Version web en ligne | https://jayjayc501.github.io/Claude/app/ (carte : `/Claude/carte/?c=…`) |
 | Base Supabase | projet `claude_projets` (ex-`jelavaisdit`) / `joqzrjjgrntbyutytpnr` (https://joqzrjjgrntbyutytpnr.supabase.co), **mutualisé** avec MyFlix et les projets à venir : chaque appli préfixe ses objets. « Je te l'avais dit » = `jtlad_…` (tables `jtlad_profils`, `jtlad_phrases`, `jtlad_moderation_mots`, fonctions `jtlad_sceller_phrase`, `jtlad_reveler_phrase`, `jtlad_carte_publique`…). Ne jamais toucher aux autres préfixes (`myflix_…`). Les comptes (`auth.users`) sont communs à toutes les applis |
 | Compte Expo | `jayjayc501`, projet `jetelavaisdit` (fabrication de l'APK) |
@@ -56,6 +56,21 @@ Valeurs publiques (URL Supabase, clé `sb_publishable_…`) : déjà dans `mobil
 
 **Données en base (17/11)** : 2 comptes (1 avec prénom / nom repris de Google), 1 phrase scellée et envoyée.
 
+## 19 novembre 2026 : « à qui tu l'as dit » (le témoin)
+
+Décision du propriétaire (détail dans `cadrage.md` §4 bis) : au scellement, étape 2 facultative « Tu l'as dit à qui ? » = prénom + 1re lettre du nom, **lien en case à cocher et / ou en texte libre**, interface qui pousse à remplir (aperçu en direct, jauge à 3 flammes, personnes récentes). Le témoin est scellé avec la phrase.
+
+**Fait (branche `jetelavaisdit/temoin`, pull request à fusionner) :**
+- Migration `20261119120000_temoin.sql` : colonnes `temoin_prenom`, `temoin_initiale`, `temoin_lien` (pote, best, crush, famille, coloc, collegue, prof, ex), `temoin_precision`, `afficher_lien` ; `jtlad_sceller_phrase(p_texte, p_temoin_prenom, p_temoin_initiale, p_temoin_lien, p_temoin_precision)` ; `jtlad_reveler_phrase(p_id, p_afficher_lien)` ; la carte publique renvoie `temoin`, `temoin_prenom`, `temoin_lien`, `temoin_lien_type`. Anciens appels toujours valides (l'APK actuel continue de marcher). Testée sur PostgreSQL local (normalisation, refus, modération, empreinte, droits).
+- App : écran `components/EtapeTemoin.tsx`, logique dans `lib/temoin.ts` ; Mes phrases triées par personne ; partage personnalisé avec interrupteur « Montrer votre lien » (masqué par défaut pour Crush et Ex).
+- Carte web : « Sarah K., Jules R. te l'avait dit il y a… », « regarde, sarah. ».
+- Retour du propriétaire intégré : pas de texte « 1re lettre » à côté du champ de l'initiale.
+
+**À faire, dans cet ordre :**
+1. Coller `supabase/migrations/20261119120000_temoin.sql` dans Supabase › SQL Editor (ou dire à Claude de l'appliquer) — **avant** de fusionner, car la nouvelle app lit les nouvelles colonnes.
+2. Fusionner la pull request (mise en ligne web automatique).
+3. Fabriquer un nouvel APK (workflow `jetelavaisdit-apk.yml`) et l'installer.
+
 ## Leçons apprises (pièges déjà rencontrés)
 
 - **E-mails Supabase** : le service gratuit n'envoie que 2 e-mails par heure et ses modèles ne sont pas modifiables sans SMTP personnel → abandon de la connexion par e-mail au profit de Google.
@@ -66,12 +81,14 @@ Valeurs publiques (URL Supabase, clé `sb_publishable_…`) : déjà dans `mobil
 - **Environnement de Claude** : pas d'accès npm ni à expo.dev / supabase.co depuis le terminal ; on vérifie via GitHub Actions (build + typecheck), un PostgreSQL local pour tester le SQL, et l'outil Supabase en lecture.
 - **Base mutualisée** : `auth.users` appartient à `supabase_auth_admin` ; le rôle `postgres` peut créer un déclencheur dessus mais pas le renommer → toujours le nommer avec le préfixe de l'appli dès sa création.
 - **Règles du dépôt** : modification de code existant → branche + pull request ; le propriétaire dit « fusionne » pour valider.
+- **Fonctions SQL appelées par l'app** : pour ajouter un paramètre, supprimer l'ancienne version et recréer avec des valeurs par défaut (deux versions en parallèle rendraient l'appel ambigu pour l'API) ; l'ancienne app continue ainsi de marcher.
+- **Maquettes (type Design)** : une planche créée dans une autre session ne peut pas être modifiée ici → on en crée une nouvelle version.
 
 ## Prochaines étapes possibles
 
 1. Installer le nouvel APK, vérifier prénom et jours sur la carte.
 2. Image au format story (Instagram) à partager depuis l'app.
-3. Notifications de rappel (« Il y a 6 mois, tu as scellé… Ça s'est réalisé ? »).
+3. Notifications de rappel, qui citent la personne (« Yanis attend toujours ta preuve »).
 4. Modération par IA.
 5. Aperçu enrichi du lien dans WhatsApp (titre + image de la carte).
 6. Points ouverts du cadrage : masquer une phrase, modèle économique.

@@ -74,7 +74,17 @@ select{font:inherit;font-size:.92rem;padding:6px 8px;border-radius:8px;border:1p
 .chip.angle{background:var(--warn-soft);color:var(--warn)}
 .chip.pris{background:var(--off-soft);color:var(--off)}
 .chip.fav{background:var(--accent-soft);color:var(--accent)}
-.chip.new{background:transparent;color:var(--accent);border:1px solid var(--accent);padding:1px 8px}
+.chip.new{background:var(--accent);color:var(--bg);border:0;padding:2px 9px;font-weight:700}
+.row.is-new{background:var(--accent-soft);box-shadow:inset 4px 0 0 var(--accent)}
+.news{margin:0 0 18px;padding:16px;border:1.5px solid var(--accent);border-radius:14px;background:var(--accent-soft)}
+.news h2{margin:0 0 6px;font-family:var(--font-display);font-size:1.1rem;color:var(--accent);display:flex;align-items:center;gap:8px}
+.news .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
+.news p{margin:0 0 10px}
+.newlist{list-style:none;margin:0 0 12px;padding:0}
+.newlist li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid var(--line)}
+.newlist li:first-child{border-top:0}
+.newlist a{color:inherit;font-weight:700}
+.newlist span{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .chip.cut{background:transparent;color:var(--muted);border:1px dashed var(--line)}
 .chip.cat{background:transparent;color:var(--muted);font-weight:400;padding-left:0}
 .chip svg{width:12px;height:12px;fill:currentColor}
@@ -594,6 +604,8 @@ src:[["Crampons d'enfant d'occasion (Vinted)","https://www.vinted.fr/catalog/273
 
 const ST = {trou:{lab:"Aucun concurrent trouvé",chip:"Aucun concurrent trouvé"},angle:{lab:"Concurrence partielle",chip:"Concurrence partielle"},pris:{lab:"Déjà pris",chip:"Déjà pris"}};
 const SEUIL = 12;
+// Dernier ajout : seules les idées de ce lot portent neu:true (retirer neu des anciennes à chaque ajout).
+const LOT = "20 novembre 2026";
 const CRIT = [["c","Concurrence","5 = aucun concurrent trouvé"],["m","Marché","taille du public en France"],["a","Argent","capacité à rapporter"],["f","Facilité","5 = rapide à construire"]];
 const STAR = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.2l2 4.3 4.7.5-3.5 3.2 1 4.6L8 11.5 3.8 13.8l1-4.6L1.3 6l4.7-.5z"/></svg>';
 
@@ -661,7 +673,7 @@ function renderList(){
   const vis = visible();
   const nHidden = D.filter(d => tot(d) < SEUIL).length;
   const rows = vis.map(d =>
-    '<a class="row' + (d.st === "pris" ? " is-pris" : "") + '" href="#' + d.id + '">' +
+    '<a class="row' + (d.st === "pris" ? " is-pris" : "") + (d.neu ? " is-new" : "") + '" href="#' + d.id + '">' +
       '<span class="rank">' + d.rank + '</span>' +
       '<span class="main"><span class="name">' + esc(d.nom) + '</span>' +
       '<span class="pitch">' + esc(d.pitch) + '</span>' +
@@ -669,9 +681,17 @@ function renderList(){
       '<span class="score" aria-label="Note ' + tot(d) + ' sur 20"><span class="total">' + tot(d) + '<small>/20</small></span>' +
       '<span class="meter">' + CRIT.map(c => '<span>' + c[1].slice(0,4) + '.</span>' + pips(d.s[c[0]], "pips")).join("") + '</span></span>' +
     '</a>').join("");
+  const NEW = RANKED.filter(d => d.neu);
+  const news = NEW.length ?
+    '<section class="news" aria-labelledby="newsT"><h2 id="newsT"><span class="dot" aria-hidden="true"></span>Nouveau · ' + LOT + '</h2>' +
+    '<p>' + NEW.length + ' idées ajoutées, avec comment les rentabiliser. Elles sont surlignées dans la liste.</p>' +
+    '<ul class="newlist">' + NEW.map(d => '<li><a href="#' + d.id + '">' + esc(d.nom) + '</a><span>' + tot(d) + '/20</span></li>').join("") + '</ul>' +
+    (filter !== "neu" ? '<button type="button" class="fbtn" data-f="neu">Ne voir que les nouvelles</button>' : '') +
+    '</section>' : '';
   app.innerHTML =
     '<header><h1>Idées d\'applis classées</h1>' +
     '<p class="sub">Toutes les idées dont on a parlé, notées sur 20 et classées. Touche une idée pour ouvrir sa fiche : les plus, les moins, les risques et la complexité.</p></header>' +
+    news +
     '<div class="filters" role="group" aria-label="Filtrer les idées">' +
       F.map(f => '<button type="button" class="fbtn" data-f="' + f[0] + '" aria-pressed="' + (filter === f[0]) + '">' + esc(f[1]) + ' <span class="n">' + f[2] + '</span></button>').join("") +
     '</div>' +

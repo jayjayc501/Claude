@@ -17,4 +17,5 @@ jour les deux copies (ce fichier et la page claude.ai).
 - Mettre `neu:true` sur les idées du nouveau lot uniquement, et le retirer des anciennes.
 - Mettre à jour la constante `LOT` (date de l'ajout) : elle s'affiche dans l'encadré « Nouveau » en haut de la page.
 - Les idées du lot sont alors listées dans l'encadré et surlignées dans la liste.
-- Toute idée notée 12/20 ou plus doit avoir sa rubrique « Comment la rentabiliser » (`money`).
+- Chaque idée doit avoir sa rubrique « Comment la rentabiliser » (`money`).
+- Note « Argent » = moyenne de deux sous-notes sur 5 : `r` (rentable vite) et `g` (gains possibles), à renseigner dans `s` ; le total peut donc tomber sur un demi-point.

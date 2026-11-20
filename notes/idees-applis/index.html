@@ -95,6 +95,10 @@ select{font:inherit;font-size:.92rem;padding:6px 8px;border-radius:8px;border:1p
 .pips{display:flex;gap:2px}
 .pips i{width:7px;height:6px;border-radius:2px;background:var(--line);display:block}
 .pips i.on{background:var(--accent)}
+.pips i.half,.sc-bar i.half{background:linear-gradient(90deg,var(--accent) 50%,var(--line) 50%)}
+.row.is-pris .pips i.half{background:linear-gradient(90deg,var(--off) 50%,var(--line) 50%)}
+.sc-row.sub{border-top:0;padding-top:0}
+.sc-row.sub .sc-lab{padding-left:16px;font-size:.92em}
 .row.is-pris .pips i.on{background:var(--off)}
 .hint{color:var(--muted);font-size:.88rem;margin:10px 2px 0}
 .method{margin-top:36px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:.93rem}
@@ -159,7 +163,7 @@ ul.clean li{margin:4px 0}
 <script>
 "use strict";
 const D = [
-{id:"frais-reels",nom:"Frais réels + empreinte carbone",pitch:"Tous les frais réels du salarié (trajets, repas, télétravail…) comparés à l'abattement de 10 %, avec le CO₂ de ses trajets en bonus.",cat:"Travail & impôts",st:"angle",fav:true,s:{c:3,m:5,a:4,f:3},
+{id:"frais-reels",nom:"Frais réels + empreinte carbone",pitch:"Tous les frais réels du salarié (trajets, repas, télétravail…) comparés à l'abattement de 10 %, avec le CO₂ de ses trajets en bonus.",cat:"Travail & impôts",st:"angle",fav:true,s:{c:3,m:5,a:4,f:3,r:4,g:4},
 cx:["Moyenne","Chaque catégorie a ses règles et ses montants, revus chaque année (barème kilométrique, valeur du repas, forfait télétravail). Le calcul carbone, lui, est simple : kilomètres × facteur d'émission de l'ADEME."],
 app:["Jours cochés d'un tap : bureau, télétravail, congés, arrêt","Trajets : barème kilométrique, limite de 40 km par trajet, plafond 7 CV","Repas : seule la part au-delà de la valeur d'un repas pris à domicile compte, dans un plafond","Télétravail : forfait de 2,70 € par jour, 626,40 € par an au maximum","Autres frais : double résidence, formation, matériel, vêtements de travail, avec photo des justificatifs","Comparaison en direct avec l'abattement de 10 % et récapitulatif pour la déclaration","Bonus carbone : CO₂ annuel des trajets, et ce que changerait un jour de télétravail de plus, le vélo ou le covoiturage"],
 money:["Achat unique vers 9,99 € par année de déclaration, au moment où l'on remplit sa déclaration (avril-mai)", "Gratuit pour les kilomètres ; payant pour les repas, le télétravail, les justificatifs en photo et l'export", "Licence pour les entreprises et les CSE : l'outil offert aux salariés, et le bilan carbone des trajets pour leur rapport RSE", "Commission sur les offres que le bonus carbone amène naturellement : vélo électrique, covoiturage, assurance auto", "À éviter : se payer en pourcentage de l'impôt économisé, cela ressemblerait à du conseil fiscal"],
@@ -169,7 +173,7 @@ risq:["Une erreur de calcul peut entraîner un redressement : l'appli reste un o
 conc:["Simulateurs web ponctuels (Dispofi…)","Applis de kilométrage génériques, surtout pour les indépendants","Carbone côté particuliers : calculateurs ADEME (impactco2.fr), Moovance","Carbone côté entreprises : Greenly, 1km à Pied, Geomob"],
 src:[["Barème kilométrique 2026 (economie.gouv.fr)","https://www.economie.gouv.fr/particuliers/bareme-kilometrique"],["Limite de 40 km par trajet (Copeps)","https://copeps.fr/actualites/declaration-kilometres-impots/"],["Exemple de gain (Dispofi)","https://impots.dispofi.fr/impots-frais-reels/option"],["Pas de cumul avec les indemnités de l'employeur (Copeps)","https://copeps.fr/actualites/forfait-km-impots/"],["Plafond 7 CV (Selectra)","https://selectra.info/energie/actualites/marche/bareme-kilometrique-gele-frais-reels-plafond-7-cv"],["Catégories de frais déductibles (service-public.gouv.fr)","https://www.service-public.gouv.fr/particuliers/actualites/A15273"],["Frais de repas 2026 (Weblex)","https://www.weblex.fr/chiffres-cles/frais-supplementaires-de-repas-2026"],["Forfait télétravail aux frais réels (Neofa)","https://neofa.com/?p=34430"],["Méthode de calcul carbone des déplacements (ADEME)","https://employeursprocovoiturage.ademe.fr/wp-content/uploads/2024/12/1-3_fiche-methode-calcul-carbone.pdf"],["Émissions des trajets domicile-travail (Insee Première)","https://www.insee.fr/fr/statistiques/fichier/version-html/7718608/ip1975.pdf"]]},
 
-{id:"caution-locataire",nom:"Récupérer sa caution",pitch:"Le dossier de preuves du locataire, de l'entrée dans le logement jusqu'au remboursement du dépôt de garantie.",cat:"Logement",st:"trou",s:{c:4,m:4,a:3,f:3},
+{id:"caution-locataire",nom:"Récupérer sa caution",pitch:"Le dossier de preuves du locataire, de l'entrée dans le logement jusqu'au remboursement du dépôt de garantie.",cat:"Logement",st:"trou",s:{c:4,m:4,a:3.5,f:3,r:3,g:4},
 cx:["Moyenne","Photos datées et rangées pièce par pièce, comparaison entrée/sortie, compte à rebours légal et lettre. Le plus délicat : que les photos tiennent comme preuve."],
 app:["Photos datées pièce par pièce à l'entrée, puis à la sortie","Comparaison côte à côte entrée/sortie","Compte à rebours dès la remise des clés : 1 mois, ou 2 mois en cas de retenues","Calcul de la majoration de 10 % du loyer par mois de retard","Lettre de mise en demeure prête à envoyer (et calcul du préavis en bonus)"],
 money:["Gratuit pour l'état des lieux en photo ; vers 4,99 € pour le dossier de sortie complet et la lettre", "Affiliation au moment du déménagement : déménageurs, box internet, électricité, assurance habitation", "Partenariat avec des associations de locataires et des écoles (logement étudiant)"],
@@ -179,7 +183,7 @@ risq:["Ne pas glisser vers le conseil juridique personnalisé","Photos de l'int�
 conc:["Outils d'état des lieux numériques côté bailleurs et agences","Guides et cabinets d'avocats ; aucune appli locataire trouvée"],
 src:[["Délais de restitution (ANIL)","https://www.anil.org/votre-besoin/louer/type-de-location/location-vide/etat-des-lieux/"],["Majoration de 10 % par mois de retard (décision, Doctrine)","https://www.doctrine.fr/d/TJ/Chambery/2025/TJP2272319C24CD32FAFDBC"],["Photos horodatées et état des lieux numérique (123loger)","https://www.123loger.com/blog/signature-electronique-etat-des-lieux-numerique-location-immobiliere-2/"],["État des lieux de sortie et preuves (Kohen Avocats)","https://kohenavocats.fr/?p=2164203"]]},
 
-{id:"comparateur-devis",nom:"Comparer 3 devis d'artisans",pitch:"On envoie ses devis, l'appli aligne les postes, repère les oublis et les prix qui sortent du lot.",cat:"Logement",st:"trou",s:{c:4,m:4,a:4,f:2},
+{id:"comparateur-devis",nom:"Comparer 3 devis d'artisans",pitch:"On envoie ses devis, l'appli aligne les postes, repère les oublis et les prix qui sortent du lot.",cat:"Logement",st:"trou",s:{c:4,m:4,a:4,f:2,r:4,g:4},
 cx:["Élevée","Lire des devis PDF très différents, regrouper les postes équivalents et disposer de prix de référence fiables par métier et par région."],
 app:["Import de 2 à 5 devis (PDF ou photo)","Tableau qui aligne les postes équivalents d'un devis à l'autre","Alerte sur les postes absents d'un devis","Repérage des prix unitaires très au-dessus des autres","Questions à poser à l'artisan avant de signer"],
 money:["Paiement à l'analyse : par exemple 9 à 19 € la comparaison, face à des travaux de plusieurs milliers d'euros", "Mise en relation avec des artisans quand un devis manque ou paraît trop cher, en l'affichant clairement pour rester crédible", "Partenariat avec des courtiers en travaux et des assureurs habitation", "Offre pour les conseils syndicaux de copropriété, qui comparent souvent des devis"],
@@ -189,7 +193,7 @@ risq:["Responsabilité si l'analyse pousse vers un mauvais choix : rester factue
 conc:["Services humains d'audit de devis (ComeUp, Construires…)","Plateformes de devis qui orientent vers leurs artisans"],
 src:[["Analyse de devis à partir de 390 € (Construires)","https://www.construires.fr/expertise-batiment/faire-verifier-devis-travaux/"],["Audit de devis par des indépendants (ComeUp)","https://comeup.com/fr/service/534764/auditer-votre-devis-de-travaux-et-detecter-les-surfacturations-ou-verifier-votre-devis-btp"],["Comparer trois devis (La Maison Saint-Gobain)","https://www.lamaisonsaintgobain.fr/guides-travaux/questions-travaux/comparer-devis"]]},
 
-{id:"arbitres",nom:"Carnet de l'arbitre amateur",pitch:"Matchs, frais de déplacement, rapports et délais des arbitres de district, au même endroit.",cat:"Sport & assos",st:"trou",fav:true,s:{c:5,m:2,a:2,f:4},
+{id:"arbitres",nom:"Carnet de l'arbitre amateur",pitch:"Matchs, frais de déplacement, rapports et délais des arbitres de district, au même endroit.",cat:"Sport & assos",st:"trou",fav:true,s:{c:5,m:2,a:2,f:4,r:2,g:2},
 cx:["Faible","L'appli elle-même est simple. Le vrai travail : collecter et tenir à jour le barème de chaque district."],
 app:["Agenda des désignations","Frais calculés selon le barème du district : distance, indemnité, part de chaque club","Fiche de frais pré-remplie","Rappels des délais (en Seine-et-Marne : 48 h pour le rapport, 72 h pour la fiche de frais)","Bilan de saison : matchs, kilomètres, indemnités"],
 money:["Gratuit pour l'arbitre ; Premium vers 15 € la saison : bilan, export, rappels illimités", "Licence pour les districts et commissions d'arbitrage, qui suivent rapports et fiches de frais", "Partenaires équipementiers : sifflets, montres, tenues d'arbitre", "Même outil réutilisable pour les autres sports (basket, hand, rugby)"],
@@ -199,7 +203,7 @@ risq:["La FFF ou un district ajoute la fonction à ses propres outils","Un barè
 conc:["Aucune appli trouvée : formulaires papier ou PDF des districts","Outils fédéraux (feuille de match informatisée) sans calcul de frais pour l'arbitre"],
 src:[["Fiche de frais arbitre 2025-2026 (District de la Loire)","https://loire.fff.fr/wp-content/uploads/sites/104/2025/12/Feuille_frais_de_deplacement_arbitre-recto_verso_2025_2026.pdf"],["Guide administratif de l'arbitre (District 77)","https://seineetmarne.fff.fr/wp-content/uploads/sites/97/2024/01/CDA-Guide-Administratif-Arbitre-77.pdf"],["Indemnités des officiels (District de Lyon et du Rhône)","https://lyon-rhone.fff.fr/wp-content/uploads/sites/105/2022/11/Les-indemnit%C3%A9s-des-officiels.pdf"],["Barème des indemnités (District du Var)","https://var.fff.fr/wp-content/uploads/sites/66/2021/08/Bar%C3%A8me-Ind%C3%A9mnit%C3%A9-21-22.pdf"]]},
 
-{id:"reparer-racheter",nom:"Réparer ou racheter ?",pitch:"Pour un appareil en panne : coût de réparation estimé, bonus réparation, prix du neuf, et un verdict.",cat:"Consommation",st:"trou",fav:true,s:{c:4,m:4,a:3,f:2},
+{id:"reparer-racheter",nom:"Réparer ou racheter ?",pitch:"Pour un appareil en panne : coût de réparation estimé, bonus réparation, prix du neuf, et un verdict.",cat:"Consommation",st:"trou",fav:true,s:{c:4,m:4,a:3,f:2,r:2,g:4},
 cx:["Élevée","Il faut une base de coûts de réparation par appareil et par panne, et suivre la liste des bonus. Sans diagnostic, l'estimation reste une fourchette."],
 app:["Choix de l'appareil et du symptôme, ou photo","Fourchette de coût de réparation","Bonus réparation applicable (appareil hors garantie, réparateur labellisé)","Prix du neuf et du reconditionné","Verdict selon le seuil de rentabilité, lien vers les réparateurs labellisés"],
 money:["Commission sur les réparateurs : mise en relation ou prise de rendez-vous", "Affiliation sur le neuf et le reconditionné quand le verdict est « racheter »", "Commission sur la reprise de l'ancien appareil", "Offre marque blanche pour des enseignes ou des fabricants qui veulent pousser la réparation"],
@@ -209,7 +213,7 @@ risq:["Une mauvaise estimation fait perdre la confiance","Montants des bonus et 
 conc:["Guides web (règle des 50 %)","SAV d'enseignes (Boulanger, Auchan) et réparation en visio (Spareka)"],
 src:[["Au-delà de 30 % du prix du neuf, on rachète (Alternativi)","https://alternativi.fr/amp/news/longue-vie-aux-objets-diagnostiquer-et-reparer-soi-meme-les-pannes/741"],["Bonus réparation : 20 à 50 % du coût (Wizbii)","https://money.wizbii.com/aide/bonus-reparation-guide-complet"],["Règle des 50 % (Électroménager Guide)","https://electromenager-guide.com/?p=3477"],["Bonus réparation : fonctionnement (economie.gouv.fr)","https://www.economie.gouv.fr/particuliers/bonus-reparation-comment-ca-marche"],["Exemples de prix de SAV (Auchan)","https://www.auchan.fr/sav-auchan/ep-sav-auchan"]]},
 
-{id:"retours-colis",nom:"Retours et remboursements",pitch:"Suivre les délais de rétractation et les remboursements de ses achats en ligne, et relancer au bon moment.",cat:"Consommation",st:"trou",s:{c:4,m:4,a:2,f:3},
+{id:"retours-colis",nom:"Retours et remboursements",pitch:"Suivre les délais de rétractation et les remboursements de ses achats en ligne, et relancer au bon moment.",cat:"Consommation",st:"trou",s:{c:4,m:4,a:2,f:3,r:2,g:2},
 cx:["Moyenne","Récupérer les commandes (e-mails transférés ou photos), calculer les délais et préparer les relances."],
 app:["Ajout d'une commande par e-mail transféré ou photo","Compte à rebours des 14 jours de rétractation","Preuve d'envoi du retour rangée avec la commande","Date limite de remboursement et relance prête à envoyer","Rappel des majorations dues en cas de retard"],
 money:["Premium vers 1,99 €/mois : suivi illimité et lettres de relance", "Le réunir avec « Mes ODR » et « Le prix a baissé » dans un seul portefeuille de remboursements, avec un seul abonnement", "Affiliation cashback sur les nouvelles commandes"],
@@ -219,7 +223,7 @@ risq:["Lire les e-mails de l'utilisateur pose une vraie question de confidential
 conc:["Aucune appli française dédiée trouvée ; suivi intégré chez certains marchands"],
 src:[["Droit de rétractation (Combak)","https://www.combak.co/blog/droit-de-retractation"],["Retours et délai de remboursement (Kohen Avocats)","https://kohenavocats.fr/?p=2160678"],["Délai légal de 14 jours (Propulse by CA)","https://propulsebyca.fr/communication-entreprise/droit-retractation-client"]]},
 
-{id:"heures-sup",nom:"Carnet d'heures sup",pitch:"Noter ses heures au jour le jour, de façon datée, pour pouvoir les faire valoir en cas de litige.",cat:"Travail & impôts",st:"angle",s:{c:3,m:4,a:2,f:4},
+{id:"heures-sup",nom:"Carnet d'heures sup",pitch:"Noter ses heures au jour le jour, de façon datée, pour pouvoir les faire valoir en cas de litige.",cat:"Travail & impôts",st:"angle",s:{c:3,m:4,a:2.5,f:4,r:3,g:2},
 cx:["Faible","Pointage simple, horodatage et export propre. L'enjeu est la fiabilité des données."],
 app:["Début et fin de journée en un tap, pauses comprises","Horodatage non modifiable, ou modifications tracées","Total hebdomadaire au-delà de 35 h","Export clair, semaine par semaine"],
 money:["Achat unique vers 4,99 €, ou 1,99 €/mois", "Offre aux syndicats pour leurs adhérents", "Annuaire d'avocats en droit du travail payé au forfait de visibilité, pas à la commission sur les dossiers"],
@@ -229,7 +233,7 @@ risq:["Sujet sensible avec l'employeur","Données à protéger et à garder long
 conc:["Applis de pointage génériques","Logiciels de temps côté employeur"],
 src:[["Courriels et captures d'écran recevables (CFDT)","https://www.cfdt.fr/mes-droits/actualites-juridiques/duree-et-organisation-du-travail/heures-supplementaires-courriels-et-captures-decran-sont-des-preuves-recevables"],["La preuve des heures supplémentaires (Legisocial)","https://www.legisocial.fr/jurisprudences-sociales/1580-preuve-heures-supplementaires.html"]]},
 
-{id:"benevoles-km",nom:"Kilomètres des bénévoles",pitch:"Transformer les trajets faits pour une association en réduction d'impôt, sans erreur de forme.",cat:"Sport & assos",st:"trou",cut:true,s:{c:5,m:3,a:2,f:3},
+{id:"benevoles-km",nom:"Kilomètres des bénévoles",pitch:"Transformer les trajets faits pour une association en réduction d'impôt, sans erreur de forme.",cat:"Sport & assos",st:"trou",cut:true,s:{c:5,m:3,a:1,f:3,r:1,g:1},
 cx:["Moyenne","Deux utilisateurs (bénévole et trésorier), des règles fiscales précises et un Cerfa à produire."],
 app:["Trajets enregistrés par association","Renonciation au remboursement prête à signer","Récapitulatif pour le trésorier, qui émet le reçu fiscal (Cerfa 11580)","Rappel au moment de la déclaration"],
 money:["Gratuit pour les bénévoles ; abonnement association vers 29 €/an", "Partenariat avec des fédérations sportives ou associatives"],
@@ -239,7 +243,7 @@ risq:["La moindre erreur de forme fait tomber l'avantage fiscal","Les logiciels 
 conc:["Simulateurs et guides (AssoConnect, Mooncard)"],
 src:[["Reçu fiscal et réduction de 66 % (JALMALV)","https://www.jalmalv-federation.fr/wp-content/uploads/2026/07/BENEVOLES-REMBOURSEMENT-DE-FRAIS-1.pdf"],["Erreurs qui font perdre l'avantage (Bourse Inside)","https://bourseinside.fr/?p=14528"],["Remboursement ou abandon de frais (Mooncard)","https://www.mooncard.co/fr/blog/frais-b%C3%A9n%C3%A9voles-remboursement-abandon-frais-alternatives"],["Frais kilométriques en association (AssoConnect)","https://www.assoconnect.com/blog/frais-kilometriques-association"]]},
 
-{id:"pension-alimentaire",nom:"Revalorisation de pension alimentaire",pitch:"Rappel annuel, calcul avec le bon indice, arriérés et courrier.",cat:"Famille",st:"trou",cut:true,s:{c:4,m:3,a:2,f:4},
+{id:"pension-alimentaire",nom:"Revalorisation de pension alimentaire",pitch:"Rappel annuel, calcul avec le bon indice, arriérés et courrier.",cat:"Famille",st:"trou",cut:true,s:{c:4,m:3,a:2,f:4,r:3,g:1},
 cx:["Faible","Une formule simple et les indices Insee à intégrer chaque mois."],
 app:["Saisie du jugement une seule fois : montant, indice, date","Rappel chaque année et calcul automatique","Calcul des arriérés","Courrier prêt à envoyer"],
 money:["Achat unique vers 4,99 € par an", "Partenariat avec des médiateurs familiaux"],
@@ -249,7 +253,7 @@ risq:["Données familiales très sensibles","Mauvais indice choisi : montant fau
 conc:["Simulateur de l'Insee","Service public des pensions alimentaires"],
 src:[["Revalorisation : qui calcule et comment (justice.fr)","https://www.justice.fr/fiche/reevaluation-pension-alimentaire"],["Module de calcul (Insee)","https://insee.fr/fr/information/1300608"],["Exemple d'arriérés (Selectra)","https://selectra.info/finance/actualites/marche/pension-alimentaire-revalorisation-arrieres-5-ans"],["Avis d'usager sur le simulateur (Services publics +)","https://www.plus.transformation.gouv.fr/experiences/7408531_simulateur-revalorisation-pension-alimentaire"]]},
 
-{id:"interim",nom:"Fin de mission intérim",pitch:"Vérifier, mission par mission, l'indemnité de fin de mission et les congés payés.",cat:"Travail & impôts",st:"trou",s:{c:4,m:3,a:2,f:3},
+{id:"interim",nom:"Fin de mission intérim",pitch:"Vérifier, mission par mission, l'indemnité de fin de mission et les congés payés.",cat:"Travail & impôts",st:"trou",s:{c:4,m:3,a:2,f:3,r:2,g:2},
 cx:["Moyenne","Lire les fiches de paie de plusieurs agences et appliquer les bons calculs."],
 app:["Toutes les missions, toutes agences confondues","Photo de la fiche de paie et contrôle automatique","Indemnité de fin de mission : 10 % du brut","Congés payés : 10 % du brut, indemnité de fin de mission comprise","Alerte en cas d'écart et message type pour l'agence"],
 money:["Gratuit pour l'intérimaire ; Premium vers 1,99 €/mois", "Offres de missions payées par les agences, sans toucher aux contrôles pour rester neutre", "Partenariat avec des acteurs qui accompagnent les intérimaires (logement, crédit, formation)"],
@@ -259,7 +263,7 @@ risq:["Fiches de paie : données sensibles","Cas particuliers à bien gérer (CD
 conc:["Simulateurs web (Travail Industrie…)","Guides des agences d'intérim"],
 src:[["IFM : 10 % du salaire brut (Randstad)","https://www.randstad.fr/conseils-carriere/droit-travail/ifm-interim-comment-ca-marche/"],["Congés payés 10 %, IFM incluse (Travail Industrie)","https://travail-industrie.com/outils/conventions-collectives/interim-salaire-prime-de-precarite-cdi-i-vos-droits-idcc-2378"],["Base de calcul et simulateur (Travail Industrie)","https://travail-industrie.com/blog/article-titre/base-calcul-ifm-primes-interim"],["Solde de tout compte (Swim Legal)","https://www.swim.legal/blog/fin-de-mission-interim-solde-de-tout-compte"]]},
 
-{id:"inflation-tickets",nom:"Mon inflation à moi",pitch:"Scanner ses tickets de caisse pour voir son vrai indice de prix et le magasin le moins cher pour son panier.",cat:"Consommation",st:"trou",s:{c:4,m:4,a:2,f:2},
+{id:"inflation-tickets",nom:"Mon inflation à moi",pitch:"Scanner ses tickets de caisse pour voir son vrai indice de prix et le magasin le moins cher pour son panier.",cat:"Consommation",st:"trou",s:{c:4,m:4,a:2,f:2,r:1,g:3},
 cx:["Élevée","Lire les tickets, reconnaître un même produit d'un magasin à l'autre, gérer formats et promotions."],
 app:["Scan des tickets de caisse","Indice de prix personnel mois par mois","Produits qui ont le plus augmenté","Comparaison de son panier entre magasins"],
 money:["Affiliation et cashback sur les courses (offres de marques)", "Premium : comparaison du panier entre plusieurs magasins", "Statistiques de prix anonymes vendues à des médias ou instituts, uniquement avec l'accord des utilisateurs (RGPD)"],
@@ -269,7 +273,7 @@ risq:["Monétiser des données de consommation : prudence RGPD","Les applis de c
 conc:["Simulateur d'indice personnalisé de l'Insee","Applis de cashback sur tickets"],
 src:[["Simulateur d'indice des prix personnalisé (Insee)","https://www.insee.fr/fr/statistiques/2418131"],["Achats alimentaires et inflation, étude sur tickets (Insee)","https://www.insee.fr/fr/statistiques/8651373"]]},
 
-{id:"loto-associatif",nom:"Loto associatif côté organisateur",pitch:"Tirage affiché sur grand écran, tableau de contrôle et vérification des cartons gagnants.",cat:"Sport & assos",st:"angle",s:{c:3,m:3,a:2,f:4},
+{id:"loto-associatif",nom:"Loto associatif côté organisateur",pitch:"Tirage affiché sur grand écran, tableau de contrôle et vérification des cartons gagnants.",cat:"Sport & assos",st:"angle",s:{c:3,m:3,a:2.5,f:4,r:3,g:2},
 cx:["Faible","Un écran d'affichage, une saisie rapide des numéros et la vérification d'un carton. Fonctionne hors ligne."],
 app:["Saisie rapide des boules tirées, ou tirage numérique","Affichage géant sur télé ou vidéoprojecteur","Tableau de contrôle des numéros sortis","Vérification d'un carton annoncé gagnant","Annonce des lots et enchaînement des parties"],
 money:["Location à la soirée, par exemple 15 à 30 € par loto, ou abonnement association vers 79 €/an", "Vente de cartons imprimés et de kits pour la soirée", "Écran des sponsors de l'association entre les parties"],
@@ -279,7 +283,7 @@ risq:["Réglementation des lotos à respecter","Un tirage purement numérique pe
 conc:["Applis côté joueurs (Loto Quine Helper, LotoQuine Scan)","Tableaux de contrôle matériels"],
 src:[["Organiser un loto d'association (AssoConnect)","https://www.assoconnect.com/blog/loto-association"],["Matériel de loto et tableau de contrôle (HelloAsso)","https://www.helloasso.com/blog/materiel-loto/"],["Loto Quine Helper (App Store)","https://apps.apple.com/us/app/id1451851037"],["LotoQuine Scan (App Store)","https://apps.apple.com/mu/app/lotoquine-scan/id6478073216"]]},
 
-{id:"livret-maison",nom:"Livret de la maison",pitch:"Consignes, routines des enfants et numéros utiles pour la baby-sitter, les grands-parents ou le voisin, par un simple lien.",cat:"Famille",st:"angle",s:{c:3,m:3,a:1,f:5},
+{id:"livret-maison",nom:"Livret de la maison",pitch:"Consignes, routines des enfants et numéros utiles pour la baby-sitter, les grands-parents ou le voisin, par un simple lien.",cat:"Famille",st:"angle",s:{c:3,m:3,a:1,f:5,r:1,g:1},
 cx:["Faible","Une fiche à remplir et un lien à partager, rien de technique."],
 app:["Routines des enfants : repas, coucher, allergies","Numéros d'urgence et contacts","Consignes de la maison : wifi, chauffage, poubelles","Lien ou QR code à partager, sans compte"],
 money:["Gratuit ; modèles illustrés et livret imprimable vers 2,99 €", "Affiliation à des plateformes de garde d'enfants", "Version location saisonnière par logement, sur un marché déjà bien occupé"],
@@ -289,179 +293,203 @@ risq:["Informations sensibles sur les enfants dans un lien : prévoir un code","
 conc:["NestOps, Sit (en anglais)","FamilyWall (répertoire de contacts familial)"],
 src:[["NestOps (fiche store)","https://mwm.ai/apps/nestops/6759583267"],["Sit : Baby Routine & Carer App","https://apps.apple.com/us/app/-/id6452016916"],["FamilyWall","https://apps.apple.com/FR/app/id496889629"]]},
 
-{id:"plateaux-fff",nom:"Plateaux de foot enfants (règles FFF)",pitch:"Temps de jeu équitable sur tout un plateau, avec les règles de chaque catégorie.",cat:"Sport & assos",st:"angle",s:{c:2,m:3,a:2,f:4},
+{id:"plateaux-fff",nom:"Plateaux de foot enfants (règles FFF)",pitch:"Temps de jeu équitable sur tout un plateau, avec les règles de chaque catégorie.",cat:"Sport & assos",st:"angle",s:{c:2,m:3,a:2,f:4,r:2,g:2},
 cx:["Faible","Rotations et chrono ; les règles par catégorie sont publiques."],
 app:["Tous les matchs d'un plateau planifiés d'un coup","U11 : chaque joueur démarre au moins une rencontre","U12-U13 : temps de jeu minimum de 50 % par joueur","Chrono, rotations et alertes d'écart"],
+money:["Gratuit pour les éducateurs ; pack club vers 29 € la saison (toutes les catégories, export des feuilles)", "Partenariat avec une enseigne de sport visible sur les plateaux", "Licence pour un district qui l'offrirait à tous ses clubs"],
 plus:["Les chronos existants gèrent surtout un match à la fois","Règles officielles précises à intégrer","Éducateurs bénévoles en demande d'outils simples"],
 moins:["Beaucoup d'applis de temps de jeu, y compris en français","Petits budgets des clubs"],
 risq:["Les concurrents ajoutent les règles FFF","Règles qui varient selon les districts et les saisons"],
 conc:["Temps De Jeu (français)","SubNow, SubTime et d'autres (anglais)"],
 src:[["Guide U11 (District de la Charente)","https://foot16.fff.fr/wp-content/uploads/sites/27/bsk-pdf-manager/0fdec1e81fc7ee73b7371bc1ed528b3e.pdf"],["Guide U12-U13 (Ligue de la Réunion)","https://liguefoot-reunion.fff.fr/wp-content/uploads/sites/116/2024/04/GIFE-Light-U12-U13-2024.pdf"],["Temps De Jeu (fiche store)","https://mwm.ai/apps/temps-de-jeu/6758916303"],["SubNow (App Store)","https://apps.apple.com/us/app/subnow-player-rotation-timer/id1147153746"]]},
 
-{id:"bons-achat",nom:"Avoirs et bons d'achat",pitch:"Photo du bon ou de l'avoir, lecture automatique du montant et de la date, rappel avant expiration.",cat:"Consommation",st:"angle",fav:true,s:{c:2,m:3,a:1,f:4},
+{id:"bons-achat",nom:"Avoirs et bons d'achat",pitch:"Photo du bon ou de l'avoir, lecture automatique du montant et de la date, rappel avant expiration.",cat:"Consommation",st:"angle",fav:true,s:{c:2,m:3,a:1.5,f:4,r:1,g:2},
 cx:["Faible","Lecture du montant et de la date sur la photo, puis des rappels."],
 app:["Photo d'un bon, d'un avoir ou d'une carte cadeau","Montant et date lus automatiquement","Rappel avant expiration","Liste triée par date"],
+money:["Gratuit : on paie rarement pour un simple rappel", "Affiliation : rappeler le bon au moment d'acheter, avec un lien vers l'enseigne", "Le réunir avec les ODR, les retours et l'alerte prix dans un seul portefeuille payant"],
 plus:["Douleur réelle : les bons expirent sans que rien ne prévienne","Simple à faire"],
 moins:["Les applis de cartes de fidélité gèrent déjà les dates d'expiration","Difficile à faire payer"],
 risq:["Codes de cartes cadeaux = argent : sécurité indispensable","Les applis de fidélité peuvent ajouter la lecture automatique"],
 conc:["Fira (date d'expiration par carte)","FideliScan (bons d'achat)","Up Cadeaux (rappels pour ses propres cartes)"],
 src:[["Bons d'achat qui expirent sans rappel (Cegid)","https://www.cegid.com/fr/blog/cartes-cadeaux-bons-achat-fidelite-leviers-engagement-retail/"],["Fira (App Store)","https://apps.apple.com/app/id1449882541"],["FideliScan (App Store)","https://apps.apple.com/fr/app/id6744745225"],["Up Cadeaux (App Store)","https://apps.apple.com/us/app/id6449083779"]]},
 
-{id:"souvenirs-famille",nom:"Souvenirs des grands-parents",pitch:"Questions guidées, enregistrement de la voix, livre de famille.",cat:"Famille",st:"pris",s:{c:1,m:3,a:3,f:3},
+{id:"souvenirs-famille",nom:"Souvenirs des grands-parents",pitch:"Questions guidées, enregistrement de la voix, livre de famille.",cat:"Famille",st:"pris",s:{c:1,m:3,a:3.5,f:3,r:4,g:3},
 cx:["Moyenne","Enregistrement, transcription et mise en page d'un livre."],
 angle:"Peu de marge : plusieurs acteurs français et étrangers font déjà tout le parcours.",
+money:["Abonnement cadeau sur un an, offert par les enfants : modèle déjà prouvé par les concurrents", "Livre imprimé en fin d'année, avec marge sur l'impression", "Version audio : un podcast de famille avec la voix des grands-parents"],
 plus:["Les gens paient pour ce genre de cadeau"],moins:["Marché déjà occupé, y compris en français"],risq:["Arriver tard face à des acteurs installés"],
 conc:["Ystory (200 questions guidées)","FamilyStories","Remento, HereAfter AI (anglais)"],
 src:[["Ystory (RFGenealogie)","https://www.rfgenealogie.com/node/65350"],["FamilyStories (RFGenealogie)","https://www.rfgenealogie.com/node/66704"]]},
 
-{id:"vinted",nom:"Tableau de bord des revendeurs Vinted",pitch:"Ventes, marge, stock et seuils fiscaux pour ceux qui revendent beaucoup.",cat:"Consommation",st:"pris",s:{c:1,m:3,a:3,f:3},
+{id:"vinted",nom:"Tableau de bord des revendeurs Vinted",pitch:"Ventes, marge, stock et seuils fiscaux pour ceux qui revendent beaucoup.",cat:"Consommation",st:"pris",s:{c:1,m:3,a:3,f:3,r:3,g:3},
 cx:["Moyenne","Import des ventes, calcul de marge et des seuils."],
 angle:"Le créneau est pris par plusieurs outils français récents.",
+money:["Abonnement vers 4,99 €/mois pour les gros revendeurs", "Affiliation : matériel d'envoi, étiquettes, comptable pour micro-entrepreneurs", "Alerte avant les seuils où les plateformes transmettent les ventes au fisc (information, jamais de déclaration à leur place)"],
 plus:["Revendeurs prêts à payer un abonnement"],moins:["Concurrence dense et active"],risq:["Dépendance aux règles de Vinted"],
 conc:["You-Sync","Margeo","Revyde","Fripio"],
 src:[["You-Sync (Friptadium)","https://friptadium.com/blogs/actualites/you-sync-avis-prix-copilote-vinted"],["Comparatif d'applis pour revendeurs (Margeo)","https://margeoapp.com/blog/meilleur-app-revendeur-vinted-leboncoin"]]},
 
-{id:"courrier-admin",nom:"Expliquer un courrier administratif",pitch:"Photo d'un courrier, explication simple, délais et réponse à préparer.",cat:"Paperasse",st:"pris",s:{c:1,m:4,a:2,f:3},
+{id:"courrier-admin",nom:"Expliquer un courrier administratif",pitch:"Photo d'un courrier, explication simple, délais et réponse à préparer.",cat:"Paperasse",st:"pris",s:{c:1,m:4,a:2,f:3,r:2,g:2},
 cx:["Moyenne","Lecture du document et explication par IA."],
 angle:"Les assistants IA généralistes le font déjà, en plus des applis dédiées.",
+money:["Gratuit pour l'explication ; vers 2,99 € pour la réponse prête à envoyer", "Offre pour les travailleurs sociaux et les associations d'aide", "Difficile à faire payer face aux assistants IA gratuits"],
 plus:["Besoin massif"],moins:["N'importe quel assistant IA le fait"],risq:["Erreur d'interprétation sur un courrier important"],
 conc:["Expliquer et Comprendre (App Store)","Assistants IA généralistes"],
 src:[["Expliquer et Comprendre (App Store)","https://apps.apple.com/fr/app/explain-understand/id6748566994"]]},
 
-{id:"preavis-locataire",nom:"Préavis du locataire",pitch:"Durée du préavis selon le logement et la ville, date de fin exacte et lettre de congé.",cat:"Logement",st:"pris",s:{c:1,m:3,a:1,f:5},
+{id:"preavis-locataire",nom:"Préavis du locataire",pitch:"Durée du préavis selon le logement et la ville, date de fin exacte et lettre de congé.",cat:"Logement",st:"pris",s:{c:1,m:3,a:1,f:5,r:1,g:1},
 cx:["Faible","Quelques règles et un modèle de lettre."],
 angle:"À intégrer comme simple fonction de « Récupérer sa caution » plutôt qu'en appli à part.",
+money:["Achat unique vers 2,99 € pour le calcul et la lettre de congé", "Affiliation déménagement : déménageurs, box internet, électricité"],
 plus:["Très facile à faire"],moins:["Simulateurs et lettres types gratuits partout"],risq:["Aucune valeur ajoutée seule"],
 conc:["SeLoger, Selectra, Resilier.fr (simulateurs et lettres)"],
 src:[["Calcul et lettre de préavis (Selectra)","https://selectra.info/demenagement/location/preavis-lettre"],["Calcul du préavis (Resilier.fr)","https://www.resilier.fr/calcul-preavis-logement.php"]]},
 
-{id:"carnet-logement",nom:"Carnet d'entretien du logement",pitch:"Rappels pour la chaudière, le ramonage, les détecteurs et la VMC.",cat:"Logement",st:"pris",s:{c:1,m:3,a:1,f:4},
+{id:"carnet-logement",nom:"Carnet d'entretien du logement",pitch:"Rappels pour la chaudière, le ramonage, les détecteurs et la VMC.",cat:"Logement",st:"pris",s:{c:1,m:3,a:1.5,f:4,r:1,g:2},
 cx:["Faible","Rappels et rangement de documents."],
 angle:"Une version pour locataires, centrée sur ce qui leur incombe, reste possible mais étroite.",
+money:["Affiliation : artisans pour l'entretien de la chaudière ou le ramonage, au moment du rappel", "Offre aux syndics et aux bailleurs"],
 plus:["Obligations réelles, comme l'entretien annuel de la chaudière"],moins:["Déjà proposé, dont par un acteur reconnu"],risq:["Concurrence d'outils gratuits"],
 conc:["CLÉA (Qualitel)","Mon Suivi Logement"],
 src:[["CLÉA, carnet d'information du logement","https://cheque-eco-energie.normandie.fr/sites/default/files/2026-06/flyer_CLEA%20particulier.pdf"],["Mon Suivi Logement (App Store)","https://apps.apple.com/fr/app/mon-suivi-logement/id1080278257"]]},
 
-{id:"garanties",nom:"Suivi des garanties",pitch:"Factures rangées et rappels avant la fin d'une garantie.",cat:"Consommation",st:"pris",s:{c:1,m:3,a:1,f:4},
+{id:"garanties",nom:"Suivi des garanties",pitch:"Factures rangées et rappels avant la fin d'une garantie.",cat:"Consommation",st:"pris",s:{c:1,m:3,a:1,f:4,r:1,g:1},
 cx:["Faible","Scan de factures et rappels."],
 angle:"Utile comme brique de « Réparer ou racheter ? » : savoir si l'appareil est encore garanti.",
+money:["Affiliation : extension de garantie ou réparateur au moment du rappel", "Premium pour stocker toutes les factures"],
 plus:["Simple"],moins:["Applis existantes"],risq:["Peu de valeur seule"],
 conc:["Où est ma garantie ? (App Store)"],
 src:[["Où est ma garantie ? (App Store)","https://apps.apple.com/us/app/id1622809535"]]},
 
-{id:"conduite-accompagnee",nom:"Conduite accompagnée",pitch:"Suivi des kilomètres et du livret pendant l'apprentissage anticipé.",cat:"Famille",st:"pris",s:{c:1,m:3,a:1,f:4},
+{id:"conduite-accompagnee",nom:"Conduite accompagnée",pitch:"Suivi des kilomètres et du livret pendant l'apprentissage anticipé.",cat:"Famille",st:"pris",s:{c:1,m:3,a:1,f:4,r:1,g:1},
 cx:["Faible","Suivi GPS des trajets et livret."],
 angle:"Aucun : l'appli gratuite de référence est déjà recommandée par les auto-écoles.",
+money:["Partenariat avec des auto-écoles qui l'offrent à leurs élèves", "Affiliation assurance jeune conducteur"],
 plus:["Besoin clair"],moins:["Concurrent gratuit très installé"],risq:["Aucun espace"],
 conc:["Coach AAC (gratuite, recommandée par plus de 1 000 auto-écoles)"],
 src:[["Coach AAC (App Store)","https://apps.apple.com/fr/app/coach-aac-conduite-accompagn%C3%A9e/id1188626853"]]},
 
-{id:"inventaire-assurance",nom:"Inventaire pour l'assurance habitation",pitch:"Liste des biens avec photos et valeurs, prête en cas de sinistre.",cat:"Logement",st:"pris",s:{c:1,m:3,a:2,f:3},
+{id:"inventaire-assurance",nom:"Inventaire pour l'assurance habitation",pitch:"Liste des biens avec photos et valeurs, prête en cas de sinistre.",cat:"Logement",st:"pris",s:{c:1,m:3,a:2,f:3,r:2,g:2},
 cx:["Moyenne","Photos, valeurs et export pour l'assureur."],
 angle:"Un inventaire par vidéo analysée par IA pourrait se démarquer, mais le terrain est occupé.",
+money:["Partenariat avec des assureurs qui l'offrent à leurs clients", "Premium pour exporter le dossier complet en cas de sinistre"],
 plus:["Vrai besoin après un cambriolage"],moins:["Applis existantes, usage rare"],risq:["Les assureurs ajoutent la fonction"],
 conc:["CBien","Home Inventory for Insurance"],
 src:[["CBien (SeLoger)","https://edito.seloger.com/node/11787"],["Home Inventory for Insurance","https://www.coddykit.com/fr/apps/home-inventory"]]},
 
-{id:"tempo-linky",nom:"Choisir son option tarifaire avec Linky",pitch:"Comparer Base, heures creuses et Tempo sur sa vraie consommation.",cat:"Consommation",st:"pris",s:{c:1,m:4,a:2,f:2},
+{id:"tempo-linky",nom:"Choisir son option tarifaire avec Linky",pitch:"Comparer Base, heures creuses et Tempo sur sa vraie consommation.",cat:"Consommation",st:"pris",s:{c:1,m:4,a:2,f:2,r:1,g:3},
 cx:["Élevée","Accès aux données Linky via Enedis et calculs par demi-heure."],
 angle:"Un comparateur gratuit le fait déjà sur la courbe de charge.",
+money:["Affiliation au changement d'offre d'électricité : commission à chaque souscription", "Gratuit pour l'utilisateur, car des comparateurs gratuits existent déjà"],
 plus:["Gros enjeu financier pour les foyers"],moins:["Concurrent gratuit et connu"],risq:["Accès aux données Enedis encadré"],
 conc:["MySelectra (comparaison sur courbe de charge, diagnostic Tempo)","Simulateurs Kelwatt, Selectra"],
 src:[["Diagnostic Tempo de MySelectra (Selectra)","https://selectra.info/energie/actualites/marche/diagnostic-tempo-perdant-fevrier-test-3-clics"],["Comparaison sur courbe de charge (Selectra)","https://selectra.info/energie/actualites/marche/myselectra-39-pourcent-ni-base-ni-heures-creuses"]]},
 
-{id:"planning-club",nom:"Tâches des parents au club",pitch:"Lavage des maillots, buvette et covoiturage à tour de rôle.",cat:"Sport & assos",st:"pris",s:{c:1,m:3,a:2,f:3},
+{id:"planning-club",nom:"Tâches des parents au club",pitch:"Lavage des maillots, buvette et covoiturage à tour de rôle.",cat:"Sport & assos",st:"pris",s:{c:1,m:3,a:2,f:3,r:2,g:2},
 cx:["Moyenne","Planning partagé et notifications."],
 angle:"Les logiciels de club couvrent déjà convocations, planning et covoiturage.",
+money:["Pack club vers 29 € la saison", "Sponsors locaux affichés dans l'appli du club"],
 plus:["Besoin dans tous les clubs"],moins:["Marché occupé par des outils complets"],risq:["Clubs déjà équipés"],
 conc:["SportEasy","MonClub (avec covoiturage)","Kalisport","TeamPulse"],
 src:[["Comparatif des logiciels de club 2026 (Hackceleration)","https://hackceleration.com/fr/labs/meilleur/logiciel-club-sportif"],["MonClub (La Fabrique du Net)","https://www.lafabriquedunet.fr/logiciel/monclub"]]},
 
-{id:"caisse-buvette",nom:"Caisse de buvette associative",pitch:"Encaisser à la buvette d'un match ou d'une fête, avec stock et bilan.",cat:"Sport & assos",st:"pris",s:{c:1,m:3,a:1,f:3},
+{id:"caisse-buvette",nom:"Caisse de buvette associative",pitch:"Encaisser à la buvette d'un match ou d'une fête, avec stock et bilan.",cat:"Sport & assos",st:"pris",s:{c:1,m:3,a:1,f:3,r:1,g:1},
 cx:["Moyenne","Hors ligne, stock et éventuelle conformité des logiciels de caisse."],
 angle:"Des caisses gratuites, hors ligne, existent déjà.",
+money:["Commission sur les paiements par carte, avec un partenaire de paiement", "Pack association à la saison"],
 plus:["Besoin fréquent"],moins:["Offre gratuite abondante"],risq:["Règles de conformité des logiciels de caisse à vérifier"],
 conc:["Tunder (gratuit, hors ligne)","ShopCaisse","digabloPos","Caisse.enregistreuse.fr"],
 src:[["Tunder (App Store)","https://apps.apple.com/fr/app/tunder-caisse-enregistreuse/id1471229783"],["Logiciels de caisse gratuits (Codeur)","https://www.codeur.com/blog/logiciels-caisse-gratuits-certifies/"]]},
 
-{id:"secu-mutuelle",nom:"Suivi Sécu + mutuelle",pitch:"Vérifier que chaque soin a bien été remboursé par la Sécu et la mutuelle.",cat:"Paperasse",st:"pris",s:{c:1,m:4,a:1,f:2},
+{id:"secu-mutuelle",nom:"Suivi Sécu + mutuelle",pitch:"Vérifier que chaque soin a bien été remboursé par la Sécu et la mutuelle.",cat:"Paperasse",st:"pris",s:{c:1,m:4,a:1.5,f:2,r:1,g:2},
 cx:["Élevée","Connexion aux comptes Ameli et mutuelles."],
 angle:"Aucun : des agrégateurs et les mutuelles le font.",
+money:["Affiliation au changement de mutuelle quand les remboursements sont mauvais", "Premium pour suivre toute la famille"],
 plus:["Besoin réel"],moins:["Déjà couvert"],risq:["Accès aux données de santé très encadré"],
 conc:["MySofie","Côté santé (AG2R La Mondiale)","Applis des mutuelles"],
 src:[["MySofie (Magnolia)","https://www.magnolia.fr/mutuelle-sante/remboursement/mysofie"],["Côté santé (AG2R La Mondiale)","https://www.ag2rlamondiale.fr/tous-nos-services/service-decouvrez-notre-application-mobile-cote-sante"]]},
 
-{id:"concours-petanque",nom:"Concours de pétanque",pitch:"Tirage au sort, tableaux et résultats d'un concours.",cat:"Sport & assos",st:"pris",s:{c:1,m:2,a:1,f:4},
+{id:"concours-petanque",nom:"Concours de pétanque",pitch:"Tirage au sort, tableaux et résultats d'un concours.",cat:"Sport & assos",st:"pris",s:{c:1,m:2,a:1,f:4,r:1,g:1},
 cx:["Faible","Tirage et tableaux."],
 angle:"Couvert par des applis dédiées et des outils de tournoi.",
+money:["Pack club à la saison", "Sponsors du concours affichés sur les tableaux"],
 plus:["Public fidèle"],moins:["Déjà couvert"],risq:["Aucun espace"],
 conc:["Bouliste+ (tirage au sort des concours)","La Compét","Logiciel fédéral"],
 src:[["Bouliste+ (App Store)","https://apps.apple.com/pg/app/bouliste/id6480347151"],["La Compét (La Fabrique du Net)","https://www.lafabriquedunet.fr/logiciel/la-compet"]]},
 
-{id:"pedibus",nom:"Organisation de pédibus",pitch:"Planning des parents qui accompagnent les enfants à l'école à pied.",cat:"Famille",st:"pris",s:{c:1,m:2,a:1,f:4},
+{id:"pedibus",nom:"Organisation de pédibus",pitch:"Planning des parents qui accompagnent les enfants à l'école à pied.",cat:"Famille",st:"pris",s:{c:1,m:2,a:1,f:4,r:1,g:1},
 cx:["Faible","Planning partagé."],
 angle:"Une appli dédiée existe déjà.",
+money:["Licence payée par la mairie ou l'école, gratuit pour les parents"],
 plus:["Initiative appréciée des villes"],moins:["Petit marché, déjà couvert"],risq:["Responsabilité en cas d'accident"],
 conc:["Petitbus"],
 src:[["Petitbus à Roubaix (Roubaix XL)","https://www.roubaixxl.fr/?p=13180"],["Organiser un pédibus (MAIF)","https://www.maif.fr/associationsetcollectivites/etablissements-enseignement/guides-fonctionnement/pedibus"]]},
 
-{id:"velo-fmd",nom:"Attestations vélo (forfait mobilités durables)",pitch:"Prouver ses trajets à vélo pour toucher le forfait de l'employeur.",cat:"Travail & impôts",st:"pris",s:{c:1,m:2,a:2,f:3},
+{id:"velo-fmd",nom:"Attestations vélo (forfait mobilités durables)",pitch:"Prouver ses trajets à vélo pour toucher le forfait de l'employeur.",cat:"Travail & impôts",st:"pris",s:{c:1,m:2,a:2,f:3,r:2,g:2},
 cx:["Moyenne","Suivi des trajets et attestation."],
 angle:"Le ministère cite déjà des applis pour ces justificatifs.",
+money:["Licence aux employeurs pour gérer le forfait de leurs salariés", "Affiliation vélos et équipements"],
 plus:["Dispositif officiel"],moins:["Déjà couvert, et une attestation sur l'honneur suffit souvent"],risq:["Aucun espace"],
 conc:["Uwinbike","Géovélo"],
 src:[["Justificatifs vélo (Région Île-de-France)","https://www.iledefrance.fr/les-prises-en-charge-facultatives-fmd-prime-transport-indemnite-kilometrique"],["Forfait mobilités durables (justice.fr)","https://www.justice.fr/fiche/forfait-mobilites-durables-fmd"]]},
 
-{id:"nounou-partagee",nom:"Garde partagée : heures et coûts",pitch:"Répartir les heures et le salaire de la nounou entre deux familles.",cat:"Famille",st:"pris",s:{c:1,m:2,a:2,f:3},
+{id:"nounou-partagee",nom:"Garde partagée : heures et coûts",pitch:"Répartir les heures et le salaire de la nounou entre deux familles.",cat:"Famille",st:"pris",s:{c:1,m:2,a:2,f:3,r:2,g:2},
 cx:["Moyenne","Règles de répartition et déclarations Pajemploi."],
 angle:"Un service dédié fait déjà le calcul et prépare les déclarations.",
+money:["Abonnement vers 2,99 €/mois par famille", "Affiliation : assurance et services de paie à domicile"],
 plus:["Calcul pénible à la main"],moins:["Déjà couvert"],risq:["Erreurs de paie"],
 conc:["Nounoupay","Simulateurs de salaire"],
 src:[["Nounoupay (Les Pépites Tech)","https://lespepitestech.com/startup-de-la-french-tech/nounoupay"],["Simulateur garde partagée (Travail Industrie)","https://travail-industrie.com/outils/simulateur-salaire-nounou-garde-partagee"]]},
 
-{id:"conges-maladie",nom:"Congés payés pendant un arrêt maladie",pitch:"Calculer les congés acquis pendant un arrêt, selon les règles de 2024.",cat:"Travail & impôts",st:"pris",s:{c:1,m:3,a:1,f:3},
+{id:"conges-maladie",nom:"Congés payés pendant un arrêt maladie",pitch:"Calculer les congés acquis pendant un arrêt, selon les règles de 2024.",cat:"Travail & impôts",st:"pris",s:{c:1,m:3,a:1,f:3,r:1,g:1},
 cx:["Moyenne","Règles récentes avec des cas particuliers."],
 angle:"Des simulateurs gratuits à jour existent.",
+money:["Gratuit avec publicité, ou achat unique minime", "Offre aux syndicats pour leurs adhérents"],
 plus:["Règles mal connues"],moins:["Déjà couvert"],risq:["Erreur de calcul"],
 conc:["Simulateurs gratuits (Advizexperts, Moicombien…)","Logiciels de paie"],
 src:[["Simulateur congés payés (Advizexperts)","https://advizexperts.fr/simulateur-conges-payes/"],["La nouvelle règle (CCI Paris Île-de-France)","https://www.entreprises.cci-paris-idf.fr/web/rh/conges-payes-et-arret-de-travail-la-nouvelle-regle"]]},
 
-{id:"vide-grenier",nom:"Prix conseillé pour vide-grenier",pitch:"Une photo de l'objet, un prix conseillé, des étiquettes à imprimer.",cat:"Consommation",st:"pris",s:{c:1,m:3,a:2,f:3},
+{id:"vide-grenier",nom:"Prix conseillé pour vide-grenier",pitch:"Une photo de l'objet, un prix conseillé, des étiquettes à imprimer.",cat:"Consommation",st:"pris",s:{c:1,m:3,a:2,f:3,r:2,g:2},
 cx:["Moyenne","Reconnaissance d'objet et estimation par IA."],
 angle:"Les étiquettes à imprimer seraient le seul petit plus, insuffisant.",
+money:["Vente de planches d'étiquettes à imprimer", "Affiliation vers les sites de revente pour les objets de valeur"],
 plus:["Usage fréquent au printemps"],moins:["Nombreuses applis d'estimation par photo"],risq:["Aucun espace"],
 conc:["Revyde","Sprice-It","FripeScan","ValueSnap"],
 src:[["Revyde (Friptadium)","https://friptadium.com/blogs/actualites/revyde-avis-prix-outil-vinted"],["Applis brocante testées (Margeo)","https://margeoapp.com/blog/applications-brocante-vide-grenier-test-2026"]]},
 
-{id:"langues-regionales",nom:"Apprendre une langue régionale",pitch:"Cours courts de breton, d'occitan, d'alsacien ou de créole.",cat:"Loisirs",st:"pris",s:{c:1,m:2,a:2,f:2},
+{id:"langues-regionales",nom:"Apprendre une langue régionale",pitch:"Cours courts de breton, d'occitan, d'alsacien ou de créole.",cat:"Loisirs",st:"pris",s:{c:1,m:2,a:2,f:2,r:2,g:2},
 cx:["Élevée","Contenus pédagogiques à produire avec des locuteurs."],
 angle:"Les langues sans appli (picard, francique…) ont un public très petit.",
+money:["Abonnement vers 4,99 €/mois", "Licences pour les écoles bilingues et les associations culturelles", "Chercher des aides des régions pour leur langue"],
 plus:["Communautés attachées à leur langue"],moins:["Grandes langues régionales déjà couvertes"],risq:["Contenu coûteux à produire"],
 conc:["Assimil (breton, catalan, corse, occitan)","Kreyolang (créole)","Applis d'alsacien"],
 src:[["Méthode Assimil en appli (Libraria Occitana)","https://libraria-occitana.org/en/product/apprendre-une-langue-regionale-version-numerique-de-la-methode-collection-sans-peine"],["Kreyolang (fiche store)","https://mwm.ai/apps/kreyolang-learn-your-language/6760952977"]]},
 
-{id:"apiculteur",nom:"Registre de l'apiculteur amateur",pitch:"Visites, traitements et déclaration annuelle des ruches.",cat:"Loisirs",st:"pris",s:{c:1,m:1,a:1,f:4},
+{id:"apiculteur",nom:"Registre de l'apiculteur amateur",pitch:"Visites, traitements et déclaration annuelle des ruches.",cat:"Loisirs",st:"pris",s:{c:1,m:1,a:1,f:4,r:1,g:1},
 cx:["Faible","Saisie des visites et export du registre."],
 angle:"Des applis de rucher exportent déjà le registre d'élevage.",
+money:["Premium vers 1,99 €/mois", "Affiliation matériel apicole et traitements"],
 plus:["Obligation réelle dès la première ruche"],moins:["Petit marché, déjà couvert"],risq:["Aucun espace"],
 conc:["BeePerf (export du registre d'élevage)","Autres applis de suivi de ruches"],
 src:[["BeePerf (App Store)","https://apps.apple.com/vg/app/beeperf/id1531124152"],["Déclaration annuelle des ruches (Chambre d'agriculture)","https://pays-de-la-loire.chambres-agriculture.fr/sinformer/ressources-et-documentation/evenements-manifestations/detail-evenement-technique/apiculteurs-cest-le-moment-de-declarer-vos-ruches"]]},
 
-{id:"jardins-partages",nom:"Planning des jardins partagés",pitch:"Arrosage et récoltes organisés entre membres.",cat:"Loisirs",st:"pris",s:{c:1,m:1,a:1,f:4},
+{id:"jardins-partages",nom:"Planning des jardins partagés",pitch:"Arrosage et récoltes organisés entre membres.",cat:"Loisirs",st:"pris",s:{c:1,m:1,a:1,f:4,r:1,g:1},
 cx:["Faible","Planning partagé."],
 angle:"Une appli française dédiée réunit déjà de nombreux jardins.",
+money:["Pack association vers 19 €/an", "Affiliation graines et matériel de jardin"],
 plus:["Communautés actives"],moins:["Petit marché, déjà couvert"],risq:["Aucun espace"],
 conc:["Adopte ma tomate (plus de 145 jardins partagés)"],
 src:[["Adopte ma tomate (HelloAsso)","https://www.helloasso.com/associations/adopte-ma-tomate/adhesions/adhesion"]]},
 
-{id:"machines-laver",nom:"Réservation des machines à laver partagées",pitch:"Réserver une machine en résidence ou en colocation.",cat:"Logement",st:"pris",s:{c:1,m:1,a:1,f:3},
+{id:"machines-laver",nom:"Réservation des machines à laver partagées",pitch:"Réserver une machine en résidence ou en colocation.",cat:"Logement",st:"pris",s:{c:1,m:1,a:1.5,f:3,r:1,g:2},
 cx:["Moyenne","Souvent liée au matériel (paiement, déverrouillage)."],
 angle:"Le marché passe par des solutions liées aux machines elles-mêmes.",
+money:["Licence aux résidences étudiantes et gestionnaires de colocation", "Commission sur les machines connectées à paiement"],
 plus:["Irritant quotidien"],moins:["Déjà couvert par des solutions matérielles"],risq:["Dépendance aux gestionnaires de résidences"],
 conc:["WeWash"],
 src:[["WeWash (fiche store)","https://mwm.ai/fr/apps/wewash/1128795787"]]},
 
-{id:"charges-locatives",cut:"ne te plaît pas",nom:"Contrôler ses charges locatives",pitch:"Vérifier ligne par ligne la régularisation annuelle des charges et demander les justificatifs.",cat:"Logement",st:"trou",s:{c:4,m:4,a:3,f:3},
+{id:"charges-locatives",cut:"ne te plaît pas",nom:"Contrôler ses charges locatives",pitch:"Vérifier ligne par ligne la régularisation annuelle des charges et demander les justificatifs.",cat:"Logement",st:"trou",s:{c:4,m:4,a:2.5,f:3,r:3,g:2},
 cx:["Moyenne","Lire un décompte souvent peu détaillé et comparer chaque ligne à la liste officielle des charges récupérables."],
 app:["Photo du décompte de régularisation","Chaque ligne comparée à la liste fermée des charges récupérables (décret du 26 août 1987)","Contrôle des délais : charges oubliées réclamables sur 3 ans maximum","Lettre de demande de justificatifs ou de contestation","Historique des provisions payées d'une année à l'autre"],
 money:["Pack contrôle annuel vers 4,99 €", "Version marque blanche pour les associations de locataires", "Affiliation énergie et assurance habitation"],
@@ -471,7 +499,7 @@ risq:["Rester sur l'information : ne pas pousser à refuser de payer, au risque 
 conc:["Outils de gestion locative côté bailleurs (BailFacile…)","Guides et cabinets d'avocats"],
 src:[["Liste des charges récupérables (Kohen Avocats)","https://kohenavocats.fr/?p=2119870"],["Justificatifs à fournir par le bailleur (BailFacile)","https://bailfacile.fr/guides/justificatif-charges-locatives-par-bailleur"],["Prescription de 3 ans (Immobilier Danger)","https://www.immobilier-danger.com/Regularisation-de-vos-charges-832.html"],["Contester une régularisation (PAP)","https://www.pap.fr/actualites/regularisation-des-charges-locatives-comment-savoir-si-vous-pouvez-contester/a25783"]]},
 
-{id:"frontaliers",cut:"ne te plaît pas",nom:"Compteur de jours des frontaliers",pitch:"Compter ses jours de télétravail et de mission hors du pays d'emploi pour rester sous les seuils fiscaux et sociaux.",cat:"Travail & impôts",st:"angle",s:{c:3,m:3,a:4,f:4},
+{id:"frontaliers",cut:"ne te plaît pas",nom:"Compteur de jours des frontaliers",pitch:"Compter ses jours de télétravail et de mission hors du pays d'emploi pour rester sous les seuils fiscaux et sociaux.",cat:"Travail & impôts",st:"angle",s:{c:3,m:3,a:3.5,f:4,r:4,g:3},
 cx:["Moyenne","Règles différentes selon le pays d'emploi, et deux compteurs à tenir : impôts et sécurité sociale."],
 app:["Calendrier : bureau, télétravail, mission, congé","Seuil fiscal France–Luxembourg : 34 jours par an hors du Luxembourg","Seuil franco-suisse : 40 % de télétravail, dont 10 jours de missions","Second compteur sécurité sociale : 25 % ou 49,9 % selon l'accord-cadre","Alerte avant le seuil et export pour l'employeur ou la déclaration"],
 money:["Abonnement vers 2,99 €/mois : public au bon salaire, qui craint un redressement", "Licence pour les employeurs et services RH qui suivent des frontaliers", "Affiliation : banques, change de devises, assurance santé des frontaliers"],
@@ -481,7 +509,7 @@ risq:["Erreur de règle = conséquences fiscales : rester un outil de comptage, 
 conc:["Simulateurs web (Frontaliers Grand Est)","Suivi interne des employeurs"],
 src:[["Seuil de 34 jours France–Luxembourg (Frontaliers Grand Est)","https://frontaliers-grandest.eu/wp-content/uploads/2025/01/Teletravail_frontalier_au_Luxembourg.pdf"],["Règle des 34 jours, frontaliers belges (Frontaliers Grand Est)","https://frontaliers-grandest.eu/accueil/salaries/belgique-luxembourg/teletravail/regle-des-34-jours/"],["Simulateur et seuil de 40 % franco-suisse (Frontaliers Grand Est)","https://frontaliers-grandest.eu/?p=69068"],["Accord-cadre sécurité sociale (LCGB)","https://lcgb.lu/files/2024/07/2025-07-Teletravail-Frontaliers-FR.pdf"]]},
 
-{id:"fuite-eau",cut:"ne te plaît pas",nom:"Fuite d'eau : alerte et plafonnement",pitch:"Relever son compteur en photo, repérer une surconsommation, et demander le plafonnement de la facture en cas de fuite.",cat:"Logement",st:"trou",s:{c:4,m:3,a:2,f:4},
+{id:"fuite-eau",cut:"ne te plaît pas",nom:"Fuite d'eau : alerte et plafonnement",pitch:"Relever son compteur en photo, repérer une surconsommation, et demander le plafonnement de la facture en cas de fuite.",cat:"Logement",st:"trou",s:{c:4,m:3,a:2,f:4,r:2,g:2},
 cx:["Faible","Relevés en photo, calcul de la moyenne et lettre type."],
 app:["Relevé du compteur d'eau en photo, chaque semaine ou chaque mois","Alerte si la consommation s'envole par rapport à la moyenne","En cas de fuite après compteur : marche à suivre et pièces à réunir","Demande de plafonnement au double de la consommation moyenne, dans le délai d'un mois","Rappel : les fuites d'appareils ménagers et sanitaires ne sont pas couvertes"],
 money:["Premium vers 1,99 €/mois avec alertes", "Affiliation : détecteurs de fuite, compteurs connectés, plombiers", "Version marque blanche pour des assureurs habitation ou des services d'eau"],
@@ -491,37 +519,41 @@ risq:["Les distributeurs d'eau peuvent alerter eux-mêmes avec les compteurs té
 conc:["Modèles de lettres et guides (Selectra, Que Choisir)"],
 src:[["Plafonnement au double de la consommation moyenne (Que Choisir)","https://www.quechoisir.org/conseils-facture-d-eau-vos-questions-nos-reponses-n115282/"],["Délai d'un mois pour demander l'écrêtement (Épernay Agglo)","https://epernay-agglo.fr/print/pdf/node/30870"],["Fuites exclues (Grand Poitiers)","https://www.grandpoitiers.fr/au-quotidien/eau-et-assainissement/paiement-et-demarches/fuites-et-degrevements/pdf"],["Démarche loi Warsmann (Selectra)","https://eau.selectra.info/info-demarche/fuite-eau/loi-warsmann"]]},
 
-{id:"encadrement-loyers",cut:"ne te plaît pas",nom:"Vérifier son loyer encadré",pitch:"Comparer son loyer au plafond de sa ville, calculer le trop-perçu et préparer les recours.",cat:"Logement",st:"angle",s:{c:3,m:3,a:2,f:3},
+{id:"encadrement-loyers",cut:"ne te plaît pas",nom:"Vérifier son loyer encadré",pitch:"Comparer son loyer au plafond de sa ville, calculer le trop-perçu et préparer les recours.",cat:"Logement",st:"angle",s:{c:3,m:3,a:2.5,f:3,r:3,g:2},
 cx:["Moyenne","Plafonds différents par ville et par quartier, mis à jour chaque année."],
 app:["Adresse, surface, époque de construction, meublé ou non","Comparaison avec le loyer de référence majoré","Alerte : 3 mois après la signature pour contester un complément de loyer","Calcul du trop-perçu mois par mois","Lettres et saisine de la commission de conciliation"],
+money:["Achat unique vers 9,99 € quand un trop-perçu est repéré : lettre et dossier de recours", "Version marque blanche pour les associations de locataires", "À éviter : un pourcentage sur la somme récupérée, qui ressemblerait à du conseil juridique"],
 plus:["Sommes parfois importantes sur plusieurs années","Délais courts que les locataires ignorent"],
 moins:["Simulateurs officiels gratuits (Ville de Paris, service-public.gouv.fr)","Seulement dans les villes concernées"],
 risq:["Plafonds à tenir à jour ville par ville","Conflit avec le bailleur"],
 conc:["Simulateurs officiels (Ville de Paris, service-public.gouv.fr)","Guides d'avocats"],
 src:[["Délai de 3 mois pour le complément de loyer (PAP)","https://www.pap.fr/bailleur/loyer-charges/complement-de-loyer-cette-erreur-qui-peut-vous-couter-des-mois-de-loyer/a31314"],["Simulateur officiel pour Paris (service-public.gouv.fr)","https://www.service-public.gouv.fr/particuliers/vosdroits/F34407?lang=fr"],["Calcul du trop-perçu (123loger)","https://www.123loger.com/blog/encadrement-loyers-verifier-loyer-legal-obtenir-remboursement/"]]},
 
-{id:"taxe-fonciere",cut:"ne te plaît pas",nom:"Vérifier sa taxe foncière",pitch:"Repérer les erreurs de surface ou de caractéristiques qui gonflent la taxe foncière.",cat:"Logement",st:"angle",s:{c:3,m:2,a:3,f:2},
+{id:"taxe-fonciere",cut:"ne te plaît pas",nom:"Vérifier sa taxe foncière",pitch:"Repérer les erreurs de surface ou de caractéristiques qui gonflent la taxe foncière.",cat:"Logement",st:"angle",s:{c:3,m:2,a:3,f:2,r:3,g:3},
 cx:["Élevée","La valeur locative cadastrale repose sur un calcul ancien et technique, et la fiche d'évaluation doit être demandée."],
 angle:"Un outil de pré-diagnostic qui explique la fiche d'évaluation, mais le sujet attire peu de recherches.",
+money:["Paiement à l'analyse, vers 9,99 €", "Offre aux agences et syndics pour leurs propriétaires", "À éviter : un pourcentage de la baisse obtenue, trop proche du conseil fiscal"],
 plus:["Remboursement possible en cas d'erreur"],moins:["Peu de recherches en ligne sur le sujet","Experts et simulateurs déjà présents"],risq:["Une réclamation peut aussi entraîner une réévaluation à la hausse","Calcul très technique"],
 conc:["Simulateurs et guides (Les Calculateurs, Simulateur Gratuit…)","Cabinets spécialisés"],
 src:[["Volume de recherches et erreurs courantes (Kohen Avocats)","https://kohenavocats.fr/2026/05/16/taxe-fonciere-trop-elevee-erreur-surface-valeur-locative-reclamation/"],["Demande à ses risques et périls (Moneyvox)","https://www.moneyvox.fr/impot/actualites/94291/taxe-fonciere-surprise-les-erreurs-sur-les-avis-de-la-dgfip-sont-souvent-en-votre-faveur"],["Contester sa taxe foncière (Les Calculateurs)","https://www.lescalculateurs.fr/pages/taxe-fonciere/comment-contester-sa-taxe-fonciere"]]},
 
-{id:"retard-train",cut:"ne te plaît pas",nom:"Indemnisation des retards de train",pitch:"Repérer les retards indemnisables et préparer la demande.",cat:"Consommation",st:"pris",s:{c:1,m:4,a:2,f:2},
+{id:"retard-train",cut:"ne te plaît pas",nom:"Indemnisation des retards de train",pitch:"Repérer les retards indemnisables et préparer la demande.",cat:"Consommation",st:"pris",s:{c:1,m:4,a:2,f:2,r:2,g:2},
 cx:["Élevée","Règles différentes selon le type de train et, pour les TER, selon chaque région."],
 angle:"Les TER restent le point faible, mais les règles sont morcelées région par région.",
+money:["Commission sur l'indemnité obtenue, comme les services d'indemnisation des vols", "Marge faible : les transporteurs proposent déjà des démarches gratuites"],
 plus:["Retards fréquents"],moins:["Une appli détecte déjà les retards dans les billets reçus par e-mail","Ouigo indemnise sans démarche"],risq:["Règles régionales nombreuses et changeantes"],
 conc:["Appli qui lit les billets dans les e-mails","Démarches SNCF (G30) et garanties régionales des abonnés"],
 src:[["Appli qui détecte les retards via les e-mails (Next)","https://next.ink/news/102322-tgv-intercites-indemnisations-en-ligne-pour-tous-retards-des-30-min-utilisables-sur-internet.htm"],["Barème et démarches selon le train (Selectra)","https://selectra.info/finance/actualites/marche/train-retard-indemnisation-25-50-pourcent"],["TER : indemnisation selon les régions (UFC-Que Choisir)","https://www.quechoisir.org/action-ufc-que-choisir-retards-des-ter-l-ufc-que-choisir-reclame-des-indemnites-automatiques-pour-les-usagers-n49560"]]},
 
-{id:"rappels-produits",cut:"ne te plaît pas",nom:"Rappels de produits sur mes achats",pitch:"Être prévenu quand un produit acheté est rappelé.",cat:"Consommation",st:"pris",s:{c:1,m:3,a:1,f:3},
+{id:"rappels-produits",cut:"ne te plaît pas",nom:"Rappels de produits sur mes achats",pitch:"Être prévenu quand un produit acheté est rappelé.",cat:"Consommation",st:"pris",s:{c:1,m:3,a:1,f:3,r:1,g:1},
 cx:["Moyenne","Base officielle ouverte, mais relier les rappels à ses propres achats est difficile."],
 angle:"Croiser les rappels avec ses propres achats serait le seul plus, mais les tickets papier ne sont plus imprimés systématiquement.",
+money:["Partenariat avec des enseignes qui veulent prévenir leurs clients", "Difficile à faire payer : un site public d'information existe déjà"],
 plus:["Données officielles ouvertes (RappelConso)"],moins:["Plusieurs applis le font déjà"],risq:["Aucun espace"],
 conc:["VérifConso","AlerteProduit (produits surveillés)","Alerte Conso"],
 src:[["VérifConso (data.gouv.fr)","https://www.data.gouv.fr/reuses/verifconso-scan-rappels"],["AlerteProduit (App Store)","https://apps.apple.com/us/app/id6444263027"],["Fin des tickets de caisse imprimés (Assemblée nationale)","https://www.assemblee-nationale.fr/dyn/16/questions/QANR5L16QE10968.pdf"]]},
 
-{id:"alerte-prix",neu:true,nom:"Le prix a baissé après mon achat",pitch:"Surveiller le prix de ce qu'on vient d'acheter et réclamer la différence quand l'enseigne la garantit.",cat:"Consommation",st:"trou",s:{c:5,m:4,a:3,f:2},
+{id:"alerte-prix",nom:"Le prix a baissé après mon achat",pitch:"Surveiller le prix de ce qu'on vient d'acheter et réclamer la différence quand l'enseigne la garantit.",cat:"Consommation",st:"trou",s:{c:5,m:4,a:3,f:2,r:2,g:4},
 cx:["Élevée","Suivre les prix chez beaucoup de marchands demande une collecte fiable, et chaque enseigne a ses propres conditions de garantie."],
 app:["Transférer l'e-mail de commande ou photographier le ticket","Suivi quotidien du prix de la même référence chez le même marchand","Alerte si le prix baisse pendant la période garantie par l'enseigne","Message de demande prêt à envoyer, avec captures datées comme preuve","Si l'enseigne ne garantit rien : rappel du délai de rétractation de 14 jours pour un achat en ligne"],
 money:["Commission seulement si ça marche : par exemple 20 % de la somme récupérée","Abonnement Premium vers 2,99 €/mois : suivi illimité et alertes instantanées pendant le Black Friday","Affiliation : quand la baisse n'est pas réclamable, lien vers le même produit moins cher","Revenus concentrés sur des pics prévisibles : Black Friday, soldes, Prime Day"],
@@ -529,7 +561,7 @@ plus:["Gain concret et chiffré pour l'utilisateur","Aucun équivalent français
 conc:["Garanties de prix propres à chaque enseigne (Darty pendant le Black Friday, Amazon pendant le Prime Day)","Historiques de prix, utiles avant l'achat mais pas après","Aucun suivi après achat repéré en France"],
 src:[["Garantie de prix Black Friday Darty, différence en carte cadeau (Economie Matin)","https://www.economiematin.fr/?p=241712"],["Remboursement automatique de la différence au Prime Day (Dealabs)","https://www.dealabs.com/magazine/?p=24367"],["Demandes de différence refusées : retours de clients (forum Que Choisir)","https://forum.quechoisir.org/post1008168.html"]]},
 
-{id:"odr",neu:true,nom:"Mes offres de remboursement (ODR)",pitch:"Ne plus rater une ODR : date limite, pièces à envoyer, copies gardées, relance quand le virement tarde.",cat:"Consommation",st:"trou",s:{c:5,m:3,a:2,f:4},
+{id:"odr",nom:"Mes offres de remboursement (ODR)",pitch:"Ne plus rater une ODR : date limite, pièces à envoyer, copies gardées, relance quand le virement tarde.",cat:"Consommation",st:"trou",s:{c:5,m:3,a:2.5,f:4,r:3,g:2},
 cx:["Faible","Photo, lecture des dates, rappels et modèles de lettres : rien de lourd."],
 app:["Photo du bulletin d'ODR et du ticket : l'appli lit le montant et la date limite","Liste des pièces à fournir, cochée au fur et à mesure","Coffre des preuves : copies du dossier et preuve d'envoi","Rappel avant la date limite, puis quand le délai de remboursement est dépassé","Lettre de relance, puis de mise en demeure, prête à envoyer"],
 money:["Affiliation : liste des ODR en cours avec liens vers les marchands","Premium vers 9,99 €/an : dossiers illimités et lettres de relance","Partenariat avec des sites de bons plans qui relaient déjà les ODR","À terme, réunir ODR, avoirs et garanties dans un seul portefeuille de remboursements, plus facile à vendre"],
@@ -537,7 +569,7 @@ plus:["Argent déjà promis au client","Délais longs qui créent un vrai besoin
 conc:["Portails de suivi de chaque marque (Samsung, Orange…)","Applis de cashback sur les courses, qui servent à autre chose","Aucune appli de suivi tous fabricants repérée"],
 src:[["Conditions retorses, garder des copies, délai jusqu'à 10 semaines (Que Choisir)","https://www.quechoisir.org/conseils-offres-de-remboursement-odr-bien-remplir-les-conditions-ou-contester-un-refus-n62398/"],["Recours en cas de non-remboursement (Électroménager Compare)","https://www.electromenager-compare.com/odr-que-faire-pour-obtenir-remboursement-aide-467.htm"],["Remboursement reçu plus de 3 mois après (communauté Samsung)","https://eu.community.samsung.com/t5/shop/d%C3%A9lai-de-traitement-odr/td-p/6535468"]]},
 
-{id:"cout-usage",neu:true,nom:"Combien me coûte chaque utilisation ?",pitch:"Diviser chaque abonnement par le nombre de fois où on s'en sert : « ta salle te coûte 18 € la séance ».",cat:"Consommation",st:"angle",s:{c:3,m:4,a:3,f:4},
+{id:"cout-usage",nom:"Combien me coûte chaque utilisation ?",pitch:"Diviser chaque abonnement par le nombre de fois où on s'en sert : « ta salle te coûte 18 € la séance ».",cat:"Consommation",st:"angle",s:{c:3,m:4,a:2.5,f:4,r:2,g:3},
 cx:["Faible","Saisie des abonnements et pointage en un geste ; la connexion bancaire peut attendre."],
 app:["Liste des abonnements : salle de sport, streaming, presse, appli payante","Pointage en un geste à chaque utilisation","Coût par utilisation, mois après mois","Verdict simple : garder, passer à l'offre inférieure, ou arrêter","Rappel avant la date de reconduction"],
 money:["Commission quand l'utilisateur passe à une offre moins chère (box, forfait mobile, salle de sport)","Premium vers 1,99 €/mois : import bancaire automatique et statistiques","Version famille : qui utilise quoi dans le foyer"],
@@ -545,7 +577,7 @@ plus:["Idée simple à expliquer, effet « waouh » sur le premier calcul","Rapi
 conc:["papernest - mes abonnements (gratuit : détection bancaire, résiliation)","ReSubs","Applis bancaires qui listent les prélèvements"],
 src:[["papernest - mes abonnements, application gratuite","https://www.papernest.com/papernest-monitor/gerer-ses-abonnements/"],["Comparatif des applis d'abonnements (ReSubs)","https://resubs.app/fr/resources/best-apps-to-manage-recurring-payments"],["Abonnements fantômes (papernest)","https://www.papernest.com/papernest-monitor/abonnements-fantomes/"]]},
 
-{id:"vtc-net",neu:true,nom:"Revenu net réel des chauffeurs et livreurs",pitch:"Savoir ce qu'il reste vraiment par heure après commission, carburant, véhicule et cotisations.",cat:"Travail & impôts",st:"angle",s:{c:3,m:3,a:4,f:3},
+{id:"vtc-net",nom:"Revenu net réel des chauffeurs et livreurs",pitch:"Savoir ce qu'il reste vraiment par heure après commission, carburant, véhicule et cotisations.",cat:"Travail & impôts",st:"angle",s:{c:3,m:3,a:3.5,f:3,r:4,g:3},
 cx:["Moyenne","Saisie ou import des relevés de plateforme, plus des taux de cotisation à tenir à jour."],
 app:["Saisie rapide des gains par plateforme et des heures","Dépenses du véhicule : carburant, location, assurance, entretien","Revenu net par heure et par jour, au fil de la semaine","Meilleures plages horaires selon ses propres chiffres","Estimation des cotisations à mettre de côté, avec le taux et sa source affichés"],
 money:["Abonnement de 4,99 à 7,99 €/mois : outil de travail, il se paie s'il fait gagner une heure par mois","Affiliation : assurance VTC, location longue durée, expert-comptable en ligne","Statistiques anonymes par ville en option payante","Diffusion par les groupes de chauffeurs et les centres de formation"],
@@ -553,23 +585,7 @@ plus:["Public qui compte chaque euro et paie pour un outil utile","Simulateurs e
 conc:["Simulateurs ponctuels (Keobiz, travail-industrie, Legalstart)","Simulateur officiel de l'URSSAF","Experts-comptables spécialisés VTC"],
 src:[["Simulateur de revenu net VTC (travail-industrie)","https://travail-industrie.com/outils/simulateur-revenu-net-chauffeur-vtc"],["Combien gagne un VTC après charges (Keobiz)","https://www.keobiz.fr/fiches-pratiques/salaire-chauffeur-vtc/"],["Salaire d'un VTC et charges (Legalstart)","https://www.legalstart.fr/fiches-pratiques/vie-des-entreprises/salaire-vtc"],["Simulateur adossé à l'API de l'URSSAF (Le Freelance)","https://lefreelance.fr/simulateurs/simulateur-revenus/"]]},
 
-{id:"chasse-tresor",neu:true,nom:"Chasse au trésor d'anniversaire sur mesure",pitch:"Le parent répond à 5 questions, l'IA écrit l'histoire, les énigmes et les indices au prénom de l'enfant, prêts à imprimer.",cat:"Loisirs",st:"angle",s:{c:3,m:3,a:3,f:4},
-cx:["Faible","Un formulaire, une génération de texte encadrée et une mise en page PDF."],
-app:["Questions : prénom, âge, thème, nombre d'enfants, maison ou jardin","Histoire et énigmes adaptées à l'âge","Indices à cacher, avec plan de cache conseillé","Diplômes et invitations au même thème","PDF prêt à imprimer en quelques minutes"],
-money:["Vente à l'unité de 7 à 12 € le kit (les kits génériques se vendent déjà de 15 à 25 €)","Kits saisonniers : Halloween, Pâques, Noël, fin d'année scolaire","Option coffret imprimé et envoyé, avec marge sur la boîte","À vendre sur ta boutique Shopify : c'est le produit numérique de l'étude de niches du projet"],
-plus:["Marché prouvé : des parents paient déjà pour des kits","Coût de fabrication presque nul par vente","Fait le lien avec ta boutique Shopify"],moins:["Beaucoup de kits gratuits à imprimer","Ventes très saisonnières"],risq:["Qualité des énigmes à surveiller, surtout pour les petits","Thèmes de personnages connus interdits : rester sur des thèmes génériques (pirates, espions, espace)"],
-conc:["En Cavale (kits clé en main)","AnnivEnigm","Kits sur Payhip et Etsy","Happy Kits (prénom et ville)","Graphistes sur ComeUp"],
-src:[["Kits immersifs à 24,90 € (Payhip)","https://payhip.com/LesKitsdAnniversairedeLexy"],["Kit clé en main pour 4 à 8 enfants (En Cavale)","https://en-cavale.fr/wp-content/uploads/2024/04/EA1-Guide-Parents-V3.pdf"],["Kits personnalisables au prénom (CitizenKid)","https://www.citizenkid.com/article/kits-organiser-chasse-au-tresor-anniversaire-enfant-a1058532"],["Chasse au trésor à 15 € (Vivre Athènes)","https://vivreathenes.com/?p=55681"]]},
-
-{id:"evg-evjf",neu:true,nom:"Organiser un EVG ou un EVJF",pitch:"Dates, budget par personne, activités votées et cagnotte, sans que le futur marié voie quoi que ce soit.",cat:"Loisirs",st:"angle",s:{c:3,m:3,a:3,f:3},
-cx:["Moyenne","Sondages, budget partagé et catalogue d'activités ; le paiement passe par un service existant."],
-app:["Groupe privé, caché de la personne fêtée","Sondage de dates et plafond de budget de chacun","Activités proposées selon la ville et le budget, votées par le groupe","Qui a payé quoi, et lien de cagnotte","Programme du jour partagé et petits défis"],
-money:["Commission sur les réservations : activités, gîtes, restaurants partenaires","Pack événement vers 9,99 €, payé une fois par l'organisateur","Mise en avant payante de prestataires locaux (karting, escape game, bateau)","Même outil réutilisable pour les 30 ans ou les week-ends entre amis"],
-plus:["Groupes de 6 à 15 personnes qui dépensent","Bouche-à-oreille naturel : chaque participant découvre l'appli"],moins:["Usage ponctuel","Groupes WhatsApp et cagnottes gratuits déjà utilisés"],risq:["Ne pas encaisser l'argent toi-même : passer par un service de cagnotte agréé"],
-conc:["Cagnottes en ligne (onparticipe…)","Groupes WhatsApp et sondages","Agences et coffrets d'activités EVG/EVJF"],
-src:[["Cagnotte EVJF sur onparticipe","https://onparticipe.fr/c/hM2RpX4R/affiche-pdf"],["Organiser un EVJF : les étapes (Sport Découverte)","https://www.sport-decouverte.com/magazine/organiser-un-evjf/"]]},
-
-{id:"caisse-equipe",neu:true,nom:"La caisse d'équipe",pitch:"Les amendes entre coéquipiers (retard, oubli de maillot) et la cagnotte de fin de saison, en mode fun.",cat:"Sport & assos",st:"angle",s:{c:2,m:3,a:2,f:5},
+{id:"caisse-equipe",nom:"La caisse d'équipe",pitch:"Les amendes entre coéquipiers (retard, oubli de maillot) et la cagnotte de fin de saison, en mode fun.",cat:"Sport & assos",st:"angle",s:{c:2,m:3,a:2,f:5,r:2,g:2},
 cx:["Faible","Règles, compteur par joueur et notifications : se construit très vite."],
 app:["Barème choisi par l'équipe : retard 2 €, oubli de maillot 5 €…","Le capitaine ajoute une amende en deux gestes","Tableau de qui doit quoi, notifications aux joueurs","Paiement par virement ou Wero, l'appli ne fait que compter","Classement des « pires élèves » et total pour la soirée de fin de saison"],
 money:["Gratuit pour une équipe, pack club vers 19 € la saison (toutes les équipes, règles perso)","Sponsor local affiché sur le tableau des amendes (le bar ou la pizzeria du coin)","Commission quand la cagnotte paie la soirée de fin de saison chez un partenaire"],
@@ -577,7 +593,7 @@ plus:["Très simple, très rapide à lancer","Ton univers : le foot amateur","Vi
 conc:["CaPaye (caisse noire sportive)","Tableurs et groupes WhatsApp"],
 src:[["CaPaye, gestion de caisse noire (App Store)","https://apps.apple.com/fr/app/capaye/id6476278318"]]},
 
-{id:"album-club",neu:true,nom:"L'album de vignettes du club",pitch:"Le club envoie les photos, l'appli fabrique l'album et les pochettes façon Panini, le club les vend et garde une part.",cat:"Sport & assos",st:"angle",s:{c:3,m:3,a:4,f:2},
+{id:"album-club",nom:"L'album de vignettes du club",pitch:"Le club envoie les photos, l'appli fabrique l'album et les pochettes façon Panini, le club les vend et garde une part.",cat:"Sport & assos",st:"angle",s:{c:3,m:3,a:4,f:2,r:4,g:4},
 cx:["Élevée","Mise en page automatique, accords parentaux pour les photos et un imprimeur partenaire."],
 app:["Import des photos par équipe, avec accord des parents","Mise en page automatique de l'album et des vignettes","Commande à un imprimeur partenaire","Version numérique : ouvrir des pochettes et échanger les doubles","Suivi des ventes à la buvette"],
 money:["Marge sur l'impression : une part sur chaque album et chaque pochette vendus","Le club garde une part pour son budget : l'argument de vente principal","Pages sponsors dans l'album, vendues par le club aux commerçants","Pochettes numériques payantes dans la version appli"],
@@ -585,7 +601,7 @@ plus:["Succès prouvé : un club savoyard a vu ses points de vente dévalisés",
 conc:["Imprimeurs locaux, club par club","Ma Carte Fut (cartes personnalisées, part reversée au club)","Opérations ponctuelles (Panini avec Uber Eats, Carrefour en Belgique)"],
 src:[["Album du FCHT : points de vente dévalisés (District de Savoie)","https://savoie.fff.fr/wp-content/uploads/sites/106/2018/10/Fiche-daction-PEF_FCHT_AlbumVignettes_Commercialisation.pdf"],["« L'album du club » pour 310 licenciés (Ligue AURA)","https://laurafoot.fff.fr/wp-content/uploads/sites/10/2019/03/Lac-Bleu-Culture-Foot-Connaitre-son-club-1.pdf"],["Ma Carte Fut : 20 à 35 % reversés au club (District de l'Ariège)","https://ariegefoot.fff.fr/wp-content/uploads/sites/67/2021/12/Proposition-partenariat-X-Ma-Carte-Fut.pdf"],["Albums de clubs locaux en Belgique (DH)","https://www.dhnet.be/conso/consommation/2019/01/29/les-albums-dautocollants-dont-vous-etes-le-heros-carrefour-met-a-lhonneur-les-clubs-de-sport-regionaux-D7Z4U7DY55CG7LTJ5LJWH3U2JQ/"]]},
 
-{id:"supporters-club",neu:true,nom:"Pronos et homme du match du club amateur",pitch:"Les supporters pronostiquent les matchs du club et votent pour l'homme du match, présenté par un sponsor.",cat:"Sport & assos",st:"angle",s:{c:3,m:3,a:3,f:3},
+{id:"supporters-club",nom:"Pronos et homme du match du club amateur",pitch:"Les supporters pronostiquent les matchs du club et votent pour l'homme du match, présenté par un sponsor.",cat:"Sport & assos",st:"angle",s:{c:3,m:3,a:2.5,f:3,r:2,g:3},
 cx:["Moyenne","Le score est saisi par un dirigeant ; vote, classement et visuel avec logo du sponsor."],
 app:["Calendrier du club saisi une fois","Pronostics gratuits avant chaque match","Vote de l'homme du match par QR code au bord du terrain","Visuel automatique « Homme du match présenté par… » à poster","Classement de la saison et lots offerts par les sponsors"],
 money:["Abonnement club vers 79 € la saison","Le club vend « l'homme du match présenté par… » à un commerçant : argument sponsor concret","Lots offerts par les sponsors en échange de visibilité"],
@@ -593,24 +609,29 @@ plus:["Donne aux clubs un nouvel argument pour leurs sponsors","Ton univers : le
 conc:["Mon Petit Prono (ligues privées sur les matchs pros)","Jour de Match","Teamsplate (visuels de match avec sponsors)","Concours de pronos organisés par les districts"],
 src:[["Règlement d'un concours sur Mon Petit Prono (Ligue de Normandie)","https://normandie.fff.fr/wp-content/uploads/sites/17/bsk-pdf-manager/eb49932f0d893d1d2156bf152af7f70b.pdf"],["Jour de Match (App Store)","https://apps.apple.com/mt/app/jour-de-match/id1458513747"],["Teamsplate, visuels de club (App Store)","https://apps.apple.com/de/app/teamsplate/id1637634371"]]},
 
-{id:"bourse-crampons",neu:true,nom:"La bourse aux crampons du club",pitch:"Les enfants grandissent : les parents revendent crampons et protège-tibias entre familles du club, remise à l'entraînement.",cat:"Sport & assos",st:"angle",s:{c:3,m:3,a:1,f:4},
+{id:"bourse-crampons",nom:"La bourse aux crampons du club",pitch:"Les enfants grandissent : les parents revendent crampons et protège-tibias entre familles du club, remise à l'entraînement.",cat:"Sport & assos",st:"angle",s:{c:3,m:3,a:1,f:4,r:1,g:1},
 cx:["Faible","Petites annonces réservées au club, sans livraison : remise en main propre."],
 app:["Annonce en photo avec la pointure","Réservé aux familles du club","Remise à l'entraînement, pas d'envoi","Alerte « pointure 34 disponible »","Bilan : argent économisé par les familles"],
 money:["Petite commission de 5 à 10 % ou don au club sur chaque vente","Pack club vers 29 € la saison","Bon d'achat d'un magasin partenaire quand l'enfant passe au neuf"],
 plus:["Utile pour les parents","Pas d'envoi, donc pas de litiges de livraison"],moins:["Faibles revenus","Vinted fait déjà le travail pour beaucoup de parents"],risq:["Peu d'annonces dans les petits clubs"],
 conc:["Vinted","Decathlon Seconde vie","Bourses faites à la main par certains clubs"],
-src:[["Crampons d'enfant d'occasion (Vinted)","https://www.vinted.fr/catalog/2738-football-boots"],["Football seconde vie (Decathlon)","https://www.decathlon.be/fr/seconde-vie/football-seconde-vie?from=40"],["Crampons moulés conseillés de 7 à 12 ans (FFF)","https://pef.fff.fr/wp-content/uploads/2021/09/sante_u6-u9_apprendre-a-bien-se-preparer_equipement_educative.pdf"]]}
+src:[["Crampons d'enfant d'occasion (Vinted)","https://www.vinted.fr/catalog/2738-football-boots"],["Football seconde vie (Decathlon)","https://www.decathlon.be/fr/seconde-vie/football-seconde-vie?from=40"],["Crampons moulés conseillés de 7 à 12 ans (FFF)","https://pef.fff.fr/wp-content/uploads/2021/09/sante_u6-u9_apprendre-a-bien-se-preparer_equipement_educative.pdf"]]},
+
+{id:"soiree-jeu",neu:true,nom:"La soirée-jeu : tous les invités jouent ensemble",pitch:"Une seule appli pour animer toute une fête sur place : quiz sur les invités, loup-garou à l'univers de la soirée, Killer, défis photo et jeu de piste, puis le film souvenir.",cat:"Loisirs",st:"angle",s:{c:3,m:4,a:4.5,f:2,r:4,g:5},cx:["Élevée","Multijoueur en temps réel pour 10 à 150 personnes, voix et IA, et surtout des jeux à rendre vraiment drôles : commencer par 3 jeux."],app:["Les invités rejoignent par QR code, sans rien installer","Programme prêt à l'emploi (mariage, anniversaire, soirée club) ou jeux lancés à la main par l'organisateur","Quiz sur les invités : chacun répond à 3 questions en arrivant, l'IA en fait un « Qui a dit ça ? »","Loup-garou à ton univers, réécrit selon la fête (« Les vampires de la noce », « La taupe du vestiaire »), raconté par une voix : tout le monde joue, même l'organisateur","Killer en fond toute la soirée, brise-glace « Trouve quelqu'un qui… », défis photo, jeu de piste avec QR codes cachés","Écran géant en option pour les scores, sinon tout se passe sur les téléphones","Remise des prix votés et film souvenir monté tout seul"],money:["Pass soirée payé par l'organisateur selon le nombre d'invités : par exemple 9 € jusqu'à 15 personnes, 29 € pour un mariage","Abonnement pro : DJ et animateurs de mariage, bars qui font des soirées quiz chaque semaine, campings, comités d'entreprise","Univers et packs de jeux en plus : Noël, Halloween, mariage","Kits physiques sur ta boutique Shopify : cartes, badges, autocollants à QR codes","Film souvenir en version longue, payant"],plus:["Le besoin revient à chaque fête","Chaque invité découvre l'appli : croissance par le bouche-à-oreille","Réunit trois idées de ta liste : jeu de piste, chasse au trésor sur mesure et EVG/EVJF","Tes atouts : temps réel déjà fait dans Foot Merge Tactic, Supabase, voix ElevenLabs"],moins:["Long à construire","Jackbox est déjà installé pour les soirées au salon","Chaque jeu doit être vraiment drôle, c'est le vrai travail"],risq:["Droits : la mécanique du loup-garou est libre, mais ne reprendre ni le nom, ni les rôles, ni les textes de Thiercelieux ; avis juridique avant le lancement","Réseau faible dans certaines salles : prévoir un mode qui tient le coup","Photos et réponses des invités : modération et RGPD"],conc:["Jackbox : le téléphone sert de manette, en français depuis le pack 9, mais une télé est obligatoire et chaque jeu est limité à 10 joueurs","Wolfy et l'appli officielle Thiercelieux : loup-garou en ligne, chacun chez soi","Goosechase, Loquiz, Actionbound : jeux de piste pour entreprises et écoles"],src:[["Jackbox Party Pack 9 : 10 joueurs par jeu, en français (PlayStation)","https://www.playstation.com/fr-fr/games/the-jackbox-party-pack-9/"],["Jackbox désormais en français, rejoindre avec un code (Mac4Ever)","https://www.mac4ever.com/gaming/175701-parfait-pour-l-apero-entre-amis-the-jackbox-party-est-desormais-disponible-en-francais"],["Wolfy, loup-garou en ligne (App Store)","https://apps.apple.com/FR/app/id1489243120"],["Loups-Garous de Thiercelieux, appli officielle (App Store)","https://apps.apple.com/FR/app/id1542355105"],["Une mécanique de jeu n'est pas protégée, seulement son expression (Gus&Co)","https://gusandco.net/2025/12/13/droits-auteur-jeu-societe-enquete-juridique/"],["Goosechase à partir de 99 $ par an (Software Advice)","https://www.softwareadvice.com/lms/goosechase-profile/"]]}
 ];
 
 const ST = {trou:{lab:"Aucun concurrent trouvé",chip:"Aucun concurrent trouvé"},angle:{lab:"Concurrence partielle",chip:"Concurrence partielle"},pris:{lab:"Déjà pris",chip:"Déjà pris"}};
 const SEUIL = 12;
 // Dernier ajout : seules les idées de ce lot portent neu:true (retirer neu des anciennes à chaque ajout).
-const LOT = "20 novembre 2026";
-const CRIT = [["c","Concurrence","5 = aucun concurrent trouvé"],["m","Marché","taille du public en France"],["a","Argent","capacité à rapporter"],["f","Facilité","5 = rapide à construire"]];
+const LOT = "21 novembre 2026";
+const CRIT = [["c","Concurrence","5 = aucun concurrent trouvé"],["m","Marché","taille du public en France"],["a","Argent","moyenne des deux notes ci-dessous"],["f","Facilité","5 = rapide à construire"]];
 const STAR = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.2l2 4.3 4.7.5-3.5 3.2 1 4.6L8 11.5 3.8 13.8l1-4.6L1.3 6l4.7-.5z"/></svg>';
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const SUB = [["r","Rentable vite","5 = on peut faire payer dès le début"],["g","Gains possibles","5 = peut rapporter gros"]];
+D.forEach(d => { if (d.s.r != null && d.s.g != null) d.s.a = (d.s.r + d.s.g) / 2; });
 const tot = d => d.s.c + d.s.m + d.s.a + d.s.f;
+const fmt = n => String(n).replace(".", ",");
 
 const RANKED = D.slice().sort((a,b) =>
   tot(b) - tot(a) ||
@@ -638,7 +659,7 @@ function chips(d, withCat){
 }
 function pips(n, cls){
   let h = '<span class="' + cls + '" aria-hidden="true">';
-  for (let i = 1; i <= 5; i++) h += '<i' + (i <= n ? ' class="on"' : '') + '></i>';
+  for (let i = 1; i <= 5; i++) h += '<i' + (i <= n ? ' class="on"' : (i - 0.5 === n ? ' class="half"' : '')) + '></i>';
   return h + '</span>';
 }
 function pool(){ return showLow ? D : D.filter(d => tot(d) >= SEUIL); }
@@ -678,14 +699,14 @@ function renderList(){
       '<span class="main"><span class="name">' + esc(d.nom) + '</span>' +
       '<span class="pitch">' + esc(d.pitch) + '</span>' +
       '<span class="tags">' + chips(d, false) + '</span></span>' +
-      '<span class="score" aria-label="Note ' + tot(d) + ' sur 20"><span class="total">' + tot(d) + '<small>/20</small></span>' +
+      '<span class="score" aria-label="Note ' + fmt(tot(d)) + ' sur 20"><span class="total">' + fmt(tot(d)) + '<small>/20</small></span>' +
       '<span class="meter">' + CRIT.map(c => '<span>' + c[1].slice(0,4) + '.</span>' + pips(d.s[c[0]], "pips")).join("") + '</span></span>' +
     '</a>').join("");
   const NEW = RANKED.filter(d => d.neu);
   const news = NEW.length ?
     '<section class="news" aria-labelledby="newsT"><h2 id="newsT"><span class="dot" aria-hidden="true"></span>Nouveau · ' + LOT + '</h2>' +
-    '<p>' + NEW.length + ' idées ajoutées, avec comment les rentabiliser. Elles sont surlignées dans la liste.</p>' +
-    '<ul class="newlist">' + NEW.map(d => '<li><a href="#' + d.id + '">' + esc(d.nom) + '</a><span>' + tot(d) + '/20</span></li>').join("") + '</ul>' +
+    '<p>' + (NEW.length > 1 ? NEW.length + ' idées ajoutées. Elles sont surlignées dans la liste.' : '1 idée ajoutée. Elle est surlignée dans la liste.') + '</p>' +
+    '<ul class="newlist">' + NEW.map(d => '<li><a href="#' + d.id + '">' + esc(d.nom) + '</a><span>' + fmt(tot(d)) + '/20</span></li>').join("") + '</ul>' +
     (filter !== "neu" ? '<button type="button" class="fbtn" data-f="neu">Ne voir que les nouvelles</button>' : '') +
     '</section>' : '';
   app.innerHTML =
@@ -707,8 +728,9 @@ function renderList(){
       '<p>Chaque idée est notée de 1 à 5 sur quatre critères, pour un total sur 20 :</p>' +
       '<dl>' + CRIT.map(c => '<dt>' + c[1] + '</dt><dd>' + c[2] + '</dd>').join("") + '</dl>' +
       '<p>Trois niveaux de concurrence : « Aucun concurrent trouvé », le terrain semble libre ; « Concurrence partielle », des outils existent mais n\'en couvrent qu\'une partie, il reste une façon de se démarquer ; « Déjà pris », le besoin est bien couvert. Les idées notées sous 12/20 sont masquées par défaut, sauf dans le filtre « Nouvelles ».</p>' +
-      '<p>Toutes les idées notées 12/20 ou plus ont une rubrique « Comment la rentabiliser ». Les prix indiqués sont des ordres de grandeur à tester, pas des chiffres de marché.</p>' +
-      '<p>« Aucun concurrent trouvé » veut dire qu\'aucune appli dédiée n\'est apparue dans les recherches, pas qu\'il n\'en existe aucune. Notes estimées par Claude à partir de recherches web du 20 novembre 2026 : à revérifier dans les stores avant de te lancer.</p>' +
+      '<p>L\'argent est la moyenne de deux notes : « Rentable vite » (peut-on faire payer dès le début ?) et « Gains possibles » (combien ça peut rapporter au mieux). D\'où des totaux en demi-points.</p>' +
+      '<p>Chaque idée a une rubrique « Comment la rentabiliser ». Les prix indiqués sont des ordres de grandeur à tester, pas des chiffres de marché.</p>' +
+      '<p>« Aucun concurrent trouvé » veut dire qu\'aucune appli dédiée n\'est apparue dans les recherches, pas qu\'il n\'en existe aucune. Notes estimées par Claude à partir de recherches web des 20 et 21 novembre 2026 : à revérifier dans les stores avant de te lancer.</p>' +
     '</section>';
   app.querySelectorAll(".fbtn").forEach(b => b.addEventListener("click", () => { filter = b.dataset.f; renderList(); }));
   document.getElementById("sort").addEventListener("change", e => { sortBy = e.target.value; renderList(); });
@@ -721,9 +743,9 @@ function renderDetail(d){
   document.title = d.nom + " · Idées d'applis";
   const i = d.rank - 1;
   const prev = RANKED[i - 1], next = RANKED[i + 1];
-  const sc = CRIT.map(c =>
-    '<div class="sc-row"><span class="sc-lab">' + c[1] + '<span>' + c[2] + '</span></span>' +
-    pips(d.s[c[0]], "sc-bar") + '<span class="sc-val">' + d.s[c[0]] + '/5</span></div>').join("");
+  const row = (c, sub) => '<div class="sc-row' + (sub ? ' sub' : '') + '"><span class="sc-lab">' + c[1] + '<span>' + c[2] + '</span></span>' +
+    pips(d.s[c[0]], "sc-bar") + '<span class="sc-val">' + fmt(d.s[c[0]]) + '/5</span></div>';
+  const sc = CRIT.map(c => row(c, false) + (c[0] === "a" && d.s.r != null ? SUB.map(x => row(x, true)).join("") : "")).join("");
   const appBlock = d.app
     ? '<section class="card"><h2>L\'appli</h2>' + list(d.app) + '</section>'
     : '<section class="card"><h2>Ce qu\'on pourrait encore faire</h2><p style="margin:0">' + esc(d.angle) + '</p></section>';
@@ -734,7 +756,7 @@ function renderDetail(d){
     '<p class="lede">' + esc(d.pitch) + '</p>' +
     '<div class="tags">' + chips(d, false) + '</div>' +
     '<section class="card" aria-label="Notes"><h2>Notes</h2>' + sc +
-      '<div class="sc-total"><span>Total</span><b>' + tot(d) + '/20</b></div></section>' +
+      '<div class="sc-total"><span>Total</span><b>' + fmt(tot(d)) + '/20</b></div></section>' +
     '<section class="card"><h2>Complexité</h2><div class="cx"><span class="cx-pill ' + d.cx[0] + '">' + d.cx[0] + '</span><p>' + esc(d.cx[1]) + '</p></div></section>' +
     appBlock +
     (d.money ? '<section class="card money"><h2>Comment la rentabiliser</h2>' + list(d.money) + '</section>' : '') +

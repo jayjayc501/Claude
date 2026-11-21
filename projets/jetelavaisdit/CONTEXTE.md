@@ -1,5 +1,7 @@
 # « Je te l'avais dit » — contexte pour reprendre le projet
 
+> **Déplacé le 21/11/2026** dans le dépôt privé `jayjayc501/jetelavaisdit` (historique repris). Ne plus modifier ce dossier : il sert seulement à publier la version web actuelle sur GitHub Pages, en attendant la version Cloudflare.
+
 *Mis à jour le 19 novembre 2026. À lire en premier dans une nouvelle conversation.*
 
 ## Le projet en bref

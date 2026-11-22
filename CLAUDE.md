@@ -46,8 +46,9 @@ mets-le à jour quand quelque chose d'important change.
     `profil_a_l_inscription` et `noms_a_la_connexion` sont à « Je te l'avais dit ».
 - Projet `foot-merge-tactic` : jeu Foot Merge Tactic.
 - « Je te l'avais dit » est passé sur Cloudflare le 22/11/2026 (voir le dépôt jetelavaisdit) : ses objets `jtlad_`
-  restent dans `claude_projets` jusqu'à leur suppression (copie éventuelle des anciennes certitudes avant),
-  **seulement sur accord explicite du propriétaire**. Les nouvelles applis vont sur Cloudflare (une base D1 et un client
+  restent dans `claude_projets` jusqu'à leur suppression : **accord du propriétaire le 22/11 (« supprimer sans copier »)**,
+  pas encore faite (méthode dans le `CONTEXTE.md` du dépôt jetelavaisdit). Attention : ne pas supprimer
+  `jtlad_creer_profil` / `jtlad_completer_noms` tant que les déclencheurs de `auth.users` les appellent (MyFlix planterait). Les nouvelles applis vont sur Cloudflare (une base D1 et un client
   Google par appli, connexion par le module commun `app-modules`), plus dans cette base mutualisée.
 
 ## Projets en cours

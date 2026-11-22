@@ -19,3 +19,9 @@ jour les deux copies (ce fichier et la page claude.ai).
 - Les idées du lot sont alors listées dans l'encadré et surlignées dans la liste.
 - Chaque idée doit avoir sa rubrique « Comment la rentabiliser » (`money`).
 - Note « Argent » = moyenne de deux sous-notes sur 5 : `r` (rentable vite) et `g` (gains possibles), à renseigner dans `s` ; le total peut donc tomber sur un demi-point.
+- Noter chaque nouvelle idée avec la grille stricte de la constante `GRID` (affichée en bas de la page), sans gonfler l'argent : le propriétaire veut des notes franches.
+
+## Révisions des notes
+
+- Révision complète le 22/11/2026 : chaque idée porte `was` (ancien total) et `rev` (raison du changement), affichés dans l'encadré « Révision complète » et dans la fiche.
+- Pour une nouvelle révision : mettre à jour `REVDATE`, remplacer `was` et `rev` de chaque idée revue.

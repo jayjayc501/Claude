@@ -33,22 +33,18 @@ mets-le à jour quand quelque chose d'important change.
 ## Supabase (offre gratuite : 2 projets actifs au maximum)
 
 - Projet `claude_projets` (ex-`jelavaisdit` ; identifiant `joqzrjjgrntbyutytpnr`, l'URL ne change pas)
-  = base **mutualisée** entre toutes les applis (« Je te l'avais dit », MyFlix, projets à venir) :
+  = base **mutualisée** (aujourd'hui MyFlix seul ; « Je te l'avais dit » en est parti le 22/11) :
   chaque appli préfixe ses tables, ses fonctions SQL et ses fonctions Edge, aucune table sans préfixe.
-  - `jtlad_…` : « Je te l'avais dit » (`jtlad_profils`, `jtlad_phrases`, `jtlad_moderation_mots`, fonctions `jtlad_…`).
   - `myflix_…` / `myflix-…` : MyFlix.
   - Nouvelle appli : choisir un préfixe court et ne jamais toucher aux objets des autres préfixes.
-  - Les comptes (`auth.users`) sont communs : un même compte Google sert partout. Les déclencheurs
-    sur `auth.users` touchent toutes les applis (celui de « Je te l'avais dit » crée une ligne
-    `jtlad_profils` à chaque inscription, même venue de MyFlix).
-  - `auth.users` n'appartient pas au rôle `postgres` : on peut y créer un déclencheur mais pas le renommer
-    ni le supprimer ensuite → le nommer avec le préfixe de l'appli dès sa création. Exceptions historiques :
-    `profil_a_l_inscription` et `noms_a_la_connexion` sont à « Je te l'avais dit ».
+  - Les comptes (`auth.users`) sont communs : un même compte Google sert partout. Un déclencheur
+    sur `auth.users` touche toutes les applis (aucun depuis le 22/11).
+  - `auth.users` n'appartient pas au rôle `postgres` : on peut y créer un déclencheur et le supprimer
+    (vérifié le 22/11), mais pas le renommer → le nommer avec le préfixe de l'appli dès sa création.
 - Projet `foot-merge-tactic` : jeu Foot Merge Tactic.
 - « Je te l'avais dit » est passé sur Cloudflare le 22/11/2026 (voir le dépôt jetelavaisdit) : ses objets `jtlad_`
-  restent dans `claude_projets` jusqu'à leur suppression : **accord du propriétaire le 22/11 (« supprimer sans copier »)**,
-  pas encore faite (méthode dans le `CONTEXTE.md` du dépôt jetelavaisdit). Attention : ne pas supprimer
-  `jtlad_creer_profil` / `jtlad_completer_noms` tant que les déclencheurs de `auth.users` les appellent (MyFlix planterait). Les nouvelles applis vont sur Cloudflare (une base D1 et un client
+  (tables, fonctions, déclencheurs de `auth.users`) ont été **supprimés de `claude_projets` le 22/11**, sans copie, à la
+  demande du propriétaire (migration `jtlad_suppression`) ; MyFlix vérifié intact. Les nouvelles applis vont sur Cloudflare (une base D1 et un client
   Google par appli, connexion par le module commun `app-modules`), plus dans cette base mutualisée.
 
 ## Projets en cours

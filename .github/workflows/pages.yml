@@ -1,0 +1,50 @@
+# Site GitHub Pages du dépôt (GitHub n'en publie qu'un par dépôt : toute nouvelle page doit être ajoutée ici).
+#   https://jayjayc501.github.io/Claude/idees-applis/ → la page des idées d'applis (notes/idees-applis)
+# « Je te l'avais dit » n'est plus publié ici depuis le 22/11/2026 : tout est sur Cloudflare
+# (https://jetelavaisdit.jayjayc501.workers.dev/app/ et /carte, dépôt jayjayc501/jetelavaisdit).
+# Sur une branche : assemblage seulement. Sur main : mise en ligne.
+name: pages
+
+on:
+  push:
+    branches: [main, 'pages/**']
+    paths: ['notes/idees-applis/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemblage du site
+        run: |
+          mkdir -p _site
+          cp -r notes/idees-applis _site/idees-applis
+          rm -f _site/idees-applis/README.md
+          printf '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=idees-applis/"><a href="idees-applis/">Idées d%sapplis</a>\n' "'" > _site/index.html
+          ls -R _site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  mettre-en-ligne:
+    if: github.ref == 'refs/heads/main'
+    needs: construire
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}idees-applis/
+    steps:
+      - id: deploiement
+        uses: actions/deploy-pages@v4

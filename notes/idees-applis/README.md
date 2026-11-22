@@ -25,3 +25,4 @@ jour les deux copies (ce fichier et la page claude.ai).
 
 - Révision complète le 22/11/2026 : chaque idée porte `was` (ancien total) et `rev` (raison du changement), affichés dans l'encadré « Révision complète » et dans la fiche.
 - Pour une nouvelle révision : mettre à jour `REVDATE`, remplacer `was` et `rev` de chaque idée revue.
+- Chaque idée a sa ligne `pub` (niveau « Moyenne », « Faible » ou « Nulle », et la raison), affichée en tête de « Comment la rentabiliser » : la pub dépend de la fréquence d'usage, de la taille du public et de la cible (pas de pub ciblée pour les mineurs, ni sur les sujets de santé). Elle compte dans « Gains possibles ».

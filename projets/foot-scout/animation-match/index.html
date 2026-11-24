@@ -7,12 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE occasion: a game screen, a match watched live with a stylus in hand
-   IDEA the scout's tablet during the match: the app plays the match, the scout writes over it
-   PICTURE a tactical pitch where 22 players move, the tracked n°11 ringed; stylus arrows and notes appear at each key action
+/* VOICE occasion: a game screen; the match is off-screen, only the scout's hand is seen
+   IDEA the scout's tablet filling up while he watches: nothing but what he writes
+   PICTURE an empty tactical pitch and two empty goal frames that the stylus fills, minute by minute
    COLOUR graphite screen, pitch green, coral for the tracked player, sky blue for results, white stylus ink
    TYPE Inter for the interface + Caveat for the handwriting
-   LAYOUT tablet frame; pitch 60% left, notes 40% right from 860px; stacked on a phone with the pitch first */
+   LAYOUT tablet frame; drawings left, handwritten notes right from 860px; stacked on a phone */
 :root{color-scheme:light dark;--bg:light-dark(#c9ccc8,#08090b);--frame:#1d2024;--screen:light-dark(#f4f5f2,#15181c);--card:light-dark(#ffffff,#1e2228);--line:light-dark(#dfe2de,#2c323a);--ink:light-dark(#1b1d20,#eef0ec);--soft:light-dark(#6b7079,#959ba5);--pitch:light-dark(#2f7d53,#1e5b3c);--pen:light-dark(#1b1d20,#ffffff);--red:light-dark(#d93a2b,#ff6f5e);--blue:light-dark(#1f63c7,#6fb3ff)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
@@ -20,67 +20,67 @@ html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;overflow-x:clip;padding:clamp(8px,2.5vw,32px) max(2vw,8px)}
 .device{max-width:1120px;margin:0 auto;background:var(--frame);border-radius:clamp(18px,3vw,34px);padding:clamp(8px,1.6vw,18px);box-shadow:0 20px 40px -24px #000a}
 .screen{background:var(--screen);border-radius:clamp(10px,2vw,20px);overflow:hidden;padding:clamp(12px,2vw,22px)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--soft);margin:-4px 0 10px}
+.live{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--red)}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
 .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-.score{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-.score b{font:700 clamp(20px,3vw,28px)/1.1 Inter,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.clock{font:700 18px Inter,sans-serif;font-variant-numeric:tabular-nums;padding:2px 10px;border-radius:8px;background:var(--ink);color:var(--screen)}
-.ctrl{display:flex;gap:6px}
+h1{font:700 clamp(22px,3.2vw,30px)/1.1 Inter,sans-serif;letter-spacing:-.02em;margin:0}
+.meta{color:var(--soft);margin:4px 0 0;font-size:14px}
+.clock{font:700 20px Inter,sans-serif;font-variant-numeric:tabular-nums;padding:2px 12px;border-radius:8px;background:var(--ink);color:var(--screen);min-width:3.2em;text-align:center}
+.ctrl{display:flex;gap:6px;align-items:center}
 .ctrl button{font:600 14px Inter,sans-serif;min-height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.ctrl button:disabled{opacity:.4;cursor:default}
 .ctrl button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .grid{display:grid;gap:14px}
-@media(min-width:860px){.grid{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;position:relative}
+@media(min-width:860px){.grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}}
+.stack{display:grid;gap:14px;align-content:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
 .card h2{font:600 14px Inter,sans-serif;color:var(--soft);margin:0 0 8px}
-#pitch{width:100%;height:auto;display:block}
+.fig svg{width:100%;height:auto;display:block;overflow:visible}
 svg text{font-family:Caveat,cursive;font-weight:700}
 .pen{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke:var(--pen)}
-.red{stroke:var(--red)}.blue{stroke:var(--blue)}
-.draw{stroke-dasharray:var(--l);stroke-dashoffset:var(--l);animation:draw var(--t,1s) ease-out forwards;animation-delay:var(--d,0s)}
-@keyframes draw{to{stroke-dashoffset:0}}
-.fade{opacity:0;animation:fade .4s forwards;animation-delay:var(--d,0s)}
-@keyframes fade{to{opacity:1}}
-.old{opacity:.35;transition:opacity 1s}
-.flash{font:800 34px Inter,sans-serif;fill:#fff;paint-order:stroke;stroke:#0006;stroke-width:6px}
-.notes{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:360px;overflow-y:auto}
-.notes li{display:grid;grid-template-columns:2.6em minmax(0,1fr);gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font:700 22px/1.2 Caveat,cursive;color:var(--pen)}
+.red{stroke:var(--red)}.blue{stroke:var(--blue)}.white{stroke:#fff}
+.fade{transition:opacity .4s}
+.notes{list-style:none;margin:0;padding:0;display:grid}
+.notes li{display:grid;grid-template-columns:2.6em minmax(0,1fr);gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font:700 22px/1.2 Caveat,cursive;color:var(--pen)}
 .notes li:last-child{border:0}
 .notes .m{font:700 14px Inter,sans-serif;color:var(--soft);padding-top:5px;font-variant-numeric:tabular-nums}
-.notes .r{color:var(--red)}.notes .b{color:var(--blue)}
+.r{color:var(--red)}.b{color:var(--blue)}
+.circ{border:2px solid var(--blue);border-radius:50% 45% 55% 40%;padding:0 6px;color:var(--blue)}
 .notes li.empty{display:block;font:400 14px Inter,sans-serif;color:var(--soft);border:0}
-.caret{display:inline-block;width:16px;height:16px;margin-left:3px;vertical-align:-1px}
-.empty{color:var(--soft);font-size:14px}
-.stats{display:grid;gap:8px;margin-top:12px}
-.st{display:grid;grid-template-columns:7.5em minmax(0,1fr) 3em;gap:10px;align-items:center;font-size:14px}
-.st b{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.meter{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
-.meter i{display:block;height:100%;width:0;background:var(--red);border-radius:4px;transition:width .4s}
-.lbl{font-size:13px;color:var(--soft);margin:8px 0 0}
-@media(prefers-reduced-motion:reduce){.draw{animation:none;stroke-dashoffset:0}.fade{animation:none;opacity:1}}
+.caret{display:inline-block;width:18px;height:18px;margin-left:3px;vertical-align:-2px}
+.tally{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:10px;align-items:center;font-size:14px;margin-top:6px}
+.tally svg{height:26px;width:100%;overflow:visible}
+.lbl{font-size:13px;color:var(--soft);margin:10px 0 0}
+@media(prefers-reduced-motion:reduce){.live i{animation:none}}
 </style>
 </head>
 <body>
 <div class="device"><div class="screen">
+  <div class="bar"><span>Dossier · Kofi Mensah · Match 3</span><span class="live"><i></i>en tribune</span></div>
   <div class="top">
-    <div class="score"><b id="score">Vila Nova 0 – 0 Amarante</b><span class="clock" id="clock">0'</span></div>
+    <div>
+      <h1>Vila Nova – Amarante</h1>
+      <p class="meta">Sam. 21 nov · D2 portugaise · pluie fine · je suis le n° 11</p>
+    </div>
     <div class="ctrl">
+      <span class="clock" id="clock">0'</span>
       <button id="play" type="button">Pause</button>
-      <button id="speed" type="button">Vitesse ×1</button>
       <button id="again" type="button">Rejouer</button>
     </div>
   </div>
   <div class="grid">
-    <div class="card">
-      <h2>Vous suivez le n° 11 · Kofi Mensah (cercle rouge) · on attaque vers la droite</h2>
-      <svg id="pitch" viewBox="0 0 400 260" role="img" aria-label="Match en direct sur un terrain tactique : 22 joueurs en mouvement, le numéro 11 entouré en rouge. Le stylet du scout trace des flèches à chaque action importante."></svg>
+    <div class="stack">
+      <div class="card fig"><h2>Ses courses · on attaque vers la droite</h2><svg id="pitch" viewBox="0 0 400 262" role="img" aria-label="Terrain vide que le scout annote au stylet pendant le match : les courses du numéro 11, le centre, le repli."></svg></div>
+      <div class="card fig"><h2>Ses frappes</h2><svg id="goals" viewBox="0 0 400 140" role="img" aria-label="Deux cages vides où le scout marque d'une croix chaque frappe du numéro 11."></svg></div>
     </div>
     <div class="card">
-      <h2>Mes notes · au stylet</h2>
-      <ul class="notes" id="notes"><li class="empty" id="empty">Le stylet écrira ici pendant le match.</li></ul>
-      <div class="stats">
-        <div class="st"><span>Sprints gagnés</span><div class="meter"><i id="m-sp"></i></div><b id="v-sp">0 / 0</b></div>
-        <div class="st"><span>Frappes</span><div class="meter"><i id="m-sh"></i></div><b id="v-sh">0</b></div>
-      </div>
-      <p class="lbl">Match simulé, joueur inventé. 90 minutes en environ une minute, ralenti sur les actions du n° 11.</p>
+      <h2>Mes notes</h2>
+      <ul class="notes" id="notes"></ul>
+      <div class="tally"><span>Duels gagnés</span><svg id="t-won" viewBox="0 0 200 26" aria-label="Bâtons des duels gagnés"></svg></div>
+      <div class="tally"><span>Duels perdus</span><svg id="t-lost" viewBox="0 0 200 26" aria-label="Bâtons des duels perdus"></svg></div>
+      <p class="lbl">On ne voit jamais le match : seulement ce que le scout écrit en le regardant. Joueur et match inventés.</p>
     </div>
   </div>
 </div></div>
@@ -88,160 +88,147 @@ svg text{font-family:Caveat,cursive;font-weight:700}
 <script>
 {
   const NS = 'http://www.w3.org/2000/svg';
-  const svg = document.getElementById('pitch');
-  const el = (tag, a, parent) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); (parent || svg).appendChild(e); return e; };
-  let seed = 7;
+  const el = (tag, a, parent) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (parent) parent.appendChild(e); return e; };
+  let seed = 11;
   const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
   const j = (a) => (rnd() - .5) * a;
-  const wob = (pts, a = 1.6) => {
+  const wob = (pts, a = 1.4) => {
     const p = pts.map(([x, y], i) => [x + (i ? j(a) : 0), y + (i ? j(a) : 0)]);
     let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
     for (let i = 1; i < p.length; i++) { const [x0, y0] = p[i - 1], [x1, y1] = p[i]; d += ` Q${(x0 + j(a)).toFixed(1)} ${(y0 + j(a)).toFixed(1)} ${((x0 + x1) / 2).toFixed(1)} ${((y0 + y1) / 2).toFixed(1)}`; }
     const l = p[p.length - 1]; return d + ` L${l[0].toFixed(1)} ${l[1].toFixed(1)}`;
   };
+  const seg = (x1, y1, x2, y2, n = 2) => Array.from({length: n + 1}, (_, i) => [x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n]);
   const curve = (x1, y1, cx, cy, x2, y2, n = 10) => Array.from({length: n + 1}, (_, i) => { const t = i / n, u = 1 - t; return [u * u * x1 + 2 * u * t * cx + t * t * x2, u * u * y1 + 2 * u * t * cy + t * t * y2]; });
-  const circ = (cx, cy, r, n = 14) => Array.from({length: n + 2}, (_, i) => { const a = i / n * Math.PI * 2 - .6; return [cx + Math.cos(a) * r * (1 + j(.1)), cy + Math.sin(a) * r * (1 + j(.1))]; });
-  const head = (x, y, ang, s = 10) => wob([[x - Math.cos(ang - .45) * s, y - Math.sin(ang - .45) * s], [x, y], [x - Math.cos(ang + .45) * s, y - Math.sin(ang + .45) * s]], .4);
+  const circ = (cx, cy, r, ry = r, n = 14) => Array.from({length: n + 2}, (_, i) => { const a = i / n * Math.PI * 2 - .6; return [cx + Math.cos(a) * r * (1 + j(.1)), cy + Math.sin(a) * ry * (1 + j(.1))]; });
+  const head = (x, y, ang, c = 'red', s = 11) => ({d: wob([[x - Math.cos(ang - .45) * s, y - Math.sin(ang - .45) * s], [x, y], [x - Math.cos(ang + .45) * s, y - Math.sin(ang + .45) * s]], .4), c});
+  const X = (x, y, s = 6, c = 'red') => [{d: wob(seg(x - s, y - s, x + s, y + s), .5), c, w: 3}, {d: wob(seg(x + s, y - s, x - s, y + s), .5), c, w: 3}];
 
-  // Pitch (the app layer)
+  // Empty pitch (app layer)
+  const pitch = document.getElementById('pitch');
   const pl = {fill: 'none', stroke: '#e9f5ec', 'stroke-width': 1.5, opacity: .85};
-  el('rect', {x: 0, y: 0, width: 400, height: 260, rx: 10, fill: 'var(--pitch)'});
-  for (let i = 1; i < 8; i += 2) el('rect', {x: 10 + i * 47.5, y: 10, width: 47.5, height: 240, fill: '#fff', opacity: .04});
-  el('rect', {x: 10, y: 10, width: 380, height: 240, ...pl});
-  el('line', {x1: 200, y1: 10, x2: 200, y2: 250, ...pl});
-  el('circle', {cx: 200, cy: 130, r: 30, ...pl});
-  for (const s of [0, 1]) { el('rect', {x: s ? 334 : 10, y: 60, width: 56, height: 140, ...pl}); el('rect', {x: s ? 370 : 10, y: 98, width: 20, height: 64, ...pl}); el('rect', {x: s ? 390 : 4, y: 114, width: 6, height: 32, fill: '#fff', opacity: .7}); }
-  const inkLayer = el('g', {});
-  const dotLayer = el('g', {});
+  el('rect', {x: 0, y: 0, width: 400, height: 262, rx: 10, fill: 'var(--pitch)'}, pitch);
+  for (let i = 1; i < 8; i += 2) el('rect', {x: 10 + i * 47.5, y: 10, width: 47.5, height: 242, fill: '#fff', opacity: .04}, pitch);
+  el('rect', {x: 10, y: 10, width: 380, height: 242, ...pl}, pitch);
+  el('line', {x1: 200, y1: 10, x2: 200, y2: 252, ...pl}, pitch);
+  el('circle', {cx: 200, cy: 131, r: 30, ...pl}, pitch);
+  for (const s of [0, 1]) { el('rect', {x: s ? 334 : 10, y: 61, width: 56, height: 140, ...pl}, pitch); el('rect', {x: s ? 370 : 10, y: 99, width: 20, height: 64, ...pl}, pitch); }
+  const pInk = el('g', {}, pitch);
 
-  // Players: home 4-4-2 attacking right (n°11 = left midfielder, top of the pitch), away mirrored
-  const homeBase = [[22, 130, 1], [80, 40, 2], [72, 100, 4], [72, 160, 5], [80, 220, 3], [160, 40, 11], [140, 105, 8], [140, 155, 6], [160, 220, 7], [215, 110, 9], [215, 152, 10]];
-  const awayBase = homeBase.map(([x, y, n]) => [400 - x, 260 - y, n]);
-  const mk = (base, home) => base.map(([x, y, n]) => {
-    const g = el('g', {}, dotLayer);
-    const isK = home && n === 11;
-    if (isK) el('circle', {r: 13, fill: 'none', stroke: 'var(--red)', 'stroke-width': 2.2, opacity: .9}, g);
-    el('circle', {r: 7, fill: isK ? 'var(--red)' : home ? '#f4f4f1' : '#2a2e35', stroke: home ? '#0005' : '#fff8', 'stroke-width': 1.2}, g);
-    const t = el('text', {y: 3.5, 'text-anchor': 'middle', 'font-size': 8.5, fill: isK ? '#fff' : home ? '#1b1d20' : '#fff', style: 'font-family:Inter,sans-serif;font-weight:700'}, g); t.textContent = n;
-    return {g, bx: x, by: y, x, y, n, home, ph: rnd() * 6.28};
-  });
-  const P = [...mk(homeBase, true), ...mk(awayBase, false)];
-  const kofi = P[5], nine = P[9];
-  const ball = el('circle', {r: 4, fill: '#fff', stroke: '#000a', 'stroke-width': 1});
-  const flash = el('text', {x: 200, y: 138, 'text-anchor': 'middle', class: 'flash', opacity: 0, style: 'font-family:Inter,sans-serif'});
+  // Empty goal frames (app layer)
+  const goals = document.getElementById('goals');
+  const frame = (ox, label) => {
+    const w = 170, top = 34, gy = 108;
+    for (let x = ox + 14; x < ox + w; x += 14) el('line', {x1: x, y1: top, x2: x, y2: gy, stroke: 'var(--line)'}, goals);
+    for (let y = top + 14; y < gy; y += 14) el('line', {x1: ox, y1: y, x2: ox + w, y2: y, stroke: 'var(--line)'}, goals);
+    el('line', {x1: ox - 14, y1: gy, x2: ox + w + 14, y2: gy, stroke: 'var(--soft)', 'stroke-width': 1.5}, goals);
+    el('path', {d: `M${ox} ${gy}V${top}H${ox + w}V${gy}`, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 4, 'stroke-linejoin': 'round'}, goals);
+    const t = el('text', {x: ox, y: 22, 'font-size': 13, fill: 'var(--soft)', style: 'font-family:Inter,sans-serif;font-weight:600'}, goals); t.textContent = label;
+  };
+  frame(14, 'frappe 1'); frame(214, 'frappe 2');
+  const gInk = el('g', {}, goals);
 
-  // Scripted actions of n°11: paths for him, the ball and team-mates; stylus strokes; the note
-  const RUN23 = curve(190, 46, 262, 20, 330, 34);
+  // What the scout writes, minute by minute
   const EV = [
-    {t: 8, k: [[7.6, 165, 45], [8.4, 244, 38]], b: [[7.6, 160, 48], [8.4, 248, 40]], ink: [{d: wob(curve(165, 45, 205, 28, 244, 38)), c: 'red'}, {d: head(244, 38, .2), c: 'red'}, {text: "8'", x: 170, y: 32}], note: ['8\'', '1re accél. → laisse son gars sur place !!'], sp: [1, 1]},
-    {t: 23, k: [[22.4, 190, 46], [23.0, 330, 34], [23.5, 326, 36]], b: [[22.4, 186, 48], [23.0, 334, 36], [23.25, 350, 118], [23.4, 393, 128]], o: [[nine, [[22.4, 220, 110], [23.25, 346, 118], [23.5, 350, 122]]]], goal: 'h', ink: [{d: wob(RUN23), c: 'red', w: 3}, {d: head(330, 34, .15), c: 'red'}, {d: wob(curve(334, 38, 370, 70, 350, 116)), dash: 1}, {text: '1-0 !', x: 300, y: 158, size: 22, color: '#d6ebff'}], note: ['23\'', 'déborde G, centre fort → but du 9', 'explosif', 'b'], sp: [1, 1]},
-    {t: 35, k: [[34.6, 200, 60], [35.4, 196, 64]], b: [[34.6, 150, 80], [35.0, 198, 60], [35.4, 230, 90]], ink: [{text: '?', x: 206, y: 50, size: 26, color: 'var(--red)'}], note: ['35\'', 'contrôle bof, sous pression']},
-    {t: 51, k: [[50.6, 250, 88], [51.0, 272, 100], [51.5, 280, 104]], b: [[50.6, 246, 90], [51.0, 276, 102], [51.3, 386, 122], [51.6, 360, 70]], ink: [{d: wob([[278, 102], [384, 122]]), dash: 1}, {d: wob([[379, 117], [389, 127]], .5), c: 'red', w: 3}, {d: wob([[389, 117], [379, 127]], .5), c: 'red', w: 3}, {text: 'arrêt', x: 330, y: 98}], note: ['51\'', 'frappe de loin, hésite avant… arrêt'], sh: 1},
-    {t: 60, b: [[59.4, 120, 150], [59.8, 40, 136], [60.0, 6, 128]], goal: 'a', silent: 1},
-    {t: 64, k: [[63.6, 232, 60], [64.3, 150, 72]], b: [[63.6, 196, 92], [64.0, 168, 80], [64.3, 152, 74]], ink: [{d: wob(curve(232, 60, 190, 80, 152, 72)), c: 'red'}, {d: head(152, 72, 3.2), c: 'red'}, {text: 'repli', x: 175, y: 100}], note: ['64\'', 'se replie bien, coupe la passe']},
-    {t: 78, k: [[77.6, 262, 50], [78.6, 264, 52]], b: [[77.6, 280, 60], [78.6, 300, 150]], hurt: 1, ink: [{d: wob(circ(264, 52, 17)), c: 'red'}, {text: 'cuisse ??', x: 284, y: 40, size: 22, color: 'var(--red)'}], note: ['78\'', 'cuisse ?? reste au sol 1 min', '', 'r']},
-    {t: 88, k: [[87.4, 250, 80], [88.0, 330, 120], [88.5, 336, 124]], b: [[87.4, 246, 82], [88.0, 334, 122], [88.3, 393, 117]], goal: 'h', ink: [{d: wob(curve(250, 80, 292, 92, 330, 120)), c: 'red', w: 3}, {d: wob([[334, 122], [392, 117]]), dash: 1}, {d: wob(circ(388, 118, 14)), c: 'blue'}, {text: 'BUT !!', x: 318, y: 152, size: 24, color: '#d6ebff'}], note: ['88\'', 'BUT !! frappe croisée, lucarne', '', 'b'], sh: 1},
+    {m: 3, note: ['3\'', 'joue haut côté G, appelle tout le temps']},
+    {m: 8, pitch: [{d: wob(curve(118, 50, 160, 28, 200, 34)), c: 'red', w: 2.8}, head(200, 34, .1), {text: "8'", x: 124, y: 34}], note: ['8\'', '1re accél. → laisse son gars sur place !!'], won: 1},
+    {m: 14, lost: 1},
+    {m: 23, pitch: [{d: wob(curve(222, 48, 280, 22, 336, 30)), c: 'red', w: 3}, head(336, 30, .15), {text: "23'", x: 226, y: 30}, {d: wob(curve(340, 34, 372, 70, 350, 120)), c: 'white', dash: 1}, {d: wob(circ(350, 126, 7)), c: 'white'}, {text: '9 tête 1-0', x: 290, y: 160, color: '#fff'}], note: ['23\'', 'déborde G, centre fort pied G → but du 9', 'explosif'], won: 1},
+    {m: 29, won: 1},
+    {m: 35, pitch: [{text: '?', x: 176, y: 76, size: 30, color: 'var(--red)'}], note: ['35\'', 'contrôle bof ×2, sous pression'], lost: 1},
+    {m: 51, goal: [...X(42, 96), {d: wob(curve(70, 60, 54, 64, 48, 84, 5), .5), dash: 1}, {text: 'arrêt', x: 184, y: 134, anchor: 'end'}], label1: "51' de loin", note: ['51\'', 'frappe de loin, hésite avant… arrêt', '', 'r']},
+    {m: 57, won: 1},
+    {m: 64, pitch: [{d: wob(curve(300, 66, 250, 86, 206, 72)), c: 'red', w: 2.4}, head(206, 72, 3.1), {text: "64' repli", x: 206, y: 102}], note: ['64\'', 'se replie bien, coupe la passe'], won: 1},
+    {m: 78, pitch: [{d: wob(circ(262, 52, 16)), c: 'red', w: 2.2}, {text: 'cuisse ??', x: 282, y: 46, size: 22, color: 'var(--red)'}], note: ['78\'', 'cuisse ?? reste au sol 1 min', '', 'r']},
+    {m: 82, lost: 1},
+    {m: 88, pitch: [{d: wob(curve(244, 62, 290, 92, 322, 120)), c: 'red', w: 2.8}, head(322, 120, .8), {d: wob(seg(326, 124, 386, 132, 3)), c: 'white', dash: 1}, {text: "88' BUT", x: 300, y: 190, size: 24, color: '#fff'}], goal: [...X(362, 48), {d: wob(circ(362, 48, 17, 13)), c: 'blue', w: 2.4}, {text: 'BUT !', x: 384, y: 134, size: 24, anchor: 'end', color: 'var(--blue)'}], label2: "88' croisée", note: ['88\'', 'BUT !! frappe croisée, lucarne', '', 'b'], won: 1},
+    {m: 90, note: ['fin', 'scout Benfica B en tribune · À REVOIR : kiné + famille', '', 'r']},
   ];
 
-  // Default ball movement between actions: a seeded wander that drifts with play
-  let BK = [];
-  const build = () => {
-    seed = 7; BK = [];
-    for (let m = 0; m <= 90; m += .8) {
-      if (EV.some(e => m > e.b[0][0] - .5 && m < e.b[e.b.length - 1][0] + .5)) continue;
-      BK.push([m, 60 + rnd() * 280, 30 + rnd() * 200]);
-    }
-    for (const e of EV) BK.push(...e.b);
-    BK.sort((a, b) => a[0] - b[0]);
-  };
-  const lerpKeys = (K, t) => {
-    if (t <= K[0][0]) return [K[0][1], K[0][2]];
-    for (let i = 1; i < K.length; i++) if (t <= K[i][0]) { const [t0, x0, y0] = K[i - 1], [t1, x1, y1] = K[i]; const u = (t - t0) / (t1 - t0), s = u * u * (3 - 2 * u); return [x0 + (x1 - x0) * s, y0 + (y1 - y0) * s]; }
-    const l = K[K.length - 1]; return [l[1], l[2]];
-  };
-  const within = (K, t) => t >= K[0][0] && t <= K[K.length - 1][0];
-
-  // State
-  let t = 0, playing = true, speed = 1, last = 0, done = new Set(), score = [0, 0], sp = [0, 0], sh = 0, hurtUntil = 0, queue = Promise.resolve();
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = (id) => document.getElementById(id);
-  const setScore = () => { $('score').textContent = `Vila Nova ${score[0]} – ${score[1]} Amarante`; };
-  const showFlash = (txt) => { flash.textContent = txt; flash.setAttribute('opacity', 1); setTimeout(() => flash.setAttribute('opacity', 0), 1400); };
-
-  // Stylus: strokes on the pitch, then the note written letter by letter
-  const PEN = '<svg class="caret" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 14l1.2-4.2L11 2l3 3-7.8 7.8z" fill="var(--soft)"/><path d="M2 14l1.2-4.2 3 3z" fill="var(--pen)"/></svg>';
-  const drawInk = (items) => {
-    for (const c of inkLayer.children) c.classList.add('old');
-    const g = el('g', {}, inkLayer);
+  // Stylus strokes are tweened in script, so they draw the same way everywhere
+  const later = (fn, sec) => setTimeout(fn, sec * 1000);
+  const drawStroke = (e, L, dur, delay) => {
+    if (still) return;
+    e.style.strokeDasharray = L; e.style.strokeDashoffset = L;
+    let t0 = 0;
+    const step = () => { if (!t0) t0 = performance.now(); const u = Math.min(1, (performance.now() - t0) / (dur * 1000)); e.style.strokeDashoffset = (L * (1 - (1 - (1 - u) ** 2))).toFixed(1); if (u < 1) setTimeout(step, 16); };
+    later(step, delay);
+  };
+  const fadeIn = (e, delay) => { if (still) return; e.style.opacity = 0; later(() => { e.style.opacity = 1; }, delay + .02); };
+  const ink = (g, items) => {
     let d0 = 0;
     for (const it of items) {
-      if (it.text) { const e = el('text', {x: it.x, y: it.y, 'font-size': it.size || 20, fill: it.color || '#fff', class: 'fade', style: 'paint-order:stroke;stroke:#0005;stroke-width:3px'}, g); e.textContent = it.text; e.style.setProperty('--d', d0 + 's'); d0 += .2; continue; }
-      const e = el('path', {d: it.d, class: 'pen ' + (it.c || ''), 'stroke-width': it.w || 2.4, style: it.c ? '' : 'stroke:#fff'}, g);
-      if (it.dash) { e.setAttribute('stroke-dasharray', '1 7'); e.classList.add('fade'); e.style.setProperty('--d', d0 + 's'); d0 += .3; continue; }
-      const L = Math.ceil(e.getTotalLength()); e.classList.add('draw'); e.style.setProperty('--l', L); e.style.setProperty('--t', Math.min(1.1, .3 + L / 300) + 's'); e.style.setProperty('--d', d0 + 's'); d0 += Math.min(1, .25 + L / 320);
+      if (it.text) {
+        const e = el('text', {x: it.x, y: it.y, 'font-size': it.size || 20, fill: it.color || 'var(--pen)', class: 'fade'}, g);
+        fadeIn(e, d0);
+        if (it.anchor) e.setAttribute('text-anchor', it.anchor);
+        if (g === pInk) e.setAttribute('style', 'paint-order:stroke;stroke:#0004;stroke-width:3px');
+        e.textContent = it.text; d0 += .25; continue;
+      }
+      const e = el('path', {d: it.d, class: 'pen ' + (it.c || ''), 'stroke-width': it.w || 2.2}, g);
+      if (it.dash) { e.setAttribute('stroke-dasharray', '1 7'); e.classList.add('fade'); fadeIn(e, d0); d0 += .35; continue; }
+      const L = Math.ceil(e.getTotalLength()), dur = Math.min(1.1, .3 + L / 280);
+      drawStroke(e, L, dur, d0); d0 += dur * .9;
     }
+    return d0;
   };
+  const PEN = '<svg class="caret" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 14l1.2-4.2L11 2l3 3-7.8 7.8z" fill="var(--soft)"/><path d="M2 14l1.2-4.2 3 3z" fill="var(--pen)"/></svg>';
   const write = ([m, txt, circled, tone]) => {
-    $('empty')?.remove();
+    $('notes').querySelector('.empty')?.remove();
     const li = document.createElement('li');
     li.innerHTML = '<span class="m"></span><span><span class="w"></span></span>';
     li.querySelector('.m').textContent = m;
     const w = li.querySelector('.w'); if (tone) w.classList.add(tone);
     w.insertAdjacentHTML('afterend', PEN);
-    $('notes').appendChild(li); $('notes').scrollTop = 1e6;
-    const full = txt + (circled ? '  (' + circled + ')' : '');
-    if (still) { w.textContent = full; li.querySelector('.caret').remove(); return Promise.resolve(); }
-    return new Promise(res => { let i = 0; const step = () => { w.textContent = full.slice(0, ++i); if (i < full.length) setTimeout(step, 38); else { li.querySelector('.caret').remove(); res(); } }; step(); });
+    $('notes').appendChild(li);
+    const end = () => { li.querySelector('.caret').remove(); if (circled) { const c = document.createElement('span'); c.className = 'circ'; c.textContent = circled; w.after(' ', c); } };
+    if (still) { w.textContent = txt; end(); return Promise.resolve(); }
+    return new Promise(res => { let i = 0; const step = () => { w.textContent = txt.slice(0, ++i); if (i < txt.length) setTimeout(step, 45); else { end(); res(); } }; step(); });
   };
-  const stats = () => { $('v-sp').textContent = `${sp[0]} / ${sp[1]}`; $('m-sp').style.width = (sp[1] ? sp[0] / sp[1] * 100 : 0) + '%'; $('v-sh').textContent = sh; $('m-sh').style.width = Math.min(100, sh * 33) + '%'; };
-
-  const frame = (now) => {
-    const dt = Math.min(.05, (now - (last || now)) / 1000); last = now;
-    const slow = EV.some(e => !e.silent && e.k && t > e.k[0][0] - .3 && t < e.k[e.k.length - 1][0] + .2);
-    if (playing && t < 90) t = Math.min(90, t + dt * (slow ? .22 : 1.6) * speed);
-    $('clock').textContent = t >= 90 ? 'Fin' : Math.floor(t) + "'";
-    // events
-    for (const [i, e] of EV.entries()) {
-      if (!done.has(i + 'i') && t >= e.t - .35 && e.ink) { done.add(i + 'i'); drawInk(e.ink); }
-      const end = e.b[e.b.length - 1][0];
-      if (!done.has(i + 'g') && e.goal && t >= end) { done.add(i + 'g'); score[e.goal === 'h' ? 0 : 1]++; setScore(); showFlash(e.goal === 'h' ? 'BUT !' : 'But adverse'); }
-      if (!done.has(i + 'n') && e.note && t >= end) { done.add(i + 'n'); if (e.sp) { sp[0] += e.sp[0]; sp[1] += e.sp[1]; } if (e.sh) sh += e.sh; stats(); queue = queue.then(() => write(e.note)); }
-      if (e.hurt && t >= e.t && t < e.t + 1.5) hurtUntil = e.t + 1.5;
-    }
-    // ball and players
-    const [bx, by] = lerpKeys(BK, t);
-    ball.setAttribute('cx', bx.toFixed(1)); ball.setAttribute('cy', by.toFixed(1));
-    const shift = (bx - 200) * .32, vy = (by - 130) * .18;
-    const k = Math.min(1, dt * (slow ? 6 : 4) * (playing ? 1 : 0));
-    for (const p of P) {
-      let tx = p.bx + shift + Math.sin(t * 1.3 + p.ph) * 6, ty = p.by + vy * (1 - Math.abs(p.by - 130) / 260) + Math.cos(t * 1.1 + p.ph) * 5;
-      if (p.n === 1) { tx = p.bx + shift * .15; ty = 130 + vy * .6; }
-      for (const e of EV) {
-        if (p === kofi && e.k && within(e.k, t)) [tx, ty] = lerpKeys(e.k, t);
-        for (const [who, K] of e.o || []) if (p === who && within(K, t)) [tx, ty] = lerpKeys(K, t);
-      }
-      if (p === kofi && t < hurtUntil) [tx, ty] = [p.x, p.y];
-      p.x += (tx - p.x) * k; p.y += (ty - p.y) * k;
-      p.g.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
-    }
-    kofi.g.style.opacity = t < hurtUntil ? (Math.sin(now / 120) > 0 ? .4 : 1) : 1;
-    if (t >= 90 && !done.has('end')) { done.add('end'); queue = queue.then(() => write(['fin', 'À revoir : kiné + famille', '', 'r'])); playing = false; $('play').textContent = 'Lecture'; }
-    requestAnimationFrame(frame);
+  const tallies = {won: 0, lost: 0};
+  const tally = (kind) => {
+    const n = tallies[kind]++, g = $(kind === 'won' ? 't-won' : 't-lost');
+    const group = Math.floor(n / 5), k = n % 5, x0 = 6 + group * 44;
+    const d = k < 4 ? wob(seg(x0 + k * 8, 3, x0 + k * 8 + j(2), 23), .6) : wob(seg(x0 - 4, 20, x0 + 30, 6), .6);
+    ink(g, [{d, c: kind === 'won' ? '' : 'red', w: 2.2}]);
   };
+  const label = (n, txt) => { const t = goals.querySelectorAll('text')[n]; t.textContent = txt; t.style.fill = 'var(--ink)'; };
 
+  // Timeline: the clock runs, each moment waits for the stylus to finish
+  let minute = 0, playing = true, timer = null, idx = 0, busy = false, run = 0;
+  const tick = async () => {
+    if (!playing || busy) return;
+    if (idx < EV.length && minute >= EV[idx].m) {
+      const e = EV[idx++], my = run; busy = true;
+      let wait = 0;
+      if (e.pitch) wait = Math.max(wait, ink(pInk, e.pitch));
+      if (e.goal) { wait = Math.max(wait, ink(gInk, e.goal)); if (e.label1) label(0, e.label1); if (e.label2) label(1, e.label2); }
+      if (e.won) tally('won');
+      if (e.lost) tally('lost');
+      if (!still && wait) await new Promise(r => setTimeout(r, wait * 1000));
+      if (my !== run) return;
+      if (e.note) await write(e.note);
+      if (!still) await new Promise(r => setTimeout(r, 500));
+      if (my === run) busy = false;
+      return;
+    }
+    if (minute < 90) { minute++; $('clock').textContent = minute + "'"; }
+    else { $('clock').textContent = 'Fin'; clearInterval(timer); $('play').disabled = true; playing = false; }
+  };
+  const start = () => { clearInterval(timer); timer = setInterval(tick, still ? 5 : 180); };
   const reset = () => {
-    t = 0; done = new Set(); score = [0, 0]; sp = [0, 0]; sh = 0; hurtUntil = 0; queue = Promise.resolve();
-    inkLayer.replaceChildren(); $('notes').innerHTML = '<li class="empty" id="empty">Le stylet écrira ici pendant le match.</li>';
-    for (const p of P) { p.x = p.bx; p.y = p.by; }
-    setScore(); stats(); build();
-    playing = true; $('play').textContent = 'Pause';
+    run++; seed = 11; minute = 0; idx = 0; busy = false; tallies.won = tallies.lost = 0;
+    pInk.replaceChildren(); gInk.replaceChildren(); $('t-won').replaceChildren(); $('t-lost').replaceChildren();
+    label(0, 'frappe 1'); label(1, 'frappe 2');
+    goals.querySelectorAll('text').forEach(t => t.style.fill = '');
+    $('notes').innerHTML = '<li class="empty">Le match commence. Le stylet est prêt.</li>';
+    $('clock').textContent = "0'"; playing = true; $('play').disabled = false; $('play').textContent = 'Pause'; start();
   };
-  $('play').addEventListener('click', () => { if (t >= 90) { reset(); return; } playing = !playing; $('play').textContent = playing ? 'Pause' : 'Lecture'; });
-  $('speed').addEventListener('click', () => { speed = speed === 1 ? 2 : 1; $('speed').textContent = 'Vitesse ×' + speed; });
+  $('play').addEventListener('click', () => { playing = !playing; $('play').textContent = playing ? 'Pause' : 'Lecture'; });
   $('again').addEventListener('click', reset);
   reset();
-  if (still) { playing = false; $('play').textContent = 'Lecture'; }
-  requestAnimationFrame(frame);
 }
 </script>
 </body>

@@ -27,6 +27,7 @@ entretien, synthèse), terrain tactique et cages propres, annotés au stylet. Sa
 
 ## animation-match/
 
-Animation (24/11) : on regarde un match simulé sur la tablette (22 joueurs sur un terrain
-tactique, le n° 11 suivi entouré en rouge) et le stylet du scout trace des flèches et écrit
-les notes à chaque action importante. Pause, vitesse ×2, rejouer.
+Animation (24/11) : on ne voit jamais le match, seulement la tablette du scout qui se remplit
+pendant qu'il le regarde (minute qui avance, flèches et croix au stylet sur le terrain et les
+cages, notes écrites à la main, bâtons des duels). Principe validé par le propriétaire : pas de
+match simulé à l'écran, sinon on refait un jeu de gestion classique.

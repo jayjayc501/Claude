@@ -24,3 +24,9 @@ Copie en ligne sur claude.ai : https://claude.ai/artifact/AxihFiSz3mvXjW2zqimnNi
 Variante moderne du même dossier (24/11) : une tablette de scout avec onglets (identité, match,
 entretien, synthèse), terrain tactique et cages propres, annotés au stylet. Sans la fiche du match
 (jugée inutile par le propriétaire). Copie en ligne sur claude.ai : voir le lien dans le fil du projet.
+
+## animation-match/
+
+Animation (24/11) : on regarde un match simulé sur la tablette (22 joueurs sur un terrain
+tactique, le n° 11 suivi entouré en rouge) et le stylet du scout trace des flèches et écrit
+les notes à chaque action importante. Pause, vitesse ×2, rejouer.

@@ -18,3 +18,9 @@ brouillard : la valeur d'un joueur s'affiche en fourchette, et chaque observatio
 Maquette légère du carnet à pages qu'on tourne : fiche d'identité, notes brutes d'un match
 (terrain entier, cages des frappes), fiche du match, notes d'entretien, synthèse. Une seule page HTML.
 Copie en ligne sur claude.ai : https://claude.ai/artifact/AxihFiSz3mvXjW2zqimnNi
+
+## maquette-tablette/
+
+Variante moderne du même dossier (24/11) : une tablette de scout avec onglets (identité, match,
+entretien, synthèse), terrain tactique et cages propres, annotés au stylet. Sans la fiche du match
+(jugée inutile par le propriétaire). Copie en ligne sur claude.ai : voir le lien dans le fil du projet.

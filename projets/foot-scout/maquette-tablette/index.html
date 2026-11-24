@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablette du scout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE occasion: a game screen, modern and precise, with a human hand on top
+   IDEA a scout's tablet: clean digital file, annotated with a stylus
+   PICTURE a tactical pitch and goal frames, the scout's stylus strokes drawn over them
+   COLOUR graphite screen, pitch green, white stylus ink, coral for the tracked player, sky blue for results
+   TYPE Inter for the interface + Caveat for stylus handwriting
+   LAYOUT a tablet frame with tabs; each tab a page that snaps sideways; two columns from 860px, stacked on a phone */
+:root{color-scheme:light dark;--bg:light-dark(#c9ccc8,#08090b);--frame:light-dark(#1d2024,#1d2024);--screen:light-dark(#f4f5f2,#15181c);--card:light-dark(#ffffff,#1e2228);--line:light-dark(#dfe2de,#2c323a);--ink:light-dark(#1b1d20,#eef0ec);--soft:light-dark(#6b7079,#959ba5);--pitch:light-dark(#2f7d53,#1e5b3c);--pline:#e9f5ec;--pen:light-dark(#1b1d20,#ffffff);--red:light-dark(#d93a2b,#ff6f5e);--blue:light-dark(#1f63c7,#6fb3ff)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;overflow-x:clip;padding:clamp(8px,2.5vw,32px) max(2vw,8px)}
+.device{max-width:1120px;margin:0 auto;background:var(--frame);border-radius:clamp(18px,3vw,34px);padding:clamp(8px,1.6vw,18px);box-shadow:0 20px 40px -24px #000a}
+.screen{background:var(--screen);border-radius:clamp(10px,2vw,20px);overflow:hidden}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;font-size:13px;color:var(--soft)}
+.tabs{display:flex;gap:4px;padding:0 12px 10px;overflow-x:auto;scrollbar-width:none}
+.tabs button{flex:none;font:600 14px Inter,sans-serif;min-height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--line);background:transparent;color:var(--soft);cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--screen);border-color:var(--ink)}
+.tabs button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.book{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-top:1px solid var(--line)}
+.book::-webkit-scrollbar,.tabs::-webkit-scrollbar{display:none}
+.pg{flex:0 0 100%;scroll-snap-align:center;padding:clamp(14px,2.6vw,30px)}
+h1{font:700 clamp(24px,3.4vw,34px)/1.1 Inter,sans-serif;letter-spacing:-.02em;margin:0}
+h2{font:600 15px Inter,sans-serif;margin:0 0 10px;color:var(--soft)}
+.meta{color:var(--soft);margin:4px 0 16px;font-size:14px}
+.cols{display:grid;gap:16px}
+@media(min-width:860px){.cols{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}.cols.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;position:relative}
+.stack{display:grid;gap:16px;align-content:start}
+.ink{font-family:Caveat,cursive;font-weight:700;color:var(--pen)}
+.ink.r{color:var(--red)}.ink.b{color:var(--blue)}
+svg text{font-family:Caveat,cursive;font-weight:700}
+.fig svg{width:100%;height:auto;display:block;overflow:visible}
+.pen{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke:var(--pen)}
+.red{stroke:var(--red)}.blue{stroke:var(--blue)}.soft{stroke:var(--soft)}
+.draw{stroke-dasharray:var(--l);stroke-dashoffset:var(--l);animation:draw var(--t,.7s) ease-out forwards;animation-delay:var(--d,0s)}
+@keyframes draw{to{stroke-dashoffset:0}}
+.fade{opacity:0;animation:fade .35s forwards;animation-delay:var(--d,0s)}
+@keyframes fade{to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.draw{animation:none;stroke-dashoffset:0}.fade{animation:none;opacity:1}}
+/* identity */
+.who{display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:center}
+.ava{width:96px;height:96px;border-radius:50%;overflow:hidden;background:#cfc6b4}
+.ava svg{display:block;width:100%;height:100%}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:13px;font-weight:600;padding:3px 10px;border-radius:12px;background:color-mix(in srgb,var(--ink) 8%,transparent)}
+dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 16px;margin:0}
+dt{color:var(--soft)}dd{margin:0;font-weight:500}
+.wants{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.wants li{display:grid;grid-template-columns:5.2em minmax(0,1fr);gap:10px;align-items:baseline}
+.wants b{font-size:13px;color:var(--soft);font-weight:600}
+.wants .ink{font-size:22px;line-height:1.15}
+/* match */
+.tl{list-style:none;margin:0;padding:0;display:grid}
+.tl li{display:grid;grid-template-columns:3em minmax(0,1fr);gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.tl li:last-child{border:0}
+.tl .m{font-weight:700;font-variant-numeric:tabular-nums;color:var(--soft)}
+.tl .ink{font-size:21px;margin-left:6px}
+.stats{display:grid;gap:10px}
+.st{display:grid;grid-template-columns:7em minmax(0,1fr) 3.2em;gap:10px;align-items:center;font-size:14px}
+.st b{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.meter{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--red);border-radius:4px}
+.lbl{font-size:13px;color:var(--soft);margin:8px 0 0}
+/* interview */
+.chat{display:grid;gap:10px}
+.q,.a{max-width:88%;padding:9px 13px;border-radius:14px;line-height:1.4}
+.q{justify-self:end;background:var(--ink);color:var(--screen);border-bottom-right-radius:4px}
+.a{background:color-mix(in srgb,var(--ink) 7%,transparent);border-bottom-left-radius:4px}
+.a .ink{display:block;font-size:21px;margin-top:2px}
+.pause{color:var(--red);font-style:italic}
+.trust{display:flex;gap:6px;align-items:center}
+.trust i{width:26px;height:26px;border-radius:50%;border:2px solid var(--blue)}
+.trust i.on{background:var(--blue)}
+.trust i.half{background:linear-gradient(90deg,var(--blue) 50%,transparent 50%)}
+.chk{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.chk li{display:grid;grid-template-columns:2em minmax(0,1fr);gap:8px}
+.chk .s{font-weight:700;text-align:center;border-radius:6px;font-size:13px;padding:1px 0}
+.ok{background:color-mix(in srgb,var(--blue) 18%,transparent);color:var(--blue)}
+.no{background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red)}
+.new{background:color-mix(in srgb,var(--ink) 10%,transparent)}
+/* summary */
+.rg{display:grid;grid-template-columns:6em minmax(0,1fr) 4em;gap:10px;align-items:center;margin:10px 0}
+.rg b{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.track{position:relative;height:14px;border-radius:7px;background:var(--line)}
+.band{position:absolute;top:0;bottom:0;border-radius:7px;background:color-mix(in srgb,var(--red) 55%,transparent)}
+.band.sure{background:var(--red)}
+.was{position:absolute;top:-3px;bottom:-3px;border:1.5px dashed var(--soft);border-radius:9px}
+.verdict{border:2px solid var(--blue);border-radius:14px;padding:12px 14px}
+.verdict .ink{font-size:28px;color:var(--blue);line-height:1.1}
+.sample{font-size:13px;color:var(--soft);margin:14px 0 0}
+</style>
+</head>
+<body>
+<div class="device"><div class="screen">
+  <div class="bar"><span>Dossier · Kofi Mensah</span><span>mar. 24 nov · 21:50</span></div>
+  <div class="tabs" role="tablist" id="tabs">
+    <button role="tab" type="button">Identité</button>
+    <button role="tab" type="button">Match 3</button>
+    <button role="tab" type="button">Entretien</button>
+    <button role="tab" type="button">Synthèse</button>
+  </div>
+  <div class="book" id="book" tabindex="0" aria-label="Pages du dossier, faire défiler pour changer de page">
+
+    <section class="pg" aria-label="Identité">
+      <div class="cols even">
+        <div class="card">
+          <div class="who">
+            <div class="ava"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#cfc6b4"/><path d="M12 100c4-24 18-32 38-32s34 8 38 32z" fill="#2f6b45"/><path d="M40 70l10 11 10-11" fill="none" stroke="#e9e3d2" stroke-width="3"/><ellipse cx="50" cy="44" rx="18" ry="22" fill="#7a4e33"/><path d="M32 38c2-15 11-21 19-21s17 5 18 20c-6-7-11-9-19-9s-13 3-18 10z" fill="#1d1712"/><path d="M43 55q7 5 14 0" fill="none" stroke="#3a2418" stroke-width="2" stroke-linecap="round"/><circle cx="43" cy="45" r="2" fill="#1d1712"/><circle cx="57" cy="45" r="2" fill="#1d1712"/></svg></div>
+            <div>
+              <h1>Kofi Mensah</h1>
+              <div class="tags"><span class="tag">17 ans</span><span class="tag">Ailier G</span><span class="tag">Pied gauche</span><span class="tag">3 matchs vus</span></div>
+            </div>
+          </div>
+          <dl style="margin-top:16px">
+            <dt>Né</dt><dd>12 mars 2009, Kumasi (Ghana)</dd>
+            <dt>Taille</dt><dd>1,74 m · 66 kg</dd>
+            <dt>Club</dt><dd>FC Vila Nova (D2 Portugal), n° 11</dd>
+            <dt>Contrat</dt><dd>Jusqu'en juin 2027</dd>
+            <dt>Agent</dt><dd>R. Costa, Norte Talentos</dd>
+            <dt>Famille</dt><dd>Mère et sœur (14 ans), à Porto</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <h2>Ce qu'ils veulent · notes au stylet</h2>
+          <ul class="wants">
+            <li><b>Lui</b><span class="ink">jouer à Lisbonne, « comme mon père »</span></li>
+            <li><b>Lui</b><span class="ink">du temps de jeu tout de suite</span></li>
+            <li><b>La mère</b><span class="ink">qu'il continue l'école</span></li>
+            <li><b>La mère</b><span class="ink r">pas trop loin de Porto (sa sœur)</span></li>
+            <li><b>L'agent</b><span class="ink">un gros transfert avant 19 ans</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="pg" aria-label="Match 3">
+      <h1>Vila Nova 2 – 1 Amarante</h1>
+      <p class="meta">Sam. 21 nov · 17 h · D2 portugaise · pluie fine · suivis : n° 11 et n° 6</p>
+      <div class="cols">
+        <div class="stack">
+          <div class="card fig"><h2>Ses courses · on attaque vers la droite</h2><svg id="pitch" viewBox="0 0 400 262" role="img" aria-label="Terrain tactique annoté au stylet : courses du numéro 11 sur l'aile gauche à la 8e, 23e (centre, but du 9), 64e (repli) et 88e (but)."></svg></div>
+          <div class="card fig"><h2>Ses frappes</h2><svg id="goals" viewBox="0 0 400 140" role="img" aria-label="Deux cages vues de face. 51e : croix en bas à gauche, arrêt du gardien. 88e : croix en lucarne, entourée, but."></svg></div>
+        </div>
+        <div class="stack">
+          <div class="card">
+            <h2>Fil du match</h2>
+            <ul class="tl">
+              <li><span class="m">8'</span><span>Première accélération<span class="ink">laisse son gars sur place !</span></span></li>
+              <li><span class="m">23'</span><span>Débordement, centre du gauche, but du n° 9<span class="ink b">explosif</span></span></li>
+              <li><span class="m">35'</span><span>Deux contrôles manqués sous pression</span></li>
+              <li><span class="m">51'</span><span>Frappe de loin, arrêt<span class="ink r">hésite avant</span></span></li>
+              <li><span class="m">64'</span><span>Repli, coupe la passe</span></li>
+              <li><span class="m">78'</span><span>Reste au sol une minute<span class="ink r">cuisse ??</span></span></li>
+              <li><span class="m">88'</span><span>But, frappe croisée en lucarne<span class="ink b">!!</span></span></li>
+            </ul>
+          </div>
+          <div class="card stats">
+            <h2 style="margin:0">Compteurs du match</h2>
+            <div class="st"><span>Sprints gagnés</span><div class="meter"><i style="width:83%"></i></div><b>5 / 6</b></div>
+            <div class="st"><span>Duels gagnés</span><div class="meter"><i style="width:71%"></i></div><b>5 / 7</b></div>
+            <div class="st"><span>Centres réussis</span><div class="meter"><i style="width:50%"></i></div><b>2 / 4</b></div>
+            <p class="lbl" style="margin:0"><span class="ink" style="font-size:20px">scout du Benfica B en tribune, 2e rang</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pg" aria-label="Entretien">
+      <h1>Entretien · Mme Mensah</h1>
+      <p class="meta">Mar. 24 nov · 15 h · chez elle, banlieue de Porto · 45 min</p>
+      <div class="cols">
+        <div class="card chat">
+          <div class="q">Loin de chez lui, comment il le vit ?</div>
+          <div class="a">« Il appelle tous les soirs. Sa sœur lui manque beaucoup. »<span class="ink">mal du pays ++</span></div>
+          <div class="q">Il s'est déjà blessé ?</div>
+          <div class="a">« Non, jamais rien de grave. » <span class="pause">(silence)</span> « Juste des petites douleurs, comme tous les garçons. »<span class="ink r">≠ match 78' cuisse : elle le protège ?</span></div>
+          <div class="q">Qu'est-ce qu'il veut faire, plus tard ?</div>
+          <div class="a">« Jouer à Lisbonne. Son père y a joué, en réserve. »<span class="ink">ambition ++, photos du père au mur</span></div>
+        </div>
+        <div class="stack">
+          <div class="card">
+            <h2>Confiance de la famille</h2>
+            <div class="trust" aria-label="4 sur 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><b style="margin-left:8px">4 / 5</b></div>
+            <p class="lbl">4,5 avant · question directe sur les blessures : −0,5 · elle m'a donné son numéro</p>
+          </div>
+          <div class="card">
+            <h2>Ce que ça change</h2>
+            <ul class="chk">
+              <li><span class="s ok">=</span><span>Ambition forte, déjà vue au match.</span></li>
+              <li><span class="s no">≠</span><span>Blessure niée, mais vue à la 78e : à vérifier.</span></li>
+              <li><span class="s new">+</span><span>Mal du pays : nouveau, invisible sur le terrain.</span></li>
+            </ul>
+            <p class="lbl">Prochaine étape : le kiné du club, semaine prochaine (1 jour).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pg" aria-label="Synthèse">
+      <h1>Synthèse</h1>
+      <p class="meta">Après 3 matchs et 1 entretien · mise à jour automatique</p>
+      <div class="cols even">
+        <div class="card">
+          <h2>Mon estimation</h2>
+          <div id="ranges"></div>
+          <p class="lbl">Pointillé : avant le match 3 · plein : estimation sûre</p>
+        </div>
+        <div class="stack">
+          <div class="card">
+            <h2>Ce que je retiens</h2>
+            <ul class="chk">
+              <li><span class="s ok">+</span><span>Vitesse au-dessus du niveau D2.</span></li>
+              <li><span class="s ok">+</span><span>Centre du gauche précis à pleine course.</span></li>
+              <li><span class="s no">–</span><span>Premier contrôle fragile sous pression.</span></li>
+              <li><span class="s new">?</span><span>Cuisse : vue au match, niée par la mère.</span></li>
+              <li><span class="s new">?</span><span>Mal du pays : un club proche de Porto l'aiderait.</span></li>
+            </ul>
+          </div>
+          <div class="verdict">
+            <div class="ink">Mon pari : titulaire en D1 d'ici 3 ans</div>
+            <div class="lbl" style="margin-top:4px">Certitude 70 % · rapport au club après le kiné</div>
+          </div>
+        </div>
+      </div>
+      <p class="sample">Maquette avec un joueur et un match inventés.</p>
+    </section>
+  </div>
+</div></div>
+
+<script>
+{
+  const NS = 'http://www.w3.org/2000/svg';
+  let seed = 11;
+  const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
+  const j = (a) => (rnd() - .5) * a;
+  // Stylus line: jittered points smoothed into a path (a = 0 gives a clean line)
+  const wob = (pts, a = 2) => {
+    const p = pts.map(([x, y], i) => [x + (i ? j(a) : 0), y + (i ? j(a) : 0)]);
+    let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+    for (let i = 1; i < p.length; i++) {
+      const [x0, y0] = p[i - 1], [x1, y1] = p[i];
+      d += ` Q${(x0 + j(a)).toFixed(1)} ${(y0 + j(a)).toFixed(1)} ${((x0 + x1) / 2).toFixed(1)} ${((y0 + y1) / 2).toFixed(1)}`;
+    }
+    const l = p[p.length - 1];
+    return d + ` L${l[0].toFixed(1)} ${l[1].toFixed(1)}`;
+  };
+  const seg = (x1, y1, x2, y2, n = 4) => Array.from({length: n + 1}, (_, i) => [x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n]);
+  const curve = (x1, y1, cx, cy, x2, y2, n = 10) => Array.from({length: n + 1}, (_, i) => { const t = i / n, u = 1 - t; return [u * u * x1 + 2 * u * t * cx + t * t * x2, u * u * y1 + 2 * u * t * cy + t * t * y2]; });
+  const circ = (cx, cy, r, n = 14, ry = r) => Array.from({length: n + 2}, (_, i) => { const a = i / n * Math.PI * 2 - .6; return [cx + Math.cos(a) * r * (1 + j(.08)), cy + Math.sin(a) * ry * (1 + j(.08))]; });
+
+  const el = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+  const ink = (svg, items) => {
+    let t = .3;
+    for (const it of items) {
+      if (it.text) {
+        const e = el('text', {x: it.x, y: it.y, 'font-size': it.size || 18, fill: it.color || 'var(--pen)', class: 'fade'});
+        if (it.anchor) e.setAttribute('text-anchor', it.anchor);
+        e.textContent = it.text; e.style.setProperty('--d', t + 's'); t += .1;
+        svg.appendChild(e); continue;
+      }
+      const e = el('path', {d: it.d, class: 'pen ' + (it.c || ''), 'stroke-width': it.w || 2.2});
+      if (it.dash) e.setAttribute('stroke-dasharray', it.dash);
+      svg.appendChild(e);
+      if (it.dash) { e.classList.add('fade'); e.style.setProperty('--d', t + 's'); t += .15; continue; }
+      const L = Math.ceil(e.getTotalLength()), dur = Math.min(.7, .12 + L / 650);
+      e.classList.add('draw'); e.style.setProperty('--l', L); e.style.setProperty('--t', dur + 's'); e.style.setProperty('--d', t + 's');
+      t += it.lead ? dur * .85 : .04;
+    }
+  };
+  const X = (x, y, s = 6, c = 'red') => [{d: wob(seg(x - s, y - s, x + s, y + s, 2), .6), w: 3, c}, {d: wob(seg(x + s, y - s, x - s, y + s, 2), .6), w: 3, c}];
+  const head = (x, y, ang, c = 'red', s = 11) => ({d: wob([[x - Math.cos(ang - .45) * s, y - Math.sin(ang - .45) * s], [x, y], [x - Math.cos(ang + .45) * s, y - Math.sin(ang + .45) * s]], .4), c, w: 2.6});
+
+  // Clean tactical pitch (the app), then stylus strokes on top (the scout)
+  const pitch = document.getElementById('pitch');
+  const W = 400, H = 262, m = 10, cx = W / 2, cy = H / 2;
+  pitch.appendChild(el('rect', {x: 0, y: 0, width: W, height: H, rx: 10, fill: 'var(--pitch)'}));
+  for (let i = 0; i < 8; i++) if (i % 2) pitch.appendChild(el('rect', {x: m + i * (W - 2 * m) / 8, y: m, width: (W - 2 * m) / 8, height: H - 2 * m, fill: '#ffffff', opacity: .04}));
+  const pl = {fill: 'none', stroke: 'var(--pline)', 'stroke-width': 1.5, opacity: .85};
+  pitch.appendChild(el('rect', {x: m, y: m, width: W - 2 * m, height: H - 2 * m, ...pl}));
+  pitch.appendChild(el('line', {x1: cx, y1: m, x2: cx, y2: H - m, ...pl}));
+  pitch.appendChild(el('circle', {cx, cy, r: 30, ...pl}));
+  const bh = 140, bw = 56, sh = 64, sw = 20;
+  for (const side of [0, 1]) {
+    const x = side ? W - m - bw : m, xs = side ? W - m - sw : m;
+    pitch.appendChild(el('rect', {x, y: cy - bh / 2, width: bw, height: bh, ...pl}));
+    pitch.appendChild(el('rect', {x: xs, y: cy - sh / 2, width: sw, height: sh, ...pl}));
+  }
+  // App layer: player dot, live position
+  pitch.appendChild(el('circle', {cx: 108, cy: 58, r: 7, fill: 'var(--red)', stroke: '#fff', 'stroke-width': 2}));
+  const lab = el('text', {x: 108, y: 62, 'font-size': 10, 'text-anchor': 'middle', fill: '#fff', style: 'font-family:Inter,sans-serif;font-weight:700'}); lab.textContent = '11'; pitch.appendChild(lab);
+  ink(pitch, [
+    {d: wob(curve(118, 50, 150, 30, 196, 34, 8), 1.2), c: 'red', w: 2.8, lead: 1}, head(196, 34, .1),
+    {text: "8'", x: 128, y: 30, size: 20},
+    {d: wob(curve(222, 48, 280, 22, 336, 30, 10), 1.2), c: 'red', w: 3, lead: 1}, head(336, 30, .15),
+    {text: "23'", x: 226, y: 30, size: 20},
+    {d: wob(curve(340, 34, 372, 70, 350, 120, 8), .8), w: 2.4, dash: '1 7'},
+    {d: wob(circ(350, 126, 7), .6), w: 2.2, lead: 1},
+    {text: '9 tête 1-0', x: 296, y: 160, size: 20},
+    {d: wob(curve(300, 66, 250, 86, 206, 72, 8), 1.2), c: 'red', w: 2.4, lead: 1}, head(206, 72, 3.1),
+    {text: "64' repli", x: 206, y: 102, size: 18},
+    {d: wob(curve(244, 62, 290, 92, 322, 120, 8), 1.2), c: 'red', w: 2.8, lead: 1}, head(322, 120, .8),
+    {d: wob(seg(326, 124, 386, 132, 3), .8), w: 2.4, dash: '1 7'},
+    {text: "88' BUT", x: 300, y: 186, size: 24, color: 'var(--blue)'},
+    {d: wob(circ(250, 46, 112, 18, 32), 3), w: 1.4, dash: '3 7'},
+    {text: 'sa zone', x: 150, y: 92, size: 17},
+  ]);
+
+  // Goal frames: clean frame + net from the app, cross and circle by stylus
+  const goals = document.getElementById('goals');
+  const frame = (ox, label, shot, scored, kx, lean) => {
+    const w = 170, h = 74, top = 34, gy = top + h;
+    for (let x = ox + 14; x < ox + w; x += 14) goals.appendChild(el('line', {x1: x, y1: top, x2: x, y2: gy, stroke: 'var(--line)', 'stroke-width': 1}));
+    for (let y = top + 14; y < gy; y += 14) goals.appendChild(el('line', {x1: ox, y1: y, x2: ox + w, y2: y, stroke: 'var(--line)', 'stroke-width': 1}));
+    goals.appendChild(el('line', {x1: ox - 14, y1: gy, x2: ox + w + 14, y2: gy, stroke: 'var(--soft)', 'stroke-width': 1.5}));
+    goals.appendChild(el('path', {d: `M${ox} ${gy}V${top}H${ox + w}V${gy}`, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 4, 'stroke-linejoin': 'round'}));
+    // keeper as a simple app silhouette
+    const g = el('g', {fill: 'var(--soft)', opacity: .8});
+    g.appendChild(el('circle', {cx: kx + lean * 6, cy: gy - 50, r: 7}));
+    g.appendChild(el('path', {d: `M${kx - 9 + lean * 4} ${gy - 40}h18l-3 22h-12z`}));
+    g.appendChild(el('path', {d: `M${kx - 9 + lean * 4} ${gy - 38}l${-16 + lean * 6} ${-6 + lean * 10}M${kx + 9 + lean * 4} ${gy - 38}l${16 + lean * 10} ${-6 + lean * 12}`, stroke: 'var(--soft)', 'stroke-width': 5, 'stroke-linecap': 'round', fill: 'none'}));
+    g.appendChild(el('path', {d: `M${kx - 6} ${gy - 18}l-4 18M${kx + 6} ${gy - 18}l4 18`, stroke: 'var(--soft)', 'stroke-width': 5, 'stroke-linecap': 'round', fill: 'none'}));
+    goals.appendChild(g);
+    const t = el('text', {x: ox, y: 22, 'font-size': 13, fill: 'var(--soft)', style: 'font-family:Inter,sans-serif;font-weight:600'}); t.textContent = label; goals.appendChild(t);
+    return [
+      ...X(shot[0], shot[1]),
+      scored ? {d: wob(circ(shot[0], shot[1], 17, 14, 13), 1), c: 'blue', w: 2.4, lead: 1} : {d: wob(curve(shot[0] + 40, shot[1] - 30, shot[0] + 14, shot[1] - 26, shot[0] + 6, shot[1] - 10, 5), .6), w: 1.8, dash: '2 5'},
+      {text: scored ? 'BUT !' : 'arrêt', x: ox + w, y: gy + 26, size: 24, anchor: 'end', color: scored ? 'var(--blue)' : 'var(--pen)'},
+    ];
+  };
+  ink(goals, [...frame(14, "51' · de loin", [42, 96], false, 80, -1), ...frame(214, "88' · croisée", [362, 48], true, 290, .4)]);
+
+  // Summary ranges
+  const R = [
+    {k: 'Vitesse', lo: 68, hi: 86, was: [62, 90]},
+    {k: 'Technique', lo: 60, hi: 72, was: [55, 80], sure: 1},
+    {k: 'Mental', lo: 45, hi: 80, was: [40, 85]},
+    {k: 'Physique', lo: 40, hi: 75, was: [40, 75]},
+    {k: 'Potentiel', lo: 70, hi: 90, was: [60, 92]},
+  ];
+  document.getElementById('ranges').innerHTML = R.map(r => `<div class="rg"><span>${r.k}</span><div class="track"><div class="was" style="left:${r.was[0]}%;width:${r.was[1] - r.was[0]}%"></div><div class="band${r.sure ? ' sure' : ''}" style="left:${r.lo}%;width:${r.hi - r.lo}%"></div></div><b>${r.lo}–${r.hi}</b></div>`).join('');
+
+  // Tabs drive the page scroller, and follow it
+  const book = document.getElementById('book');
+  const pages = [...book.children];
+  const tabs = [...document.querySelectorAll('#tabs button')];
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cur = () => Math.round(book.scrollLeft / book.clientWidth);
+  const go = (i) => pages[Math.max(0, Math.min(pages.length - 1, i))].scrollIntoView({behavior: still ? 'auto' : 'smooth', block: 'nearest', inline: 'center'});
+  const mark = () => { const i = cur(); tabs.forEach((b, k) => b.setAttribute('aria-selected', k === i ? 'true' : 'false')); };
+  tabs.forEach((b, k) => b.addEventListener('click', () => go(k)));
+  book.addEventListener('scroll', mark, {passive: true});
+  book.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') { e.preventDefault(); go(cur() + 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur() - 1); } });
+  mark();
+}
+</script>
+</body>
+</html>

@@ -148,7 +148,7 @@ dt{color:var(--soft)}dd{margin:0;font-weight:500}
       <div class="cols">
         <div class="stack">
           <div class="card fig"><h2>Ses courses · on attaque vers la droite</h2><svg id="pitch" viewBox="0 0 400 262" role="img" aria-label="Terrain tactique annoté au stylet : courses du numéro 11 sur l'aile gauche à la 8e, 23e (centre, but du 9), 64e (repli) et 88e (but)."></svg></div>
-          <div class="card fig"><h2>Ses frappes</h2><svg id="goals" viewBox="0 0 400 140" role="img" aria-label="Deux cages vues de face. 51e : croix en bas à gauche, arrêt du gardien. 88e : croix en lucarne, entourée, but."></svg></div>
+          <div class="card fig"><h2>Ses frappes</h2><svg id="goals" viewBox="0 0 400 140" role="img" aria-label="Une seule cage vue de face, avec chaque frappe du match : 51e, croix en bas à gauche, arrêt ; 88e, croix en lucarne entourée, but."></svg></div>
         </div>
         <div class="stack">
           <div class="card">
@@ -314,29 +314,19 @@ dt{color:var(--soft)}dd{margin:0;font-weight:500}
     {text: 'sa zone', x: 150, y: 92, size: 17},
   ]);
 
-  // Goal frames: clean frame + net from the app, cross and circle by stylus
+  // One goal frame: clean frame + net from the app, every shot of the match marked on it by stylus
   const goals = document.getElementById('goals');
-  const frame = (ox, label, shot, scored, kx, lean) => {
-    const w = 170, h = 74, top = 34, gy = top + h;
+  {
+    const ox = 70, w = 260, top = 34, gy = 108;
     for (let x = ox + 14; x < ox + w; x += 14) goals.appendChild(el('line', {x1: x, y1: top, x2: x, y2: gy, stroke: 'var(--line)', 'stroke-width': 1}));
     for (let y = top + 14; y < gy; y += 14) goals.appendChild(el('line', {x1: ox, y1: y, x2: ox + w, y2: y, stroke: 'var(--line)', 'stroke-width': 1}));
-    goals.appendChild(el('line', {x1: ox - 14, y1: gy, x2: ox + w + 14, y2: gy, stroke: 'var(--soft)', 'stroke-width': 1.5}));
+    goals.appendChild(el('line', {x1: ox - 20, y1: gy, x2: ox + w + 20, y2: gy, stroke: 'var(--soft)', 'stroke-width': 1.5}));
     goals.appendChild(el('path', {d: `M${ox} ${gy}V${top}H${ox + w}V${gy}`, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 4, 'stroke-linejoin': 'round'}));
-    // keeper as a simple app silhouette
-    const g = el('g', {fill: 'var(--soft)', opacity: .8});
-    g.appendChild(el('circle', {cx: kx + lean * 6, cy: gy - 50, r: 7}));
-    g.appendChild(el('path', {d: `M${kx - 9 + lean * 4} ${gy - 40}h18l-3 22h-12z`}));
-    g.appendChild(el('path', {d: `M${kx - 9 + lean * 4} ${gy - 38}l${-16 + lean * 6} ${-6 + lean * 10}M${kx + 9 + lean * 4} ${gy - 38}l${16 + lean * 10} ${-6 + lean * 12}`, stroke: 'var(--soft)', 'stroke-width': 5, 'stroke-linecap': 'round', fill: 'none'}));
-    g.appendChild(el('path', {d: `M${kx - 6} ${gy - 18}l-4 18M${kx + 6} ${gy - 18}l4 18`, stroke: 'var(--soft)', 'stroke-width': 5, 'stroke-linecap': 'round', fill: 'none'}));
-    goals.appendChild(g);
-    const t = el('text', {x: ox, y: 22, 'font-size': 13, fill: 'var(--soft)', style: 'font-family:Inter,sans-serif;font-weight:600'}); t.textContent = label; goals.appendChild(t);
-    return [
-      ...X(shot[0], shot[1]),
-      scored ? {d: wob(circ(shot[0], shot[1], 17, 14, 13), 1), c: 'blue', w: 2.4, lead: 1} : {d: wob(curve(shot[0] + 40, shot[1] - 30, shot[0] + 14, shot[1] - 26, shot[0] + 6, shot[1] - 10, 5), .6), w: 1.8, dash: '2 5'},
-      {text: scored ? 'BUT !' : 'arrêt', x: ox + w, y: gy + 26, size: 24, anchor: 'end', color: scored ? 'var(--blue)' : 'var(--pen)'},
-    ];
-  };
-  ink(goals, [...frame(14, "51' · de loin", [42, 96], false, 80, -1), ...frame(214, "88' · croisée", [362, 48], true, 290, .4)]);
+  }
+  ink(goals, [
+    ...X(100, 94), {text: "51' arrêt", x: 114, y: 100, size: 20},
+    ...X(306, 48), {d: wob(circ(306, 48, 17, 14, 13), 1), c: 'blue', w: 2.4, lead: 1}, {text: "88' BUT !", x: 284, y: 132, size: 24, anchor: 'end', color: 'var(--blue)'},
+  ]);
 
   // Summary ranges
   const R = [

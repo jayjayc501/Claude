@@ -31,3 +31,6 @@ Animation (24/11) : on ne voit jamais le match, seulement la tablette du scout q
 pendant qu'il le regarde (minute qui avance, flèches et croix au stylet sur le terrain et les
 cages, notes écrites à la main, bâtons des duels). Principe validé par le propriétaire : pas de
 match simulé à l'écran, sinon on refait un jeu de gestion classique.
+
+**Base retenue pour la V1 (24/11)** : l'animation « Scout en direct » avec une seule cage, sans gardien,
+où les frappes s'accumulent au fil du match.

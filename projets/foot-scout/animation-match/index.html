@@ -41,7 +41,7 @@ h1{font:700 clamp(22px,3.2vw,30px)/1.1 Inter,sans-serif;letter-spacing:-.02em;ma
 svg text{font-family:Caveat,cursive;font-weight:700}
 .pen{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke:var(--pen)}
 .red{stroke:var(--red)}.blue{stroke:var(--blue)}.white{stroke:#fff}
-.fade{transition:opacity .4s}
+
 .notes{list-style:none;margin:0;padding:0;display:grid}
 .notes li{display:grid;grid-template-columns:2.6em minmax(0,1fr);gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font:700 22px/1.2 Caveat,cursive;color:var(--pen)}
 .notes li:last-child{border:0}
@@ -73,7 +73,7 @@ svg text{font-family:Caveat,cursive;font-weight:700}
   <div class="grid">
     <div class="stack">
       <div class="card fig"><h2>Ses courses · on attaque vers la droite</h2><svg id="pitch" viewBox="0 0 400 262" role="img" aria-label="Terrain vide que le scout annote au stylet pendant le match : les courses du numéro 11, le centre, le repli."></svg></div>
-      <div class="card fig"><h2>Ses frappes</h2><svg id="goals" viewBox="0 0 400 140" role="img" aria-label="Deux cages vides où le scout marque d'une croix chaque frappe du numéro 11."></svg></div>
+      <div class="card fig"><h2>Ses frappes</h2><svg id="goals" viewBox="0 0 400 140" role="img" aria-label="Une seule cage, vue de face, où le scout marque d'une croix chaque frappe du numéro 11 au fil du match."></svg></div>
     </div>
     <div class="card">
       <h2>Mes notes</h2>
@@ -117,15 +117,15 @@ svg text{font-family:Caveat,cursive;font-weight:700}
 
   // Empty goal frames (app layer)
   const goals = document.getElementById('goals');
-  const frame = (ox, label) => {
-    const w = 170, top = 34, gy = 108;
+  const frame = (ox, label, w = 170) => {
+    const top = 34, gy = 108;
     for (let x = ox + 14; x < ox + w; x += 14) el('line', {x1: x, y1: top, x2: x, y2: gy, stroke: 'var(--line)'}, goals);
     for (let y = top + 14; y < gy; y += 14) el('line', {x1: ox, y1: y, x2: ox + w, y2: y, stroke: 'var(--line)'}, goals);
     el('line', {x1: ox - 14, y1: gy, x2: ox + w + 14, y2: gy, stroke: 'var(--soft)', 'stroke-width': 1.5}, goals);
     el('path', {d: `M${ox} ${gy}V${top}H${ox + w}V${gy}`, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 4, 'stroke-linejoin': 'round'}, goals);
     const t = el('text', {x: ox, y: 22, 'font-size': 13, fill: 'var(--soft)', style: 'font-family:Inter,sans-serif;font-weight:600'}, goals); t.textContent = label;
   };
-  frame(14, 'frappe 1'); frame(214, 'frappe 2');
+  frame(70, '', 260);
   const gInk = el('g', {}, goals);
 
   // What the scout writes, minute by minute
@@ -136,12 +136,12 @@ svg text{font-family:Caveat,cursive;font-weight:700}
     {m: 23, pitch: [{d: wob(curve(222, 48, 280, 22, 336, 30)), c: 'red', w: 3}, head(336, 30, .15), {text: "23'", x: 226, y: 30}, {d: wob(curve(340, 34, 372, 70, 350, 120)), c: 'white', dash: 1}, {d: wob(circ(350, 126, 7)), c: 'white'}, {text: '9 tête 1-0', x: 290, y: 160, color: '#fff'}], note: ['23\'', 'déborde G, centre fort pied G → but du 9', 'explosif'], won: 1},
     {m: 29, won: 1},
     {m: 35, pitch: [{text: '?', x: 176, y: 76, size: 30, color: 'var(--red)'}], note: ['35\'', 'contrôle bof ×2, sous pression'], lost: 1},
-    {m: 51, goal: [...X(42, 96), {d: wob(curve(70, 60, 54, 64, 48, 84, 5), .5), dash: 1}, {text: 'arrêt', x: 184, y: 134, anchor: 'end'}], label1: "51' de loin", note: ['51\'', 'frappe de loin, hésite avant… arrêt', '', 'r']},
+    {m: 51, goal: [...X(100, 94), {text: "51' arrêt", x: 114, y: 100, size: 20}], note: ['51\'', 'frappe de loin, hésite avant… arrêt', '', 'r']},
     {m: 57, won: 1},
     {m: 64, pitch: [{d: wob(curve(300, 66, 250, 86, 206, 72)), c: 'red', w: 2.4}, head(206, 72, 3.1), {text: "64' repli", x: 206, y: 102}], note: ['64\'', 'se replie bien, coupe la passe'], won: 1},
     {m: 78, pitch: [{d: wob(circ(262, 52, 16)), c: 'red', w: 2.2}, {text: 'cuisse ??', x: 282, y: 46, size: 22, color: 'var(--red)'}], note: ['78\'', 'cuisse ?? reste au sol 1 min', '', 'r']},
     {m: 82, lost: 1},
-    {m: 88, pitch: [{d: wob(curve(244, 62, 290, 92, 322, 120)), c: 'red', w: 2.8}, head(322, 120, .8), {d: wob(seg(326, 124, 386, 132, 3)), c: 'white', dash: 1}, {text: "88' BUT", x: 300, y: 190, size: 24, color: '#fff'}], goal: [...X(362, 48), {d: wob(circ(362, 48, 17, 13)), c: 'blue', w: 2.4}, {text: 'BUT !', x: 384, y: 134, size: 24, anchor: 'end', color: 'var(--blue)'}], label2: "88' croisée", note: ['88\'', 'BUT !! frappe croisée, lucarne', '', 'b'], won: 1},
+    {m: 88, pitch: [{d: wob(curve(244, 62, 290, 92, 322, 120)), c: 'red', w: 2.8}, head(322, 120, .8), {d: wob(seg(326, 124, 386, 132, 3)), c: 'white', dash: 1}, {text: "88' BUT", x: 300, y: 190, size: 24, color: '#fff'}], goal: [...X(306, 48), {d: wob(circ(306, 48, 17, 13)), c: 'blue', w: 2.4}, {text: "88' BUT !", x: 284, y: 132, size: 24, anchor: 'end', color: 'var(--blue)'}], note: ['88\'', 'BUT !! frappe croisée, lucarne', '', 'b'], won: 1},
     {m: 90, note: ['fin', 'scout Benfica B en tribune · À REVOIR : kiné + famille', '', 'r']},
   ];
 
@@ -156,7 +156,7 @@ svg text{font-family:Caveat,cursive;font-weight:700}
     const step = () => { if (!t0) t0 = performance.now(); const u = Math.min(1, (performance.now() - t0) / (dur * 1000)); e.style.strokeDashoffset = (L * (1 - (1 - (1 - u) ** 2))).toFixed(1); if (u < 1) setTimeout(step, 16); };
     later(step, delay);
   };
-  const fadeIn = (e, delay) => { if (still) return; e.style.opacity = 0; later(() => { e.style.opacity = 1; }, delay + .02); };
+  const fadeIn = (e, delay) => { if (still) return; e.style.opacity = 0; later(() => { let o = 0; const up = () => { o = Math.min(1, o + .12); e.style.opacity = o; if (o < 1) setTimeout(up, 30); }; up(); }, delay + .02); };
   const ink = (g, items) => {
     let d0 = 0;
     for (const it of items) {
@@ -164,7 +164,7 @@ svg text{font-family:Caveat,cursive;font-weight:700}
         const e = el('text', {x: it.x, y: it.y, 'font-size': it.size || 20, fill: it.color || 'var(--pen)', class: 'fade'}, g);
         fadeIn(e, d0);
         if (it.anchor) e.setAttribute('text-anchor', it.anchor);
-        if (g === pInk) e.setAttribute('style', 'paint-order:stroke;stroke:#0004;stroke-width:3px');
+        if (g === pInk) { e.style.paintOrder = 'stroke'; e.style.stroke = '#0004'; e.style.strokeWidth = '3px'; }
         e.textContent = it.text; d0 += .25; continue;
       }
       const e = el('path', {d: it.d, class: 'pen ' + (it.c || ''), 'stroke-width': it.w || 2.2}, g);
@@ -194,7 +194,6 @@ svg text{font-family:Caveat,cursive;font-weight:700}
     const d = k < 4 ? wob(seg(x0 + k * 8, 3, x0 + k * 8 + j(2), 23), .6) : wob(seg(x0 - 4, 20, x0 + 30, 6), .6);
     ink(g, [{d, c: kind === 'won' ? '' : 'red', w: 2.2}]);
   };
-  const label = (n, txt) => { const t = goals.querySelectorAll('text')[n]; t.textContent = txt; t.style.fill = 'var(--ink)'; };
 
   // Timeline: the clock runs, each moment waits for the stylus to finish
   let minute = 0, playing = true, timer = null, idx = 0, busy = false, run = 0;
@@ -204,7 +203,7 @@ svg text{font-family:Caveat,cursive;font-weight:700}
       const e = EV[idx++], my = run; busy = true;
       let wait = 0;
       if (e.pitch) wait = Math.max(wait, ink(pInk, e.pitch));
-      if (e.goal) { wait = Math.max(wait, ink(gInk, e.goal)); if (e.label1) label(0, e.label1); if (e.label2) label(1, e.label2); }
+      if (e.goal) wait = Math.max(wait, ink(gInk, e.goal));
       if (e.won) tally('won');
       if (e.lost) tally('lost');
       if (!still && wait) await new Promise(r => setTimeout(r, wait * 1000));
@@ -221,8 +220,6 @@ svg text{font-family:Caveat,cursive;font-weight:700}
   const reset = () => {
     run++; seed = 11; minute = 0; idx = 0; busy = false; tallies.won = tallies.lost = 0;
     pInk.replaceChildren(); gInk.replaceChildren(); $('t-won').replaceChildren(); $('t-lost').replaceChildren();
-    label(0, 'frappe 1'); label(1, 'frappe 2');
-    goals.querySelectorAll('text').forEach(t => t.style.fill = '');
     $('notes').innerHTML = '<li class="empty">Le match commence. Le stylet est prêt.</li>';
     $('clock').textContent = "0'"; playing = true; $('play').disabled = false; $('play').textContent = 'Pause'; start();
   };

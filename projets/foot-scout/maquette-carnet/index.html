@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carnet du scout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* VOICE occasion: a game screen, hushed and hand-made
+   IDEA the scout's own squared notebook, one page filled during a match
+   PICTURE a pencil sketch of the key action on a hand-drawn pitch, drawn stroke by stroke
+   COLOUR squared paper, graphite, red pencil for the tracked player, blue ballpoint for verdicts
+   TYPE Caveat for headings and scribbles + Kalam for the notes
+   LAYOUT one notebook page; two columns from 860px (sketch left, notes right), one column on a phone */
+:root{color-scheme:light dark;--bg:light-dark(#d9d4c7,#121417);--paper:light-dark(#fbfaf4,#1d2125);--grid:light-dark(#dfe7ef,#2a3139);--ink:light-dark(#2e2e2c,#e4e0d4);--soft:light-dark(#77746c,#9c988c);--red:light-dark(#c8352b,#ff7d6e);--blue:light-dark(#2347a3,#93b2ff);--tape:light-dark(#efe3b8cc,#5d5640cc)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:300 17px/1.5 Kalam,"Comic Sans MS",cursive;overflow-x:clip;padding:clamp(12px,3vw,40px) max(3vw,12px)}
+.page{max-width:1080px;margin:0 auto;background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;border-radius:4px 14px 14px 4px;box-shadow:0 1px 0 #0002,0 14px 30px -18px #0007;padding:clamp(18px,3.5vw,44px) clamp(16px,4vw,52px) clamp(22px,3vw,40px) clamp(30px,5vw,64px);position:relative}
+.page::before{content:"";position:absolute;left:clamp(14px,2.4vw,30px);top:0;bottom:0;width:2px;background:var(--red);opacity:.35}
+h1,h2,.hand{font-family:Caveat,cursive;font-weight:700;line-height:1.05;margin:0}
+h1{font-size:clamp(32px,5vw,48px);letter-spacing:-.01em}
+h2{font-size:30px;margin:26px 0 6px}
+.meta{font-size:22px;font-family:Caveat,cursive;color:var(--soft);margin:2px 0 14px}
+.top{display:grid;gap:clamp(18px,3vw,36px)}
+@media(min-width:860px){.top{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+.sketch{position:relative}
+.sketch svg{width:100%;height:auto;display:block;overflow:visible}
+.sketch svg text{font-family:Caveat,cursive;font-weight:700;paint-order:stroke;stroke:var(--paper);stroke-width:5px}
+.cap{font-size:15px;color:var(--soft);margin:4px 0 0}
+.pen{fill:none;stroke:var(--ink);stroke-linecap:round;stroke-linejoin:round}
+.red{stroke:var(--red)}.blue{stroke:var(--blue)}
+.draw{stroke-dasharray:var(--l);stroke-dashoffset:var(--l);animation:draw var(--t,.8s) ease-out forwards;animation-delay:var(--d,0s)}
+@keyframes draw{to{stroke-dashoffset:0}}
+.fade{opacity:0;animation:fade .4s forwards;animation-delay:var(--d,0s)}
+@keyframes fade{to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.draw{animation:none;stroke-dashoffset:0}.fade{animation:none;opacity:1}}
+.player{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
+.polaroid{width:118px;background:#fff;padding:8px 8px 26px;box-shadow:0 2px 6px #0003;transform:rotate(-4deg);position:relative;margin-top:6px}
+.polaroid::after{content:"";position:absolute;top:-10px;left:30px;width:58px;height:20px;background:var(--tape);transform:rotate(3deg)}
+.polaroid svg{display:block;width:100%;height:auto;background:#d9d2c3}
+.polaroid span{position:absolute;bottom:3px;left:0;right:0;text-align:center;font:700 18px Caveat,cursive;color:#2e2e2c}
+.name{font-size:36px}
+.sub{margin:2px 0 8px;color:var(--soft);font-size:16px}
+.ranges{display:grid;gap:10px;margin-top:6px}
+.rg{display:grid;grid-template-columns:5.6em minmax(0,1fr) 3.6em;gap:10px;align-items:center;font-size:16px}
+.rg b{font:700 21px Caveat,cursive;text-align:right;white-space:nowrap}
+.track{position:relative;height:16px;border-bottom:1.5px solid var(--soft)}
+.band{position:absolute;top:2px;bottom:2px;border:1.5px solid var(--ink);border-radius:3px;background:repeating-linear-gradient(-55deg,var(--ink) 0 1.2px,transparent 1.2px 5px);opacity:.8}
+.band.sure{background:var(--ink);opacity:.85}
+.ghost{position:absolute;top:2px;bottom:2px;border:1.5px dashed var(--soft);border-radius:3px}
+.notes{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:4px}
+.notes li{display:grid;grid-template-columns:3em minmax(0,1fr);gap:8px;line-height:1.35}
+.notes .m{font:700 20px Caveat,cursive;color:var(--soft)}
+.strike{text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:2px}
+.blue-t{color:var(--blue)}.red-t{color:var(--red)}
+.verdict{margin-top:14px;border:2px solid var(--blue);border-radius:10px 4px 12px 6px;padding:10px 14px;color:var(--blue);transform:rotate(-.6deg)}
+.verdict .hand{font-size:26px}
+.fiche{margin-top:28px;border-top:2px dashed var(--soft);padding-top:6px}
+.score{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.score .hand{font-size:clamp(28px,4.6vw,40px)}
+.score .meta{margin:0}
+.moments{display:grid;gap:16px;margin-top:14px}
+@media(min-width:700px){.moments{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.mo{background:#fff8;border:1px solid var(--grid);padding:8px 8px 10px;border-radius:4px}
+:root[data-theme=dark] .mo{background:#0002}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .mo{background:#0002}}
+.mo svg{display:block;width:100%;height:auto;border-radius:3px}
+.mo .slot{font-size:13px;color:var(--soft);margin:4px 0 2px}
+.mo p{margin:2px 0 0;font-size:16px;line-height:1.4}
+.mo .m{font:700 22px Caveat,cursive;margin-right:4px}
+.crowd{margin:16px 0 0;font-size:17px}
+.sample{margin:18px 0 0;font-size:14px;color:var(--soft)}
+</style>
+</head>
+<body>
+<main class="page">
+  <h1>Vila Nova – Amarante</h1>
+  <p class="meta">D2 portugaise · samedi 17 h · pluie fine · semaine 3</p>
+
+  <div class="top">
+    <section class="sketch">
+      <svg id="pitch" viewBox="0 0 380 250" role="img" aria-label="Croquis au crayon : le numéro 11 déborde sur l'aile gauche, dépasse son défenseur et centre ; le numéro 9 reprend de la tête."></svg>
+      <p class="cap">23e · coup de jumelles sur le n° 11, croquis du scout</p>
+    </section>
+
+    <section>
+      <div class="player">
+        <div class="polaroid">
+          <svg viewBox="0 0 100 110" aria-hidden="true">
+            <rect width="100" height="110" fill="#cfc6b4"/>
+            <path d="M14 110c4-26 18-34 36-34s32 8 36 34z" fill="#2f6b45"/>
+            <path d="M40 76l10 12 10-12" fill="none" stroke="#e9e3d2" stroke-width="3"/>
+            <ellipse cx="50" cy="48" rx="19" ry="23" fill="#7a4e33"/>
+            <path d="M31 42c2-16 12-22 20-22s18 5 19 21c-6-7-12-9-20-9s-14 3-19 10z" fill="#1d1712"/>
+            <path d="M43 60q7 5 14 0" fill="none" stroke="#3a2418" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="42" cy="49" r="2" fill="#1d1712"/><circle cx="58" cy="49" r="2" fill="#1d1712"/>
+          </svg>
+          <span>Kofi, 17 ans</span>
+        </div>
+        <div>
+          <div class="hand name">Kofi Mensah</div>
+          <p class="sub">Ailier gauche · n° 11 · 3e match observé</p>
+          <div class="ranges" id="ranges"></div>
+        </div>
+      </div>
+
+      <h2>Notes</h2>
+      <ul class="notes">
+        <li><span class="m">8e</span><span>Première accélération : laisse son vis-à-vis sur place.</span></li>
+        <li><span class="m">23e</span><span>Déborde et centre fort, but du 9. <span class="blue-t">Explosif.</span></span></li>
+        <li><span class="m">51e</span><span><span class="strike">Frappe de loin, sûr de lui.</span> Hésite avant de frapper, arrêt du gardien.</span></li>
+        <li><span class="m">78e</span><span class="red-t">Se tient l'arrière de la cuisse, reste au sol une minute. À surveiller.</span></li>
+        <li><span class="m">tribune</span><span>Un scout du Benfica B, deuxième rangée.</span></li>
+      </ul>
+
+      <div class="verdict">
+        <div class="hand">Mon pari : titulaire en D1 d'ici 3 ans</div>
+        <div>Certitude 70 % · à revoir avec le kiné avant le rapport</div>
+      </div>
+    </section>
+  </div>
+
+  <section class="fiche">
+    <h2>Fiche du match</h2>
+    <div class="score">
+      <span class="hand">FC Vila Nova 2 – 1 Sporting Amarante</span>
+      <span class="meta">buts : 23e Duarte, 64e Rocha (A), 88e Kofi</span>
+    </div>
+    <div class="moments" id="moments"></div>
+    <p class="crowd">Ce que dit la tribune : <span class="hand" style="font-size:24px">« Le petit n° 11, il va pas rester longtemps chez nous. »</span></p>
+  </section>
+
+  <p class="sample">Maquette avec un joueur et un match inventés. Les vignettes au crayon prennent la place des images d'ambiance Kling à venir.</p>
+</main>
+
+<script>
+{
+  const NS = 'http://www.w3.org/2000/svg';
+  let seed = 11;
+  const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
+  const j = (a) => (rnd() - .5) * a;
+
+  // Hand-drawn line: a few jittered points smoothed into a path
+  const wob = (pts, a = 2.2) => {
+    const p = pts.map(([x, y], i) => [x + (i ? j(a) : 0), y + (i ? j(a) : 0)]);
+    let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+    for (let i = 1; i < p.length; i++) {
+      const [x0, y0] = p[i - 1], [x1, y1] = p[i];
+      d += ` Q${(x0 + j(a)).toFixed(1)} ${(y0 + j(a)).toFixed(1)} ${((x0 + x1) / 2).toFixed(1)} ${((y0 + y1) / 2).toFixed(1)}`;
+    }
+    const l = p[p.length - 1];
+    return d + ` L${l[0].toFixed(1)} ${l[1].toFixed(1)}`;
+  };
+  const seg = (x1, y1, x2, y2, n = 4) => Array.from({length: n + 1}, (_, i) => [x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n]);
+  const curve = (x1, y1, cx, cy, x2, y2, n = 10) => Array.from({length: n + 1}, (_, i) => { const t = i / n, u = 1 - t; return [u * u * x1 + 2 * u * t * cx + t * t * x2, u * u * y1 + 2 * u * t * cy + t * t * y2]; });
+  const circ = (cx, cy, r, n = 14) => Array.from({length: n + 2}, (_, i) => { const a = i / n * Math.PI * 2 - .6; return [cx + Math.cos(a) * r * (1 + j(.08)), cy + Math.sin(a) * r * (1 + j(.08))]; });
+
+  // Draw one sketch into an svg; anim=true draws it stroke by stroke
+  const sketch = (svg, items, anim) => {
+    let t = 0;
+    for (const it of items) {
+      if (it.text) {
+        const e = document.createElementNS(NS, 'text');
+        e.setAttribute('x', it.x); e.setAttribute('y', it.y);
+        e.setAttribute('font-size', it.size || 18);
+        e.setAttribute('fill', it.color || 'var(--ink)');
+        if (it.rot) e.setAttribute('transform', `rotate(${it.rot} ${it.x} ${it.y})`);
+        e.textContent = it.text;
+        if (anim) { e.setAttribute('class', 'fade'); e.style.setProperty('--d', t + 's'); t += .15; }
+        svg.appendChild(e);
+        continue;
+      }
+      const e = document.createElementNS(NS, 'path');
+      e.setAttribute('d', it.d);
+      e.setAttribute('class', 'pen ' + (it.c || ''));
+      e.setAttribute('stroke-width', it.w || 1.6);
+      if (it.dash) e.setAttribute('stroke-dasharray', it.dash);
+      svg.appendChild(e);
+      if (anim && !it.dash) {
+        const L = Math.ceil(e.getTotalLength());
+        const dur = Math.min(.9, .15 + L / 500);
+        e.classList.add('draw');
+        e.style.setProperty('--l', L);
+        e.style.setProperty('--t', dur + 's');
+        e.style.setProperty('--d', t + 's');
+        t += it.lead ? dur * .9 : .05;
+      } else if (anim) {
+        e.classList.add('fade'); e.style.setProperty('--d', t + 's'); t += .25;
+      }
+    }
+  };
+
+  const X = (x, y, s = 6) => [{d: wob(seg(x - s, y - s, x + s, y + s, 2), 1), w: 1.8}, {d: wob(seg(x + s, y - s, x - s, y + s, 2), 1), w: 1.8}];
+  const O = (x, y, r = 6, c = '') => ({d: wob(circ(x, y, r), .8), c, w: 1.7});
+  const arrowHead = (x, y, ang, c = '', s = 10) => ({d: wob([[x - Math.cos(ang - .45) * s, y - Math.sin(ang - .45) * s], [x, y], [x - Math.cos(ang + .45) * s, y - Math.sin(ang + .45) * s]], .6), c, w: 2});
+
+  // Pitch: attacking half, goal on the right
+  const pitch = () => [
+    {d: wob(seg(14, 14, 366, 14, 6), 1.6), w: 1.3, lead: 1},
+    {d: wob(seg(366, 14, 366, 236, 4), 1.6), w: 1.3},
+    {d: wob(seg(366, 236, 14, 236, 6), 1.6), w: 1.3},
+    {d: wob(seg(14, 236, 14, 14, 4), 1.6), w: 1.3},
+    {d: wob(curve(14, 70, 70, 125, 14, 180, 8), 1.2), w: 1.2},
+    {d: wob([[366, 60], [298, 60], [298, 190], [366, 190]], 1.2), w: 1.3},
+    {d: wob([[366, 98], [342, 98], [342, 152], [366, 152]], 1), w: 1.2},
+    {d: wob(curve(298, 104, 278, 125, 298, 146, 6), 1), w: 1.2},
+    {d: wob([[366, 108], [376, 108], [376, 142], [366, 142]], .6), w: 2},
+  ];
+
+  // The 23rd-minute action: n°11 beats his man down the left and crosses, n°9 heads in
+  const action = () => [
+    ...X(150, 52), ...X(250, 118), ...X(318, 140), ...X(204, 168),
+    O(214, 196), O(120, 150),
+    O(112, 40, 8, 'red'), {d: wob(circ(112, 40, 14), 1.2), c: 'red', w: 1.4},
+    {text: '11', x: 92, y: 26, size: 20, color: 'var(--red)'},
+    {d: wob(curve(124, 42, 190, 22, 270, 34, 10), 1.6), c: 'red', w: 2.6, lead: 1},
+    arrowHead(270, 34, .15, 'red'),
+    {d: wob(seg(150, 64, 186, 44, 2), 1), w: 1.2, dash: '2 5'},
+    {text: 'le laisse sur place', x: 160, y: 72, size: 17, rot: -6},
+    {d: wob(curve(274, 40, 330, 50, 318, 116, 9), 1.2), c: 'blue', w: 2, dash: '1 6', lead: 1},
+    O(244, 152, 6), {text: '9', x: 230, y: 176, size: 18},
+    {d: wob(curve(244, 146, 280, 120, 314, 128, 6), 1), w: 1.8, lead: 1},
+    {d: wob(curve(316, 128, 345, 124, 362, 122, 5), .8), c: 'blue', w: 2, dash: '1 6'},
+    arrowHead(362, 122, 0, 'blue', 9),
+    {d: wob(circ(352, 124, 20), 1.6), c: 'blue', w: 1.5},
+    {text: 'BUT 1-0', x: 304, y: 214, size: 24, color: 'var(--blue)', rot: -4},
+    {text: 'centre fort, pied gauche !', x: 250, y: 92, size: 16, rot: 4},
+  ];
+
+  const big = document.getElementById('pitch');
+  sketch(big, [...pitch(), ...action()], true);
+
+  // Ranges: where the scout's estimate stands now (and where it stood before)
+  const R = [
+    {k: 'Vitesse', lo: 68, hi: 86, was: [62, 90]},
+    {k: 'Technique', lo: 60, hi: 72, was: [55, 80], sure: 1},
+    {k: 'Mental', lo: 45, hi: 80, was: [40, 85]},
+    {k: 'Physique', lo: 40, hi: 75, was: [40, 75]},
+  ];
+  document.getElementById('ranges').innerHTML = R.map(r => `
+    <div class="rg"><span>${r.k}</span>
+      <div class="track"><div class="ghost" style="left:${r.was[0]}%;width:${r.was[1] - r.was[0]}%"></div><div class="band${r.sure ? ' sure' : ''}" style="left:${r.lo}%;width:${r.hi - r.lo}%"></div></div>
+      <b>${r.lo}–${r.hi}</b></div>`).join('');
+
+  // Match sheet: three key moments, each with a small vignette and two lines
+  const scene = {
+    rain: () => [
+      ...Array.from({length: 22}, (_, i) => ({d: wob(seg(8 + i * 11, 4 + (i % 3) * 6, 2 + i * 11, 22 + (i % 3) * 6, 1), .5), w: .8, c: 'blue'})),
+    ],
+    cross: () => [
+      {d: wob(seg(4, 96, 236, 96, 5), 1.2), w: 1},
+      O(60, 70, 7, 'red'), {d: wob(curve(68, 70, 120, 52, 170, 60, 6), 1.2), c: 'red', w: 2.2},
+      arrowHead(170, 60, .1, 'red'), ...X(96, 80, 5),
+      {d: wob(curve(176, 58, 210, 50, 220, 80, 6), 1), c: 'blue', w: 1.8, dash: '1 5'},
+      {text: '1-0', x: 196, y: 120, size: 20, color: 'var(--blue)'},
+    ],
+    keeper: () => [
+      {d: wob([[236, 40], [204, 40], [204, 112], [236, 112]], 1), w: 1.2},
+      O(48, 84, 7, 'red'),
+      {d: wob(seg(56, 82, 200, 66, 6), 1), c: 'blue', w: 1.8, dash: '1 5'},
+      {d: wob(curve(196, 92, 214, 58, 226, 56, 5), 1.4), w: 2.4},
+      O(218, 50, 5),
+      {text: 'arrêt', x: 150, y: 122, size: 20},
+      {text: '?', x: 70, y: 66, size: 24, color: 'var(--red)'},
+    ],
+    hurt: () => [
+      {d: wob(seg(4, 104, 236, 104, 5), 1.2), w: 1},
+      {d: wob(curve(84, 98, 120, 80, 156, 98, 6), 1.2), c: 'red', w: 2.6},
+      O(76, 90, 8, 'red'),
+      {d: wob(circ(140, 92, 12), 1), c: 'red', w: 1.2},
+      {text: 'cuisse ?', x: 154, y: 66, size: 20, color: 'var(--red)'},
+      {text: '1 min au sol', x: 20, y: 128, size: 16},
+    ],
+  };
+  const M = [
+    {m: '23e', s: 'cross', slot: 'Image : un ailier déborde le long de la ligne, terrain détrempé', t: 'Kofi (n° 11) prend son défenseur de vitesse et centre fort. Duarte reprend de la tête : 1-0.'},
+    {m: '51e', s: 'keeper', slot: 'Image : le gardien plonge, ballon dévié en corner', t: 'Kofi tente sa chance de loin. Arrêt du gardien. Il a hésité avant de frapper.'},
+    {m: '78e', s: 'hurt', slot: 'Image : un joueur assis sur la pelouse, la main sur la cuisse', t: 'Kofi se tient l\'arrière de la cuisse et reste au sol une minute. Il finit le match.'},
+  ];
+  const box = document.getElementById('moments');
+  M.forEach((mo, i) => {
+    const d = document.createElement('div');
+    d.className = 'mo';
+    d.innerHTML = `<svg viewBox="0 0 240 140" role="img"></svg><div class="slot"></div><p><span class="m"></span><span></span></p>`;
+    const s = d.querySelector('svg');
+    s.setAttribute('aria-label', mo.slot);
+    d.querySelector('.slot').textContent = mo.slot;
+    d.querySelector('.m').textContent = mo.m;
+    d.querySelector('p span:last-child').textContent = mo.t;
+    box.appendChild(d);
+    seed = 101 + i * 37;
+    sketch(s, [...scene.rain(), ...scene[mo.s]()], false);
+  });
+}
+</script>
+</body>
+</html>

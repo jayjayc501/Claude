@@ -8,35 +8,56 @@
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@300;400&display=swap" rel="stylesheet">
 <style>
 /* VOICE occasion: a game screen, hushed and hand-made
-   IDEA the scout's own squared notebook, one page filled during a match
-   PICTURE a pencil sketch of the key action on a hand-drawn pitch, drawn stroke by stroke
-   COLOUR squared paper, graphite, red pencil for the tracked player, blue ballpoint for verdicts
-   TYPE Caveat for headings and scribbles + Kalam for the notes
-   LAYOUT one notebook page; two columns from 860px (sketch left, notes right), one column on a phone */
+   IDEA the scout's squared notebook, pages turned by hand
+   PICTURE page 1 = raw match notes: the whole pitch with the player's runs, the goal frame with each shot marked
+   COLOUR squared paper, graphite, red pencil for the tracked player, blue ballpoint for results
+   TYPE Caveat for scribbles + Kalam for the clean file
+   LAYOUT a book of 3 pages that snap sideways; page 1 two columns from 860px, stacked on a phone */
 :root{color-scheme:light dark;--bg:light-dark(#d9d4c7,#121417);--paper:light-dark(#fbfaf4,#1d2125);--grid:light-dark(#dfe7ef,#2a3139);--ink:light-dark(#2e2e2c,#e4e0d4);--soft:light-dark(#77746c,#9c988c);--red:light-dark(#c8352b,#ff7d6e);--blue:light-dark(#2347a3,#93b2ff);--tape:light-dark(#efe3b8cc,#5d5640cc)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:300 17px/1.5 Kalam,"Comic Sans MS",cursive;overflow-x:clip;padding:clamp(12px,3vw,40px) max(3vw,12px)}
-.page{max-width:1080px;margin:0 auto;background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;border-radius:4px 14px 14px 4px;box-shadow:0 1px 0 #0002,0 14px 30px -18px #0007;padding:clamp(18px,3.5vw,44px) clamp(16px,4vw,52px) clamp(22px,3vw,40px) clamp(30px,5vw,64px);position:relative}
-.page::before{content:"";position:absolute;left:clamp(14px,2.4vw,30px);top:0;bottom:0;width:2px;background:var(--red);opacity:.35}
+body{background:var(--bg);color:var(--ink);font:300 17px/1.5 Kalam,"Comic Sans MS",cursive;overflow-x:clip;padding:clamp(10px,2.5vw,32px) max(2.5vw,10px)}
+.wrap{max-width:1100px;margin:0 auto}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.nav button{font:700 22px Caveat,cursive;min-width:44px;min-height:44px;padding:0 14px;border:1.5px solid var(--ink);border-radius:22px;background:var(--paper);color:var(--ink);cursor:pointer}
+.nav button:disabled{opacity:.35;cursor:default}
+.nav button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.nav .where{font:700 22px Caveat,cursive;text-align:center}
+.book{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;perspective:1600px;border-radius:6px}
+.book::-webkit-scrollbar{display:none}
+.sheet{flex:0 0 100%;scroll-snap-align:center;padding:4px}
+.page{height:100%;background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;border-radius:4px 14px 14px 4px;box-shadow:0 1px 0 #0002,0 14px 30px -18px #0007;padding:clamp(16px,3vw,40px) clamp(14px,3.5vw,46px) clamp(20px,3vw,36px) clamp(34px,5vw,62px);position:relative;transform-origin:left center;will-change:transform}
+.page::before{content:"";position:absolute;left:clamp(16px,2.4vw,30px);top:0;bottom:0;width:2px;background:var(--red);opacity:.35}
+.page::after{content:attr(data-n);position:absolute;right:16px;bottom:10px;font:700 20px Caveat,cursive;color:var(--soft)}
 h1,h2,.hand{font-family:Caveat,cursive;font-weight:700;line-height:1.05;margin:0}
-h1{font-size:clamp(32px,5vw,48px);letter-spacing:-.01em}
-h2{font-size:30px;margin:26px 0 6px}
-.meta{font-size:22px;font-family:Caveat,cursive;color:var(--soft);margin:2px 0 14px}
-.top{display:grid;gap:clamp(18px,3vw,36px)}
-@media(min-width:860px){.top{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
-.sketch{position:relative}
-.sketch svg{width:100%;height:auto;display:block;overflow:visible}
-.sketch svg text{font-family:Caveat,cursive;font-weight:700;paint-order:stroke;stroke:var(--paper);stroke-width:5px}
-.cap{font-size:15px;color:var(--soft);margin:4px 0 0}
+h1{font-size:clamp(30px,4.6vw,44px)}
+h2{font-size:30px;margin:22px 0 6px}
+.meta{font:500 21px Caveat,cursive;color:var(--soft);margin:2px 0 12px}
+svg text{font-family:Caveat,cursive;font-weight:700;paint-order:stroke;stroke:var(--paper);stroke-width:5px}
 .pen{fill:none;stroke:var(--ink);stroke-linecap:round;stroke-linejoin:round}
-.red{stroke:var(--red)}.blue{stroke:var(--blue)}
+.red{stroke:var(--red)}.blue{stroke:var(--blue)}.soft{stroke:var(--soft)}
 .draw{stroke-dasharray:var(--l);stroke-dashoffset:var(--l);animation:draw var(--t,.8s) ease-out forwards;animation-delay:var(--d,0s)}
 @keyframes draw{to{stroke-dashoffset:0}}
 .fade{opacity:0;animation:fade .4s forwards;animation-delay:var(--d,0s)}
 @keyframes fade{to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.draw{animation:none;stroke-dashoffset:0}.fade{animation:none;opacity:1}}
+.fig svg{width:100%;height:auto;display:block;overflow:visible}
+/* page 1: raw notes */
+.raw{display:grid;gap:clamp(14px,2.5vw,30px)}
+@media(min-width:860px){.raw{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}}
+.scrawl{font:500 23px/1.3 Caveat,cursive;list-style:none;margin:0;padding:0;display:grid;gap:3px}
+.scrawl li{transform:rotate(var(--r,0deg))}
+.scrawl .m{font-weight:700;color:var(--soft);margin-right:6px}
+.circ{border:2px solid var(--blue);border-radius:50% 45% 55% 40%;padding:0 6px;color:var(--blue)}
+.ul{text-decoration:underline wavy var(--red) 1.5px;text-underline-offset:4px}
+.r{color:var(--red)}.b{color:var(--blue)}
+.boxed{display:inline-block;border:2px solid var(--red);padding:0 8px;color:var(--red);transform:rotate(-2deg);margin-top:6px}
+.tally{font:700 26px Caveat,cursive;letter-spacing:2px}
+.lbl{font:500 19px Caveat,cursive;color:var(--soft);margin:8px 0 0}
+/* page 2: clean file */
+.file{display:grid;gap:clamp(18px,3vw,36px)}
+@media(min-width:860px){.file{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 .player{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
 .polaroid{width:118px;background:#fff;padding:8px 8px 26px;box-shadow:0 2px 6px #0003;transform:rotate(-4deg);position:relative;margin-top:6px}
 .polaroid::after{content:"";position:absolute;top:-10px;left:30px;width:58px;height:20px;background:var(--tape);transform:rotate(3deg)}
@@ -51,90 +72,177 @@ h2{font-size:30px;margin:26px 0 6px}
 .band{position:absolute;top:2px;bottom:2px;border:1.5px solid var(--ink);border-radius:3px;background:repeating-linear-gradient(-55deg,var(--ink) 0 1.2px,transparent 1.2px 5px);opacity:.8}
 .band.sure{background:var(--ink);opacity:.85}
 .ghost{position:absolute;top:2px;bottom:2px;border:1.5px dashed var(--soft);border-radius:3px}
-.notes{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:4px}
+.notes{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:4px}
 .notes li{display:grid;grid-template-columns:3em minmax(0,1fr);gap:8px;line-height:1.35}
 .notes .m{font:700 20px Caveat,cursive;color:var(--soft)}
-.strike{text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:2px}
-.blue-t{color:var(--blue)}.red-t{color:var(--red)}
-.verdict{margin-top:14px;border:2px solid var(--blue);border-radius:10px 4px 12px 6px;padding:10px 14px;color:var(--blue);transform:rotate(-.6deg)}
+.verdict{margin-top:16px;border:2px solid var(--blue);border-radius:10px 4px 12px 6px;padding:10px 14px;color:var(--blue);transform:rotate(-.6deg)}
 .verdict .hand{font-size:26px}
-.fiche{margin-top:28px;border-top:2px dashed var(--soft);padding-top:6px}
-.score{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
-.score .hand{font-size:clamp(28px,4.6vw,40px)}
-.score .meta{margin:0}
+.notes.id li{grid-template-columns:4.2em minmax(0,1fr)}
+.trust{display:flex;gap:8px;margin:6px 0 0}
+.trust span{width:30px;height:30px;border:2px solid var(--blue);border-radius:50% 45% 52% 48%}
+.trust .on{background:repeating-linear-gradient(-50deg,var(--blue) 0 2px,transparent 2px 5px)}
+/* page 3: match sheet */
+.score .hand{font-size:clamp(28px,4.4vw,40px)}
 .moments{display:grid;gap:16px;margin-top:14px}
 @media(min-width:700px){.moments{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.mo{background:#fff8;border:1px solid var(--grid);padding:8px 8px 10px;border-radius:4px}
-:root[data-theme=dark] .mo{background:#0002}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .mo{background:#0002}}
-.mo svg{display:block;width:100%;height:auto;border-radius:3px}
-.mo .slot{font-size:13px;color:var(--soft);margin:4px 0 2px}
-.mo p{margin:2px 0 0;font-size:16px;line-height:1.4}
+.mo{border:1px solid var(--grid);padding:8px 8px 10px;border-radius:4px;background:color-mix(in srgb,var(--paper) 70%,transparent)}
+.mo svg{display:block;width:100%;height:auto}
+.slot{aspect-ratio:240/140;border:1.5px dashed var(--soft);border-radius:4px;display:grid;place-items:center;text-align:center;padding:10px;font:500 19px/1.2 Caveat,cursive;color:var(--soft)}
+.mo p{margin:6px 0 0;font-size:16px;line-height:1.4}
 .mo .m{font:700 22px Caveat,cursive;margin-right:4px}
 .crowd{margin:16px 0 0;font-size:17px}
-.sample{margin:18px 0 0;font-size:14px;color:var(--soft)}
+.sample{margin:12px 0 0;font-size:14px;color:var(--soft)}
 </style>
 </head>
 <body>
-<main class="page">
-  <h1>Vila Nova – Amarante</h1>
-  <p class="meta">D2 portugaise · samedi 17 h · pluie fine · semaine 3</p>
-
-  <div class="top">
-    <section class="sketch">
-      <svg id="pitch" viewBox="0 0 380 250" role="img" aria-label="Croquis au crayon : le numéro 11 déborde sur l'aile gauche, dépasse son défenseur et centre ; le numéro 9 reprend de la tête."></svg>
-      <p class="cap">23e · coup de jumelles sur le n° 11, croquis du scout</p>
-    </section>
-
-    <section>
-      <div class="player">
-        <div class="polaroid">
-          <svg viewBox="0 0 100 110" aria-hidden="true">
-            <rect width="100" height="110" fill="#cfc6b4"/>
-            <path d="M14 110c4-26 18-34 36-34s32 8 36 34z" fill="#2f6b45"/>
-            <path d="M40 76l10 12 10-12" fill="none" stroke="#e9e3d2" stroke-width="3"/>
-            <ellipse cx="50" cy="48" rx="19" ry="23" fill="#7a4e33"/>
-            <path d="M31 42c2-16 12-22 20-22s18 5 19 21c-6-7-12-9-20-9s-14 3-19 10z" fill="#1d1712"/>
-            <path d="M43 60q7 5 14 0" fill="none" stroke="#3a2418" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="42" cy="49" r="2" fill="#1d1712"/><circle cx="58" cy="49" r="2" fill="#1d1712"/>
-          </svg>
-          <span>Kofi, 17 ans</span>
-        </div>
-        <div>
-          <div class="hand name">Kofi Mensah</div>
-          <p class="sub">Ailier gauche · n° 11 · 3e match observé</p>
-          <div class="ranges" id="ranges"></div>
-        </div>
-      </div>
-
-      <h2>Notes</h2>
-      <ul class="notes">
-        <li><span class="m">8e</span><span>Première accélération : laisse son vis-à-vis sur place.</span></li>
-        <li><span class="m">23e</span><span>Déborde et centre fort, but du 9. <span class="blue-t">Explosif.</span></span></li>
-        <li><span class="m">51e</span><span><span class="strike">Frappe de loin, sûr de lui.</span> Hésite avant de frapper, arrêt du gardien.</span></li>
-        <li><span class="m">78e</span><span class="red-t">Se tient l'arrière de la cuisse, reste au sol une minute. À surveiller.</span></li>
-        <li><span class="m">tribune</span><span>Un scout du Benfica B, deuxième rangée.</span></li>
-      </ul>
-
-      <div class="verdict">
-        <div class="hand">Mon pari : titulaire en D1 d'ici 3 ans</div>
-        <div>Certitude 70 % · à revoir avec le kiné avant le rapport</div>
-      </div>
-    </section>
+<div class="wrap">
+  <div class="nav">
+    <button id="prev" type="button" aria-label="Page précédente">‹</button>
+    <div class="where" id="where">Fiche d'identité</div>
+    <button id="next" type="button" aria-label="Page suivante">›</button>
   </div>
 
-  <section class="fiche">
-    <h2>Fiche du match</h2>
-    <div class="score">
-      <span class="hand">FC Vila Nova 2 – 1 Sporting Amarante</span>
-      <span class="meta">buts : 23e Duarte, 64e Rocha (A), 88e Kofi</span>
-    </div>
-    <div class="moments" id="moments"></div>
-    <p class="crowd">Ce que dit la tribune : <span class="hand" style="font-size:24px">« Le petit n° 11, il va pas rester longtemps chez nous. »</span></p>
-  </section>
+  <div class="book" id="book" tabindex="0" aria-label="Carnet du scout, faire défiler pour tourner les pages">
+    <!-- PAGE 1: identity card, opens the file -->
+    <section class="sheet" data-title="Fiche d'identité"><div class="page" data-n="1">
+      <h1>Kofi Mensah</h1>
+      <p class="meta">dossier ouvert le 2 septembre · région Nord Portugal</p>
+      <div class="file">
+        <div class="player">
+          <div class="polaroid">
+            <svg viewBox="0 0 100 110" aria-hidden="true">
+              <rect width="100" height="110" fill="#cfc6b4"/>
+              <path d="M14 110c4-26 18-34 36-34s32 8 36 34z" fill="#2f6b45"/>
+              <path d="M40 76l10 12 10-12" fill="none" stroke="#e9e3d2" stroke-width="3"/>
+              <ellipse cx="50" cy="48" rx="19" ry="23" fill="#7a4e33"/>
+              <path d="M31 42c2-16 12-22 20-22s18 5 19 21c-6-7-12-9-20-9s-14 3-19 10z" fill="#1d1712"/>
+              <path d="M43 60q7 5 14 0" fill="none" stroke="#3a2418" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="42" cy="49" r="2" fill="#1d1712"/><circle cx="58" cy="49" r="2" fill="#1d1712"/>
+            </svg>
+            <span>Kofi, 17 ans</span>
+          </div>
+          <ul class="notes id">
+            <li><span class="m">né</span><span>12 mars 2009, Kumasi (Ghana)</span></li>
+            <li><span class="m">poste</span><span>Ailier gauche, pied gauche</span></li>
+            <li><span class="m">taille</span><span>1,74 m · 66 kg</span></li>
+            <li><span class="m">club</span><span>FC Vila Nova (D2), n° 11</span></li>
+            <li><span class="m">contrat</span><span>Jusqu'en juin 2027</span></li>
+            <li><span class="m">agent</span><span>R. Costa, agence Norte Talentos</span></li>
+            <li><span class="m">famille</span><span>Vit avec sa mère et sa sœur (14 ans) à Porto</span></li>
+          </ul>
+        </div>
+        <div>
+          <h2 style="margin-top:0">Ce qu'ils veulent</h2>
+          <ul class="scrawl">
+            <li style="--r:-.6deg"><b>Lui :</b> jouer à Lisbonne, « comme mon père »</li>
+            <li style="--r:.5deg"><b>Lui :</b> du temps de jeu tout de suite, pas une réserve</li>
+            <li style="--r:-.4deg"><b>La mère :</b> qu'il continue l'école</li>
+            <li style="--r:.6deg"><b>La mère :</b> pas trop loin de Porto, pour sa sœur</li>
+            <li style="--r:-.5deg"><b>L'agent :</b> un gros transfert avant ses 19 ans</li>
+          </ul>
+          <p class="lbl">Observé 3 fois · 1 entretien · confiance de la famille : bonne</p>
+        </div>
+      </div>
+    </div></section>
 
-  <p class="sample">Maquette avec un joueur et un match inventés. Les vignettes au crayon prennent la place des images d'ambiance Kling à venir.</p>
-</main>
+    <!-- PAGE 2: raw notes taken during the match -->
+    <section class="sheet" data-title="Match 3 · notes"><div class="page" data-n="2">
+      <h1>Sam. 17 h · Vila Nova – Amarante</h1>
+      <p class="meta">D2 portugaise · pluie fine · suivis : <span class="r">11 (Kofi)</span> et 6</p>
+      <div class="raw">
+        <div>
+          <div class="fig"><svg id="pitch" viewBox="0 0 400 262" role="img" aria-label="Le terrain entier au crayon, avec les courses du numéro 11 sur l'aile gauche : 8e, 23e avec le centre qui donne le but, 64e en repli."></svg></div>
+          <p class="lbl">ses courses, côté gauche (on attaque vers la droite)</p>
+          <div class="fig"><svg id="goals" viewBox="0 0 400 150" role="img" aria-label="Deux cages vues de face. 51e : frappe en bas à gauche, arrêtée par le gardien. 88e : frappe en lucarne, but."></svg></div>
+          <p class="lbl">ses deux frappes</p>
+        </div>
+        <ul class="scrawl">
+          <li style="--r:-1deg"><span class="m">8'</span>1re accél. → laisse son gars sur place !!</li>
+          <li style="--r:.6deg"><span class="m">23'</span>déborde G, centre fort pied G → but du 9 <span class="circ">explosif</span></li>
+          <li><span class="m">35'</span>contrôle bof ×2, sous pression</li>
+          <li style="--r:-.8deg"><span class="m">51'</span>frappe de loin, <span class="ul">hésite avant</span>, arrêt</li>
+          <li style="--r:.5deg"><span class="m">64'</span>se replie bien, coupe la passe</li>
+          <li style="--r:-.4deg"><span class="m">78'</span><span class="r">cuisse ?? reste au sol 1 min</span></li>
+          <li style="--r:.8deg"><span class="m">88'</span><span class="b">BUT !! frappe croisée lucarne</span></li>
+          <li style="margin-top:8px">duels gagnés <span class="tally">||||&nbsp;|</span> perdus <span class="tally">||</span></li>
+          <li style="--r:-.6deg">sprints : 6 · 5 gagnés</li>
+          <li style="--r:.4deg">scout Benfica B en tribune, 2e rang</li>
+          <li><span class="boxed">À revoir : kiné + famille</span></li>
+        </ul>
+      </div>
+    </div></section>
+
+    <!-- PAGE 3: the match sheet, right-hand page of the match spread -->
+    <section class="sheet" data-title="Match 3 · fiche"><div class="page" data-n="3">
+      <h1>FC Vila Nova 2 – 1 Sporting Amarante</h1>
+      <p class="meta">buts : 23e Duarte, 64e Rocha (A), 88e Kofi</p>
+      <div class="moments" id="moments"></div>
+      <p class="crowd">Ce que dit la tribune : <span class="hand" style="font-size:24px">« Le petit n° 11, il va pas rester longtemps chez nous. »</span></p>
+    </div></section>
+
+    <!-- PAGE 4: notes taken during the interview -->
+    <section class="sheet" data-title="Entretien · la mère"><div class="page" data-n="4">
+      <h1>Entretien · Mme Mensah</h1>
+      <p class="meta">mardi 15 h · chez elle, banlieue de Porto · thé, pluie</p>
+      <div class="raw">
+        <ul class="scrawl">
+          <li style="--r:-.5deg"><span class="m">Q</span>loin de chez lui, ça va ?</li>
+          <li style="--r:.4deg">→ « appelle tous les soirs », sa sœur lui manque <span class="circ">mal du pays ++</span></li>
+          <li style="--r:-.6deg;margin-top:6px"><span class="m">Q</span>déjà blessé ?</li>
+          <li style="--r:.6deg">→ « non, jamais rien de grave » <span class="r">(silence)</span> « juste des petites douleurs »</li>
+          <li style="--r:-.3deg"><span class="ul">≠ match 78' cuisse !</span> <span class="r">elle le protège ?</span></li>
+          <li style="--r:.5deg;margin-top:6px"><span class="m">Q</span>il veut quoi plus tard ?</li>
+          <li style="--r:-.5deg">→ Lisbonne, « son père y a joué » <span class="circ">ambition ++</span></li>
+          <li style="--r:.3deg;margin-top:6px">coupes sur l'étagère, photos du père en maillot</li>
+          <li style="--r:-.4deg">m'a raccompagné à la porte, m'a donné son numéro</li>
+          <li><span class="boxed">kiné du club : semaine pro</span></li>
+        </ul>
+        <div>
+          <h2 style="margin-top:0">Confiance</h2>
+          <div class="trust" aria-label="Confiance de la famille : 4 sur 5, en baisse d'un demi-point après la question sur les blessures">
+            <span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span>
+          </div>
+          <p class="lbl">avant : 4,5 · question directe sur les blessures : −0,5</p>
+          <h2>Ce que ça confirme</h2>
+          <ul class="notes">
+            <li><span class="m">=</span><span>Ambition forte, déjà vue au match (veut le ballon).</span></li>
+            <li><span class="m">≠</span><span class="r">Blessure niée, mais vue au match : à vérifier.</span></li>
+            <li><span class="m">+</span><span>Mal du pays : nouveau, rien vu au match.</span></li>
+          </ul>
+          <p class="lbl">questions gardées pour plus tard : son agent, ses sorties</p>
+        </div>
+      </div>
+    </div></section>
+
+    <!-- PAGE 5: overall summary, closes the file -->
+    <section class="sheet" data-title="Synthèse"><div class="page" data-n="5">
+      <h1>Synthèse · Kofi Mensah</h1>
+      <p class="meta">après 3 matchs et 1 entretien</p>
+      <div class="file">
+        <div>
+          <div class="ranges" id="ranges"></div>
+          <p class="lbl">pointillé : mon estimation d'avant · hachuré : maintenant · plein : sûr</p>
+          <div class="verdict">
+            <div class="hand">Mon pari : titulaire en D1 d'ici 3 ans</div>
+            <div>Certitude 70 % · voir le kiné avant le rapport</div>
+          </div>
+        </div>
+        <div>
+          <h2 style="margin-top:0">Ce que je retiens</h2>
+          <ul class="notes">
+            <li><span class="m">+</span><span>Vitesse au-dessus du niveau D2 : 5 sprints gagnés sur 6.</span></li>
+            <li><span class="m">+</span><span>Centre du pied gauche précis à pleine course.</span></li>
+            <li><span class="m">+</span><span>Ambition forte, confirmée par la famille.</span></li>
+            <li><span class="m">–</span><span>Premier contrôle fragile sous pression.</span></li>
+            <li><span class="m">?</span><span class="r">Cuisse : vue au match, niée par la mère.</span></li>
+            <li><span class="m">?</span><span>Mal du pays : un club proche de Porto l'aiderait.</span></li>
+          </ul>
+        </div>
+      </div>
+      <p class="sample">Maquette avec un joueur et un match inventés. Les cadres en pointillé attendent les images Kling.</p>
+    </div></section>
+  </div>
+</div>
 
 <script>
 {
@@ -143,7 +251,7 @@ h2{font-size:30px;margin:26px 0 6px}
   const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
   const j = (a) => (rnd() - .5) * a;
 
-  // Hand-drawn line: a few jittered points smoothed into a path
+  // Hand-drawn line through jittered points
   const wob = (pts, a = 2.2) => {
     const p = pts.map(([x, y], i) => [x + (i ? j(a) : 0), y + (i ? j(a) : 0)]);
     let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
@@ -156,9 +264,8 @@ h2{font-size:30px;margin:26px 0 6px}
   };
   const seg = (x1, y1, x2, y2, n = 4) => Array.from({length: n + 1}, (_, i) => [x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n]);
   const curve = (x1, y1, cx, cy, x2, y2, n = 10) => Array.from({length: n + 1}, (_, i) => { const t = i / n, u = 1 - t; return [u * u * x1 + 2 * u * t * cx + t * t * x2, u * u * y1 + 2 * u * t * cy + t * t * y2]; });
-  const circ = (cx, cy, r, n = 14) => Array.from({length: n + 2}, (_, i) => { const a = i / n * Math.PI * 2 - .6; return [cx + Math.cos(a) * r * (1 + j(.08)), cy + Math.sin(a) * r * (1 + j(.08))]; });
+  const circ = (cx, cy, r, n = 14, ry = r) => Array.from({length: n + 2}, (_, i) => { const a = i / n * Math.PI * 2 - .6; return [cx + Math.cos(a) * r * (1 + j(.08)), cy + Math.sin(a) * ry * (1 + j(.08))]; });
 
-  // Draw one sketch into an svg; anim=true draws it stroke by stroke
   const sketch = (svg, items, anim) => {
     let t = 0;
     for (const it of items) {
@@ -167,9 +274,10 @@ h2{font-size:30px;margin:26px 0 6px}
         e.setAttribute('x', it.x); e.setAttribute('y', it.y);
         e.setAttribute('font-size', it.size || 18);
         e.setAttribute('fill', it.color || 'var(--ink)');
+        if (it.anchor) e.setAttribute('text-anchor', it.anchor);
         if (it.rot) e.setAttribute('transform', `rotate(${it.rot} ${it.x} ${it.y})`);
         e.textContent = it.text;
-        if (anim) { e.setAttribute('class', 'fade'); e.style.setProperty('--d', t + 's'); t += .15; }
+        if (anim) { e.setAttribute('class', 'fade'); e.style.setProperty('--d', t + 's'); t += .12; }
         svg.appendChild(e);
         continue;
       }
@@ -179,61 +287,89 @@ h2{font-size:30px;margin:26px 0 6px}
       e.setAttribute('stroke-width', it.w || 1.6);
       if (it.dash) e.setAttribute('stroke-dasharray', it.dash);
       svg.appendChild(e);
-      if (anim && !it.dash) {
-        const L = Math.ceil(e.getTotalLength());
-        const dur = Math.min(.9, .15 + L / 500);
-        e.classList.add('draw');
-        e.style.setProperty('--l', L);
-        e.style.setProperty('--t', dur + 's');
-        e.style.setProperty('--d', t + 's');
-        t += it.lead ? dur * .9 : .05;
-      } else if (anim) {
-        e.classList.add('fade'); e.style.setProperty('--d', t + 's'); t += .25;
-      }
+      if (!anim) continue;
+      if (it.dash) { e.classList.add('fade'); e.style.setProperty('--d', t + 's'); t += .2; continue; }
+      const L = Math.ceil(e.getTotalLength());
+      const dur = Math.min(.8, .12 + L / 600);
+      e.classList.add('draw');
+      e.style.setProperty('--l', L); e.style.setProperty('--t', dur + 's'); e.style.setProperty('--d', t + 's');
+      t += it.lead ? dur * .85 : .04;
     }
   };
 
-  const X = (x, y, s = 6) => [{d: wob(seg(x - s, y - s, x + s, y + s, 2), 1), w: 1.8}, {d: wob(seg(x + s, y - s, x - s, y + s, 2), 1), w: 1.8}];
-  const O = (x, y, r = 6, c = '') => ({d: wob(circ(x, y, r), .8), c, w: 1.7});
-  const arrowHead = (x, y, ang, c = '', s = 10) => ({d: wob([[x - Math.cos(ang - .45) * s, y - Math.sin(ang - .45) * s], [x, y], [x - Math.cos(ang + .45) * s, y - Math.sin(ang + .45) * s]], .6), c, w: 2});
+  const X = (x, y, s = 5, c = '') => [{d: wob(seg(x - s, y - s, x + s, y + s, 2), .8), w: 2.2, c}, {d: wob(seg(x + s, y - s, x - s, y + s, 2), .8), w: 2.2, c}];
+  const O = (x, y, r = 6, c = '', w = 1.7) => ({d: wob(circ(x, y, r), .8), c, w});
+  const head = (x, y, ang, c = '', s = 10) => ({d: wob([[x - Math.cos(ang - .45) * s, y - Math.sin(ang - .45) * s], [x, y], [x - Math.cos(ang + .45) * s, y - Math.sin(ang + .45) * s]], .5), c, w: 2.2});
 
-  // Pitch: attacking half, goal on the right
-  const pitch = () => [
-    {d: wob(seg(14, 14, 366, 14, 6), 1.6), w: 1.3, lead: 1},
-    {d: wob(seg(366, 14, 366, 236, 4), 1.6), w: 1.3},
-    {d: wob(seg(366, 236, 14, 236, 6), 1.6), w: 1.3},
-    {d: wob(seg(14, 236, 14, 14, 4), 1.6), w: 1.3},
-    {d: wob(curve(14, 70, 70, 125, 14, 180, 8), 1.2), w: 1.2},
-    {d: wob([[366, 60], [298, 60], [298, 190], [366, 190]], 1.2), w: 1.3},
-    {d: wob([[366, 98], [342, 98], [342, 152], [366, 152]], 1), w: 1.2},
-    {d: wob(curve(298, 104, 278, 125, 298, 146, 6), 1), w: 1.2},
-    {d: wob([[366, 108], [376, 108], [376, 142], [366, 142]], .6), w: 2},
+  // The whole pitch, seen from above
+  const pitch = (W = 400, H = 262, m = 10) => {
+    const r = W - m, b = H - m, cx = W / 2, cy = H / 2, bh = (H - 2 * m) * .58, bw = W * .14, sh = bh * .45, sw = W * .05;
+    return [
+      {d: wob([[m, m], [cx, m], [r, m]], 1.4), w: 1.3},
+      {d: wob([[r, m], [r, cy], [r, b]], 1.4), w: 1.3},
+      {d: wob([[r, b], [cx, b], [m, b]], 1.4), w: 1.3},
+      {d: wob([[m, b], [m, cy], [m, m]], 1.4), w: 1.3},
+      {d: wob(seg(cx, m, cx, b, 3), 1.2), w: 1.2},
+      {d: wob(circ(cx, cy, 30), 1), w: 1.2},
+      {d: wob([[m, cy - bh / 2], [m + bw, cy - bh / 2], [m + bw, cy + bh / 2], [m, cy + bh / 2]], 1), w: 1.2},
+      {d: wob([[r, cy - bh / 2], [r - bw, cy - bh / 2], [r - bw, cy + bh / 2], [r, cy + bh / 2]], 1), w: 1.2},
+      {d: wob([[m, cy - sh / 2], [m + sw, cy - sh / 2], [m + sw, cy + sh / 2], [m, cy + sh / 2]], .8), w: 1.1},
+      {d: wob([[r, cy - sh / 2], [r - sw, cy - sh / 2], [r - sw, cy + sh / 2], [r, cy + sh / 2]], .8), w: 1.1},
+      {d: wob([[m, cy - 16], [m - 6, cy - 16], [m - 6, cy + 16], [m, cy + 16]], .4), w: 2},
+      {d: wob([[r, cy - 16], [r + 6, cy - 16], [r + 6, cy + 16], [r, cy + 16]], .4), w: 2},
+    ];
+  };
+
+  // Kofi's runs on the left wing (top of the drawing, attacking right)
+  const runs = () => [
+    {d: wob(circ(250, 46, 105, 18, 30), 3), c: 'soft', w: 1, dash: '3 6'},
+    {text: 'sa zone', x: 160, y: 88, size: 16, color: 'var(--soft)'},
+    {d: wob(curve(118, 50, 150, 30, 196, 34, 8), 1.4), c: 'red', w: 2.4, lead: 1}, head(196, 34, .1, 'red'),
+    {text: "8'", x: 120, y: 36, size: 19, color: 'var(--red)'},
+    {d: wob(curve(222, 48, 280, 22, 336, 30, 10), 1.4), c: 'red', w: 2.8, lead: 1}, head(336, 30, .15, 'red'),
+    {text: "23'", x: 220, y: 34, size: 19, color: 'var(--red)'},
+    ...X(262, 40, 4),
+    {d: wob(curve(340, 34, 372, 70, 350, 120, 8), 1), c: 'blue', w: 2, dash: '1 6'},
+    O(350, 126, 5, 'blue'),
+    {text: '9 tête → 1-0', x: 300, y: 152, size: 19, color: 'var(--blue)'},
+    {d: wob(curve(300, 64, 250, 84, 206, 70, 8), 1.4), c: 'red', w: 2, lead: 1}, head(206, 70, 3.1, 'red'),
+    {text: "64' repli", x: 214, y: 100, size: 17, color: 'var(--red)'},
+    {d: wob(curve(244, 60, 290, 90, 322, 120, 8), 1.4), c: 'red', w: 2.4, lead: 1}, head(322, 120, .8, 'red'),
+    {d: wob(seg(326, 124, 386, 134, 3), 1), c: 'blue', w: 2, dash: '1 6'},
+    {text: "88' BUT", x: 300, y: 178, size: 22, color: 'var(--blue)'},
+    {text: '11', x: 100, y: 64, size: 22, color: 'var(--red)'},
+    O(108, 58, 13, 'red', 1.4),
   ];
 
-  // The 23rd-minute action: n°11 beats his man down the left and crosses, n°9 heads in
-  const action = () => [
-    ...X(150, 52), ...X(250, 118), ...X(318, 140), ...X(204, 168),
-    O(214, 196), O(120, 150),
-    O(112, 40, 8, 'red'), {d: wob(circ(112, 40, 14), 1.2), c: 'red', w: 1.4},
-    {text: '11', x: 92, y: 26, size: 20, color: 'var(--red)'},
-    {d: wob(curve(124, 42, 190, 22, 270, 34, 10), 1.6), c: 'red', w: 2.6, lead: 1},
-    arrowHead(270, 34, .15, 'red'),
-    {d: wob(seg(150, 64, 186, 44, 2), 1), w: 1.2, dash: '2 5'},
-    {text: 'le laisse sur place', x: 160, y: 72, size: 17, rot: -6},
-    {d: wob(curve(274, 40, 330, 50, 318, 116, 9), 1.2), c: 'blue', w: 2, dash: '1 6', lead: 1},
-    O(244, 152, 6), {text: '9', x: 230, y: 176, size: 18},
-    {d: wob(curve(244, 146, 280, 120, 314, 128, 6), 1), w: 1.8, lead: 1},
-    {d: wob(curve(316, 128, 345, 124, 362, 122, 5), .8), c: 'blue', w: 2, dash: '1 6'},
-    arrowHead(362, 122, 0, 'blue', 9),
-    {d: wob(circ(352, 124, 20), 1.6), c: 'blue', w: 1.5},
-    {text: 'BUT 1-0', x: 304, y: 214, size: 24, color: 'var(--blue)', rot: -4},
-    {text: 'centre fort, pied gauche !', x: 250, y: 92, size: 16, rot: 4},
-  ];
+  // Goal frames seen from the front, keeper inside, the shot marked
+  const goal = (ox, label, shot, scored, keeper) => {
+    const w = 170, h = 74, top = 40, gy = top + h;
+    const net = [];
+    for (let x = ox + 14; x < ox + w; x += 14) net.push({d: wob(seg(x, top + 2, x, gy, 2), .8), c: 'soft', w: .7});
+    for (let y = top + 14; y < gy; y += 14) net.push({d: wob(seg(ox + 2, y, ox + w - 2, y, 3), .8), c: 'soft', w: .7});
+    const [kx, ky, lean] = keeper;
+    return [
+      {d: wob(seg(ox - 14, gy, ox + w + 14, gy, 4), 1), w: 1.2},
+      ...net,
+      {d: wob([[ox, gy], [ox, top], [ox + w, top], [ox + w, gy]], 1), w: 2.6, lead: 1},
+      O(kx + lean * 6, ky - 22, 6, '', 1.8),
+      {d: wob([[kx + lean * 4, ky - 15], [kx, ky + 6]], .6), w: 2.2},
+      {d: wob([[kx - 14 + lean * 10, ky - 18 + lean * 6], [kx + lean * 4, ky - 10], [kx + 14 + lean * 14, ky - 18 + lean * 12]], .8), w: 2},
+      {d: wob([[kx - 8, gy], [kx, ky + 6], [kx + 8, gy]], .6), w: 2},
+      ...X(shot[0], shot[1], 6, 'red'),
+      scored ? {d: wob(circ(shot[0], shot[1], 16, 14, 12), 1.2), c: 'blue', w: 1.6} : {d: wob(curve(kx + 14 + lean * 14, ky - 18 + lean * 12, shot[0] + 10, shot[1] - 20, shot[0] + 2, shot[1] - 4, 5), .8), c: 'soft', w: 1.2, dash: '2 4'},
+      {text: label, x: ox, y: 26, size: 20},
+      {text: scored ? 'BUT !' : 'arrêt', x: ox + w - 2, y: gy + 26, size: 22, anchor: 'end', color: scored ? 'var(--blue)' : 'var(--ink)'},
+    ];
+  };
 
-  const big = document.getElementById('pitch');
-  sketch(big, [...pitch(), ...action()], true);
+  sketch(document.getElementById('pitch'), [...pitch(), ...runs()], true);
+  sketch(document.getElementById('goals'), [
+    ...goal(14, "51' de loin", [42, 102], false, [74, 96, -1]),
+    ...goal(214, "88' croisée", [362, 52], true, [290, 96, .4]),
+  ], true);
 
-  // Ranges: where the scout's estimate stands now (and where it stood before)
+  // Page 2: estimate ranges, the old one dashed
   const R = [
     {k: 'Vitesse', lo: 68, hi: 86, was: [62, 90]},
     {k: 'Technique', lo: 60, hi: 72, was: [55, 80], sure: 1},
@@ -245,55 +381,59 @@ h2{font-size:30px;margin:26px 0 6px}
       <div class="track"><div class="ghost" style="left:${r.was[0]}%;width:${r.was[1] - r.was[0]}%"></div><div class="band${r.sure ? ' sure' : ''}" style="left:${r.lo}%;width:${r.hi - r.lo}%"></div></div>
       <b>${r.lo}–${r.hi}</b></div>`).join('');
 
-  // Match sheet: three key moments, each with a small vignette and two lines
-  const scene = {
-    rain: () => [
-      ...Array.from({length: 22}, (_, i) => ({d: wob(seg(8 + i * 11, 4 + (i % 3) * 6, 2 + i * 11, 22 + (i % 3) * 6, 1), .5), w: .8, c: 'blue'})),
-    ],
-    cross: () => [
-      {d: wob(seg(4, 96, 236, 96, 5), 1.2), w: 1},
-      O(60, 70, 7, 'red'), {d: wob(curve(68, 70, 120, 52, 170, 60, 6), 1.2), c: 'red', w: 2.2},
-      arrowHead(170, 60, .1, 'red'), ...X(96, 80, 5),
-      {d: wob(curve(176, 58, 210, 50, 220, 80, 6), 1), c: 'blue', w: 1.8, dash: '1 5'},
-      {text: '1-0', x: 196, y: 120, size: 20, color: 'var(--blue)'},
-    ],
-    keeper: () => [
-      {d: wob([[236, 40], [204, 40], [204, 112], [236, 112]], 1), w: 1.2},
-      O(48, 84, 7, 'red'),
-      {d: wob(seg(56, 82, 200, 66, 6), 1), c: 'blue', w: 1.8, dash: '1 5'},
-      {d: wob(curve(196, 92, 214, 58, 226, 56, 5), 1.4), w: 2.4},
-      O(218, 50, 5),
-      {text: 'arrêt', x: 150, y: 122, size: 20},
-      {text: '?', x: 70, y: 66, size: 24, color: 'var(--red)'},
-    ],
-    hurt: () => [
-      {d: wob(seg(4, 104, 236, 104, 5), 1.2), w: 1},
-      {d: wob(curve(84, 98, 120, 80, 156, 98, 6), 1.2), c: 'red', w: 2.6},
-      O(76, 90, 8, 'red'),
-      {d: wob(circ(140, 92, 12), 1), c: 'red', w: 1.2},
-      {text: 'cuisse ?', x: 154, y: 66, size: 20, color: 'var(--red)'},
-      {text: '1 min au sol', x: 20, y: 128, size: 16},
-    ],
-  };
+  // Page 3: key moments, pitch or goal when it helps, an image frame otherwise
   const M = [
-    {m: '23e', s: 'cross', slot: 'Image : un ailier déborde le long de la ligne, terrain détrempé', t: 'Kofi (n° 11) prend son défenseur de vitesse et centre fort. Duarte reprend de la tête : 1-0.'},
-    {m: '51e', s: 'keeper', slot: 'Image : le gardien plonge, ballon dévié en corner', t: 'Kofi tente sa chance de loin. Arrêt du gardien. Il a hésité avant de frapper.'},
-    {m: '78e', s: 'hurt', slot: 'Image : un joueur assis sur la pelouse, la main sur la cuisse', t: 'Kofi se tient l\'arrière de la cuisse et reste au sol une minute. Il finit le match.'},
+    {m: '23e', kind: 'pitch', t: 'Kofi (n° 11) prend son défenseur de vitesse et centre fort. Duarte reprend de la tête : 1-0.'},
+    {m: '78e', slot: 'Image Kling : un joueur assis sur la pelouse détrempée', t: 'Kofi se tient l\'arrière de la cuisse et reste au sol une minute. Il finit le match.'},
+    {m: '88e', kind: 'goal', t: 'Kofi repique dans l\'axe et frappe croisé, en lucarne. 2-1, le stade se lève.'},
   ];
   const box = document.getElementById('moments');
   M.forEach((mo, i) => {
     const d = document.createElement('div');
     d.className = 'mo';
-    d.innerHTML = `<svg viewBox="0 0 240 140" role="img"></svg><div class="slot"></div><p><span class="m"></span><span></span></p>`;
-    const s = d.querySelector('svg');
-    s.setAttribute('aria-label', mo.slot);
-    d.querySelector('.slot').textContent = mo.slot;
+    d.innerHTML = mo.kind ? '<svg role="img"></svg>' : '<div class="slot"></div>';
+    d.insertAdjacentHTML('beforeend', '<p><span class="m"></span><span></span></p>');
     d.querySelector('.m').textContent = mo.m;
     d.querySelector('p span:last-child').textContent = mo.t;
     box.appendChild(d);
     seed = 101 + i * 37;
-    sketch(s, [...scene.rain(), ...scene[mo.s]()], false);
+    if (mo.kind === 'pitch') {
+      const s = d.querySelector('svg'); s.setAttribute('viewBox', '0 0 400 262'); s.setAttribute('aria-label', 'Terrain : la course et le centre de la 23e');
+      sketch(s, [...pitch(), {d: wob(curve(222, 48, 280, 22, 336, 30, 10), 1.4), c: 'red', w: 3}, head(336, 30, .15, 'red', 12), {d: wob(curve(340, 34, 372, 70, 350, 120, 8), 1), c: 'blue', w: 2.4, dash: '1 6'}, O(350, 126, 6, 'blue')], false);
+    } else if (mo.kind === 'goal') {
+      const s = d.querySelector('svg'); s.setAttribute('viewBox', '100 0 200 150'); s.setAttribute('aria-label', 'Cage : frappe en lucarne, but');
+      sketch(s, goal(115, '', [262, 52], true, [190, 96, .4]), false);
+    } else {
+      d.querySelector('.slot').textContent = mo.slot;
+    }
   });
+
+  // Page turning: snap scroller, buttons, arrow keys, and a slight 3D turn while moving
+  const book = document.getElementById('book');
+  const sheets = [...book.querySelectorAll('.sheet')];
+  const where = document.getElementById('where'), prev = document.getElementById('prev'), next = document.getElementById('next');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cur = () => Math.round(book.scrollLeft / book.clientWidth);
+  const go = (i) => sheets[Math.max(0, Math.min(sheets.length - 1, i))].scrollIntoView({behavior: still ? 'auto' : 'smooth', block: 'nearest', inline: 'center'});
+  const onScroll = () => {
+    const i = cur();
+    where.textContent = sheets[i]?.dataset.title || '';
+    prev.disabled = i <= 0; next.disabled = i >= sheets.length - 1;
+    if (still) return;
+    sheets.forEach((s) => {
+      const off = (s.offsetLeft - book.scrollLeft) / book.clientWidth;
+      const pg = s.firstElementChild;
+      const k = Math.max(-1, Math.min(1, off));
+      pg.style.transformOrigin = k < 0 ? 'right center' : 'left center';
+      pg.style.transform = Math.abs(k) < .01 ? '' : `rotateY(${(-k * 28).toFixed(1)}deg)`;
+    });
+  };
+  book.addEventListener('scroll', onScroll, {passive: true});
+  prev.addEventListener('click', () => go(cur() - 1));
+  next.addEventListener('click', () => go(cur() + 1));
+  book.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') { e.preventDefault(); go(cur() + 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur() - 1); } });
+  const rs = new ResizeObserver(onScroll); rs.observe(book);
+  onScroll();
 }
 </script>
 </body>

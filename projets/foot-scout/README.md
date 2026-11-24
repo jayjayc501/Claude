@@ -15,6 +15,6 @@ brouillard : la valeur d'un joueur s'affiche en fourchette, et chaque observatio
 
 ## maquette-carnet/
 
-Maquette légère du rendu final d'une page du carnet (croquis au crayon d'une action, notes,
-fourchettes, fiche du match). Une seule page HTML, à ouvrir dans un navigateur.
+Maquette légère du carnet à pages qu'on tourne : fiche d'identité, notes brutes d'un match
+(terrain entier, cages des frappes), fiche du match, notes d'entretien, synthèse. Une seule page HTML.
 Copie en ligne sur claude.ai : https://claude.ai/artifact/AxihFiSz3mvXjW2zqimnNi

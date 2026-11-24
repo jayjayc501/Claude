@@ -34,3 +34,14 @@ match simulé à l'écran, sinon on refait un jeu de gestion classique.
 
 **Base retenue pour la V1 (24/11)** : l'animation « Scout en direct » avec une seule cage, sans gardien,
 où les frappes s'accumulent au fil du match.
+
+## Règles de conception
+
+- **Langues** : le jeu est multilingue dès la première ligne de code, mais on développe et on teste
+  en français seulement (anglais ensuite, puis espagnol et portugais pour la sortie).
+- **Aucun texte en dur** : chaque élément qui affiche du texte est une zone reliée à une clé de la
+  table de traduction (par exemple `match.notes.titre`), avec une valeur par langue. Nombres, dates
+  et monnaies au format de la langue.
+- **Vrais clubs** : noms de clubs, joueurs et compétitions dans un fichier de données séparé,
+  remplaçable sans toucher au jeu ; aucun logo officiel.
+- **On ne montre jamais le match** : seulement la tablette du scout qui se remplit.

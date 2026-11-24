@@ -80,6 +80,8 @@ svg text{font-family:Caveat,cursive;font-weight:700}
       <ul class="notes" id="notes"></ul>
       <div class="tally"><span>Duels gagnés</span><svg id="t-won" viewBox="0 0 200 26" aria-label="Bâtons des duels gagnés"></svg></div>
       <div class="tally"><span>Duels perdus</span><svg id="t-lost" viewBox="0 0 200 26" aria-label="Bâtons des duels perdus"></svg></div>
+      <h2 style="margin-top:16px">Joueurs remarqués · à revoir</h2>
+      <ul class="notes" id="spots"><li class="empty">Personne pour l'instant.</li></ul>
       <p class="lbl">On ne voit jamais le match : seulement ce que le scout écrit en le regardant. Joueur et match inventés.</p>
     </div>
   </div>
@@ -135,10 +137,12 @@ svg text{font-family:Caveat,cursive;font-weight:700}
     {m: 14, lost: 1},
     {m: 23, pitch: [{d: wob(curve(222, 48, 280, 22, 336, 30)), c: 'red', w: 3}, head(336, 30, .15), {text: "23'", x: 226, y: 30}, {d: wob(curve(340, 34, 372, 70, 350, 120)), c: 'white', dash: 1}, {d: wob(circ(350, 126, 7)), c: 'white'}, {text: '9 tête 1-0', x: 290, y: 160, color: '#fff'}], note: ['23\'', 'déborde G, centre fort pied G → but du 9', 'explosif'], won: 1},
     {m: 29, won: 1},
+    {m: 31, spot: ['31\'', 'n° 6 Amarante, milieu : très propre à la relance']},
     {m: 35, pitch: [{text: '?', x: 176, y: 76, size: 30, color: 'var(--red)'}], note: ['35\'', 'contrôle bof ×2, sous pression'], lost: 1},
     {m: 51, goal: [...X(100, 94), {text: "51' arrêt", x: 114, y: 100, size: 20}], note: ['51\'', 'frappe de loin, hésite avant… arrêt', '', 'r']},
     {m: 57, won: 1},
     {m: 64, pitch: [{d: wob(curve(300, 66, 250, 86, 206, 72)), c: 'red', w: 2.4}, head(206, 72, 3.1), {text: "64' repli", x: 206, y: 102}], note: ['64\'', 'se replie bien, coupe la passe'], won: 1},
+    {m: 70, spot: ['70\'', 'n° 4 Vila Nova, défenseur : gagne tout de la tête']},
     {m: 78, pitch: [{d: wob(circ(262, 52, 16)), c: 'red', w: 2.2}, {text: 'cuisse ??', x: 282, y: 46, size: 22, color: 'var(--red)'}], note: ['78\'', 'cuisse ?? reste au sol 1 min', '', 'r']},
     {m: 82, lost: 1},
     {m: 88, pitch: [{d: wob(curve(244, 62, 290, 92, 322, 120)), c: 'red', w: 2.8}, head(322, 120, .8), {d: wob(seg(326, 124, 386, 132, 3)), c: 'white', dash: 1}, {text: "88' BUT", x: 300, y: 190, size: 24, color: '#fff'}], goal: [...X(306, 48), {d: wob(circ(306, 48, 17, 13)), c: 'blue', w: 2.4}, {text: "88' BUT !", x: 284, y: 132, size: 24, anchor: 'end', color: 'var(--blue)'}], note: ['88\'', 'BUT !! frappe croisée, lucarne', '', 'b'], won: 1},
@@ -175,14 +179,14 @@ svg text{font-family:Caveat,cursive;font-weight:700}
     return d0;
   };
   const PEN = '<svg class="caret" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 14l1.2-4.2L11 2l3 3-7.8 7.8z" fill="var(--soft)"/><path d="M2 14l1.2-4.2 3 3z" fill="var(--pen)"/></svg>';
-  const write = ([m, txt, circled, tone]) => {
-    $('notes').querySelector('.empty')?.remove();
+  const write = ([m, txt, circled, tone], list = 'notes') => {
+    $(list).querySelector('.empty')?.remove();
     const li = document.createElement('li');
     li.innerHTML = '<span class="m"></span><span><span class="w"></span></span>';
     li.querySelector('.m').textContent = m;
     const w = li.querySelector('.w'); if (tone) w.classList.add(tone);
     w.insertAdjacentHTML('afterend', PEN);
-    $('notes').appendChild(li);
+    $(list).appendChild(li);
     const end = () => { li.querySelector('.caret').remove(); if (circled) { const c = document.createElement('span'); c.className = 'circ'; c.textContent = circled; w.after(' ', c); } };
     if (still) { w.textContent = txt; end(); return Promise.resolve(); }
     return new Promise(res => { let i = 0; const step = () => { w.textContent = txt.slice(0, ++i); if (i < txt.length) setTimeout(step, 45); else { end(); res(); } }; step(); });
@@ -209,6 +213,7 @@ svg text{font-family:Caveat,cursive;font-weight:700}
       if (!still && wait) await new Promise(r => setTimeout(r, wait * 1000));
       if (my !== run) return;
       if (e.note) await write(e.note);
+      if (e.spot) await write(e.spot, 'spots');
       if (!still) await new Promise(r => setTimeout(r, 500));
       if (my === run) busy = false;
       return;
@@ -221,6 +226,7 @@ svg text{font-family:Caveat,cursive;font-weight:700}
     run++; seed = 11; minute = 0; idx = 0; busy = false; tallies.won = tallies.lost = 0;
     pInk.replaceChildren(); gInk.replaceChildren(); $('t-won').replaceChildren(); $('t-lost').replaceChildren();
     $('notes').innerHTML = '<li class="empty">Le match commence. Le stylet est prêt.</li>';
+    $('spots').innerHTML = '<li class="empty">Personne pour l\'instant.</li>';
     $('clock').textContent = "0'"; playing = true; $('play').disabled = false; $('play').textContent = 'Pause'; start();
   };
   $('play').addEventListener('click', () => { playing = !playing; $('play').textContent = playing ? 'Pause' : 'Lecture'; });

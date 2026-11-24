@@ -45,3 +45,5 @@ où les frappes s'accumulent au fil du match.
 - **Vrais clubs** : noms de clubs, joueurs et compétitions dans un fichier de données séparé,
   remplaçable sans toucher au jeu ; aucun logo officiel.
 - **On ne montre jamais le match** : seulement la tablette du scout qui se remplit.
+- **Un seul joueur suivi par match**, sans préparation avant le match ; une zone « joueurs
+  remarqués » note les autres pistes à revoir. L'intérêt est de comparer les notes d'un match à l'autre.

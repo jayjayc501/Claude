@@ -51,9 +51,15 @@ Deux familles d'attributs, toutes notées de 1 à 100. Le **niveau** est la moye
 
 | Famille | Attributs |
 |---|---|
-| Physique | Vitesse, Physique |
-| Technique | Technique, Passe, Finition |
-| Jeu | Défense, Vision, Sang-froid (rester lucide sous la pression) |
+| Physique | Vitesse, Endurance, Puissance (duels, jeu aérien) |
+| Technique | Dribble, Passe, Finition, Jeu de tête |
+| Défense | Marquage, Tacle |
+| Intelligence | Vision, Appels (se démarquer), Sang-froid (rester lucide sous la pression) |
+| Gardien (à la place des autres) | Réflexes, Placement, Sorties, Jeu au pied |
+
+Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette montre d'abord une note par famille (comme les 6 notes d'une carte EA FC), puis le détail. Repères : EA FC affiche 6 notes et cache environ 29 attributs détaillés ; Football Manager en a 36 visibles et une dizaine de cachés. Ici, chaque attribut est une fourchette à resserrer : 12 donnent du relief sans rendre l'enquête fastidieuse.
+
+**Un attribut ne se voit que si le match le sollicite.** À chaque match, chaque attribut a une chance d'être observé selon le poste et le match : 90 % pour ce qui fait le cœur du poste (Vitesse d'un ailier, Marquage d'un défenseur), 50 % en moyenne, 15 % pour ce qui sort du poste (Finition d'un défenseur central). Le tableau de la partie 4 compte donc des matchs où l'attribut a été vu, pas des matchs tout court.
 
 **Attributs hors match** (la personne, presque invisibles en match ; on les découvre surtout en entretien et par les sources de la partie 5) :
 
@@ -67,6 +73,25 @@ Deux familles d'attributs, toutes notées de 1 à 100. Le **niveau** est la moye
 | Entourage | Sa famille et son agent l'aident-ils ou le gênent-ils ? | Sous 40 : exigences plus fortes, négociation plus dure |
 
 **Traits rares** (0 ou 1 par joueur, tout ou rien) : Fragile (risque de blessure ×2), Grand match (forme +5 dans les matchs importants), Leader (fait progresser les jeunes autour de lui).
+
+**Le hors match évolue, plus ou moins selon les joueurs.** Chaque trimestre, chaque attribut hors match bouge :
+
+changement = (tendance de l'âge + événements de carrière) × souplesse du joueur
+
+- **Souplesse** : un nombre propre à chaque joueur, tiré entre 0,2 et 1, puis multiplié par l'âge (×1 avant 21 ans, ×0,6 de 21 à 27 ans, ×0,3 après 28 ans). Environ 3 joueurs sur 10 ont un caractère presque figé (souplesse 0,2 à 0,35) : ce qu'on a vu à 16 ans restera vrai. Les autres peuvent changer beaucoup.
+
+| Attribut | Tendance avec l'âge (par an) | Événements qui le font bouger |
+|---|---|---|
+| Sérieux | +2 jusqu'à 25 ans | Bon entraîneur ou mentor (+5) ; argent facile, mauvaise bande (−5 à −10) |
+| Discipline | +3 jusqu'à 23 ans | Sanction du club (+5) ; conflit, injustice ressentie (−5) |
+| Humilité | stable | Gros contrat, célébrité, buzz au-dessus de 80 (−10) ; échec, longue blessure, banc (+5 à +10) |
+| Ambition | −2 après 30 ans | Titre, sélection (+5) ; série d'échecs (−5) |
+| Adaptation | +1 | Expérience réussie à l'étranger (+10) ; expérience ratée (−10) |
+| Entourage | stable | Changement d'agent, mariage, départ de chez les parents (±10 à ±20) |
+
+Les traits rares bougent aussi, rarement : Fragile peut apparaître après une grave blessure ou après 30 ans (10 % par an) ; Leader peut naître après 24 ans si Sérieux et Sang-froid dépassent 70 (10 % par an) ; Grand match ne change pas.
+
+Pour le scout, ça veut dire que **ses notes sur le caractère vieillissent aussi** : un rapport « sérieux, humble » fait à 16 ans peut être faux à 20 ans, après un premier gros contrat. Les fourchettes hors match s'élargissent de 5 points par saison sans nouvel entretien.
 
 ## 4. Le brouillard : ce que le scout voit
 
@@ -295,7 +320,7 @@ La **stratégie** du club oriente les cibles : formation (moins de 20 ans), acha
 | 20 à 23 ans | 0,25 |
 | 24 à 27 ans | 0,10 |
 | 28 à 30 ans | 0 |
-| 31 ans et plus | −2 à −5 par an sur Vitesse et Physique |
+| 31 ans et plus | −2 à −5 par an sur Vitesse, Endurance et Puissance |
 
 Temps de jeu : titulaire ×1,2, remplaçant ×0,8, réserve ×0,6.
 

@@ -65,72 +65,39 @@ Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette mon
 
 **Les traits.** Règle de conception : un trait est **un effet dans une situation précise**, pas une simple grosse note (ça, ce sont les attributs). Environ 1 joueur sur 4 a un trait positif, 1 sur 5 un trait négatif ; très peu en ont plus de deux.
 
-**Traits positifs, joueurs de champ** (+10 % de valeur chacun)
+**Traits positifs** (11, +10 % de valeur chacun)
 
-| Trait | Ce que le scout voit en match | Effet en jeu |
-|---|---|---|
-| Costaud | Gagne ses 1 contre 1 au physique, en attaque comme en défense | +8 en Puissance et Vitesse dans les 1 contre 1 |
-| Magicien | Tente des gestes imprévisibles, qui ratent ou qui brillent | Sur ces gestes, 1 sur 2 rate et 1 sur 2 réussit à +10 ; buzz qui monte deux fois plus vite |
-| Roi des airs | Domine de la tête, en attaque comme en défense | +8 en Jeu de tête ; danger sur corners |
-| Renard des surfaces | Toujours au bon endroit dans la surface | +8 en Appels et Finition dans la surface |
-| Frappe de loin | Marque de 25 mètres | Hors de la surface, frappe sans la pénalité habituelle de −10 |
-| Pied magique | Coups francs et corners décisifs | Chances de but sur coup franc direct doublées ; corners plus dangereux |
-| Guerrier | Ne lâche rien, harcèle le porteur, récupère haut | +8 en Tacle et Marquage au pressing ; ne baisse pas en fin de match |
-| Capitaine | Organise, parle, rassure l'équipe | +3 en Sang-froid pour les coéquipiers ; leur moral baisse moins vite |
-| Se transcende | Élève son niveau dans les gros matchs | +6 sur tous ses attributs dans les gros matchs (derby, finale, sélection) |
-
-**Traits positifs, gardiens**
-
-| Trait | Ce que le scout voit | Effet |
-|---|---|---|
-| Gardien libéro | Joue haut, sort loin, relance comme un milieu | +8 en Sorties et Jeu au pied hors de sa surface |
-| Roi des airs | Sort fort et capte les centres | +8 en Sorties sur les centres ; corners adverses moins dangereux |
-| Penalty | Devine le côté, arrête les tirs au but | Arrête environ 40 % des penaltys au lieu de 20 % |
-| Le Mur | Arrêts réflexes sur sa ligne | +8 en Réflexes sur les frappes de près |
-| Capitaine | Dirige sa défense, parle, place son mur | +3 en Sang-froid pour les défenseurs ; moins de buts sur coups de pied arrêtés |
-| Se transcende | Sort le grand jeu dans les gros matchs | +6 sur tous ses attributs dans les gros matchs (derby, finale, sélection) |
-
-**Traits négatifs, joueurs de champ**
-
-| Trait | Ce que le scout voit | Effet | Valeur |
+| Trait | Pour | Ce que le scout voit en match | Effet en jeu |
 |---|---|---|---|
-| Fragile | Se blesse souvent, absences longues | Risque de blessure ×2, absences 50 % plus longues | −20 % |
-| Violent | Cartons, fautes bêtes, s'en prend à l'arbitre | Cartons ×3 ; un rouge tous les 10 matchs environ | −10 % |
-| Discret | Disparaît quand ça compte | −6 sur tous ses attributs dans les gros matchs | −10 % |
-| Perso | Garde le ballon au lieu de passer | Quand un coéquipier est mieux placé, ne passe qu'une fois sur deux | −5 % |
-| Nonchalant | Ne fait pas les efforts sans ballon | −8 en Marquage et Tacle au pressing ; repli lent | −10 % |
-| Maladroit | Rate des occasions ou des passes faciles | Une action facile sur cinq ratée (Finition et Passe) | −10 % |
-| Irrégulier | Un grand match, puis trois matchs fantômes | Forme du jour d'écart-type 12 au lieu de 5 ; il faut deux fois plus de matchs pour le cerner | −10 % |
+| Costaud | Champ | Gagne ses 1 contre 1 au physique, en attaque comme en défense | +8 en Puissance et Vitesse dans les 1 contre 1 |
+| Magicien | Champ | Tente des gestes imprévisibles, qui ratent ou qui brillent | Sur ces gestes, 1 sur 2 rate et 1 sur 2 réussit à +10 ; buzz qui monte deux fois plus vite |
+| Renard des surfaces | Champ | Toujours au bon endroit dans la surface | +8 en Appels et Finition dans la surface |
+| Pied magique | Champ | Frappes de loin, coups francs et corners qui font mal | Frappe hors de la surface sans la pénalité habituelle de −10 ; chances de but sur coup franc direct doublées ; corners plus dangereux |
+| Guerrier | Champ | Ne lâche rien, harcèle le porteur, récupère haut | +8 en Tacle et Marquage au pressing ; ne baisse pas en fin de match |
+| Maître des airs | Tous | Champ : domine de la tête. Gardien : sort fort et capte les centres | Champ : +8 en Jeu de tête, danger sur corners. Gardien : +8 en Sorties sur les centres, corners adverses moins dangereux |
+| Capitaine | Tous | Organise, parle, rassure l'équipe (le gardien place son mur) | +3 en Sang-froid pour les coéquipiers ; leur moral baisse moins vite |
+| Se transcende | Tous | Élève son niveau dans les gros matchs | +6 sur tous ses attributs dans les gros matchs (derby, finale, sélection) |
+| Gardien libéro | Gardien | Joue haut, sort loin, relance comme un milieu | +8 en Sorties et Jeu au pied hors de sa surface |
+| Penalty | Gardien | Devine le côté, arrête les tirs au but | Arrête environ 40 % des penaltys au lieu de 20 % |
+| Le Mur | Gardien | Arrêts réflexes sur sa ligne | +8 en Réflexes sur les frappes de près |
 
-**Traits négatifs, gardiens**
+**Traits négatifs** (7)
 
-| Trait | Ce que le scout voit | Effet | Valeur |
-|---|---|---|---|
-| Pieds carrés | Relance dangereuse, dégagements ratés | −10 en Jeu au pied ; une relance sur dix donne une occasion à l'adversaire | −10 % |
-| Fébrile | Relâche les ballons, parfois une grosse boulette | Une frappe arrêtée sur cinq est relâchée devant lui ; une boulette qui coûte un but tous les 15 matchs environ | −15 % |
+| Trait | Pour | Ce que le scout voit | Effet | Valeur |
+|---|---|---|---|---|
+| Fragile | Tous | Se blesse souvent, absences longues | Risque de blessure ×2, absences 50 % plus longues | −20 % |
+| Violent | Tous | Cartons, fautes bêtes, s'en prend à l'arbitre | Cartons ×3 ; un rouge tous les 10 matchs environ ; chez un gardien, un penalty concédé tous les 10 matchs | −10 % |
+| Fébrile | Tous | Craque sous la pression, disparaît dans les gros matchs | −6 sur tous ses attributs dans les gros matchs et dans les fins de match serrées | −10 % |
+| Maladroit | Tous | Champ : rate des occasions ou des passes faciles. Gardien : relâche les ballons, rate ses sorties, fait des boulettes | Champ : une action facile sur cinq ratée (Finition, Passe). Gardien : une frappe arrêtée sur cinq relâchée, une boulette qui coûte un but tous les 15 matchs | −10 % (gardien −15 %) |
+| Irrégulier | Tous | Un grand match, puis trois matchs fantômes, sans raison | Forme du jour d'écart-type 12 au lieu de 5 ; il faut deux fois plus de matchs pour le cerner | −10 % |
+| Perso | Champ | Joue pour lui : garde le ballon, ne fait pas les efforts sans ballon | Ne passe qu'une fois sur deux quand un coéquipier est mieux placé ; −8 en Marquage et Tacle au pressing, repli lent | −10 % |
+| Pieds carrés | Gardien | Relance dangereuse, dégagements ratés | −10 en Jeu au pied ; une relance sur dix donne une occasion à l'adversaire | −10 % |
 
-Cinq traits négatifs des joueurs de champ valent aussi pour les gardiens, avec un effet adapté :
+Fébrile et Irrégulier sont bien différents : le Fébrile baisse **quand ça compte** (on peut le prévoir), l'Irrégulier baisse **n'importe quand** (on ne peut pas le prévoir).
 
-| Trait | Chez un gardien | Effet | Valeur |
-|---|---|---|---|
-| Fragile | Se blesse souvent | Comme pour un joueur de champ | −20 % |
-| Violent | Fautes bêtes dans sa surface, contestations | Cartons ×3 ; un penalty concédé tous les 10 matchs environ | −10 % |
-| Discret | Disparaît quand ça compte | −6 sur tous ses attributs dans les gros matchs | −10 % |
-| Maladroit | Rate des ballons faciles : prise de balle, sortie mal jugée | Un ballon facile sur dix mal géré ; à la différence de Fébrile, il ne s'agit pas de frappes relâchées | −10 % |
-| Irrégulier | Un grand match, puis trois matchs fantômes | Forme du jour d'écart-type 12 au lieu de 5 | −10 % |
-
-**Repérer un trait** : à chaque match où la situation se présente, il se montre 1 fois sur 3. La première fois, la tablette le note « possible » ; une deuxième fois dans un autre match, il est « confirmé ». Un très bon ou un très mauvais jour peut donner un faux « possible », d'où les deux matchs. Se transcende et Discret ne se voient que dans les gros matchs, qui sont rares : les sources (entraîneur, coéquipier) aident beaucoup. Fragile se confirme aussi par le kiné.
+**Repérer un trait** : à chaque match où la situation se présente, il se montre 1 fois sur 3. La première fois, la tablette le note « possible » ; une deuxième fois dans un autre match, il est « confirmé ». Un très bon ou un très mauvais jour peut donner un faux « possible », d'où les deux matchs. Se transcende et Fébrile ne se voient que dans les gros matchs, qui sont rares : les sources (entraîneur, coéquipier) aident beaucoup. Fragile se confirme aussi par le kiné.
 
 **Les traits évoluent** : un jeune peut gagner un trait positif si l'attribut lié dépasse 80 (5 % par trimestre) ; Capitaine peut naître après 24 ans si Sérieux et Sang-froid dépassent 70 (10 % par an). Costaud et Guerrier peuvent disparaître après 30 ans (10 % par an). Fragile peut apparaître après une grave blessure ou après 30 ans (10 % par an). Violent peut s'effacer si la Discipline remonte au-dessus de 60.
-
-**Profil de développement : Précoce ou Tardif.** Environ 1 jeune sur 10 a un corps en avance sur son âge, 1 sur 10 en retard. C'est un piège pour l'estimation du potentiel :
-
-| Profil | Avant 18 ans | Ensuite | Le piège |
-|---|---|---|---|
-| Précoce | +8 en Vitesse, Puissance et Endurance | L'avance fond jusqu'à 20 ans | Il domine chez les jeunes, on le surestime |
-| Tardif | −8 en Vitesse, Puissance et Endurance | Rattrape jusqu'à 21-22 ans | Il paraît frêle, on le néglige alors qu'il peut exploser |
-
-Indices pour le scout : « déjà un corps d'adulte » ou « le plus petit du terrain » sur la tablette ; les parents (« il a pris 12 cm cette année ») et le médecin du club, si la confiance est assez haute, le confirment.
 
 **Attributs hors match** (la personne, presque invisibles en match ; on les découvre surtout en entretien et par les sources de la partie 5) :
 

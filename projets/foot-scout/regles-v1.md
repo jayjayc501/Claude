@@ -84,9 +84,11 @@ Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette mon
 | Trait | Ce que le scout voit | Effet |
 |---|---|---|
 | Gardien libéro | Joue haut, sort loin, relance comme un milieu | +8 en Sorties et Jeu au pied hors de sa surface |
-| Maître des airs | Sort fort et capte les centres | +8 en Sorties sur les centres ; corners adverses moins dangereux |
+| Roi des airs | Sort fort et capte les centres | +8 en Sorties sur les centres ; corners adverses moins dangereux |
 | Penalty | Devine le côté, arrête les tirs au but | Arrête environ 40 % des penaltys au lieu de 20 % |
 | Le Mur | Arrêts réflexes sur sa ligne | +8 en Réflexes sur les frappes de près |
+| Capitaine | Dirige sa défense, parle, place son mur | +3 en Sang-froid pour les défenseurs ; moins de buts sur coups de pied arrêtés |
+| Se transcende | Sort le grand jeu dans les gros matchs | +6 sur tous ses attributs dans les gros matchs (derby, finale, sélection) |
 
 **Traits négatifs, joueurs de champ**
 

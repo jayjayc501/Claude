@@ -71,7 +71,34 @@ Deux familles d'attributs, toutes notées de 1 à 100. Le **niveau** est la moye
 ## 4. Le brouillard : ce que le scout voit
 
 **Chaque match donne un indice par attribut observé** :
-indice = vraie valeur + forme du jour (écart-type 5) + bruit du scout (écart-type s).
+indice = vraie valeur + effet du moral + forme du jour (écart-type 5) + bruit du scout (écart-type s).
+
+**L'état du moment : forme et moral.** D'un match à l'autre, un joueur ne joue pas toujours à son vrai niveau. Deux choses le font varier :
+
+- **La forme du jour** (fatigue, petits pépins, adversaire) : un hasard de écart-type 5, différent à chaque match.
+- **Le moral**, de 0 à 100, qui dure plusieurs semaines. Il se voit en quatre états :
+
+| Moral | État | Effet sur ce qu'on voit en match |
+|---|---|---|
+| 80 à 100 | En confiance | +4 |
+| 50 à 79 | Tout va bien | 0 |
+| 25 à 49 | Dans le doute | −3 |
+| 0 à 24 | Déprimé | −7 |
+
+**Ce qui fait bouger le moral, chaque semaine** :
+
+| Événement | Effet |
+|---|---|
+| Bon match, but, titularisation | +5 à +10 |
+| Banc plusieurs semaines | −5 par semaine |
+| Blessure | −15 |
+| Ennuis familiaux, mal du pays (faible Adaptation) | −10 à −20 |
+| Nouveau contrat, sélection | +15 |
+| Visite ou message d'un proche (dont toi, si le lien est fort) | +5 |
+
+Sans événement, le moral revient doucement vers 60 (un quart de l'écart par semaine).
+
+**Le piège pour le scout** : un joueur déprimé paraît 7 points plus faible qu'il ne l'est. Si tu ne le sais pas, ta fourchette est faussée, et tu risques de rater une pépite qui traverse un mauvais mois. Si tu l'apprends (en entretien, par un proche, ou par des signes sur la tablette comme « tête basse, ne demande pas le ballon »), le jeu corrige la fourchette. À l'inverse, un joueur en confiance sur une série de matchs peut te faire surestimer son niveau.
 
 Un scout juge tous les postes de la même façon, de l'attaquant au gardien. Ce qui décide de la netteté de ce qu'il voit, c'est **son expérience**, de 0 à 5 : elle monte avec les saisons et les matchs vus.
 
@@ -287,18 +314,26 @@ Le jeu tient une **base de données mondiale** d'environ 30 000 joueurs (de 15 �
 
 | | Joueurs simulés | Rythme | Ce qui est calculé |
 |---|---|---|---|
-| Monde | Tous (environ 30 000) | Une fois par saison, en S46 | Niveau, potentiel, club, valeur, retraite, transfert, une ligne de stats (matchs, buts) |
+| Monde | Tous (environ 30 000) | Chaque trimestre (S12, S23, S35, S46) | Niveau, potentiel, club, valeur, retraite, transfert, une ligne de stats (matchs, buts) |
 | Joueurs connus | Ceux de ton carnet : vus, signés, suivis (50 à 300) | Chaque semaine | Chaque attribut, forme, temps de jeu, blessures, événements hors match, lien avec toi |
 
 Quand un joueur du monde entre dans ton radar (tu le vois jouer, on t'en parle), il passe au niveau détaillé : ses attributs sont tirés pour coller à son niveau et à son poste, et ses attributs hors match sont tirés à ce moment-là.
 
-**Le cycle d'une saison du monde**
+**Pourquoi le trimestre** : chaque saison, ce serait trop lent (un joueur repéré en août ne bougerait pas avant mai) ; chaque mois, ce serait inutilement fin pour des joueurs que personne ne regarde. Le trimestre colle aux temps forts : fin de mercato d'été, mi-saison, mercato d'hiver, fin de saison.
 
-- **Arrivées** : chaque pays fait entrer une nouvelle génération de 15 ans, en nombre selon sa taille et son football (Brésil, France, Nigeria : beaucoup ; petits pays : peu). Environ 2 500 par saison dans le monde.
-- **Progression** : la formule de la partie 9, simplifiée (sans le détail par attribut).
+**Pourquoi 30 000 joueurs** : c'est un premier réglage. Il correspond à environ 1 000 clubs à 30 joueurs, soit les deux premières divisions d'une soixantaine de pays et les meilleurs centres de formation.
+
+- **Moins** (5 000) : le monde paraîtrait vide. On ferait vite le tour d'une région, et chaque pépite serait trouvée.
+- **Plus** (100 000 et au-delà) : ça n'apporterait rien au jeu, puisqu'un scout ne voit que quelques centaines de joueurs par carrière ; la base serait juste plus lourde à télécharger.
+- **Le calcul n'est pas le problème** : 30 000 joueurs mis à jour 4 fois par saison, c'est moins d'une seconde sur un téléphone. On pourra monter ou descendre selon ce qu'on ressent en jouant.
+
+**Le cycle du monde, trimestre par trimestre**
+
+- **Arrivées** : en début de saison (S1), chaque pays fait entrer une nouvelle génération de 15 ans, en nombre selon sa taille et son football (Brésil, France, Nigeria : beaucoup ; petits pays : peu). Environ 2 500 par saison dans le monde.
+- **Progression** : la formule de la partie 9, simplifiée (sans le détail par attribut), un quart à chaque trimestre. Le moral du trimestre (partie 4) la fait varier.
 - **Éclosions et chutes** : 1 jeune sur 50 « explose » (potentiel +10 et buzz) ; 1 sur 30 stagne (potentiel −10). C'est ce qui fabrique des stars inattendues.
 - **Mouvements** : les clubs du monde achètent et vendent entre eux selon leurs moyens et leur stratégie (comme les clubs des rivaux).
-- **Retraites** : chance de 10 % à 33 ans, 30 % à 35 ans, 70 % à 37 ans ; plus tôt si le niveau est faible ou après une grave blessure.
+- **Retraites** : décidées en fin de saison (S46), chance de 10 % à 33 ans, 30 % à 35 ans, 70 % à 37 ans ; plus tôt si le niveau est faible ou après une grave blessure.
 
 **Tes ratés sont visibles.** En fin de saison, une page « Ceux qui ont explosé » montre les joueurs de ta région de travail devenus bons, avec une mention : « vu 2 fois, noté Correct », « jamais vu », ou « signé par le jeune loup ». C'est frustrant, et c'est ce qui donne envie de mieux faire.
 

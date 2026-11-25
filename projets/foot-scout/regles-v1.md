@@ -107,6 +107,16 @@ Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette mon
 | Pieds carrés | Relance dangereuse, dégagements ratés | −10 en Jeu au pied ; une relance sur dix donne une occasion à l'adversaire | −10 % |
 | Fébrile | Relâche les ballons, parfois une grosse boulette | Une frappe arrêtée sur cinq est relâchée devant lui ; une boulette qui coûte un but tous les 15 matchs environ | −15 % |
 
+Cinq traits négatifs des joueurs de champ valent aussi pour les gardiens, avec un effet adapté :
+
+| Trait | Chez un gardien | Effet | Valeur |
+|---|---|---|---|
+| Fragile | Se blesse souvent | Comme pour un joueur de champ | −20 % |
+| Violent | Fautes bêtes dans sa surface, contestations | Cartons ×3 ; un penalty concédé tous les 10 matchs environ | −10 % |
+| Discret | Disparaît quand ça compte | −6 sur tous ses attributs dans les gros matchs | −10 % |
+| Maladroit | Rate des ballons faciles : prise de balle, sortie mal jugée | Un ballon facile sur dix mal géré ; à la différence de Fébrile, il ne s'agit pas de frappes relâchées | −10 % |
+| Irrégulier | Un grand match, puis trois matchs fantômes | Forme du jour d'écart-type 12 au lieu de 5 | −10 % |
+
 **Repérer un trait** : à chaque match où la situation se présente, il se montre 1 fois sur 3. La première fois, la tablette le note « possible » ; une deuxième fois dans un autre match, il est « confirmé ». Un très bon ou un très mauvais jour peut donner un faux « possible », d'où les deux matchs. Se transcende et Discret ne se voient que dans les gros matchs, qui sont rares : les sources (entraîneur, coéquipier) aident beaucoup. Fragile se confirme aussi par le kiné.
 
 **Les traits évoluent** : un jeune peut gagner un trait positif si l'attribut lié dépasse 80 (5 % par trimestre) ; Capitaine peut naître après 24 ans si Sérieux et Sang-froid dépassent 70 (10 % par an). Costaud et Guerrier peuvent disparaître après 30 ans (10 % par an). Fragile peut apparaître après une grave blessure ou après 30 ans (10 % par an). Violent peut s'effacer si la Discipline remonte au-dessus de 60.

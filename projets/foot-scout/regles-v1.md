@@ -61,6 +61,26 @@ Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette mon
 
 **Un attribut ne se voit que si le match le sollicite.** À chaque match, chaque attribut a une chance d'être observé selon le poste et le match : 90 % pour ce qui fait le cœur du poste (Vitesse d'un ailier, Marquage d'un défenseur), 50 % en moyenne, 15 % pour ce qui sort du poste (Finition d'un défenseur central). Le tableau de la partie 4 compte donc des matchs où l'attribut a été vu, pas des matchs tout court.
 
+**Les postes.** Douze postes classiques : G (gardien), DD, DC, DG (défenseurs droit, central, gauche), MDC (milieu défensif), MC (milieu central), MOC (milieu offensif), MD, MG (milieux droit et gauche), AD, AG (ailiers droit et gauche), BU (buteur).
+
+Le **niveau** d'un joueur dépend du poste : c'est la moyenne de ses attributs, pondérée ainsi (les attributs non cités comptent ×0,5) :
+
+| Poste | Comptent ×3 | Comptent ×2 |
+|---|---|---|
+| G | Réflexes, Placement | Sorties, Sang-froid (Jeu au pied ×1) |
+| DC | Marquage, Tacle, Jeu de tête | Puissance, Sang-froid |
+| DD, DG | Vitesse, Tacle, Endurance | Marquage, Passe, Dribble |
+| MDC | Tacle, Marquage, Passe | Endurance, Vision, Sang-froid |
+| MC | Passe, Vision, Endurance | Tacle, Dribble, Sang-froid |
+| MOC | Vision, Passe, Dribble | Finition, Appels, Sang-froid |
+| MD, MG | Vitesse, Dribble, Passe | Endurance, Appels |
+| AD, AG | Vitesse, Dribble, Appels | Finition, Passe |
+| BU | Finition, Appels, Sang-froid | Jeu de tête, Puissance, Vitesse |
+
+**Plusieurs postes par joueur.** Chaque joueur a un poste principal et 0 à 2 postes secondaires, le plus souvent voisins (DD et MD, MC et MDC ou MOC, AD et BU…). À un poste secondaire, son niveau est calculé avec les poids de ce poste, moins 5 s'il y est à l'aise, moins 15 s'il dépanne. Le pied compte : un gaucher à droite (ailier « inversé ») n'a pas de malus, il rentre sur son bon pied.
+
+Le scout ne découvre un poste secondaire qu'en voyant le joueur y jouer (son entraîneur le fait tourner environ 1 match sur 5) ou par une source, comme l'entraîneur des jeunes.
+
 **Le pied fort.** Chaque joueur est droitier (environ 75 %), gaucher (20 %) ou ambidextre (5 %). Le pied fort se note dès le premier match, sans brouillard. Le **pied faible** va de 1 à 5 (1 : ne s'en sert jamais, 5 : les deux pieds) ; il se cerne en 3 matchs environ. Effet : avec un pied faible à 1 ou 2, Passe et Finition perdent 10 points quand le joueur est forcé sur son mauvais pied (environ 1 action sur 4). Un gaucher vaut 10 % de plus sur le marché, parce qu'il est plus rare.
 
 **Les traits.** Règle de conception : un trait est **un effet dans une situation précise**, pas une simple grosse note (ça, ce sont les attributs). Environ 1 joueur sur 4 a un trait positif, 1 sur 5 un trait négatif ; très peu en ont plus de deux.
@@ -198,6 +218,26 @@ Autrement dit : un débutant a besoin de 5 matchs pour cerner un attribut, un v�
 
 Les attributs hors match ne se voient presque jamais en match : ils viennent des entretiens et des sources (partie 5). En match, on n'en voit que des signes, 1 fois sur 10 par match : un carton ou une dispute (Discipline), un repli à la 85e minute (Sérieux), un joueur qui remobilise les autres (Capitaine).
 
+**Le match sur la tablette.** Pendant le match, le joueur ne fait rien d'autre que lire : il voit la tablette du scout se remplir, comme une caméra posée sur ses notes. Le match ne s'affiche jamais.
+
+- Durée : **1 à 2 minutes** pour 90 minutes de jeu, avec pause et accélération (×2, ×4).
+- Chaque indice de la partie 4 devient une note écrite à la minute où il tombe (« 23e : appel croisé, bien senti », « 57e : perd son duel, trop court physiquement »). Les signes d'un trait s'écrivent de la même façon (« 64e : encore un geste fou, raté »).
+- Les joueurs remarqués sur le côté s'ajoutent dans la case « à revoir ».
+
+**Ton verdict : le potentiel.** À la fin du match, c'est le joueur qui s'engage. Le jeu montre les fourchettes de niveau, l'âge et les traits notés, mais **jamais le potentiel** : on le donne soi-même, sous forme de fourchette, avec un curseur à deux poignées (de 40 à 99).
+
+- On peut revoir sa fourchette après chaque nouveau match ou entretien. Celle qui compte est celle qu'on envoie au club dans le rapport.
+- Le verdict est jugé quand le potentiel se révèle, vers 23 ans ou quand le joueur arrête de progresser :
+
+| Résultat | Effet sur la confiance du club |
+|---|---|
+| Vrai potentiel dedans, fourchette de 10 points ou moins | Avis confirmé : +8 |
+| Dedans, fourchette de 11 à 20 points | +4 |
+| Dedans, fourchette de plus de 20 points | +1 : le club trouve ça trop prudent |
+| Dehors | Avis démenti : −10 |
+
+On a donc intérêt à s'engager serré, mais seulement quand on a assez vu.
+
 ## 5. Les sources et les entretiens
 
 **Sources d'information**
@@ -232,6 +272,10 @@ Un trait devient **sûr** quand deux sources indépendantes le confirment, ou un
 
 - Sans contact pendant 8 semaines : −0,5.
 - Promesse tenue : +1. Promesse rompue : −2.
+
+**Les langues.** Le scout parle 2 langues au départ (le français et une autre, au choix). Un entretien dans une langue qu'il ne parle pas passe par un interprète : 150 € par entretien, la moitié de l'information, et des gains de confiance divisés par deux. Les familles parlent souvent la langue locale, même quand le joueur parle anglais.
+
+Apprendre une langue prend une saison de cours, environ 2 demi-journées par mois, et 500 €. Le premier niveau supprime l'interprète, mais garde 20 % d'information en moins. Le second niveau, une saison plus tard, donne la pleine efficacité. Les langues ouvrent donc des régions : un scout qui parle portugais est chez lui au Brésil, au Portugal, en Angola et au Mozambique.
 
 ## 6. La fin d'une enquête : signe, signe pas
 
@@ -368,6 +412,8 @@ Kofi : N = max(65, 75) = 75, soit 2,5 M€, puis ×1,3 (19 ans), environ **3,2 M
 ## 10. Un monde qui vit tout seul
 
 Le jeu tient une **base de données mondiale** d'environ 30 000 joueurs (de 15 à 38 ans, tous continents). Elle vit sans toi : des jeunes arrivent, d'autres éclosent, certains déclinent, d'autres prennent leur retraite. Des stars sortiront de partout, y compris là où tu n'es jamais allé.
+
+**Joueurs fictifs, clubs réels.** Tous les joueurs sont inventés, avec des noms tirés selon leur pays. Ça évite les questions de droits, et personne ne connaît les futures stars à l'avance. Les clubs, eux, sont réels (partie « Clubs » du concept).
 
 **Deux niveaux de simulation**, pour que ça reste léger :
 

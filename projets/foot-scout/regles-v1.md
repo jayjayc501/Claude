@@ -220,7 +220,7 @@ Les attributs hors match ne se voient presque jamais en match : ils viennent des
 
 **Le match sur la tablette.** Pendant le match, le joueur ne fait rien d'autre que lire : il voit la tablette du scout se remplir, comme une caméra posée sur ses notes. Le match ne s'affiche jamais.
 
-- Durée : **1 à 2 minutes** pour 90 minutes de jeu, avec pause et accélération (×2, ×4).
+- Durée : **30 secondes** pour 90 minutes de jeu : deux mi-temps de 15 secondes (1 seconde égale 3 minutes de jeu), avec un bouton pause et un arrêt à la mi-temps pour relire ses notes. Rythme : 8 à 12 notes par match, soit une toutes les 2 à 4 secondes, le temps de la lire ; les 4 dernières restent affichées en grand, les autres se rangent dans la liste du match.
 - Chaque indice de la partie 4 devient une note écrite à la minute où il tombe (« 23e : appel croisé, bien senti », « 57e : perd son duel, trop court physiquement »). Les signes d'un trait s'écrivent de la même façon (« 64e : encore un geste fou, raté »).
 - Les joueurs remarqués sur le côté s'ajoutent dans la case « à revoir ».
 

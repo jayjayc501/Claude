@@ -61,6 +61,27 @@ Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette mon
 
 **Un attribut ne se voit que si le match le sollicite.** À chaque match, chaque attribut a une chance d'être observé selon le poste et le match : 90 % pour ce qui fait le cœur du poste (Vitesse d'un ailier, Marquage d'un défenseur), 50 % en moyenne, 15 % pour ce qui sort du poste (Finition d'un défenseur central). Le tableau de la partie 4 compte donc des matchs où l'attribut a été vu, pas des matchs tout court.
 
+**Le pied fort.** Chaque joueur est droitier (environ 75 %), gaucher (20 %) ou ambidextre (5 %). Le pied fort se note dès le premier match, sans brouillard. Le **pied faible** va de 1 à 5 (1 : ne s'en sert jamais, 5 : les deux pieds) ; il se cerne en 3 matchs environ. Effet : avec un pied faible à 1 ou 2, Passe et Finition perdent 10 points quand le joueur est forcé sur son mauvais pied (environ 1 action sur 4). Un gaucher vaut 10 % de plus sur le marché, parce qu'il est plus rare.
+
+**Les signes de jeu** (traits bonus) : environ 1 joueur sur 4 en a un, très peu en ont deux. Chacun ajoute +5 à ses attributs liés, dans les actions concernées, et 10 % à sa valeur.
+
+| Signe | Ce que le scout voit en match | Effet |
+|---|---|---|
+| Athlétique | Gagne les courses et les duels d'épaule, frais à la 90e | Vitesse, Puissance, Endurance |
+| Artiste | Gestes rares, dribbles qui font lever le public | Dribble ; buzz qui monte deux fois plus vite |
+| Volant | Saute plus haut que tout le monde sur les centres | Jeu de tête, danger sur coups de pied arrêtés |
+| Renard | Toujours au bon endroit dans la surface | Appels et Finition de près |
+| Canonnier | Frappes de loin qui font mal | Finition hors de la surface |
+| Chirurgien | Passes longues et passes décisives au millimètre | Passe et Vision dans le dernier tiers |
+| Mur | Personne ne passe en un contre un | Marquage et Tacle dans les duels |
+| Moteur | Court partout, ne baisse jamais de rythme | Endurance ; aide l'équipe à presser |
+| Chat (gardien) | Arrêts réflexes impossibles | Réflexes |
+| Libero (gardien) | Relance au pied comme un milieu | Jeu au pied, Sorties |
+
+**Repérer un signe** : à chaque match où la situation se présente, il se montre 1 fois sur 3. Une première fois, la tablette le note « possible » ; une deuxième fois dans un autre match, il est « confirmé ». Un joueur qui a un très bon jour peut donner un faux « possible » : c'est pour ça qu'on attend deux matchs.
+
+**Les signes évoluent aussi** : un jeune peut en gagner un si l'attribut lié dépasse 80 (5 % par trimestre). Athlétique et Moteur peuvent disparaître après 30 ans (10 % par an).
+
 **Attributs hors match** (la personne, presque invisibles en match ; on les découvre surtout en entretien et par les sources de la partie 5) :
 
 | Attribut | La question qu'on se pose | Effet en jeu |

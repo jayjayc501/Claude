@@ -100,7 +100,12 @@ Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette mon
 | Maladroit | Rate des occasions ou des passes faciles | Une action facile sur cinq ratée (Finition et Passe) | −10 % |
 | Irrégulier | Un grand match, puis trois matchs fantômes | Forme du jour d'écart-type 12 au lieu de 5 ; il faut deux fois plus de matchs pour le cerner | −10 % |
 
-Les traits négatifs des gardiens restent à choisir.
+**Traits négatifs, gardiens**
+
+| Trait | Ce que le scout voit | Effet | Valeur |
+|---|---|---|---|
+| Pieds carrés | Relance dangereuse, dégagements ratés | −10 en Jeu au pied ; une relance sur dix donne une occasion à l'adversaire | −10 % |
+| Fébrile | Relâche les ballons, parfois une grosse boulette | Une frappe arrêtée sur cinq est relâchée devant lui ; une boulette qui coûte un but tous les 15 matchs environ | −15 % |
 
 **Repérer un trait** : à chaque match où la situation se présente, il se montre 1 fois sur 3. La première fois, la tablette le note « possible » ; une deuxième fois dans un autre match, il est « confirmé ». Un très bon ou un très mauvais jour peut donner un faux « possible », d'où les deux matchs. Se transcende et Discret ne se voient que dans les gros matchs, qui sont rares : les sources (entraîneur, coéquipier) aident beaucoup. Fragile se confirme aussi par le kiné.
 

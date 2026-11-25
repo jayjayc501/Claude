@@ -63,7 +63,7 @@ Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette mon
 
 **Le pied fort.** Chaque joueur est droitier (environ 75 %), gaucher (20 %) ou ambidextre (5 %). Le pied fort se note dès le premier match, sans brouillard. Le **pied faible** va de 1 à 5 (1 : ne s'en sert jamais, 5 : les deux pieds) ; il se cerne en 3 matchs environ. Effet : avec un pied faible à 1 ou 2, Passe et Finition perdent 10 points quand le joueur est forcé sur son mauvais pied (environ 1 action sur 4). Un gaucher vaut 10 % de plus sur le marché, parce qu'il est plus rare.
 
-**Les traits.** Règle de conception : un trait est **un effet dans une situation précise**, pas une simple grosse note (ça, ce sont les attributs). Environ 1 joueur sur 4 a un trait positif, 1 sur 6 un trait négatif ; très peu en ont plus de deux.
+**Les traits.** Règle de conception : un trait est **un effet dans une situation précise**, pas une simple grosse note (ça, ce sont les attributs). Environ 1 joueur sur 4 a un trait positif, 1 sur 5 un trait négatif ; très peu en ont plus de deux.
 
 **Traits positifs, joueurs de champ** (+10 % de valeur chacun)
 
@@ -84,19 +84,27 @@ Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette mon
 | Trait | Ce que le scout voit | Effet |
 |---|---|---|
 | Gardien libéro | Joue haut, sort loin, relance comme un milieu | +8 en Sorties et Jeu au pied hors de sa surface |
-| Arrêteur de penaltys | Devine le côté, arrête les penaltys | Arrête environ 40 % des penaltys au lieu de 20 % |
+| Maître des airs | Sort fort et capte les centres | +8 en Sorties sur les centres ; corners adverses moins dangereux |
+| Penalty | Devine le côté, arrête les tirs au but | Arrête environ 40 % des penaltys au lieu de 20 % |
+| Le Mur | Arrêts réflexes sur sa ligne | +8 en Réflexes sur les frappes de près |
 
-**Traits négatifs**
+**Traits négatifs, joueurs de champ**
 
 | Trait | Ce que le scout voit | Effet | Valeur |
 |---|---|---|---|
-| Fragile | Souvent blessé, sort sur blessure, absences longues | Risque de blessure ×2, absences 50 % plus longues | −20 % |
-| Tête brûlée | Cartons, fautes bêtes, s'en prend à l'arbitre | Cartons ×3 ; un rouge tous les 10 matchs environ | −10 % |
-| Petit match | Disparaît quand ça compte | −6 sur tous ses attributs dans les gros matchs | −10 % |
+| Fragile | Se blesse souvent, absences longues | Risque de blessure ×2, absences 50 % plus longues | −20 % |
+| Violent | Cartons, fautes bêtes, s'en prend à l'arbitre | Cartons ×3 ; un rouge tous les 10 matchs environ | −10 % |
+| Discret | Disparaît quand ça compte | −6 sur tous ses attributs dans les gros matchs | −10 % |
+| Perso | Garde le ballon au lieu de passer | Quand un coéquipier est mieux placé, ne passe qu'une fois sur deux | −5 % |
+| Nonchalant | Ne fait pas les efforts sans ballon | −8 en Marquage et Tacle au pressing ; repli lent | −10 % |
+| Maladroit | Rate des occasions ou des passes faciles | Une action facile sur cinq ratée (Finition et Passe) | −10 % |
+| Irrégulier | Un grand match, puis trois matchs fantômes | Forme du jour d'écart-type 12 au lieu de 5 ; il faut deux fois plus de matchs pour le cerner | −10 % |
 
-**Repérer un trait** : à chaque match où la situation se présente, il se montre 1 fois sur 3. La première fois, la tablette le note « possible » ; une deuxième fois dans un autre match, il est « confirmé ». Un très bon ou un très mauvais jour peut donner un faux « possible », d'où les deux matchs. Se transcende et Petit match ne se voient que dans les gros matchs, qui sont rares : les sources (entraîneur, coéquipier) aident beaucoup. Fragile se confirme aussi par le kiné.
+Les traits négatifs des gardiens restent à choisir.
 
-**Les traits évoluent** : un jeune peut gagner un trait positif si l'attribut lié dépasse 80 (5 % par trimestre) ; Capitaine peut naître après 24 ans si Sérieux et Sang-froid dépassent 70 (10 % par an). Costaud et Guerrier peuvent disparaître après 30 ans (10 % par an). Fragile peut apparaître après une grave blessure ou après 30 ans (10 % par an). Tête brûlée peut s'effacer si la Discipline remonte au-dessus de 60.
+**Repérer un trait** : à chaque match où la situation se présente, il se montre 1 fois sur 3. La première fois, la tablette le note « possible » ; une deuxième fois dans un autre match, il est « confirmé ». Un très bon ou un très mauvais jour peut donner un faux « possible », d'où les deux matchs. Se transcende et Discret ne se voient que dans les gros matchs, qui sont rares : les sources (entraîneur, coéquipier) aident beaucoup. Fragile se confirme aussi par le kiné.
+
+**Les traits évoluent** : un jeune peut gagner un trait positif si l'attribut lié dépasse 80 (5 % par trimestre) ; Capitaine peut naître après 24 ans si Sérieux et Sang-froid dépassent 70 (10 % par an). Costaud et Guerrier peuvent disparaître après 30 ans (10 % par an). Fragile peut apparaître après une grave blessure ou après 30 ans (10 % par an). Violent peut s'effacer si la Discipline remonte au-dessus de 60.
 
 **Profil de développement : Précoce ou Tardif.** Environ 1 jeune sur 10 a un corps en avance sur son âge, 1 sur 10 en retard. C'est un piège pour l'estimation du potentiel :
 

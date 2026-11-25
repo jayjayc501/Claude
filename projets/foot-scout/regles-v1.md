@@ -52,12 +52,12 @@ Deux familles d'attributs, toutes notées de 1 à 100. Le **niveau** est la moye
 | Famille | Attributs |
 |---|---|
 | Physique | Vitesse, Endurance, Puissance (duels, jeu aérien) |
-| Technique | Dribble, Passe, Finition, Jeu de tête |
-| Défense | Marquage, Tacle |
-| Intelligence | Vision, Appels (se démarquer), Sang-froid (rester lucide sous la pression) |
+| Technique | Dribble, Passe, Vision |
+| Attaque | Finition, Jeu de tête, Appels (se démarquer) |
+| Défense | Marquage, Tacle, Sang-froid (rester lucide sous la pression) |
 | Gardien (à la place des autres) | Réflexes, Placement, Sorties, Jeu au pied |
 
-Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette montre d'abord une note par famille (comme les 6 notes d'une carte EA FC), puis le détail. Repères : EA FC affiche 6 notes et cache environ 29 attributs détaillés ; Football Manager en a 36 visibles et une dizaine de cachés. Ici, chaque attribut est une fourchette à resserrer : 12 donnent du relief sans rendre l'enquête fastidieuse.
+Douze attributs pour un joueur de champ, quatre familles de trois. **Par défaut, la tablette n'affiche que la moyenne de chaque famille**, avec sa fourchette (par exemple « Physique 72 à 84 ») ; on déplie une famille pour voir le détail de ses trois attributs. Le gardien a ses quatre attributs à lui. Repères : EA FC affiche 6 notes et cache environ 29 attributs détaillés ; Football Manager en a 36 visibles et une dizaine de cachés. Ici, chaque attribut est une fourchette à resserrer : 12 donnent du relief sans rendre l'enquête fastidieuse.
 
 **Un attribut ne se voit que si le match le sollicite.** À chaque match, chaque attribut a une chance d'être observé selon le poste et le match : 90 % pour ce qui fait le cœur du poste (Vitesse d'un ailier, Marquage d'un défenseur), 50 % en moyenne, 15 % pour ce qui sort du poste (Finition d'un défenseur central). Le tableau de la partie 4 compte donc des matchs où l'attribut a été vu, pas des matchs tout court.
 

@@ -63,24 +63,49 @@ Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette mon
 
 **Le pied fort.** Chaque joueur est droitier (environ 75 %), gaucher (20 %) ou ambidextre (5 %). Le pied fort se note dès le premier match, sans brouillard. Le **pied faible** va de 1 à 5 (1 : ne s'en sert jamais, 5 : les deux pieds) ; il se cerne en 3 matchs environ. Effet : avec un pied faible à 1 ou 2, Passe et Finition perdent 10 points quand le joueur est forcé sur son mauvais pied (environ 1 action sur 4). Un gaucher vaut 10 % de plus sur le marché, parce qu'il est plus rare.
 
-**Les signes de jeu** (traits bonus) : environ 1 joueur sur 4 en a un, très peu en ont deux. Chacun ajoute +5 à ses attributs liés, dans les actions concernées, et 10 % à sa valeur.
+**Les traits.** Règle de conception : un trait est **un effet dans une situation précise**, pas une simple grosse note (ça, ce sont les attributs). Environ 1 joueur sur 4 a un trait positif, 1 sur 6 un trait négatif ; très peu en ont plus de deux.
 
-| Signe | Ce que le scout voit en match | Effet |
+**Traits positifs, joueurs de champ** (+10 % de valeur chacun)
+
+| Trait | Ce que le scout voit en match | Effet en jeu |
 |---|---|---|
-| Athlétique | Gagne les courses et les duels d'épaule, frais à la 90e | Vitesse, Puissance, Endurance |
-| Artiste | Gestes rares, dribbles qui font lever le public | Dribble ; buzz qui monte deux fois plus vite |
-| Volant | Saute plus haut que tout le monde sur les centres | Jeu de tête, danger sur coups de pied arrêtés |
-| Renard | Toujours au bon endroit dans la surface | Appels et Finition de près |
-| Canonnier | Frappes de loin qui font mal | Finition hors de la surface |
-| Chirurgien | Passes longues et passes décisives au millimètre | Passe et Vision dans le dernier tiers |
-| Mur | Personne ne passe en un contre un | Marquage et Tacle dans les duels |
-| Moteur | Court partout, ne baisse jamais de rythme | Endurance ; aide l'équipe à presser |
-| Chat (gardien) | Arrêts réflexes impossibles | Réflexes |
-| Libero (gardien) | Relance au pied comme un milieu | Jeu au pied, Sorties |
+| Costaud | Gagne ses 1 contre 1 au physique, en attaque comme en défense | +8 en Puissance et Vitesse dans les 1 contre 1 |
+| Magicien | Tente des gestes imprévisibles, qui ratent ou qui brillent | Sur ces gestes, 1 sur 2 rate et 1 sur 2 réussit à +10 ; buzz qui monte deux fois plus vite |
+| Roi des airs | Domine de la tête, en attaque comme en défense | +8 en Jeu de tête ; danger sur corners |
+| Renard des surfaces | Toujours au bon endroit dans la surface | +8 en Appels et Finition dans la surface |
+| Frappe de loin | Marque de 25 mètres | Hors de la surface, frappe sans la pénalité habituelle de −10 |
+| Pied magique | Coups francs et corners décisifs | Chances de but sur coup franc direct doublées ; corners plus dangereux |
+| Guerrier | Ne lâche rien, harcèle le porteur, récupère haut | +8 en Tacle et Marquage au pressing ; ne baisse pas en fin de match |
+| Capitaine | Organise, parle, rassure l'équipe | +3 en Sang-froid pour les coéquipiers ; leur moral baisse moins vite |
+| Se transcende | Élève son niveau dans les gros matchs | +6 sur tous ses attributs dans les gros matchs (derby, finale, sélection) |
 
-**Repérer un signe** : à chaque match où la situation se présente, il se montre 1 fois sur 3. Une première fois, la tablette le note « possible » ; une deuxième fois dans un autre match, il est « confirmé ». Un joueur qui a un très bon jour peut donner un faux « possible » : c'est pour ça qu'on attend deux matchs.
+**Traits positifs, gardiens**
 
-**Les signes évoluent aussi** : un jeune peut en gagner un si l'attribut lié dépasse 80 (5 % par trimestre). Athlétique et Moteur peuvent disparaître après 30 ans (10 % par an).
+| Trait | Ce que le scout voit | Effet |
+|---|---|---|
+| Gardien libéro | Joue haut, sort loin, relance comme un milieu | +8 en Sorties et Jeu au pied hors de sa surface |
+| Arrêteur de penaltys | Devine le côté, arrête les penaltys | Arrête environ 40 % des penaltys au lieu de 20 % |
+
+**Traits négatifs**
+
+| Trait | Ce que le scout voit | Effet | Valeur |
+|---|---|---|---|
+| Fragile | Souvent blessé, sort sur blessure, absences longues | Risque de blessure ×2, absences 50 % plus longues | −20 % |
+| Tête brûlée | Cartons, fautes bêtes, s'en prend à l'arbitre | Cartons ×3 ; un rouge tous les 10 matchs environ | −10 % |
+| Petit match | Disparaît quand ça compte | −6 sur tous ses attributs dans les gros matchs | −10 % |
+
+**Repérer un trait** : à chaque match où la situation se présente, il se montre 1 fois sur 3. La première fois, la tablette le note « possible » ; une deuxième fois dans un autre match, il est « confirmé ». Un très bon ou un très mauvais jour peut donner un faux « possible », d'où les deux matchs. Se transcende et Petit match ne se voient que dans les gros matchs, qui sont rares : les sources (entraîneur, coéquipier) aident beaucoup. Fragile se confirme aussi par le kiné.
+
+**Les traits évoluent** : un jeune peut gagner un trait positif si l'attribut lié dépasse 80 (5 % par trimestre) ; Capitaine peut naître après 24 ans si Sérieux et Sang-froid dépassent 70 (10 % par an). Costaud et Guerrier peuvent disparaître après 30 ans (10 % par an). Fragile peut apparaître après une grave blessure ou après 30 ans (10 % par an). Tête brûlée peut s'effacer si la Discipline remonte au-dessus de 60.
+
+**Profil de développement : Précoce ou Tardif.** Environ 1 jeune sur 10 a un corps en avance sur son âge, 1 sur 10 en retard. C'est un piège pour l'estimation du potentiel :
+
+| Profil | Avant 18 ans | Ensuite | Le piège |
+|---|---|---|---|
+| Précoce | +8 en Vitesse, Puissance et Endurance | L'avance fond jusqu'à 20 ans | Il domine chez les jeunes, on le surestime |
+| Tardif | −8 en Vitesse, Puissance et Endurance | Rattrape jusqu'à 21-22 ans | Il paraît frêle, on le néglige alors qu'il peut exploser |
+
+Indices pour le scout : « déjà un corps d'adulte » ou « le plus petit du terrain » sur la tablette ; les parents (« il a pris 12 cm cette année ») et le médecin du club, si la confiance est assez haute, le confirment.
 
 **Attributs hors match** (la personne, presque invisibles en match ; on les découvre surtout en entretien et par les sources de la partie 5) :
 
@@ -92,8 +117,6 @@ Douze attributs pour un joueur de champ, quatre pour un gardien. La tablette mon
 | Ambition | Veut-il aller au plus haut ? | Progression ×1,1 au-dessus de 70, mais veut partir plus tôt |
 | Adaptation | Supportera-t-il le départ ? | Première saison loin de chez lui : progression × (0,6 + Adaptation / 250) |
 | Entourage | Sa famille et son agent l'aident-ils ou le gênent-ils ? | Sous 40 : exigences plus fortes, négociation plus dure |
-
-**Traits rares** (0 ou 1 par joueur, tout ou rien) : Fragile (risque de blessure ×2), Grand match (forme +5 dans les matchs importants), Leader (fait progresser les jeunes autour de lui).
 
 **Le hors match évolue, plus ou moins selon les joueurs.** Chaque trimestre, chaque attribut hors match bouge :
 
@@ -109,8 +132,6 @@ changement = (tendance de l'âge + événements de carrière) × souplesse du jo
 | Ambition | −2 après 30 ans | Titre, sélection (+5) ; série d'échecs (−5) |
 | Adaptation | +1 | Expérience réussie à l'étranger (+10) ; expérience ratée (−10) |
 | Entourage | stable | Changement d'agent, mariage, départ de chez les parents (±10 à ±20) |
-
-Les traits rares bougent aussi, rarement : Fragile peut apparaître après une grave blessure ou après 30 ans (10 % par an) ; Leader peut naître après 24 ans si Sérieux et Sang-froid dépassent 70 (10 % par an) ; Grand match ne change pas.
 
 Pour le scout, ça veut dire que **ses notes sur le caractère vieillissent aussi** : un rapport « sérieux, humble » fait à 16 ans peut être faux à 20 ans, après un premier gros contrat. Les fourchettes hors match s'élargissent de 5 points par saison sans nouvel entretien.
 
@@ -183,7 +204,7 @@ Autrement dit : un débutant a besoin de 5 matchs pour cerner un attribut, un v�
 | 3 | 69 à 89 | 20 points |
 | 6 | 72 à 86 | 14 points |
 
-Les attributs hors match et les traits rares ne se voient presque jamais en match : ils viennent des entretiens et des sources (partie 5). En match, on n'en voit que des signes, 1 fois sur 10 par match : un carton ou une dispute (Discipline), un repli à la 85e minute (Sérieux), un joueur qui remobilise les autres (Leader).
+Les attributs hors match ne se voient presque jamais en match : ils viennent des entretiens et des sources (partie 5). En match, on n'en voit que des signes, 1 fois sur 10 par match : un carton ou une dispute (Discipline), un repli à la 85e minute (Sérieux), un joueur qui remobilise les autres (Capitaine).
 
 ## 5. Les sources et les entretiens
 
